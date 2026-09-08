@@ -56,12 +56,12 @@ export default function SolutionsPage() {
         {solutions.map((solution) => (
           <CardSpotlight key={solution.name} className="h-full p-6">
             <div className="relative z-20">
-              <h3 className="text-lg font-semibold text-white">{solution.name}</h3>
-              <p className="mt-2 text-sm text-neutral-300">{solution.summary}</p>
+              <h3 className="text-lg font-semibold text-foreground">{solution.name}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{solution.summary}</p>
               <ul className="mt-4 space-y-2">
                 {solution.deliverables.map((d) => (
-                  <li key={d} className="flex items-start gap-2 text-sm text-neutral-200">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#FF6600]" />
+                  <li key={d} className="flex items-start gap-2 text-sm text-foreground">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                     {d}
                   </li>
                 ))}
