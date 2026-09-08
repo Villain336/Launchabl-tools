@@ -6,12 +6,12 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/agency-badge";
 import { siteConfig, tools } from "@/lib/site-config";
 import { ToolCard } from "@/components/tools/tool-card";
-import HeroBlock from "@/components/blocks/hero-1";
-import BentoBlock from "@/components/blocks/bento-1";
+import HeroBlock from "@/components/blocks/hero-2";
+import BentoBlock from "@/components/blocks/bento-2";
+import ComparisonBlock from "@/components/blocks/comparison-2";
+import TimelineBlock from "@/components/blocks/timeline-1";
 import StatsBlock from "@/components/blocks/stats-1";
-import HowItWorksBlock from "@/components/blocks/how-it-works-1";
 import TestimonialsBlock from "@/components/blocks/testimonials-1";
-import CtaBlock from "@/components/blocks/cta-3";
 
 const featuredToolSlugs = [
   "brand-creator",
@@ -39,6 +39,8 @@ export default function Home() {
     <>
       <HeroBlock />
 
+      <ComparisonBlock />
+
       <section className="border-t border-border bg-background py-20">
         <Container>
           <SectionHeading
@@ -63,7 +65,7 @@ export default function Home() {
 
       <BentoBlock />
 
-      <HowItWorksBlock />
+      <TimelineBlock />
 
       <section className="border-t border-border bg-muted/30 py-20">
         <Container>
@@ -125,7 +127,7 @@ export default function Home() {
             </div>
           </div>
           <div className="rounded-3xl bg-primary p-10 text-primary-foreground">
-            <p className="text-sm font-medium text-primary-foreground/70">Why unlimited works</p>
+            <p className="text-sm font-medium text-primary-foreground/80">Why unlimited works</p>
             <p className="mt-4 text-xl font-semibold leading-relaxed">
               &ldquo;One request in the queue at a time keeps quality high. A flat price up front
               keeps trust high. That combination is the entire business model.&rdquo;
@@ -139,8 +141,6 @@ export default function Home() {
           </div>
         </Container>
       </section>
-
-      <CtaBlock />
     </>
   );
 }
