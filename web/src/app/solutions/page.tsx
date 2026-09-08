@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export const metadata: Metadata = {
   title: "Solutions",
-  description: "Everything included in the Launchable unlimited marketing & design plan.",
+  description: "Everything included in the Launchabl unlimited marketing & design plan.",
 };
 
 const solutions = [

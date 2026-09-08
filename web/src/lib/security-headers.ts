@@ -13,7 +13,7 @@ export type SecurityHeadersResult = {
   score: number;
 };
 
-const USER_AGENT = "LaunchableAuditBot/1.0 (+https://launchable.example/tools)";
+const USER_AGENT = "LaunchablAuditBot/1.0 (+https://launchabl.example/tools)";
 
 const HEADER_SPECS: {
   id: string;

@@ -6,7 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why Launchable exists, and how the unlimited model actually works.",
+  description: "Why Launchabl exists, and how the unlimited model actually works.",
 };
 
 const principles = [
@@ -39,9 +39,9 @@ export default function AboutPage() {
   return (
     <Container className="py-16 sm:py-24">
       <SectionHeading
-        eyebrow="About Launchable"
+        eyebrow="About Launchabl"
         title="One price. No retainers. No games."
-        description="We built Launchable because most marketing agencies are either too expensive to try or too generic to trust. We wanted something a solo founder and a growing team could both rely on."
+        description="We built Launchabl because most marketing agencies are either too expensive to try or too generic to trust. We wanted something a solo founder and a growing team could both rely on."
       />
 
       <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2">

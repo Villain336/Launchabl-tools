@@ -1,4 +1,4 @@
-# Launchable
+# Launchabl
 
 A marketing/design agency platform: a free, growing suite of marketing tools paired with a one-time-price, unlimited-requests agency plan (Design Joy-style business model).
 

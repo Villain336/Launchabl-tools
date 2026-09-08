@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import AnnouncementBlock from "@/components/blocks/announcement-1";
 import { siteConfig } from "@/lib/site-config";
 
 const geistSans = Geist({
@@ -21,6 +22,10 @@ export const metadata: Metadata = {
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: "/brand/logo.jpg",
+    apple: "/brand/logo.jpg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -30,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <AnnouncementBlock />
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

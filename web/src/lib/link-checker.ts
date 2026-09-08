@@ -18,7 +18,7 @@ export type BrokenLinkReport = {
 };
 
 const MAX_LINKS = 25;
-const USER_AGENT = "LaunchableAuditBot/1.0 (+https://launchable.example/tools)";
+const USER_AGENT = "LaunchablAuditBot/1.0 (+https://launchabl.example/tools)";
 
 export async function checkBrokenLinks(rawUrl: string): Promise<BrokenLinkReport> {
   let url = rawUrl.trim();
