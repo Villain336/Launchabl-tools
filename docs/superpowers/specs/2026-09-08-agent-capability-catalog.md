@@ -508,16 +508,16 @@ Does not replace the Studio implementation plan. Studio is still layer 1 — wit
 Capability order inside those waves:
 
 1. **Studio kernel** on audit + watermark (skills visible, approve-to-export).  
-2. **Name shared engines** in code: `fetch-page`, `score-seo`, `dns-lookup`, `compose-image`.  
-3. **Accuracy pack** on every research/produce job (`verify-url`, `cite-source`, `no-fake-metrics`).  
+2. **Accuracy envelope** (`SkillResult` sources, required accuracy skills, no fake metrics).  
+3. **Named shared engines** (`fetch-page`, `score-seo`, `dns-lookup`).  
 4. **Vault** so brand + last fetch reuse.  
 5. **First crew: Audits & reports** (existing heavy tools composed).  
-6. **Logo system + trademark search** (vectors, colorways, cited register hits) — identity is no longer a placeholder.  
-7. **Website scaffold (Next first)** + `web.inject-seo` + brand files in the repo.  
+6. **Logo system + trademark search** (vectors, colorways, cited register hits).  
+7. **Website scaffold (Next first)** + iframe preview + zip.  
 8. **GitHub connection** — Approve push, repo is the source of truth.  
-9. **Vercel connection** — preview on every PR; Approve publish for production + domain.  
-10. **Search Console** on Get found (inbound research).  
-11. Outbound Jobs API for the same audit/scaffold/deploy jobs agencies already run in Studio.
+9. **Vercel connection** — preview on push; Approve publish for production + domain.  
+10. **Launch crew** — one job composing 6–9.  
+11. **Search Console** on Get found, then outbound Jobs API.
 
 Webflow/GBP publish stay real, but they are not the default website path. Skipping 6–9 would leave logos, repos, and go-live as a promise. Skipping 1–5 would make 6–9 a chat demo with no approvals.
 
