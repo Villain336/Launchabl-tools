@@ -1,20 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Menu } from "lucide-react";
+import { ArrowRight, Menu as MenuIcon } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
+import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Button } from "@/components/ui/button";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+  HoveredLink,
+  Menu,
+  MenuItem,
+  ProductItem,
+} from "@/components/ui/navbar-menu";
 import {
   Sheet,
   SheetClose,
@@ -23,92 +20,73 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { primaryNav, siteConfig, toolClusters } from "@/lib/site-config";
 
-const pillSpring = { type: "spring" as const, stiffness: 400, damping: 34 };
-
-const capsuleLinks = primaryNav.filter((link) => link.href !== "/tools");
+const LOGO = "/brand/logo.jpg";
 
 export function SiteHeader() {
-  const pathname = usePathname();
-  const reduce = useReducedMotion();
-  const [hovered, setHovered] = useState<number | null>(null);
-  const activeIndex = capsuleLinks.findIndex(
-    (link) => pathname === link.href || pathname.startsWith(link.href + "/"),
-  );
-  const shown = hovered ?? (activeIndex === -1 ? 0 : activeIndex);
+  const [active, setActive] = useState<string | null>(null);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <Link href="/" className="shrink-0 text-foreground">
-          <BrandMark size={32} />
+        <Link href="/" className="flex shrink-0 items-center gap-2 text-foreground">
+          <BrandMark size={32} withWordmark={false} />
+          <EncryptedText
+            text={siteConfig.name}
+            className="text-base font-bold tracking-tight"
+            encryptedClassName="text-primary/50"
+            revealedClassName="text-foreground"
+            revealDelayMs={45}
+          />
           <span className="sr-only">{siteConfig.name} home</span>
         </Link>
 
-        <NavigationMenu className="hidden lg:flex">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="h-9 gap-1 px-2.5 text-sm font-medium text-muted-foreground hover:text-foreground data-popup-open:text-foreground">
-                Tools
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="flex w-72 flex-col p-1">
-                  {toolClusters.map((cluster) => (
-                    <li key={cluster.slug}>
-                      <NavigationMenuLink
-                        render={<Link href={`/tools#${cluster.slug}`} />}
-                        className="flex-col items-start gap-0.5 p-2.5"
-                      >
-                        <span className="text-sm font-medium text-foreground">{cluster.name}</span>
-                        <span className="text-xs text-muted-foreground">{cluster.description}</span>
-                      </NavigationMenuLink>
-                    </li>
-                  ))}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-
-        <nav
-          onMouseLeave={() => setHovered(null)}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node)) setHovered(null);
-          }}
-          className="ml-auto hidden items-center gap-0.5 rounded-[calc(var(--radius-md)+4px)] border border-border bg-muted/60 p-1 backdrop-blur lg:flex"
-        >
-          {capsuleLinks.map((link, i) => {
-            const isShown = shown === i;
-            const active = pathname === link.href || pathname.startsWith(link.href + "/");
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={active ? "page" : undefined}
-                onMouseEnter={() => setHovered(i)}
-                onFocus={() => setHovered(i)}
-                className={cn(
-                  "relative rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors",
-                  isShown ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {isShown && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    aria-hidden="true"
-                    transition={reduce ? { duration: 0 } : pillSpring}
-                    className="absolute inset-0 -z-10 rounded-md bg-background shadow-sm"
+        <div className="hidden flex-1 items-center justify-center lg:flex">
+          <Menu setActive={setActive}>
+            <MenuItem setActive={setActive} active={active} item="Tools">
+              <div className="grid grid-cols-2 gap-4 p-2 text-sm">
+                {toolClusters.map((cluster) => (
+                  <ProductItem
+                    key={cluster.slug}
+                    title={cluster.name}
+                    href={`/tools#${cluster.slug}`}
+                    src={LOGO}
+                    description={cluster.description}
                   />
-                )}
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+                ))}
+              </div>
+            </MenuItem>
+            <MenuItem setActive={setActive} active={active} item="Solutions">
+              <div className="flex flex-col space-y-3 text-sm">
+                <HoveredLink href="/solutions">All solutions</HoveredLink>
+                <HoveredLink href="/solutions">Brand & identity</HoveredLink>
+                <HoveredLink href="/solutions">Website design & build</HoveredLink>
+                <HoveredLink href="/solutions">SEO & technical marketing</HoveredLink>
+                <HoveredLink href="/pricing">Unlimited plan</HoveredLink>
+              </div>
+            </MenuItem>
+            <MenuItem setActive={setActive} active={active} item="Work">
+              <div className="flex flex-col space-y-3 text-sm">
+                <HoveredLink href="/case-studies">Case studies</HoveredLink>
+                <HoveredLink href="/blog">Blog</HoveredLink>
+                <HoveredLink href="/roadmap">Roadmap</HoveredLink>
+              </div>
+            </MenuItem>
+            <HoveredLink href="/pricing" className="text-sm font-medium text-foreground hover:text-primary">
+              Pricing
+            </HoveredLink>
+            <HoveredLink href="/about" className="text-sm font-medium text-foreground hover:text-primary">
+              About
+            </HoveredLink>
+          </Menu>
+        </div>
 
-        <Button render={<Link href="/pricing" />} nativeButton={false} className="hidden lg:inline-flex">
+        <Button
+          render={<Link href="/pricing" />}
+          nativeButton={false}
+          className="ml-auto hidden lg:inline-flex"
+        >
           Get unlimited
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Button>
@@ -126,7 +104,7 @@ function MobileMenu() {
         render={<Button variant="outline" size="icon" className="ml-auto lg:hidden" />}
         aria-label="Open menu"
       >
-        <Menu aria-hidden="true" />
+        <MenuIcon aria-hidden="true" />
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-xs">
         <SheetHeader>

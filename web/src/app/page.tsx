@@ -9,6 +9,7 @@ import { ToolCard } from "@/components/tools/tool-card";
 import HeroBlock from "@/components/blocks/hero-2";
 import BentoBlock from "@/components/blocks/bento-2";
 import ComparisonBlock from "@/components/blocks/comparison-2";
+import WorldMapVisibility from "@/components/blocks/world-map-visibility";
 import TimelineBlock from "@/components/blocks/timeline-1";
 import StatsBlock from "@/components/blocks/stats-1";
 import TestimonialsBlock from "@/components/blocks/testimonials-1";
@@ -40,6 +41,8 @@ export default function Home() {
       <HeroBlock />
 
       <ComparisonBlock />
+
+      <WorldMapVisibility />
 
       <section className="border-t border-border bg-background py-20">
         <Container>

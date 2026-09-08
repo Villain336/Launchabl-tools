@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
 
 export const metadata: Metadata = {
   title: "Solutions",
@@ -54,22 +54,20 @@ export default function SolutionsPage() {
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {solutions.map((solution) => (
-          <Card key={solution.name}>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">{solution.name}</CardTitle>
-              <CardDescription className="mt-1">{solution.summary}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
+          <CardSpotlight key={solution.name} className="h-full p-6">
+            <div className="relative z-20">
+              <h3 className="text-lg font-semibold text-white">{solution.name}</h3>
+              <p className="mt-2 text-sm text-neutral-300">{solution.summary}</p>
+              <ul className="mt-4 space-y-2">
                 {solution.deliverables.map((d) => (
-                  <li key={d} className="flex items-start gap-2 text-sm text-foreground">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+                  <li key={d} className="flex items-start gap-2 text-sm text-neutral-200">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#FF6600]" />
                     {d}
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
+            </div>
+          </CardSpotlight>
         ))}
       </div>
 
