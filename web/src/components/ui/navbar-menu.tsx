@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { ComponentProps } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -94,7 +95,7 @@ export const ProductItem = ({
 }) => {
   return (
     <Link href={href} className="flex space-x-3">
-      <img
+      <Image
         src={src}
         width={140}
         height={70}

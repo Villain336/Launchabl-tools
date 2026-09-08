@@ -65,6 +65,8 @@ export const ThreeDMarquee = ({
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       className="relative aspect-[970/700] w-full overflow-hidden rounded-lg bg-[#171717] ring ring-[#FF6600]/25 hover:shadow-2xl"
                     >
+                      {/* Decorative marquee tiles; next/image is a poor fit inside the 3D grid. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={item.src}
                         alt=""

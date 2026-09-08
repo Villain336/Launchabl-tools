@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { CometCard } from "@/components/ui/comet-card";
 import type { CaseStudy } from "@/lib/case-studies";
 import { toolClusters } from "@/lib/site-config";
@@ -17,10 +18,12 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
       >
         <div className="mx-2 flex-1">
           <div className="relative mt-2 aspect-[4/5] w-full overflow-hidden rounded-[16px] bg-black">
-            <img
+            <Image
               src="/brand/logo.jpg"
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 20vw, (min-width: 640px) 40vw, 90vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10" />
             <div className="absolute inset-x-0 bottom-0 p-4 text-white">

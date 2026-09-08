@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import {
@@ -156,7 +157,7 @@ const SkeletonFour = () => {
         variants={first}
         className="flex h-full w-1/3 flex-col items-center justify-center rounded-2xl border border-border bg-background p-4"
       >
-        <img src={LOGO} alt="" height="100" width="100" className="h-10 w-10 rounded-md object-cover" />
+        <Image src={LOGO} alt="" height={40} width={40} className="h-10 w-10 rounded-md object-cover" />
         <p className="mt-4 text-center text-xs font-semibold text-muted-foreground sm:text-sm">
           Another DIY converter site
         </p>
@@ -165,7 +166,7 @@ const SkeletonFour = () => {
         </p>
       </motion.div>
       <motion.div className="relative z-20 flex h-full w-1/3 flex-col items-center justify-center rounded-2xl border border-border bg-background p-4">
-        <img src={LOGO} alt="" height="100" width="100" className="h-10 w-10 rounded-md object-cover" />
+        <Image src={LOGO} alt="" height={40} width={40} className="h-10 w-10 rounded-md object-cover" />
         <p className="mt-4 text-center text-xs font-semibold text-muted-foreground sm:text-sm">
           Free tool, then unlimited agency
         </p>
@@ -177,7 +178,7 @@ const SkeletonFour = () => {
         variants={second}
         className="flex h-full w-1/3 flex-col items-center justify-center rounded-2xl border border-border bg-background p-4"
       >
-        <img src={LOGO} alt="" height="100" width="100" className="h-10 w-10 rounded-md object-cover" />
+        <Image src={LOGO} alt="" height={40} width={40} className="h-10 w-10 rounded-md object-cover" />
         <p className="mt-4 text-center text-xs font-semibold text-muted-foreground sm:text-sm">
           Monthly retainer forever
         </p>
@@ -209,7 +210,7 @@ const SkeletonFive = () => {
         variants={variants}
         className="flex flex-row items-start space-x-2 rounded-2xl border border-border bg-background p-2"
       >
-        <img src={LOGO} alt="" height="100" width="100" className="h-10 w-10 rounded-md object-cover" />
+        <Image src={LOGO} alt="" height={40} width={40} className="h-10 w-10 rounded-md object-cover" />
         <p className="text-xs text-muted-foreground">
           We need a scored audit, a brand kit, and a report we can send to a client — not another
           file converter.
