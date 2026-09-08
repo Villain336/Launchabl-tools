@@ -6,9 +6,9 @@ export const metadata: Metadata = { title: "Privacy Policy" };
 export default function PrivacyPage() {
   return (
     <Container className="prose py-16 sm:py-24">
-      <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
-      <p className="mt-4 text-sm text-slate-500">Placeholder — replace with counsel-reviewed policy before launch.</p>
-      <div className="mt-8 space-y-6 text-sm text-slate-700">
+      <h1 className="text-3xl font-bold text-foreground">Privacy Policy</h1>
+      <p className="mt-4 text-sm text-muted-foreground">Placeholder — replace with counsel-reviewed policy before launch.</p>
+      <div className="mt-8 space-y-6 text-sm text-foreground">
         <p>
           Client-side tools (Metadata Remover, Image Converter, QR Code Generator, Watermark
           Generator, Schema Markup Generator) process your files entirely in your browser using

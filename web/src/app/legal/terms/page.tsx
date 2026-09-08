@@ -6,9 +6,9 @@ export const metadata: Metadata = { title: "Terms of Service" };
 export default function TermsPage() {
   return (
     <Container className="prose py-16 sm:py-24">
-      <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
-      <p className="mt-4 text-sm text-slate-500">Placeholder — replace with counsel-reviewed terms before launch.</p>
-      <div className="mt-8 space-y-6 text-sm text-slate-700">
+      <h1 className="text-3xl font-bold text-foreground">Terms of Service</h1>
+      <p className="mt-4 text-sm text-muted-foreground">Placeholder — replace with counsel-reviewed terms before launch.</p>
+      <div className="mt-8 space-y-6 text-sm text-foreground">
         <p>
           These terms govern use of the free tools and the unlimited request-based service
           (&ldquo;the Plan&rdquo;). By using either, you agree to the Acceptable Use Policy,

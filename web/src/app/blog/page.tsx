@@ -32,10 +32,10 @@ export default function BlogPage() {
       />
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {posts.map((post) => (
-          <article key={post.title} className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="font-semibold text-slate-900">{post.title}</h3>
-            <p className="mt-2 text-sm text-slate-600">{post.excerpt}</p>
-            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-indigo-600">Coming soon</p>
+          <article key={post.title} className="rounded-2xl border border-border p-6">
+            <h3 className="font-semibold text-foreground">{post.title}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{post.excerpt}</p>
+            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-primary">Coming soon</p>
           </article>
         ))}
       </div>

@@ -24,20 +24,20 @@ export function ContentCampaignCalendar() {
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="text-sm font-medium text-slate-700">Brand / business</label>
+          <label className="text-sm font-medium text-foreground">Brand / business</label>
           <input
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
             placeholder="Riverside Roasters"
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-slate-700">Primary goal</label>
+          <label className="text-sm font-medium text-foreground">Primary goal</label>
           <select
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           >
             {goals.map((g) => (
               <option key={g.value} value={g.value}>
@@ -47,7 +47,7 @@ export function ContentCampaignCalendar() {
           </select>
         </div>
         <div>
-          <label className="text-sm font-medium text-slate-700">Days — {days}</label>
+          <label className="text-sm font-medium text-foreground">Days — {days}</label>
           <input
             type="range"
             min={7}
@@ -72,21 +72,21 @@ export function ContentCampaignCalendar() {
         <Download className="h-4 w-4" /> Download CSV
       </Button>
 
-      <div className="mt-6 max-h-[420px] overflow-y-auto rounded-xl border border-slate-200">
+      <div className="mt-6 max-h-[420px] overflow-y-auto rounded-xl border border-border">
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-white">
             <tr>
-              <th className="border-b border-slate-200 px-3 py-2 text-left font-medium text-slate-500">Day</th>
-              <th className="border-b border-slate-200 px-3 py-2 text-left font-medium text-slate-500">Channel</th>
-              <th className="border-b border-slate-200 px-3 py-2 text-left font-medium text-slate-500">Idea</th>
+              <th className="border-b border-border px-3 py-2 text-left font-medium text-muted-foreground">Day</th>
+              <th className="border-b border-border px-3 py-2 text-left font-medium text-muted-foreground">Channel</th>
+              <th className="border-b border-border px-3 py-2 text-left font-medium text-muted-foreground">Idea</th>
             </tr>
           </thead>
           <tbody>
             {entries.map((e) => (
               <tr key={e.day}>
-                <td className="border-b border-slate-100 px-3 py-2 text-slate-500">{e.day}</td>
-                <td className="border-b border-slate-100 px-3 py-2 text-slate-700">{e.channel}</td>
-                <td className="border-b border-slate-100 px-3 py-2 text-slate-700">{e.idea}</td>
+                <td className="border-b border-slate-100 px-3 py-2 text-muted-foreground">{e.day}</td>
+                <td className="border-b border-slate-100 px-3 py-2 text-foreground">{e.channel}</td>
+                <td className="border-b border-slate-100 px-3 py-2 text-foreground">{e.idea}</td>
               </tr>
             ))}
           </tbody>

@@ -40,13 +40,13 @@ export function SecurityHeadersChecker() {
     <div>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && run()}
             placeholder="https://yourbrand.com"
-            className="w-full rounded-full border border-slate-200 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="w-full rounded-full border border-border py-2.5 pl-9 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <Button onClick={run} disabled={busy}>
@@ -62,17 +62,17 @@ export function SecurityHeadersChecker() {
 
       {result && (
         <div className="mt-8">
-          <div className="flex flex-col items-center gap-4 rounded-2xl bg-slate-50 p-6 sm:flex-row sm:justify-between">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6 sm:flex-row sm:justify-between">
             <div>
-              <p className="text-sm text-slate-500">Security headers for</p>
-              <p className="font-medium text-slate-900">{result.url}</p>
+              <p className="text-sm text-muted-foreground">Security headers for</p>
+              <p className="font-medium text-foreground">{result.url}</p>
             </div>
             <ScoreDial score={result.score} />
           </div>
 
           <ul className="mt-6 space-y-3">
             {result.checks.map((c) => (
-              <li key={c.id} className="flex items-start gap-3 rounded-lg border border-slate-200 p-4">
+              <li key={c.id} className="flex items-start gap-3 rounded-lg border border-border p-4">
                 {c.present ? (
                   <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
                 ) : (
@@ -81,8 +81,8 @@ export function SecurityHeadersChecker() {
                   />
                 )}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900">{c.label}</p>
-                  <p className="mt-0.5 break-words text-sm text-slate-600">{c.detail}</p>
+                  <p className="text-sm font-medium text-foreground">{c.label}</p>
+                  <p className="mt-0.5 break-words text-sm text-muted-foreground">{c.detail}</p>
                 </div>
               </li>
             ))}
