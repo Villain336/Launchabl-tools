@@ -209,3 +209,98 @@ Ten heavy tools, added as a fifth cluster — **Audits, kits & reports**:
 **Why this tier is the actual differentiator, not the first 12 tools:** a single-action tool is a commodity the moment a competitor copies the UI. A tool that fetches real data, applies a judgment/scoring layer, and hands back a multi-part deliverable requires the same kind of synthesis work the agency itself sells — which means every heavy tool is simultaneously (a) a genuinely hard-to-clone product feature and (b) a live demonstration of the exact expertise the unlimited plan is selling. The White-Label Report Builder in particular should be read as a preview of what §2.2's "Brand Vault" becomes once accounts exist: a place where tool outputs compound into something no single tool visit could produce alone.
 
 **Sequencing within the tier:** ship the three tools that share the audit engine first (Website Audit Report → Landing Page Grader → Competitor Gap Report) since they're one build amortized three ways, then DNS Health (isolated, zero shared code, fast to ship), then the client-side batch/kit tools (Ad Creative Resizer, Brand Identity Kit), then the template-driven planning tools (Content Calendar, Local SEO Optimizer), then Sitemap/Robots (needs real URLs, so benefits from users already having run an audit), and the White-Label Report Builder last, since it's most valuable once there's real tool output to compose.
+
+---
+
+## 12. Tool backlog — brainstorm for the next wave (marketers, entrepreneurs, developers)
+
+This section captures a wide brainstorm of additional tools, including a founder-supplied starter list, expanded significantly and organized for prioritization. It also proposes a new audience segment — **developers** — since several of the strongest ideas here (test generation, dev utilities) don't fit cleanly into the existing five clusters, which were all marketer/brand-facing.
+
+### 12.1 A new cluster: Developer Tools
+
+Add a sixth cluster, **Developer Tools**, distinct from the marketer-facing five. Rationale: an agency site that *also* has genuinely good developer utilities gets a second, very different acquisition channel (dev.to/Hacker News/GitHub-adjacent traffic) with near-zero overlap against the marketer clusters, and several of these tools are simple, high-leverage, client-side builds — good margin, good SEO, low risk. They don't need to connect to the unlimited plan as tightly as the marketer tools do, but a light connection still works ("need this shipped as a real feature, not just a code snippet? that's what the unlimited plan's dev-adjacent requests are for").
+
+### 12.2 Evaluating the founder-supplied ideas
+
+| Idea (as given) | Refined scope | Tier | Build note / key risk |
+|---|---|---|---|
+| **Test generator for apps/SaaS** | "App/SaaS QA Test Plan Generator" — crawl a URL (reuse the audit engine) and generate a QA checklist + a Playwright/Cypress test-file skeleton (page loads, forms present, console errors, broken links, mobile viewport) | Heavy / server | v1 can reuse `site-audit.ts`'s fetch layer for static checks; deeper flow-based test generation (login → checkout → confirm) needs either a headless browser or an LLM reading a plain-English description of the flow — treat that as v2. |
+| **Reverse image lookup** | Don't build a rival image index (infeasible). Smart-redirect to Google Lens / TinEye / Bing Visual Search with the uploaded image pre-loaded, plus an in-house perceptual-hash duplicate check across a user's own uploaded/Vault images | Light / hybrid | Real "we searched the whole web" reverse image search requires an index the size of Google's — don't attempt to build this in-house; a redirect tool is still genuinely useful and honest about what it does. |
+| **Background remover** | In-browser image segmentation (person/product cutout) | Light-to-medium / client | Buildable with a client-side ML model (e.g., a WASM/TF.js segmentation model) — zero server cost, same privacy pitch as the other client-side tools. Quality will trail paid tools (remove.bg) but is a strong free-tier offering. Elevate to "heavy" by adding **batch** background removal for e-commerce product shots. |
+| **Transcriber** | Audio/video → text | Heavy / server (real cost) | A live, low-accuracy version can run 100% client-side via the browser's Web Speech API (Chrome-only, no file upload, live mic only) as a free instant demo. A real file-upload transcriber needs a server-side ASR model/API (e.g., Whisper) — this has real per-minute compute cost, so gate long files behind an account or the plan. |
+| **Phone number lookup** | Line-type / carrier / spam-risk lookup for a number you already have (e.g., verifying an inbound lead) | Heavy / partner API | Needs a carrier-lookup API (e.g., a phone intelligence provider) — real per-lookup cost. **Legal/positioning risk:** must be scoped and marketed strictly as lead/lineage verification for numbers you already have a business reason to check, never as a general "find anyone's number" people-search tool — the latter invites stalking/harassment misuse and regulatory scrutiny (see the eToro-style "never build the surveillance version of a legitimate tool" principle). |
+| **Burner / disposable email** | Temporary inbox for testing signups, avoiding spam on one-off signups | Heavy / partner infra | Requires actual email-receiving infrastructure (a provider or self-hosted catch-all domain + inbound parsing). Real abuse vector (disposable emails are also used to bypass fraud/spam controls elsewhere) — needs rate limiting, no persistent identity, and clear ToS restricting use to your own testing purposes. |
+| **"Accurately finds old emails and files"** | Two different tools live under this one idea — build both, separately: **(a) B2B Email Finder & Verifier** (guess a person's business email from name + company domain using common patterns, then verify deliverability via MX/catch-all checks) — a very standard, high-value sales/marketing tool; **(b) Inbox/Drive Deep Search** (OAuth into the user's own Gmail/Drive to find old buried threads/files) — a real product but a much heavier OAuth/privacy/compliance lift and further from the agency's core positioning | (a) Heavy / server, reuses DNS engine. (b) Heavy / OAuth integration, phase later | Ship (a) first — it slots directly into the existing `dns-email-health` engine (MX lookups are already built). Treat (b) as a much later, separate initiative given the OAuth scope and data-handling burden. |
+| **Competitor intelligence (ad spend, ad location, suppliers)** | "Competitor Ad Intelligence" — aggregate what's *legally and publicly* queryable from official ad transparency APIs (Meta Ad Library API, Google Ads Transparency Center, TikTok Commercial Content Library, LinkedIn Ad Library) into one report per competitor domain/page | Heavy / partner API | Ad spend/location data is realistically available (with caveats — full spend ranges are mainly exposed for political/social ads, and coverage/granularity varies by platform); **supplier intelligence is not** — that requires licensed customs/shipping data (e.g., import/export manifest providers), which is a real paid-data-license relationship, not something to scrape. Ship the ad-transparency aggregation first; treat supplier lookup as a "connect a data partner" v2, not a v1 build. |
+| **Business formation** | LLC/corp formation, EIN application guidance, registered agent | Heavy / partner integration | Same pattern as domain/hosting (§5): partner with an existing formation service (reseller/affiliate), don't attempt to become a registered agent or filing service yourselves — this is a regulated, state-by-state process. Pair with a free **Business Name + Trademark Availability Checker** (extends the existing Brand Creator) as the natural free on-ramp. |
+| **Clipping software** | Long-form video → short social clips | Heavy / phased | v1: client-side trimmer + caption burn-in (user manually picks the clip range). v2: AI "auto-find the highlight" needs a transcript (pairs naturally with the Transcriber tool above) plus a heuristic or model to rank segments — a good example of two heavy tools compounding, which is exactly the platform's moat pattern from §11. |
+| **Demo video creator** | Screen recording + simple edit + branded intro/outro + captions | Heavy / mostly client | Screen + webcam recording is natively possible client-side via `MediaRecorder`/`getDisplayMedia` — a real, zero-server-cost v1 (record → trim → add a branded watermark/outro → export). Auto-captions are v2 and depend on the Transcriber tool above. |
+
+### 12.3 Additional brainstormed tools, by audience
+
+**For marketers** (extends clusters 1–5):
+- Email subject-line spam-word / deliverability checker
+- Social post previewer (renders how a post/link will actually look on each platform before publishing)
+- Open Graph / social preview card generator (distinct from Schema — this is the "how does my link look when pasted in Slack/iMessage/Twitter" problem)
+- Hashtag research & grouping tool
+- UTM link builder + campaign tracker
+- Customer persona / ICP generator (from a short business description)
+- Testimonial/review embed-widget generator
+- NPS / customer survey builder
+- Link-in-bio micro-page builder (standalone, beyond the QR generator)
+- Broken link checker (crawl a site, list dead links) — extends the audit engine
+- Accessibility (WCAG) checker — extends the audit engine, real value, real legal relevance (ADA lawsuits over inaccessible sites are common)
+- Security headers checker (CSP, HSTS, X-Frame-Options) — extends the audit engine
+- SSL/TLS certificate expiry checker — extends the audit engine
+- Ad copy compliance scanner (flags Facebook/Google-banned phrasing before you get an ad rejected)
+- Content repurposing tool (long-form → thread/social post variants)
+- Press release generator + a distribution checklist
+- Media kit generator (for creators/influencers pitching brands)
+- Uptime / competitor page-change monitor ("alert me when a competitor changes their pricing page")
+
+**For entrepreneurs:**
+- Business name + trademark availability checker (pairs with Business Formation above)
+- Business plan / one-pager generator
+- Financial projection & startup-runway calculator
+- Break-even & unit-economics calculator
+- Freelance/agency rate calculator (expenses + margin goal → hourly rate)
+- Invoice & estimate generator with branded templates
+- Simple contract / NDA / SOW template generator (with a prominent "not legal advice" disclaimer, same pattern as the Copywriter/AUP disclaimers already in place)
+- Elevator pitch generator
+- Pitch deck outline generator
+- Digital business card generator (pairs naturally with the QR Code Generator)
+- Loan/grant program matcher (quiz-style, matches business profile to public program categories)
+
+**For developers** (proposed new cluster, §12.1):
+- Regex builder + tester with plain-English explanation
+- JSON/YAML/CSV/XML formatter, converter, and diff tool
+- JWT decoder/debugger
+- Cron expression builder + explainer
+- Webhook tester/inspector (capture and display inbound webhook payloads — needs a small always-on receiving backend)
+- Fake/test data generator (Faker-style structured mock data)
+- README generator (project description → structured README.md)
+- Changelog generator (from conventional-commit-style git log input)
+- OSS license chooser
+- Database schema visualizer (paste SQL → ER diagram)
+- cURL ↔ code generator (convert a cURL command to fetch/axios/Python requests/etc.)
+- Code snippet → shareable image generator (Carbon/Ray.so-style — cheap to build, has real viral/sharing potential on its own)
+- Favicon + PWA manifest generator (pairs with the Brand Identity Kit)
+- API docs generator (paste an OpenAPI/Swagger spec → a clean, hosted docs page)
+
+**Cross-cutting / shared-infrastructure ideas** (each reuses an engine already built or planned):
+- Background remover and Transcriber (above) both become inputs other tools can build on — background removal feeds the Ad Creative Resizer and Brand Identity Kit; transcription feeds the Clipping tool, the Demo Video Creator, and a future closed-captioning tool.
+- The Broken Link Checker, Accessibility Checker, Security Headers Checker, and SSL Checker are all thin additional scoring lenses on the *same* `site-audit.ts` engine used by the Website Audit Report / Landing Page Grader / Competitor Gap Report — each one is a small, high-leverage addition, not a new subsystem.
+
+### 12.4 Suggested next-build priority
+
+Ordered by (build cost) × (how directly it reuses existing engines):
+
+1. **Broken Link Checker, Accessibility Checker, Security Headers Checker, SSL Checker** — near-zero new infrastructure; each is a new scoring function on the existing audit engine.
+2. **B2B Email Finder & Verifier** — reuses the DNS/MX lookup work already built for the Email Deliverability Health Check.
+3. **Background Remover** — client-side, zero server cost, closes an obvious gap next to the existing Watermark Generator/Remover.
+4. **Demo Video Creator (v1: record + trim + brand outro, no captions yet)** — client-side, zero server cost, and a strong differentiator (nobody bundles this into a marketing-tools site).
+5. **Competitor Ad Intelligence (ad-transparency aggregation only, no supplier data yet)** — directly answers the founder's original ask and is legally clean since it only surfaces official transparency-API data.
+6. **App/SaaS QA Test Plan Generator (v1: static checks only)** — reuses the audit engine; a strong developer-cluster anchor tool.
+7. **Business Name + Trademark Availability Checker** — small extension of the existing Brand Creator.
+8. **Transcriber (short files only, gated)** — first tool with meaningful per-use compute cost; ship after there's an account/plan gate to control cost exposure.
+9. Everything requiring a paid third-party data license or partner contract (Phone Number Lookup, Burner Email, Business Formation, Clipping's AI highlight detection, Supplier Intelligence) — sequence these once there's a partnerships/procurement process in place; they're valuable but shouldn't block the tools that can ship with zero external dependencies.
