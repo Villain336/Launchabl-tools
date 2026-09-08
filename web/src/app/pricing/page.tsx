@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
 import PricingBlock from "@/components/blocks/pricing-3";
 import FeaturesBlock from "@/components/blocks/features-3";
+import ComparisonBlock from "@/components/blocks/comparison-2";
 import FaqsBlock from "@/components/blocks/faqs-1";
 
 export const metadata: Metadata = {
@@ -35,6 +36,7 @@ export default function PricingPage() {
   return (
     <>
       <PricingBlock />
+      <ComparisonBlock />
       <FeaturesBlock />
       <FaqsBlock
         items={faqs}

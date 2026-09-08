@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ToolsExplorer } from "@/components/tools/tools-explorer";
+import BentoBlock from "@/components/blocks/bento-2";
 
 export const metadata: Metadata = {
   title: "Free Marketing Tools",
@@ -11,13 +12,16 @@ export const metadata: Metadata = {
 
 export default function ToolsPage() {
   return (
-    <Container className="py-16 sm:py-24">
-      <SectionHeading
-        eyebrow="The toolbox"
-        title="Free tools, organized by outcome"
-        description="No account required for single-file actions. Every tool tells you exactly how your data is handled, and every result points at a clear next step."
-      />
-      <ToolsExplorer />
-    </Container>
+    <>
+      <BentoBlock />
+      <Container className="pb-16 sm:pb-24">
+        <SectionHeading
+          eyebrow="The toolbox"
+          title="Free tools, organized by outcome"
+          description="No account required for single-file actions. Every tool tells you exactly how your data is handled, and every result points at a clear next step."
+        />
+        <ToolsExplorer />
+      </Container>
+    </>
   );
 }

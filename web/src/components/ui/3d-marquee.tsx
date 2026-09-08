@@ -37,7 +37,7 @@ export const ThreeDMarquee = ({
         className,
       )}
     >
-      <div className="flex size-full items-center justify-center">
+      <div className="flex size-full items-center justify-center [perspective:4000px]">
         <div className="size-[1720px] shrink-0 scale-50 sm:scale-75 lg:scale-100">
           <div
             style={{
@@ -63,19 +63,18 @@ export const ThreeDMarquee = ({
                     <motion.div
                       whileHover={{ y: -10 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="relative aspect-[970/700] w-full overflow-hidden rounded-lg bg-[#171717] ring ring-[#FF6600]/25 hover:shadow-2xl"
+                      className="relative overflow-hidden rounded-lg bg-white ring ring-black/10 hover:shadow-2xl"
+                      style={{ width: 970, height: 700 }}
                     >
-                      {/* Decorative marquee tiles; next/image is a poor fit inside the 3D grid. */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={item.src}
                         alt=""
-                        width={970}
-                        height={700}
-                        className="absolute inset-0 size-full object-cover opacity-90"
+                        width={420}
+                        height={420}
+                        className="absolute top-[12%] left-1/2 h-[58%] w-auto -translate-x-1/2 object-contain"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
-                      <p className="absolute inset-x-0 bottom-0 truncate px-6 pb-6 text-2xl font-semibold tracking-tight text-white">
+                      <p className="absolute inset-x-0 bottom-0 truncate px-12 pb-12 text-5xl font-semibold tracking-tight text-neutral-900">
                         {item.title}
                       </p>
                     </motion.div>
@@ -102,12 +101,12 @@ const GridLineHorizontal = ({
       style={
         {
           "--background": "#ffffff",
-          "--color": "rgba(255, 102, 0, 0.35)",
+          "--color": "rgba(0, 0, 0, 0.2)",
           "--height": "1px",
           "--width": "5px",
           "--fade-stop": "90%",
           "--offset": offset || "200px",
-          "--color-dark": "rgba(255, 184, 0, 0.35)",
+          "--color-dark": "rgba(255, 255, 255, 0.2)",
           maskComposite: "exclude",
         } as React.CSSProperties
       }
@@ -137,12 +136,12 @@ const GridLineVertical = ({
       style={
         {
           "--background": "#ffffff",
-          "--color": "rgba(255, 102, 0, 0.35)",
+          "--color": "rgba(0, 0, 0, 0.2)",
           "--height": "5px",
           "--width": "1px",
           "--fade-stop": "90%",
           "--offset": offset || "150px",
-          "--color-dark": "rgba(255, 184, 0, 0.35)",
+          "--color-dark": "rgba(255, 255, 255, 0.2)",
           maskComposite: "exclude",
         } as React.CSSProperties
       }

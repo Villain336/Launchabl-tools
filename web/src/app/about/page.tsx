@@ -3,6 +3,8 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import TimelineBlock from "@/components/blocks/timeline-1";
+import StatsBlock from "@/components/blocks/stats-1";
 
 export const metadata: Metadata = {
   title: "About",
@@ -37,6 +39,7 @@ const queueSteps = [
 
 export default function AboutPage() {
   return (
+    <>
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="About Launchabl"
@@ -72,5 +75,8 @@ export default function AboutPage() {
         </div>
       </div>
     </Container>
+      <TimelineBlock />
+      <StatsBlock />
+    </>
   );
 }
