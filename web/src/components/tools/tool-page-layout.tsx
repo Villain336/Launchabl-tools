@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ShieldCheck, ServerCog, Handshake } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { ToolStatusBadge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
+import { ToolStatusBadge } from "@/components/ui/agency-badge";
+import { LinkButton } from "@/components/ui/agency-button";
+import FaqsBlock from "@/components/blocks/faqs-1";
 import type { ReactNode } from "react";
 import type { Tool } from "@/lib/site-config";
 import { getRelatedTools } from "@/lib/site-config";
@@ -65,13 +66,8 @@ export function ToolPageLayout({
           {tool.faq.length > 0 && (
             <div className="mt-10">
               <h2 className="text-xl font-bold text-slate-900">FAQ</h2>
-              <div className="mt-4 space-y-5">
-                {tool.faq.map((item) => (
-                  <div key={item.question} className="border-b border-slate-200 pb-4">
-                    <p className="font-semibold text-slate-900">{item.question}</p>
-                    <p className="mt-1 text-sm text-slate-600">{item.answer}</p>
-                  </div>
-                ))}
+              <div className="mt-4">
+                <FaqsBlock items={tool.faq} compact />
               </div>
             </div>
           )}

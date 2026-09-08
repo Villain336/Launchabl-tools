@@ -1,15 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Search } from "lucide-react";
 import { clsx } from "clsx";
-import { ToolStatusBadge } from "@/components/ui/badge";
+import { ToolStatusBadge } from "@/components/ui/agency-badge";
 import { toolClusters, tools } from "@/lib/site-config";
 
 export function ToolsExplorer() {
   const [query, setQuery] = useState("");
   const [activeCluster, setActiveCluster] = useState<string | "all">("all");
+
+  useEffect(() => {
+    // One-time sync from the URL hash (an external system unavailable during SSR),
+    // e.g. deep links from the homepage like /tools#audits-reports.
+    const hash = window.location.hash.replace("#", "");
+    if (hash && toolClusters.some((c) => c.slug === hash)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveCluster(hash);
+    }
+  }, []);
 
   const filtered = useMemo(() => {
     return tools.filter((tool) => {
