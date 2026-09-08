@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadDataUrl } from "@/lib/download";
 
 export function QrCodeGenerator() {
@@ -43,38 +43,38 @@ export function QrCodeGenerator() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
       <div className="space-y-5">
         <div>
-          <label className="text-sm font-medium text-slate-700">Link or text to encode</label>
+          <label className="text-sm font-medium text-foreground">Link or text to encode</label>
           <input
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="https://yourbrand.com"
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700">Foreground color</label>
+            <label className="text-sm font-medium text-foreground">Foreground color</label>
             <input
               type="color"
               value={fgColor}
               onChange={(e) => setFgColor(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200"
+              className="mt-2 h-10 w-full rounded-lg border border-border"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Background color</label>
+            <label className="text-sm font-medium text-foreground">Background color</label>
             <input
               type="color"
               value={bgColor}
               onChange={(e) => setBgColor(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200"
+              className="mt-2 h-10 w-full rounded-lg border border-border"
             />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium text-slate-700">Size — {size}px</label>
+          <label className="text-sm font-medium text-foreground">Size — {size}px</label>
           <input
             type="range"
             min={160}
@@ -89,12 +89,12 @@ export function QrCodeGenerator() {
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
 
-      <div className="flex flex-col items-center gap-4 rounded-2xl bg-slate-50 p-6">
+      <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6">
         {showPreview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={dataUrl} alt="Generated QR code" className="h-40 w-40 rounded-lg bg-white p-2 shadow-sm" />
         ) : (
-          <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-white text-xs text-slate-400">
+          <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-white text-xs text-muted-foreground">
             Enter a link
           </div>
         )}

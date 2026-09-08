@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Loader2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 const formats = [
@@ -70,12 +70,12 @@ export function ImageConverter() {
 
   return (
     <div>
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 p-10 text-center transition-colors hover:border-indigo-400">
-        <Upload className="h-8 w-8 text-slate-400" />
-        <span className="text-sm font-medium text-slate-700">
+      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-10 text-center transition-colors hover:border-primary">
+        <Upload className="h-8 w-8 text-muted-foreground" />
+        <span className="text-sm font-medium text-foreground">
           {file ? file.name : "Drop an image, or click to choose one"}
         </span>
-        <span className="text-xs text-slate-500">PNG, JPG, or WebP · converted entirely in your browser</span>
+        <span className="text-xs text-muted-foreground">PNG, JPG, or WebP · converted entirely in your browser</span>
         <input
           type="file"
           accept="image/*"
@@ -86,7 +86,7 @@ export function ImageConverter() {
 
       <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-700">Convert to</p>
+          <p className="text-sm font-medium text-foreground">Convert to</p>
           <div className="mt-2 flex gap-2">
             {formats.map((fmt) => (
               <button
@@ -96,7 +96,7 @@ export function ImageConverter() {
                   if (file) convert(file, fmt, quality);
                 }}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                  target.ext === fmt.ext ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  target.ext === fmt.ext ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/70"
                 }`}
               >
                 {fmt.label}
@@ -107,7 +107,7 @@ export function ImageConverter() {
 
         {target.mime !== "image/png" && (
           <div className="w-full sm:w-56">
-            <p className="text-sm font-medium text-slate-700">Quality — {Math.round(quality * 100)}%</p>
+            <p className="text-sm font-medium text-foreground">Quality — {Math.round(quality * 100)}%</p>
             <input
               type="range"
               min={0.4}
@@ -128,19 +128,19 @@ export function ImageConverter() {
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {busy && (
-        <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
+        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Converting…
         </div>
       )}
 
       {!busy && resultUrl && resultBlob && (
-        <div className="mt-6 flex flex-col items-start gap-4 rounded-xl bg-slate-50 p-5 sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col items-start gap-4 rounded-xl bg-muted p-5 sm:flex-row sm:items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={resultUrl} alt="Converted preview" className="h-24 w-24 rounded-lg object-cover" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-slate-900">Ready to download</p>
+            <p className="text-sm font-medium text-foreground">Ready to download</p>
             {sizeInfo && (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 {Math.round(sizeInfo.before / 1024)} KB → {Math.round(sizeInfo.after / 1024)} KB
               </p>
             )}

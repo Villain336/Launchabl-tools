@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
-import { Container } from "@/components/ui/container";
+import { ChevronRight } from "lucide-react";
+import { BrandMark } from "@/components/brand/brand-mark";
+import { Button } from "@/components/ui/button";
 import { siteConfig, toolClusters } from "@/lib/site-config";
 
-const footerColumns = [
+const columns = [
   {
     heading: "Product",
     links: [
@@ -14,8 +15,8 @@ const footerColumns = [
     ],
   },
   {
-    heading: "Tool clusters",
-    links: toolClusters.map((c) => ({ label: c.name, href: `/tools#${c.slug}` })),
+    heading: "Clusters",
+    links: toolClusters.slice(0, 4).map((c) => ({ label: c.name, href: `/tools#${c.slug}` })),
   },
   {
     heading: "Company",
@@ -23,39 +24,48 @@ const footerColumns = [
       { label: "About", href: "/about" },
       { label: "Case Studies", href: "/case-studies" },
       { label: "Blog", href: "/blog" },
-    ],
-  },
-  {
-    heading: "Legal",
-    links: [
-      { label: "Terms of Service", href: "/legal/terms" },
-      { label: "Privacy Policy", href: "/legal/privacy" },
-      { label: "Acceptable Use", href: "/legal/acceptable-use" },
+      { label: "Privacy", href: "/legal/privacy" },
     ],
   },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
-      <Container className="py-16">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-          <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 font-bold text-slate-900">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              {siteConfig.name}
+    <footer className="w-full border-t border-border bg-background text-foreground">
+      <div className="mx-auto w-full max-w-5xl px-6">
+        <div className="flex flex-col items-center gap-5 border-b border-border py-12 text-center">
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+            Ready to stop paying a retainer?
+          </h2>
+          <p className="max-w-md text-sm text-pretty text-muted-foreground">
+            Start with a free tool. When you&apos;re ready, {siteConfig.price} once unlocks unlimited
+            marketing and design requests.
+          </p>
+          <Button render={<Link href="/pricing" />} nativeButton={false} size="lg">
+            Get unlimited
+            <ChevronRight data-icon="inline-end" aria-hidden="true" />
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-4">
+          <div className="col-span-2 flex flex-col gap-3 sm:col-span-1">
+            <Link href="/" className="text-foreground">
+              <BrandMark size={28} />
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-slate-600">{siteConfig.description}</p>
+            <p className="max-w-xs text-sm text-muted-foreground">{siteConfig.tagline}</p>
           </div>
-          {footerColumns.map((col) => (
-            <div key={col.heading}>
-              <h3 className="text-sm font-semibold text-slate-900">{col.heading}</h3>
-              <ul className="mt-4 space-y-3">
-                {col.links.map((link) => (
+          {columns.map((column) => (
+            <div key={column.heading} className="flex flex-col gap-3">
+              <h3 className="font-heading text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                {column.heading}
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {column.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-slate-600 hover:text-slate-900">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -64,11 +74,24 @@ export function SiteFooter() {
             </div>
           ))}
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 sm:flex-row">
-          <p>© {new Date().getFullYear()} {siteConfig.name}. All rights reserved.</p>
-          <p>Built as a strategy + platform scaffold — see <code className="rounded bg-slate-200 px-1.5 py-0.5">docs/STRATEGY.md</code>.</p>
+
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border py-6 sm:flex-row">
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+          </p>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <Link href="/legal/terms" className="hover:text-foreground">
+              Terms
+            </Link>
+            <Link href="/legal/privacy" className="hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/legal/acceptable-use" className="hover:text-foreground">
+              Acceptable use
+            </Link>
+          </div>
         </div>
-      </Container>
+      </div>
     </footer>
   );
 }

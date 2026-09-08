@@ -1,8 +1,8 @@
 export const siteConfig = {
-  name: "Launchable",
+  name: "Launchabl",
   tagline: "Unlimited marketing & design. One price. Forever.",
   description:
-    "Launchable is the marketing platform where the tools are free forever and the agency is unlimited for life — brand, website, content, and SEO, one flat price, no retainers.",
+    "Launchabl is the marketing platform where the tools are free forever and the agency is unlimited for life — brand, website, content, and SEO, one flat price, no retainers.",
   price: "$3,997",
   priceNote: "one-time · lifetime access · no monthly retainer",
 };
@@ -89,7 +89,7 @@ export const tools: Tool[] = [
     processing: "client",
     upsell: {
       headline: "Need a full brand system, not just a name?",
-      body: "Launchable unlimited plan members get a complete visual identity, logo files, and a launch-ready website built around this name — included, forever.",
+      body: "Launchabl unlimited plan members get a complete visual identity, logo files, and a launch-ready website built around this name — included, forever.",
     },
     faq: [
       {
@@ -119,7 +119,7 @@ export const tools: Tool[] = [
       {
         question: "Who do you register domains through?",
         answer:
-          "This tool is designed to plug into a registrar/reseller API (e.g. a domain-search + registration partner). Purchases route through that partner, not through Launchable directly.",
+          "This tool is designed to plug into a registrar/reseller API (e.g. a domain-search + registration partner). Purchases route through that partner, not through Launchabl directly.",
       },
     ],
   },

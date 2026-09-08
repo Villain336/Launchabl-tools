@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, Check, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { AuditResult } from "@/lib/site-audit";
 
 type Row = { url: string; ok: boolean; result?: AuditResult; error?: string };
@@ -53,7 +53,7 @@ export function CompetitorGapReport() {
           value={you}
           onChange={(e) => setYou(e.target.value)}
           placeholder="Your URL — https://yourbrand.com"
-          className="rounded-lg border-2 border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="rounded-lg border-2 border-indigo-200 px-3 py-2 text-sm outline-none focus:border-ring"
         />
         {competitors.map((c, i) => (
           <input
@@ -65,7 +65,7 @@ export function CompetitorGapReport() {
               setCompetitors(next);
             }}
             placeholder={`Competitor ${i + 1} URL (optional)`}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         ))}
       </div>
@@ -85,9 +85,9 @@ export function CompetitorGapReport() {
           <table className="w-full min-w-[600px] border-collapse text-sm">
             <thead>
               <tr>
-                <th className="border-b border-slate-200 py-2 pr-4 text-left font-medium text-slate-500">Metric</th>
+                <th className="border-b border-border py-2 pr-4 text-left font-medium text-muted-foreground">Metric</th>
                 {rows.map((r) => (
-                  <th key={r.url} className="border-b border-slate-200 py-2 pr-4 text-left font-medium text-slate-900">
+                  <th key={r.url} className="border-b border-border py-2 pr-4 text-left font-medium text-foreground">
                     {r.ok ? new URL(r.result!.url).hostname : r.url}
                   </th>
                 ))}
@@ -96,16 +96,16 @@ export function CompetitorGapReport() {
             <tbody>
               {metrics.map((m) => (
                 <tr key={m.key}>
-                  <td className="border-b border-slate-100 py-2 pr-4 text-slate-500">{m.label}</td>
+                  <td className="border-b border-slate-100 py-2 pr-4 text-muted-foreground">{m.label}</td>
                   {rows.map((r) => (
-                    <td key={r.url + m.key} className="border-b border-slate-100 py-2 pr-4 text-slate-800">
+                    <td key={r.url + m.key} className="border-b border-slate-100 py-2 pr-4 text-foreground">
                       {r.ok ? m.format(r.result![m.key]) : <span className="text-red-500">Failed</span>}
                     </td>
                   ))}
                 </tr>
               ))}
               <tr>
-                <td className="py-2 pr-4 text-slate-500">HTTPS</td>
+                <td className="py-2 pr-4 text-muted-foreground">HTTPS</td>
                 {rows.map((r) => (
                   <td key={r.url + "https"} className="py-2 pr-4">
                     {r.ok ? (

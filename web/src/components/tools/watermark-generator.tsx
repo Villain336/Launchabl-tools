@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Position = "center" | "bottom-right" | "bottom-left" | "top-right" | "top-left" | "tile";
@@ -90,10 +90,10 @@ export function WatermarkGenerator() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
       <div>
         {!bitmap ? (
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 p-10 text-center transition-colors hover:border-indigo-400">
-            <Upload className="h-8 w-8 text-slate-400" />
-            <span className="text-sm font-medium text-slate-700">Drop an image, or click to choose one</span>
-            <span className="text-xs text-slate-500">Watermarked entirely in your browser</span>
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-10 text-center transition-colors hover:border-primary">
+            <Upload className="h-8 w-8 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">Drop an image, or click to choose one</span>
+            <span className="text-xs text-muted-foreground">Watermarked entirely in your browser</span>
             <input
               type="file"
               accept="image/*"
@@ -102,7 +102,7 @@ export function WatermarkGenerator() {
             />
           </label>
         ) : (
-          <div className="overflow-hidden rounded-2xl bg-slate-100">
+          <div className="overflow-hidden rounded-2xl bg-muted">
             <canvas ref={canvasRef} className="h-auto w-full" />
           </div>
         )}
@@ -110,20 +110,20 @@ export function WatermarkGenerator() {
 
       <div className="space-y-5">
         <div>
-          <label className="text-sm font-medium text-slate-700">Watermark text</label>
+          <label className="text-sm font-medium text-foreground">Watermark text</label>
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium text-slate-700">Position</label>
+          <label className="text-sm font-medium text-foreground">Position</label>
           <select
             value={position}
             onChange={(e) => setPosition(e.target.value as Position)}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           >
             <option value="tile">Tiled (repeat across image)</option>
             <option value="center">Center</option>
@@ -136,16 +136,16 @@ export function WatermarkGenerator() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700">Color</label>
+            <label className="text-sm font-medium text-foreground">Color</label>
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200"
+              className="mt-2 h-10 w-full rounded-lg border border-border"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Opacity — {Math.round(opacity * 100)}%</label>
+            <label className="text-sm font-medium text-foreground">Opacity — {Math.round(opacity * 100)}%</label>
             <input
               type="range"
               min={0.05}
@@ -160,7 +160,7 @@ export function WatermarkGenerator() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700">Font size — {fontSize}px</label>
+            <label className="text-sm font-medium text-foreground">Font size — {fontSize}px</label>
             <input
               type="range"
               min={16}
@@ -171,7 +171,7 @@ export function WatermarkGenerator() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700">Rotation — {rotation}°</label>
+            <label className="text-sm font-medium text-foreground">Rotation — {rotation}°</label>
             <input
               type="range"
               min={-90}

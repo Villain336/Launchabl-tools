@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Check, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 
 type SchemaType = "Organization" | "LocalBusiness" | "Product" | "FAQPage" | "Article";
 
@@ -83,11 +83,11 @@ export function SchemaGenerator() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div className="space-y-5">
         <div>
-          <label className="text-sm font-medium text-slate-700">Schema type</label>
+          <label className="text-sm font-medium text-foreground">Schema type</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as SchemaType)}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           >
             {schemaTypes.map((t) => (
               <option key={t.value} value={t.value}>
@@ -118,7 +118,7 @@ export function SchemaGenerator() {
         {type === "FAQPage" && (
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="rounded-lg border border-slate-200 p-3">
+              <div key={i} className="rounded-lg border border-border p-3">
                 <input
                   value={faq.q}
                   placeholder="Question"
@@ -127,7 +127,7 @@ export function SchemaGenerator() {
                     next[i].q = e.target.value;
                     setFaqs(next);
                   }}
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-indigo-400"
+                  className="w-full rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
                 />
                 <textarea
                   value={faq.a}
@@ -137,7 +137,7 @@ export function SchemaGenerator() {
                     next[i].a = e.target.value;
                     setFaqs(next);
                   }}
-                  className="mt-2 w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-indigo-400"
+                  className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
                 />
               </div>
             ))}
@@ -150,7 +150,7 @@ export function SchemaGenerator() {
 
       <div>
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-slate-700">Generated JSON-LD</label>
+          <label className="text-sm font-medium text-foreground">Generated JSON-LD</label>
           <Button
             size="sm"
             variant="secondary"
@@ -187,20 +187,20 @@ function Field({
 }) {
   return (
     <div>
-      <label className="text-sm font-medium text-slate-700">{label}</label>
+      <label className="text-sm font-medium text-foreground">{label}</label>
       {textarea ? (
         <textarea
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       ) : (
         <input
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       )}
     </div>

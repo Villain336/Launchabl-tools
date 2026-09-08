@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Check, Copy, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 function buildSitemap(urls: string[]): string {
@@ -57,22 +57,22 @@ export function SitemapRobotsGenerator() {
     <div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div>
-          <label className="text-sm font-medium text-slate-700">Page URLs (one per line)</label>
+          <label className="text-sm font-medium text-foreground">Page URLs (one per line)</label>
           <textarea
             value={urlsRaw}
             onChange={(e) => setUrlsRaw(e.target.value)}
             rows={8}
             placeholder={"https://yourbrand.com/\nhttps://yourbrand.com/solutions\nhttps://yourbrand.com/pricing"}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 font-mono text-xs outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-slate-700">Paths to block (one per line)</label>
+          <label className="text-sm font-medium text-foreground">Paths to block (one per line)</label>
           <textarea
             value={blockRaw}
             onChange={(e) => setBlockRaw(e.target.value)}
             rows={8}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 font-mono text-xs outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
       </div>
@@ -117,7 +117,7 @@ function OutputBlock({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-slate-900">{title}</p>
+        <p className="text-sm font-semibold text-foreground">{title}</p>
         <div className="flex gap-2">
           <Button size="sm" variant="secondary" onClick={onCopy}>
             {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}

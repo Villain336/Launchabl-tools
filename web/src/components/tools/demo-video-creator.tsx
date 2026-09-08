@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Circle, Download, Mic, MicOff, Monitor, Square } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type RecorderState = "idle" | "recording" | "stopped";
@@ -176,34 +176,34 @@ export function DemoVideoCreator() {
     <div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Watermark text</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">Watermark text</label>
           <input
             value={watermarkText}
             onChange={(e) => setWatermarkText(e.target.value)}
             disabled={state === "recording"}
-            className="w-full rounded-full border border-slate-200 px-4 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50"
+            className="w-full rounded-full border border-border px-4 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:bg-muted"
             placeholder="yourbrand.com"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">Accent color</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">Accent color</label>
           <input
             type="color"
             value={accentColor}
             onChange={(e) => setAccentColor(e.target.value)}
             disabled={state === "recording"}
-            className="h-10 w-full cursor-pointer rounded-lg border border-slate-200"
+            className="h-10 w-full cursor-pointer rounded-lg border border-border"
           />
         </div>
       </div>
 
-      <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+      <label className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
         <input
           type="checkbox"
           checked={includeMic}
           disabled={state === "recording"}
           onChange={(e) => setIncludeMic(e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300"
+          className="h-4 w-4 rounded border-border"
         />
         {includeMic ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
         Include microphone audio
@@ -233,15 +233,15 @@ export function DemoVideoCreator() {
       </div>
 
       <div className={state === "recording" ? "mt-6" : "mt-6 hidden"}>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Live preview</p>
-        <canvas ref={canvasRef} className="w-full rounded-xl border border-slate-200 bg-slate-900" />
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live preview</p>
+        <canvas ref={canvasRef} className="w-full rounded-xl border border-border bg-slate-900" />
       </div>
       <video ref={videoElRef} muted playsInline className="hidden" />
 
       {videoUrl && state === "stopped" && (
         <div className="mt-8">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Your recording</p>
-          <video src={videoUrl} controls className="w-full rounded-xl border border-slate-200 bg-slate-900" />
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your recording</p>
+          <video src={videoUrl} controls className="w-full rounded-xl border border-border bg-slate-900" />
           <Button
             className="mt-3"
             onClick={async () => {

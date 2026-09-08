@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, Search, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { AuditResult } from "@/lib/site-audit";
 
 export function WebsiteAuditReport() {
@@ -40,13 +40,13 @@ export function WebsiteAuditReport() {
     <div>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && runAudit()}
             placeholder="https://yourbrand.com"
-            className="w-full rounded-full border border-slate-200 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="w-full rounded-full border border-border py-2.5 pl-9 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <Button onClick={runAudit} disabled={busy}>
@@ -62,11 +62,11 @@ export function WebsiteAuditReport() {
 
       {result && (
         <div className="mt-8">
-          <div className="flex flex-col items-center gap-4 rounded-2xl bg-slate-50 p-6 sm:flex-row sm:justify-between">
+          <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6 sm:flex-row sm:justify-between">
             <div>
-              <p className="text-sm text-slate-500">Audited</p>
-              <p className="font-medium text-slate-900">{result.url}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="text-sm text-muted-foreground">Audited</p>
+              <p className="font-medium text-foreground">{result.url}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
                 {result.loadTimeMs}ms response · {result.pageSizeKb}KB · {result.wordCount} words
               </p>
             </div>
@@ -75,7 +75,7 @@ export function WebsiteAuditReport() {
 
           <ul className="mt-6 space-y-3">
             {result.findings.map((f) => (
-              <li key={f.id} className="flex items-start gap-3 rounded-lg border border-slate-200 p-4">
+              <li key={f.id} className="flex items-start gap-3 rounded-lg border border-border p-4">
                 {f.passed ? (
                   <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
                 ) : (
@@ -84,8 +84,8 @@ export function WebsiteAuditReport() {
                   />
                 )}
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{f.label}</p>
-                  <p className="mt-0.5 text-sm text-slate-600">{f.detail}</p>
+                  <p className="text-sm font-medium text-foreground">{f.label}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{f.detail}</p>
                 </div>
               </li>
             ))}
@@ -101,7 +101,7 @@ export function ScoreDial({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center">
       <div className={`text-4xl font-extrabold ${color}`}>{score}</div>
-      <p className="text-xs text-slate-500">out of 100</p>
+      <p className="text-xs text-muted-foreground">out of 100</p>
     </div>
   );
 }

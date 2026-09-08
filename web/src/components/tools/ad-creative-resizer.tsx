@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Download, Loader2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Preset = { id: string; label: string; width: number; height: number; group: string };
@@ -83,10 +83,10 @@ export function AdCreativeResizer() {
   return (
     <div>
       {!bitmap ? (
-        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 p-10 text-center transition-colors hover:border-indigo-400">
-          <Upload className="h-8 w-8 text-slate-400" />
-          <span className="text-sm font-medium text-slate-700">Drop your master creative, or click to choose one</span>
-          <span className="text-xs text-slate-500">Resized entirely in your browser — nothing is uploaded</span>
+        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-10 text-center transition-colors hover:border-primary">
+          <Upload className="h-8 w-8 text-muted-foreground" />
+          <span className="text-sm font-medium text-foreground">Drop your master creative, or click to choose one</span>
+          <span className="text-xs text-muted-foreground">Resized entirely in your browser — nothing is uploaded</span>
           <input
             type="file"
             accept="image/*"
@@ -99,12 +99,12 @@ export function AdCreativeResizer() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {groups.map((group) => (
               <div key={group}>
-                <p className="text-sm font-semibold text-slate-900">{group}</p>
+                <p className="text-sm font-semibold text-foreground">{group}</p>
                 <div className="mt-2 space-y-2">
                   {presets
                     .filter((p) => p.group === group)
                     .map((p) => (
-                      <label key={p.id} className="flex items-center gap-2 text-sm text-slate-700">
+                      <label key={p.id} className="flex items-center gap-2 text-sm text-foreground">
                         <input
                           type="checkbox"
                           checked={selected.has(p.id)}
@@ -114,10 +114,10 @@ export function AdCreativeResizer() {
                             else next.delete(p.id);
                             setSelected(next);
                           }}
-                          className="h-4 w-4 rounded border-slate-300"
+                          className="h-4 w-4 rounded border-border"
                         />
                         {p.label}{" "}
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-muted-foreground">
                           {p.width}×{p.height}
                         </span>
                       </label>
@@ -141,10 +141,10 @@ export function AdCreativeResizer() {
           {previews && (
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {previews.map(({ preset, url }) => (
-                <div key={preset.id} className="overflow-hidden rounded-lg border border-slate-200">
+                <div key={preset.id} className="overflow-hidden rounded-lg border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={preset.label} className="h-24 w-full object-cover" />
-                  <p className="p-2 text-xs text-slate-600">{preset.label}</p>
+                  <p className="p-2 text-xs text-muted-foreground">{preset.label}</p>
                 </div>
               ))}
             </div>

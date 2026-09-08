@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, Loader2, Lock, Search, ShieldAlert, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { SslResult } from "@/lib/ssl-checker";
 
 export function SslCertificateChecker() {
@@ -42,13 +42,13 @@ export function SslCertificateChecker() {
     <div>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={domain}
             onChange={(e) => setDomain(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && run()}
             placeholder="yourbrand.com"
-            className="w-full rounded-full border border-slate-200 py-2.5 pl-9 pr-4 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="w-full rounded-full border border-border py-2.5 pl-9 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <Button onClick={run} disabled={busy}>
@@ -81,8 +81,8 @@ export function SslCertificateChecker() {
               <ShieldAlert className="h-8 w-8 text-red-600" />
             )}
             <div>
-              <p className="font-semibold text-slate-900">{result.host}</p>
-              <p className="text-sm text-slate-600">
+              <p className="font-semibold text-foreground">{result.host}</p>
+              <p className="text-sm text-muted-foreground">
                 {result.connected
                   ? result.valid
                     ? "Certificate is valid"
@@ -95,22 +95,22 @@ export function SslCertificateChecker() {
           {result.connected ? (
             <dl className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
               <div>
-                <dt className="text-slate-500">Issuer</dt>
-                <dd className="font-medium text-slate-900">{result.issuer ?? "—"}</dd>
+                <dt className="text-muted-foreground">Issuer</dt>
+                <dd className="font-medium text-foreground">{result.issuer ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Issued to</dt>
-                <dd className="font-medium text-slate-900">{result.subject ?? "—"}</dd>
+                <dt className="text-muted-foreground">Issued to</dt>
+                <dd className="font-medium text-foreground">{result.subject ?? "—"}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Expires</dt>
-                <dd className="font-medium text-slate-900">
+                <dt className="text-muted-foreground">Expires</dt>
+                <dd className="font-medium text-foreground">
                   {result.validTo ? new Date(result.validTo).toLocaleDateString() : "—"}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Days remaining</dt>
-                <dd className="font-medium text-slate-900">{result.daysRemaining ?? "—"}</dd>
+                <dt className="text-muted-foreground">Days remaining</dt>
+                <dd className="font-medium text-foreground">{result.daysRemaining ?? "—"}</dd>
               </div>
             </dl>
           ) : (

@@ -76,7 +76,7 @@ export async function auditUrl(rawUrl: string): Promise<AuditResult> {
 
   const res = await fetch(parsed.toString(), {
     redirect: "follow",
-    headers: { "User-Agent": "LaunchableAuditBot/1.0 (+https://launchable.example/tools)" },
+    headers: { "User-Agent": "LaunchablAuditBot/1.0 (+https://launchabl.example/tools)" },
     signal: AbortSignal.timeout(12000),
   });
 

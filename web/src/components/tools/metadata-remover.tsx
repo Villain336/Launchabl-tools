@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { FileImage, Loader2, ShieldCheck, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Detected = Record<string, unknown> | null;
@@ -61,12 +61,12 @@ export function MetadataRemover() {
 
   return (
     <div>
-      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 p-10 text-center transition-colors hover:border-indigo-400">
-        <Upload className="h-8 w-8 text-slate-400" />
-        <span className="text-sm font-medium text-slate-700">
+      <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-10 text-center transition-colors hover:border-primary">
+        <Upload className="h-8 w-8 text-muted-foreground" />
+        <span className="text-sm font-medium text-foreground">
           {file ? file.name : "Drop an image, or click to choose one"}
         </span>
-        <span className="text-xs text-slate-500">JPEG or PNG · processed entirely in your browser</span>
+        <span className="text-xs text-muted-foreground">JPEG or PNG · processed entirely in your browser</span>
         <input
           type="file"
           accept="image/jpeg,image/png"
@@ -78,30 +78,30 @@ export function MetadataRemover() {
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {busy && (
-        <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
+        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Reading and cleaning your file…
         </div>
       )}
 
       {!busy && detected && (
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="rounded-xl bg-slate-50 p-5">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <div className="rounded-xl bg-muted p-5">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <FileImage className="h-4 w-4" /> What we found in your file
             </h3>
             {Object.keys(detected).length === 0 ? (
-              <p className="mt-3 text-sm text-slate-600">No EXIF/metadata found — this file was already clean.</p>
+              <p className="mt-3 text-sm text-muted-foreground">No EXIF/metadata found — this file was already clean.</p>
             ) : (
               <dl className="mt-3 space-y-2 text-sm">
                 {notableKeys
                   .filter((key) => key in detected)
                   .map((key) => (
                     <div key={key} className="flex justify-between gap-4">
-                      <dt className="text-slate-500">{key}</dt>
-                      <dd className="text-right font-medium text-slate-800">{String(detected[key])}</dd>
+                      <dt className="text-muted-foreground">{key}</dt>
+                      <dd className="text-right font-medium text-foreground">{String(detected[key])}</dd>
                     </div>
                   ))}
-                <div className="flex justify-between gap-4 pt-1 text-xs text-slate-400">
+                <div className="flex justify-between gap-4 pt-1 text-xs text-muted-foreground">
                   <span>{Object.keys(detected).length} field(s) total detected</span>
                 </div>
               </dl>
