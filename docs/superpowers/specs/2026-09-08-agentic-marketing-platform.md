@@ -37,10 +37,12 @@ Never put "MCP," "function calling," or "system prompt" in the operator UI. Thos
 **Inbound (do this first).** Launchabl *calls their APIs* as skills.
 
 - Google Search Console, Analytics, Business Profile
+- GitHub (their repos) and Vercel (preview + production)
 - Shopify / Woo product catalogs
-- Webflow / WordPress publish
+- Webflow / WordPress as an alternate publish path
 - Meta / Google Ads libraries (public + their ad accounts)
 - HubSpot / email ESP for campaigns they already run
+- USPTO TESS/TSDR for trademark search (logo jobs)
 
 Each connection is a skill pack: `gsc.list-queries`, `shopify.list-products`, `gbp.update-description`. The operator sees "Connected: Search Console," not a token form.
 
@@ -87,6 +89,8 @@ The white-label report builder is the first crew hiding in the product today —
 A connection is not a generic HTTP tool. It is a **narrow, job-shaped pack**:
 
 - Search Console → "queries you already rank for," "pages with impressions but no clicks"
+- GitHub → "your site repo," "open a pull request"
+- Vercel → "preview URL," "publish the live site"
 - Shopify → "products missing description / alt text"
 - GBP → "description, categories, Q&A"
 
@@ -104,7 +108,7 @@ This is how Launchabl stays the OS when the operator lives in Slack, Cursor, or 
 
 ### Layer 5 — Humans as the last skill
 
-The unlimited plan is not a separate product. It is the terminal node when the crew cannot finish: implement schema site-wide, design the real identity, produce the campaign. The agent already collected the brief, the scan, and the approval. Hand-off is a skill: `request-unlimited` with the Vault payload attached.
+The unlimited plan is not a separate product. It is the terminal node when the crew cannot finish: attorney filing for a crowded mark, photography, complex CMS, produce the campaign. The agent already collected the brief, the scan, the repo, and the approval. Hand-off is a skill: `request-unlimited` with the Vault (and repo) payload attached.
 
 ## What a skill actually is
 
@@ -127,7 +131,7 @@ The model (when we add one) only *chooses among declared skills for that job*. I
 
 Marketers ship to customers and to Google. A platform that auto-publishes schema or ads without a gate will get them banned or sued.
 
-Every crew ends in review. Writes to connected systems (GBP update, Shopify description, Webflow publish) are a second, louder gate: **Approve publish**. Downloads stay the first gate.
+Every crew ends in review. Writes to connected systems (GitHub push, Vercel production, GBP update, Shopify description, Webflow publish) are a louder gate: **Approve push** (first repo write) and **Approve publish** (live URL / CMS). Downloads stay the first gate.
 
 Anonymous free runs: no outbound API, no publish connections, still have Approve-to-download. Accounts unlock Vault + connections. Unlimited unlocks humans.
 
@@ -146,13 +150,13 @@ Anonymous free runs: no outbound API, no publish connections, still have Approve
 4. First crew: **Audits & reports** (audit + grader + gap → one white-label report). This is the freelancer/agency wedge.
 5. First connection: Search Console on Get found. One OAuth, obvious payoff.
 6. Jobs API for the same audit the studio already runs. Agencies ask for this; marketers never see it.
-7. Publish connections (Webflow/Shopify) with Approve publish.
+7. GitHub + Vercel with Approve push / Approve publish (default website path). Webflow/Shopify remain alternates.
 8. MCP for the same jobs, for operators who already live in an IDE.
 
 Each step is still a diagnostic that points at the unlimited plan. That is the strategy, unchanged.
 
-Must-have packs (research, images, marketing-site code, SEO, accuracy/efficiency) and the service-coverage matrix live in the capability catalog. This document stays the platform shape; that one stays the "what it is allowed to do."
+Must-have packs (research, trademark-ready logos, marketing-site code in GitHub, Vercel publish, SEO, accuracy/efficiency) and the service-coverage matrix live in the capability catalog. This document stays the platform shape; that one stays the "what it is allowed to do."
 
 ## Success test
 
-A freelancer can: connect Search Console, run Get found, approve a schema + titles package, download a client-ready zip, and click "Have Launchabl implement this." They never saw an API key, a prompt, or a tool-calling log labeled as such. They saw a job, skills with plain names, and an approval.
+A freelancer can: connect GitHub and Vercel, run Launch, approve a trademark-ready logo kit (with a cited register search), approve a push to their repo, open the preview URL, approve production, and still click "Have Launchabl finish this" if they want hosting owned or an attorney to file. They never saw an API key, a prompt, or a tool-calling log labeled as such. They saw a job, skills with plain names, and an approval.

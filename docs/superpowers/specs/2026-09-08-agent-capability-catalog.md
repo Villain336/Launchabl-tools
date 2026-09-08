@@ -21,10 +21,10 @@ Default loop (every job):
 
 1. **Intake** — brief, URL, files, optional connections.
 2. **Research** — live fetch + public sources, with citations. No invented rankings, spend, or traffic.
-3. **Produce** — drafts the operator asked for: copy, images, SEO packages, marketing-site code.
-4. **Verify** — check drafts against live pages, schema validators, contrast/a11y heuristics, and the brief.
-5. **Approve** — human-in-the-loop. Downloads and publishes stay locked until then.
-6. **Deliver or hand off** — zip / snippets / Vault item, or `request-unlimited` with the payload attached.
+3. **Produce** — drafts the operator asked for: trademark-ready logo kits, copy, images, SEO packages, marketing-site code in a real repo.
+4. **Verify** — check drafts against live pages, USPTO search hits, schema validators, contrast/a11y heuristics, and the brief.
+5. **Approve** — human-in-the-loop. Downloads, git pushes, and Vercel production publishes stay locked until then.
+6. **Deliver or hand off** — zip / repo / live preview URL, or `request-unlimited` with the payload attached.
 
 If a step would require guessing a number Google has not shown us, the agent **stops and labels the gap** ("Connect Search Console" or "Hand off to unlimited") instead of filling it in.
 
@@ -49,15 +49,20 @@ A new tool is usually a new SKU wrapping skills we already have (`fetch-page` + 
 - Paying or managing ad media budgets
 - Parallel unlimited-plan queues (product constraint, not a model constraint)
 - Arbitrary HTTP with the operator's tokens ("paste any OpenAPI spec")
-- Legal clearance (trademark, claims, medical/finance copy) — it can draft and flag; it cannot certify
+- Practicing law or guaranteeing a trademark will register — it **does** produce filing-ready logo kits and a cited USPTO search; it **does not** file as attorney of record or certify registrability
+- Claims / medical / finance copy certification — it can draft and flag; it cannot certify
 
-**Website coding is in.** Custom app coding is out. See §5.3.
+**Website coding is in.** Custom app coding is out. See §3.3.  
+**Trademark-ready logo kits are in.** Attorney filing is out. See §3.2.  
+**Repo control and Vercel publish are in.** Arbitrary git-forge admin and non-marketing apps are out. See §3.4.
 
 ---
 
 ## 3. Must-haves (non-negotiable skill packs)
 
-These are the capabilities the user named. Everything else in this catalog is support for them, or a later SKU that reuses them.
+These are the capabilities the user named, plus the ship path they asked to add. Everything else in this catalog is support for them, or a later SKU that reuses them.
+
+Must-haves: **research**, **trademark-ready logos**, **marketing-site code**, **SEO**, **accuracy/efficiency**, plus **GitHub repo control** and **Vercel publishing**.
 
 ### 3.1 Research
 
@@ -81,38 +86,59 @@ These are the capabilities the user named. Everything else in this catalog is su
 
 Live SKUs that already exercise this pack: Website Audit, Landing Page Grader, Competitor Gap, Broken Link Checker, Security Headers, SSL Checker.
 
-### 3.2 Images
+### 3.2 Images — including trademark-ready logos
 
-**Purpose:** Produce and prepare marketing imagery without a separate design tool for the common cases.
+**Purpose:** Produce marketing imagery **and** a logo system an operator can actually file and ship, not a disposable monogram.
+
+**Trademark-ready** here means the **artwork package** used for a USPTO (or equivalent) filing, plus a cited search. It does **not** mean Launchabl is their lawyer or that registration is guaranteed.
+
+A logo kit is not done until all of these exist:
+
+- Distinctive mark (icon + wordmark + at least one lockup), not initials-in-a-circle as the only option
+- True vectors (SVG + PDF), not a PNG wrapped in an `.svg`
+- Colorways: full color, black, white, one-color
+- Clear-space and minimum-size rules
+- Raster exports (PNG @1x/@2x, favicon, app icon) derived from the vectors
+- USPTO-style specimen (the mark as it appears on the generated site or a mock usage)
+- `trademark.search` report with cited serial numbers and conflict flags
 
 | Skill | Operator label | Processing | Notes |
 |---|---|---|---|
-| `image.generate-mark` | Make a mark / lockup | Partner (image model) | Starter identity, not trademark-safe custom logo |
-| `image.generate-og` | Make the social preview | Partner | From page title + palette |
-| `image.generate-social-set` | Make a social set | Partner | Feed / story / LinkedIn crops from one brief |
+| `logo.brief` | What this mark has to do | Server | Name, industry, Nice classes if they have them, distinctiveness notes |
+| `logo.generate-system` | Design the logo system | Partner (image + vector pipeline) | Multiple directions; operator picks one in review |
+| `logo.vectorize` | Make real vectors | Partner / server | SVG + PDF; reject raster-only output |
+| `logo.colorways` | Color, black, white | Server | Contrast-check each |
+| `logo.export-kit` | Package for filing and web | Server | Zip: vectors, rasters, specimen, guidelines HTML/PDF |
+| `trademark.search` | Search the trademark register | Partner (USPTO TESS/TSDR; later EUIPO etc.) | Cite hits; never "you're clear" |
+| `trademark.conflict-report` | Show likely conflicts | Server | Sourced from search; hand off if crowded |
+| `trademark.specimen` | How the mark is used | Server | From the site scaffold or a usage board |
+| `image.generate-og` | Make the social preview | Partner | From page title + palette + approved mark |
+| `image.generate-social-set` | Make a social set | Partner | Feed / story / LinkedIn crops |
 | `image.generate-ad-variants` | Draft ad creative | Partner | Stills only in v1; operator funds spend |
 | `image.remove-bg` | Cut out the subject | Client (existing) | Product / headshot |
 | `image.resize-ad-set` | Size for every platform | Client (existing resizer) | One upload → zip |
-| `image.watermark` | Stamp the asset | Client (existing) | |
+| `image.watermark` | Stamp the asset | Client (existing) | Uses the approved mark when Vault has one |
 | `image.strip-exif` | Strip hidden data | Client (existing) | |
 | `image.convert` | Convert format | Client (existing) | |
 
-**v1 quality bar:** usable drafts and production-ready *prep* (resize, cutout, watermark, OG). Custom photography, illustration systems, and motion campaigns stay unlimited-plan humans.
+**Quality bar:** the operator can download a kit a trademark attorney could attach to an application, and use the same files on the Vercel site. Custom photography, illustration systems, and motion stay unlimited-plan humans. If the search is crowded, the agent says so and offers regenerate or hand off — it does not invent clearance.
 
-**APIs:** one image-generation partner (pick at implementation; do not expose model names in the operator UI). Client skills stay in-browser.
+**APIs:** image + vector pipeline (pick at implementation; commercial-use license required for marks). USPTO search partner. Do not expose model names in the operator UI. Client prep skills stay in-browser.
 
 ### 3.3 Code websites (marketing sites only)
 
-**Purpose:** Ship conversion-focused **landing pages and marketing sites**, not products.
+**Purpose:** Ship conversion-focused **landing pages and marketing sites**, not products. Default ship path is **Next.js → their GitHub repo → Vercel preview → Approve publish → production**.
 
 In:
 
 - Single landing or small marketing site (Home, About, Services, Contact, legal stubs)
-- HTML/CSS or Next.js App Router scaffold
-- Webflow / Framer **spec** (structure + copy + assets) the human or a publish connection can apply
+- Next.js App Router scaffold as the default (this repo's stack)
+- HTML/CSS zip as a fallback when they refuse git
+- Webflow / Framer **spec** as an alternate for operators who will not use GitHub
 - On-brand sections: hero, proof, offer, FAQ, footer
 - Wired SEO: title, meta, canonical, JSON-LD, OG image
-- Hosting handoff: zip + README, or Launchabl-managed hosting via the unlimited plan
+- Logo kit dropped into `public/brand/`
+- Preview URL on Vercel; custom domain after Approve publish
 
 Out:
 
@@ -122,17 +148,63 @@ Out:
 | Skill | Operator label | Output |
 |---|---|---|
 | `web.intake-sitemap` | Pages this site needs | IA list from brief |
-| `web.scaffold-html` | Build a static landing | HTML/CSS/JS zip |
 | `web.scaffold-next` | Build a Next.js marketing site | App Router pages + `public/` assets |
+| `web.scaffold-html` | Build a static landing | HTML/CSS/JS zip (no-git fallback) |
 | `web.spec-webflow` | Spec for Webflow | Page map + CMS fields + copy blocks |
 | `web.inject-seo` | Fit SEO onto the pages | Title/meta/schema/OG per route |
-| `web.preview` | Preview the draft | In-studio preview (later: Vercel preview URL) |
+| `web.preview` | Preview the draft | In-studio preview **and** Vercel preview URL once connected |
 | `web.a11y-pass` | Check the draft | Heuristic a11y on generated markup |
-| `web.publish` | Publish | **Approve publish** only; Webflow/hosting connection |
+| `web.publish` | Publish production | **Approve publish**; Vercel production + domain (Webflow only if that connection is the one they chose) |
 
-Unlimited humans still: custom design systems, complex CMS, migrations, ongoing edits at volume, production hosting included in the plan.
+Unlimited humans still: complex CMS, migrations, high-volume ongoing edits, photography. They are not required for "the site is live on Vercel."
 
-### 3.4 SEO
+### 3.4 Repo control and Vercel
+
+**Purpose:** The generated site is a real codebase the operator owns, with preview deploys and a production URL. This is how Launchabl ships websites, not an optional developer extra.
+
+Operator labels: "Connected: GitHub", "Connected: Vercel", **Approve push**, **Approve publish**. Never "clone", "PAT", or "git remote" as the primary UI.
+
+#### GitHub (repo control)
+
+Smallest GitHub App scope that can create a repo, push branches, and open PRs on repos the operator grants. Prefer a GitHub App over a personal access token in the operator UI.
+
+| Skill | Operator label | Gate |
+|---|---|---|
+| `git.create-repo` | Create the site repo | Account + GitHub connected |
+| `git.commit` | Save this version | **Approve push** on the first write to a repo they own |
+| `git.branch` | Work on a branch | Same |
+| `git.open-pr` | Open a pull request | Approve push; Vercel preview follows |
+| `git.read-tree` | Read the current site | Needed for ongoing edits |
+| `git.invite` | Give Launchabl access | Optional; unlimited plan may keep a collaborator |
+
+Rules:
+
+- Anonymous runs: zip only. No repo create.
+- First commit to *their* org/user: Approve push, show the file list.
+- Later commits on a Launchabl-created branch: still visible in the skill log; production still needs Approve publish.
+- The agent does not force-push `main`, delete repos, or rotate org secrets.
+- Default: operator-owned repo. Unlimited plan may instead host under a Launchabl org with them as collaborator (managed hosting).
+
+#### Vercel (publish)
+
+Git integration is the product: the GitHub repo is the source of truth; Vercel builds from it. Do not make "upload a zip to Vercel" the primary path.
+
+| Skill | Operator label | Gate |
+|---|---|---|
+| `vercel.create-project` | Connect this repo to Vercel | GitHub repo exists |
+| `vercel.preview` | Preview URL | Push to a branch / PR (no extra gate beyond Approve push) |
+| `vercel.promote-production` | Publish the live site | **Approve publish** |
+| `vercel.attach-domain` | Use this domain | Approve publish; DNS skill may follow |
+| `vercel.env` | Project settings | Marketing sites should need none; never dump secrets into the skill log |
+
+Rules:
+
+- Preview URLs are the review surface for website jobs (alongside in-studio preview).
+- Production + custom domain is Approve publish — louder than download.
+- Unlimited "hosting included" = Launchabl Vercel team + domain they already registered, still with Approve publish on first go-live.
+- Failed builds surface as a failed skill with the Vercel log summary, not a fake green deploy.
+
+### 3.5 SEO
 
 **Purpose:** Diagnose, draft fixes, and package technical + on-page SEO. Site-wide implementation is still the plan.
 
@@ -149,9 +221,9 @@ Unlimited humans still: custom design systems, complex CMS, migrations, ongoing 
 | `seo.speed-notes` | Speed issues | Audit heuristics; real Lighthouse later |
 | `gsc.*` | Your Search Console | Connection, not a public SKU |
 
-**Apply vs draft:** generating a snippet is draft. Pasting it site-wide, or pushing to Webflow/Shopify, is apply → Approve publish or hand off.
+**Apply vs draft:** generating a snippet is draft. Committing it to their GitHub repo and promoting Vercel production (or pushing to Webflow/Shopify) is apply → Approve push / Approve publish or hand off.
 
-### 3.5 Accuracy and efficiency (cross-cutting)
+### 3.6 Accuracy and efficiency (cross-cutting)
 
 These are not a marketing service. They are why the agent is worth running instead of a chat box.
 
@@ -167,6 +239,9 @@ These are not a marketing service. They are why the agent is worth running inste
 | `no-fake-metrics` | Hallucinated traffic, rank, ROAS, ad spend |
 | `ownership-gate` | Watermark-remover class tools without attestation |
 | `claims-flag` | Medical / financial / guaranteed-results language |
+| `trademark.search` | Shipping a mark with no register check |
+| `logo.vector-check` | Raster-only "SVG" in a filing kit |
+| `git.diff-review` | Pushing files the operator never saw |
 
 **Efficiency skills (compounding):**
 
@@ -176,7 +251,9 @@ These are not a marketing service. They are why the agent is worth running inste
 | `reuse-fetch` | Audit, grader, gap, links, headers sharing one fetch |
 | `compose-report` | White-label report from other outputs |
 | `batch-variants` | One creative → every ad size; one brief → page + OG + schema |
-| `handoff-unlimited` | Humans start from the brief + scan + approval, not from zero |
+| `git.open-pr` | Edits as a preview URL instead of a zip round-trip |
+| `vercel.preview` | Review the real site before production |
+| `handoff-unlimited` | Humans start from the brief + scan + repo, not from zero |
 | `template-calendar` | 30-day plan without a blank chat |
 
 If a proposed feature does not make delivery **more accurate** or **faster to approve**, it is a SKU, not an agent skill.
@@ -192,19 +269,19 @@ Legend: **Agent** = draft + verify; **SKU** = live or planned tool page; **Human
 
 | Deliverable | Agent | SKU today | Human |
 |---|---|---|---|
-| Logo & mark | Starter mark + lockup (`image.generate-mark`) | Brand Creator, Brand Identity Kit | Custom identity, trademark-ready files |
-| Color + type system | Palette + pairing + contrast-check | Brand Identity Kit | Full system, usage rules, print |
-| Brand guidelines doc | Generated PDF/HTML from Vault | Identity kit export | Designed guidelines, photography direction |
-| Social profile kit | Sized avatars, banners, OG | Ad resizer + generate-social-set | Campaign photography, motion |
+| Logo & mark | Trademark-ready kit: vectors, colorways, specimen, cited USPTO search (`logo.*`, `trademark.*`) | Brand Creator, Brand Identity Kit (upgrade from monogram) | Attorney filing, crowded-class redesign, photography |
+| Color + type system | Palette + pairing + contrast-check, baked into the kit | Brand Identity Kit | Print production, extended type licensing |
+| Brand guidelines doc | Generated PDF/HTML from the same kit | Identity kit export | Art-directed books, photography direction |
+| Social profile kit | Sized avatars, banners, OG from the approved mark | Ad resizer + generate-social-set | Campaign photography, motion |
 
 ### Website design & build
 
 | Deliverable | Agent | SKU today | Human |
 |---|---|---|---|
-| Landing pages | `web.scaffold-*` + copy + SEO + OG | Copywriter, grader, schema | Design polish, CRO tests, unique art direction |
-| Full site builds | Small marketing sitemap + scaffold | None as a SKU yet (job: Launch) | Multi-page custom, CMS, migrations |
-| Ongoing edits & new pages | Diff against live fetch; draft replacement section | Audit / grader as diagnostics | Queue work on the real site |
-| Hosting included | Zip + README; later publish connection | Hosting (coming-soon partner) | Managed hosting in the plan |
+| Landing pages | `web.scaffold-next` + copy + SEO + OG + logo in `public/brand/` | Copywriter, grader, schema | CRO tests, photography |
+| Full site builds | Marketing sitemap → Next repo on GitHub → Vercel | None as a SKU yet (job: Launch) | Complex CMS, migrations, app features |
+| Ongoing edits & new pages | `git.read-tree` → branch → PR → Vercel preview | Audit / grader as diagnostics | High-volume queue on unlimited |
+| Hosting included | Vercel production + domain (`vercel.*`) | Hosting (coming-soon) becomes this connection | Launchabl-owned Vercel project when they buy the plan |
 
 ### Content & copywriting
 
@@ -239,7 +316,7 @@ Legend: **Agent** = draft + verify; **SKU** = live or planned tool page; **Human
 |---|---|---|---|
 | Domain registration | Availability check; purchase is partner | Domain Availability / Purchase | Register + own the relationship |
 | DNS & email setup | Diagnose SPF/DKIM/DMARC/MX | DNS & Email Health | Configure records for real |
-| Managed hosting | Scaffold + partner handoff | Hosting (coming-soon) | Hosting included in plan |
+| Managed hosting | Vercel project + production URL | Hosting (coming-soon → Vercel) | Launchabl team hosting on unlimited |
 | SSL & security basics | Check cert + headers | SSL Checker, Security Headers | Remediation, monitoring |
 
 ---
@@ -252,10 +329,19 @@ Packs are what crews import. SKUs pick a subset. The model (when added) may only
 `fetch-page`, `fetch-competitors`, `cite-source`, `extract-claims`, `public-ads.lookup`, `gsc.*`, `serp.outline`
 
 ### Pack: Images
-`image.generate-*`, `image.remove-bg`, `image.resize-ad-set`, `image.watermark`, `image.strip-exif`, `image.convert`
+`image.generate-og`, `image.generate-social-set`, `image.generate-ad-variants`, `image.remove-bg`, `image.resize-ad-set`, `image.watermark`, `image.strip-exif`, `image.convert`
+
+### Pack: Logo (trademark-ready)
+`logo.brief`, `logo.generate-system`, `logo.vectorize`, `logo.colorways`, `logo.export-kit`, `logo.vector-check`, `trademark.search`, `trademark.conflict-report`, `trademark.specimen`
 
 ### Pack: Websites
-`web.intake-sitemap`, `web.scaffold-html`, `web.scaffold-next`, `web.spec-webflow`, `web.inject-seo`, `web.preview`, `web.a11y-pass`, `web.publish`
+`web.intake-sitemap`, `web.scaffold-next`, `web.scaffold-html`, `web.spec-webflow`, `web.inject-seo`, `web.preview`, `web.a11y-pass`, `web.publish`
+
+### Pack: Git
+`git.create-repo`, `git.commit`, `git.branch`, `git.open-pr`, `git.read-tree`, `git.invite`, `git.diff-review`
+
+### Pack: Vercel
+`vercel.create-project`, `vercel.preview`, `vercel.promote-production`, `vercel.attach-domain`, `vercel.env`
 
 ### Pack: SEO
 `seo.score-page`, `seo.score-landing`, `seo.gap-competitors`, `seo.draft-schema`, `seo.validate-schema`, `seo.draft-titles`, `seo.sitemap-robots`, `seo.local-pack`, `seo.speed-notes`
@@ -264,10 +350,10 @@ Packs are what crews import. SKUs pick a subset. The model (when added) may only
 `copy.structured` (existing templates), `copy.claims-flag`, `calendar.30-day`, `utm.build` (backlog SKU), `og.card` (backlog)
 
 ### Pack: Brand
-`brand.names`, `brand.palette`, `brand.kit-zip`, `domain.availability`
+`brand.names`, `brand.palette`, `brand.kit-zip`, `domain.availability` (logo pack is the mark itself)
 
 ### Pack: Accuracy
-Always imported: `verify-url`, `cite-source`, `schema-validate`, `contrast-check`, `a11y-heuristics`, `no-fake-metrics`, `ownership-gate`
+Always imported: `verify-url`, `cite-source`, `schema-validate`, `contrast-check`, `a11y-heuristics`, `no-fake-metrics`, `ownership-gate`. Logo jobs also import `trademark.search` and `logo.vector-check`. Git writes import `git.diff-review`.
 
 ### Pack: Connections (inbound APIs)
 Each connection is a narrow pack, not a generic HTTP tool. See §6.
@@ -287,14 +373,17 @@ Do these as job-shaped packs with smallest OAuth scope. Operator sees "Connected
 
 | Connection | Skills it unlocks | First job that needs it |
 |---|---|---|
+| GitHub | create repo, commit, branch, PR, read tree | Launch / website edits |
+| Vercel | project, preview, production, domain | Launch / hosting |
+| USPTO TESS/TSDR (and later other registers) | trademark.search | Brand / Launch |
 | Google Search Console | queries, pages, coverage | Get found |
 | Google Analytics 4 | traffic that is *theirs*, never guessed | Get found / reports |
 | Google Business Profile | description, categories, Q&A (read then Approve publish) | Local SEO |
 | Shopify / Woo | products missing copy/alt/schema | Content + SEO |
-| Webflow / WordPress | publish drafts | Websites |
+| Webflow / WordPress | alternate publish for no-git operators | Websites (not the default) |
 | Meta / Google Ads *accounts* | their creatives (not spend we pay) | Campaigns |
 | Meta Ad Library + other **public** ad libraries | competitor creative, with spend caveats | Research |
-| Registrar / hosting reseller | availability, checkout redirect | Launch |
+| Registrar | availability, checkout redirect; DNS for Vercel domain | Launch |
 | Email ESP (later) | sequence install | Content |
 
 Auth failures: label the gap and continue on public fetch. Never send both Bearer and leftover API-key headers if we add eToro-like dual auth elsewhere — keep each vendor's client isolated.
@@ -304,7 +393,8 @@ Auth failures: label the gap and continue on public fetch. Never send both Beare
 | Partner | Used by | Constraint |
 |---|---|---|
 | LLM (server proxy only) | Copy, outlines, site IA, research synthesis | Structured templates first; no blank "do anything" chat as the product |
-| Image model | Marks, OG, social/ad stills | Draft quality; humans for identity |
+| Image + vector pipeline | Logo system, OG, social/ad stills | Commercial-use license; vectors required for logo kits |
+| USPTO (or search aggregator) | Trademark search | Cite serials; never "cleared" |
 | ASR (later) | Transcriber → clips / captions | Cost-gated |
 | Inpainting (later) | Watermark remover on *owned* assets | Ownership attestation required |
 
@@ -329,7 +419,7 @@ Named in operator language. Each is a crew: intake → skills → review → del
 
 | Job | Must-have packs | First honest deliverable |
 |---|---|---|
-| **Launch** | Brand, Images, Websites, Copy, Domain | Name + palette + landing scaffold + OG + schema |
+| **Launch** | Logo, Brand, Git, Vercel, Websites, Copy, Domain | Trademark-ready kit + Next repo + Vercel preview URL |
 | **Get found** | Research, SEO, Accuracy, optional GSC | Audit + titles/meta + schema zip, gaps labeled |
 | **Audits & reports** | Research, SEO, compose-report | White-label PDF/HTML from live fetches |
 | **Protect** | Images (watermark, exif) | Approved download, files never uploaded |
@@ -359,10 +449,11 @@ Worth turning into skills because they feed accuracy or the must-haves:
 - OG / social preview generator → Images + Websites
 - Transcriber + clipping → Create pack (later; not blocking Studio)
 - GBP API on Local SEO → Connections
+- Business Name + Trademark Availability Checker → `trademark.search` SKU on-ramp
 - Full-site crawl / JS render → Research accuracy upgrade
 - Lighthouse / CrUX → SEO speed, still sourced
 
-Not agent core (SKU or partner only): business formation, burner email, phone lookup, developer utilities cluster, invoice/contract generators.
+Not agent core (SKU or partner only): business formation *filing*, burner email, phone lookup, developer utilities cluster, invoice/contract generators. GitHub/Vercel for marketing sites **are** agent core; a general developer-tools cluster is not.
 
 ---
 
@@ -374,26 +465,35 @@ Every capability is one of:
 2. **Draft** — generate an artifact  
 3. **Verify** — check the draft  
 4. **Package** — zip, report, Vault  
-5. **Apply** — write to their CMS/GBP/Shopify (**Approve publish**)  
-6. **Finish** — unlimited human
+5. **Apply** — write to GitHub, Vercel, CMS/GBP/Shopify (**Approve push** / **Approve publish**)  
+6. **Finish** — unlimited human (attorney filing, photography, app engineering, crowded trademark redesign)
 
-The agent **owns 1–4** for the must-haves. It **may 5** only with a connection and a louder gate. It **never 6** except by calling `handoff-unlimited`.
+The agent **owns 1–4** for the must-haves, including trademark-ready logo kits and a Next.js marketing site. It **does 5** for GitHub and Vercel (and later CMS) with the louder gates. It **never 6** except by calling `handoff-unlimited`.
 
 Example: "code websites"
 
 - Diagnose: fetch current site  
-- Draft: Next/HTML scaffold  
-- Verify: a11y + schema-validate + preview  
-- Package: zip + README  
-- Apply: Webflow publish if connected  
-- Finish: design system, hosting, ongoing edits
+- Draft: Next.js scaffold + logo kit in `public/brand/`  
+- Verify: a11y + schema-validate + Vercel preview  
+- Package: GitHub repo (Approve push)  
+- Apply: Vercel production + domain (Approve publish)  
+- Finish: CMS/migrations, or unlimited if they want Launchabl to own hosting
+
+Example: "trademark-ready logo"
+
+- Diagnose: brief + `trademark.search`  
+- Draft: logo system directions  
+- Verify: vector-check + contrast + conflict-report  
+- Package: filing zip + specimen  
+- Apply: commit brand files into the site repo  
+- Finish: attorney files the application; agent does not
 
 ---
 
 ## 10. What we tell operators (vocabulary)
 
 Never: MCP, function calling, system prompt, "I called `fetch-page`."  
-Always: job name, plain skill labels ("Check the live page"), Connected: X, Approve, Hand off to Launchabl.
+Always: job name, plain skill labels ("Check the live page", "Search the trademark register", "Save to GitHub", "Publish on Vercel"), Connected: X, Approve / Approve push / Approve publish, Hand off to Launchabl.
 
 Internal ids in this catalog are for implementers.
 
@@ -408,13 +508,14 @@ Does not replace the Studio implementation plan. Studio is still layer 1 — wit
 3. **Accuracy pack** on every research/produce job (`verify-url`, `cite-source`, `no-fake-metrics`).  
 4. **Vault** so brand + last fetch reuse.  
 5. **First crew: Audits & reports** (existing heavy tools composed).  
-6. **Image generate** (OG + social set) as the first *new* produce skill — highest overlap with sites + campaigns.  
-7. **Website scaffold** (HTML landing first, then Next) + `web.inject-seo`.  
-8. **First connection: Search Console** on Get found.  
-9. **Approve publish** (Webflow or GBP), not sooner.  
-10. Outbound Jobs API for the same audit/scaffold jobs agencies already run in Studio.
+6. **Logo system + trademark search** (vectors, colorways, cited register hits) — identity is no longer a placeholder.  
+7. **Website scaffold (Next first)** + `web.inject-seo` + brand files in the repo.  
+8. **GitHub connection** — Approve push, repo is the source of truth.  
+9. **Vercel connection** — preview on every PR; Approve publish for production + domain.  
+10. **Search Console** on Get found (inbound research).  
+11. Outbound Jobs API for the same audit/scaffold/deploy jobs agencies already run in Studio.
 
-Skipping 6–7 would leave the must-haves as a promise. Skipping 1–5 would make 6–7 a chat demo with no approvals.
+Webflow/GBP publish stay real, but they are not the default website path. Skipping 6–9 would leave logos, repos, and go-live as a promise. Skipping 1–5 would make 6–9 a chat demo with no approvals.
 
 ---
 
@@ -423,22 +524,23 @@ Skipping 6–7 would leave the must-haves as a promise. Skipping 1–5 would mak
 A founder can, in one Launch job:
 
 - Research the current site (cited fetch, no fake ranks)
-- Get a starter mark + OG image
-- Get a landing-page scaffold with copy, schema, and meta
+- Get a trademark-ready logo kit (vectors, colorways, specimen) plus a cited USPTO search that never says "cleared"
+- Get a Next.js marketing site in **their** GitHub repo after Approve push
+- Open a Vercel preview URL, then Approve publish to production (optional custom domain)
 - See contrast/a11y/schema checks on that draft
-- Approve and download a zip
-- Click hand off if they want Launchabl to host and finish the identity
+- Click hand off if they want an attorney to file the mark or Launchabl to own hosting
 
-They never paid ad spend, never got a custom app, and never saw an API key. If Search Console was not connected, the SEO package still shipped from live fetch and said so.
+They never paid ad spend, never got a custom app, and never pasted a GitHub token into a chat. If GitHub/Vercel were not connected, they still got the kit + zip and the UI said so.
 
 ---
 
 ## 13. Open decisions (do not block Studio)
 
-- Which image-generation vendor (quality vs cost vs license for commercial marks).
-- HTML-first vs Next-first for `web.scaffold-*` (HTML is the faster verify; Next matches this repo).
-- Whether generated marks are labeled "starter / not a substitute for custom identity" in the UI (recommendation: **yes**, always).
+- Image + vector vendor (quality vs cost vs **commercial-use license for marks**). Raster-then-trace is acceptable only if `logo.vector-check` passes.
+- GitHub App vs OAuth App (recommendation: **GitHub App**, operator installs on the org they want).
+- Operator-owned Vercel team vs Launchabl-owned team for free vs unlimited (recommendation: **their team** when connected; **Launchabl team** when hosting is included).
+- USPTO-only search vs multi-register (EUIPO, UKIPO) in v1 (recommendation: USPTO first, others as labeled gaps).
 - Rank API (optional, paid) vs GSC-only for "what you rank for."
 - JS-rendered fetch (headless) as a billed or plan-gated accuracy upgrade.
 
-None of these change the charter: research with citations, images, marketing-site code, SEO, verify, approve, or hand off.
+These do not change the charter: research with citations, **trademark-ready logo kits**, marketing-site code **in GitHub**, **Vercel preview and production**, SEO, verify, Approve push / Approve publish, or hand off.
