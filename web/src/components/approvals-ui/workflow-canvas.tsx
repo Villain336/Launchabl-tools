@@ -1,0 +1,236 @@
+"use client";
+
+import "@xyflow/react/dist/style.css";
+import {
+  Background,
+  Controls,
+  type Edge,
+  type EdgeTypes,
+  type Node,
+  type NodeTypes,
+  ReactFlow,
+  ReactFlowProvider,
+  useReactFlow,
+} from "@xyflow/react";
+import { useEffect, useMemo } from "react";
+import { AlignedStepEdge, useAutoLayout, withAlignedElbows } from "react-flow-auto-layout/react";
+
+import type { StepChange } from "@/lib/approvals-ui/diff";
+import type { ApprovalPolicy } from "@/lib/approvals-ui/policy";
+import type { PolicyIssue } from "@/lib/approvals-ui/validate";
+
+import {
+  type ApprovalFlowNode,
+  ApprovalNode,
+  type StepStatus,
+} from "@/components/approvals-ui/approval-node";
+import { type TerminalFlowNode, TerminalNode } from "@/components/approvals-ui/terminal-node";
+import { cn } from "@/lib/utils";
+
+export type CanvasNode = ApprovalFlowNode | TerminalFlowNode;
+
+const NODE_TYPES = {
+  approval: ApprovalNode,
+  terminal: TerminalNode,
+} satisfies NodeTypes;
+
+const EDGE_TYPES = {
+  alignedStep: AlignedStepEdge,
+} satisfies EdgeTypes;
+
+export type WorkflowCanvasProps = {
+  policy: ApprovalPolicy;
+  /** Diff overlay from a pending proposal: rings added/changed steps. */
+  changes?: StepChange[];
+  /** Validation overlay: rings steps carrying an error or warning. */
+  issues?: PolicyIssue[];
+  /** Live run overlay: per-step status for one request. */
+  statuses?: Record<string, StepStatus>;
+  /** "LR" (default) lays out left to right, "TB" top to bottom. */
+  direction?: "TB" | "LR";
+  /** Gap between sibling branches. Defaults to the layout library's 40. */
+  nodeSep?: number;
+  /** Gap between ranks. Defaults to the layout library's 110. */
+  rankSep?: number;
+  selectedId?: string | null;
+  onSelectStep?: (stepId: string | null) => void;
+  /** Pass a fresh object to pan the viewport to a step. */
+  focus?: { stepId: string } | null;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+const buildNodes = (
+  policy: ApprovalPolicy,
+  props: Pick<WorkflowCanvasProps, "changes" | "issues" | "statuses" | "selectedId">,
+  isVertical: boolean
+): CanvasNode[] => {
+  const changes = props.changes ?? [];
+  const issues = props.issues ?? [];
+
+  const changeById = new Map<string, StepChange["kind"]>();
+  for (const change of changes) {
+    if (change.kind !== "unchanged") changeById.set(change.id, change.kind);
+  }
+
+  const issueById = new Map<string, "error" | "warning">();
+  for (const issue of issues) {
+    for (const stepId of issue.stepIds) {
+      if (issue.severity === "error" || !issueById.has(stepId)) {
+        issueById.set(stepId, issue.severity);
+      }
+    }
+  }
+
+  const incomingIds = new Set<string>();
+  for (const step of policy.steps) {
+    for (const nextId of step.next) incomingIds.add(nextId);
+  }
+
+  return policy.steps.map((step) => {
+    const shared = {
+      change: changeById.get(step.id),
+      issue: issueById.get(step.id),
+      status: props.statuses?.[step.id],
+      selected: props.selectedId === step.id,
+      vertical: isVertical,
+    };
+    if (step.kind === "terminal") {
+      return {
+        id: step.id,
+        type: "terminal",
+        position: { x: 0, y: 0 },
+        data: { step, ...shared },
+      } satisfies TerminalFlowNode;
+    }
+    return {
+      id: step.id,
+      type: "approval",
+      position: { x: 0, y: 0 },
+      data: {
+        step,
+        ...shared,
+        hasIncoming: incomingIds.has(step.id),
+        hasOutgoing: step.next.length > 0,
+      },
+    } satisfies ApprovalFlowNode;
+  });
+};
+
+const buildEdges = (policy: ApprovalPolicy): Edge[] => {
+  const ids = new Set(policy.steps.map((s) => s.id));
+  const edges: Edge[] = [];
+  for (const step of policy.steps) {
+    for (const nextId of step.next) {
+      if (ids.has(nextId)) {
+        edges.push({
+          id: `${step.id}->${nextId}`,
+          source: step.id,
+          target: nextId,
+          style: { stroke: "var(--border)", strokeWidth: 1.5 },
+        });
+      }
+    }
+  }
+  return withAlignedElbows(edges).map((edge) => ({ ...edge, type: "alignedStep" }));
+};
+
+const CanvasInner = ({
+  policy,
+  changes,
+  issues,
+  statuses,
+  direction = "LR",
+  nodeSep,
+  rankSep,
+  selectedId,
+  onSelectStep,
+  focus,
+  children,
+}: WorkflowCanvasProps) => {
+  const isVertical = direction !== "LR";
+  const reactFlow = useReactFlow();
+
+  const sourceNodes = useMemo<Node[]>(
+    () => buildNodes(policy, { changes, issues, statuses, selectedId }, isVertical),
+    [policy, changes, issues, statuses, selectedId, isVertical]
+  );
+  const sourceEdges = useMemo(() => buildEdges(policy), [policy]);
+
+  const { nodes, edges, onNodesChange, onEdgesChange, isLaidOut } = useAutoLayout({
+    nodes: sourceNodes,
+    edges: sourceEdges,
+    vertical: isVertical,
+    nodeSep,
+    rankSep,
+    defaultWidth: 256,
+    defaultHeight: 112,
+    fitViewOnLayout: true,
+    fitViewOptions: { padding: 0.16, maxZoom: 0.75, minZoom: 0.15 },
+  });
+
+  useEffect(() => {
+    if (!isLaidOut) return;
+    const id = window.setTimeout(() => {
+      void reactFlow.fitView({ padding: 0.16, maxZoom: 0.75, minZoom: 0.15, duration: 240 });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, [isLaidOut, reactFlow]);
+
+  useEffect(() => {
+    if (!focus) return;
+    const node = reactFlow.getNode(focus.stepId);
+    if (!node) return;
+    void reactFlow.fitView({ nodes: [node], duration: 400, padding: 0.4, maxZoom: 1.1 });
+  }, [focus, reactFlow]);
+
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={NODE_TYPES}
+      edgeTypes={EDGE_TYPES}
+      fitView={false}
+      minZoom={0.2}
+      nodesDraggable={false}
+      nodesConnectable={false}
+      elementsSelectable={false}
+      proOptions={{ hideAttribution: true }}
+      onNodeClick={(_, node) => onSelectStep?.(node.id)}
+      onPaneClick={() => onSelectStep?.(null)}
+      className="bg-background"
+    >
+      <Background gap={18} />
+      <Controls showInteractive={false} />
+      {children}
+    </ReactFlow>
+  );
+};
+
+/**
+ * Renders an ApprovalPolicy as a laid-out React Flow graph. Layout is
+ * automatic (react-flow-auto-layout measures the real node sizes), so the
+ * policy JSON is the only input: no positions to manage.
+ *
+ * The parent element must have a height.
+ */
+const FLOW_THEME: React.CSSProperties & Record<`--${string}`, string> = {
+  "--xy-controls-button-background-color": "var(--card)",
+  "--xy-controls-button-background-color-hover": "var(--muted)",
+  "--xy-controls-button-color": "var(--foreground)",
+  "--xy-controls-button-color-hover": "var(--foreground)",
+  "--xy-controls-button-border-color": "var(--border)",
+  "--xy-attribution-background-color": "transparent",
+};
+
+export const WorkflowCanvas = ({ className, ...props }: WorkflowCanvasProps) => {
+  return (
+    <div className={cn("h-full w-full", className)} style={FLOW_THEME}>
+      <ReactFlowProvider>
+        <CanvasInner {...props} />
+      </ReactFlowProvider>
+    </div>
+  );
+};

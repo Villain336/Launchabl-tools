@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ThreeDMarquee } from "@/components/ui/3d-marquee";
 import { ArrowRight } from "lucide-react";
 import { siteConfig, tools } from "@/lib/site-config";
-
-const LOGO = "/brand/logo.jpg";
+import { artForTool } from "@/lib/marquee-art";
 
 const marqueeCards = (() => {
-  const source = tools.length ? tools : [{ name: siteConfig.name, slug: "home" }];
-  const cards = source.map((tool) => ({ src: LOGO, title: tool.name }));
+  const source = tools.length
+    ? tools
+    : [{ name: siteConfig.name, slug: "home", cluster: "launch" }];
+  const cards = source.map((tool) => ({
+    src: artForTool(tool),
+    title: tool.name,
+  }));
   while (cards.length < 32) {
     cards.push(...cards.slice(0, 32 - cards.length));
   }

@@ -6,9 +6,26 @@ export type CaseStudy = {
   metric: { label: string; value: string };
   toolCluster: string;
   quote: { text: string; author: string };
+  image?: string;
+  url?: string;
 };
 
 export const caseStudies: CaseStudy[] = [
+  {
+    slug: "atlas-lot-care",
+    client: "Atlas Lot Care",
+    industry: "Parking lot services · Greensboro, NC",
+    summary:
+      "Atlas Parking Lot Solutions needed a live site that could sell striping, sealcoating, ADA markings, and lot maintenance across the Triad — without looking like a template. Launchabl designed and shipped atlaslotcare.com: a conversion-focused homepage, service grid, coverage story, and a quote path, with Atlas Intelligence on-site to catch inbound questions.",
+    metric: { label: "Live at", value: "atlaslotcare.com" },
+    toolCluster: "launch",
+    image: "/case-studies/atlaslotcare.png",
+    url: "https://atlaslotcare.com",
+    quote: {
+      text: "The site is the product: a clear offer, a local service story, and a path to a quote — built so a Greensboro lot-care company can send one URL instead of a PDF.",
+      author: "Launchabl, on the Atlas Lot Care launch",
+    },
+  },
   {
     slug: "riverside-roasters",
     client: "Riverside Roasters",
@@ -33,19 +50,6 @@ export const caseStudies: CaseStudy[] = [
     quote: {
       text: "The schema generator caught gaps we didn't know existed. The full technical SEO pass on the unlimited plan is what actually moved the needle.",
       author: "David Okafor, Managing Partner",
-    },
-  },
-  {
-    slug: "loop-studio",
-    client: "Loop Studio",
-    industry: "Creative / photography",
-    summary:
-      "An independent photo studio needed to protect proofs shared with clients before final purchase, and clean metadata from every delivered gallery.",
-    metric: { label: "Unauthorized reposts, before vs. after", value: "-89%" },
-    toolCluster: "protect",
-    quote: {
-      text: "Watermarking proofs used to be a manual Photoshop chore. Now it's part of our delivery pipeline, and the unlimited plan handles our whole gallery site.",
-      author: "Priya Nair, Owner",
     },
   },
 ];

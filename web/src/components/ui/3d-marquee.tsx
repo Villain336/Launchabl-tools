@@ -68,13 +68,23 @@ export const ThreeDMarquee = ({
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={item.src}
+                        src="/brand/logo.jpg"
                         alt=""
-                        width={420}
-                        height={420}
-                        className="absolute top-[12%] left-1/2 h-[58%] w-auto -translate-x-1/2 object-contain"
+                        width={112}
+                        height={112}
+                        className="absolute top-10 left-10 size-28 object-contain"
                       />
-                      <p className="absolute inset-x-0 bottom-0 truncate px-12 pb-12 text-5xl font-semibold tracking-tight text-neutral-900">
+                      <div className="absolute inset-x-[8%] top-[18%] bottom-[22%] flex items-center justify-center">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.src}
+                          alt=""
+                          width={640}
+                          height={480}
+                          className="max-h-full max-w-full object-contain"
+                        />
+                      </div>
+                      <p className="absolute inset-x-0 bottom-0 line-clamp-2 px-12 pb-10 text-4xl leading-tight font-semibold tracking-tight text-neutral-900">
                         {item.title}
                       </p>
                     </motion.div>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/agency-badge";
 import { LinkButton } from "@/components/ui/agency-button";
@@ -46,7 +47,30 @@ export default async function CaseStudyPage({
         <h1 className="mt-3 text-3xl font-bold text-foreground sm:text-4xl">{study.client}</h1>
         <p className="mt-1 text-sm uppercase tracking-wide text-muted-foreground">{study.industry}</p>
         <p className="mt-6 text-lg text-muted-foreground">{study.summary}</p>
+        {study.url && (
+          <Link
+            href={study.url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            {study.url.replace(/^https?:\/\//, "")} <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        )}
       </div>
+
+      {study.image && (
+        <div className="relative mt-10 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted">
+          <Image
+            src={study.image}
+            alt={`${study.client} website screenshot`}
+            fill
+            className="object-cover object-top"
+            sizes="(min-width: 1024px) 960px, 100vw"
+            priority
+          />
+        </div>
+      )}
 
       <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2 p-8">

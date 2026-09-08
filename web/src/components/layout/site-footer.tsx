@@ -50,7 +50,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-4">
           <div className="col-span-2 flex flex-col gap-3 sm:col-span-1">
             <Link href="/" className="text-foreground">
-              <BrandMark size={28} />
+              <BrandMark size={56} />
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">{siteConfig.tagline}</p>
           </div>

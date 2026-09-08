@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ToolsExplorer } from "@/components/tools/tools-explorer";
+import { ToolsWorkflowCanvas } from "@/components/tools/tools-workflow-canvas";
 import BentoBlock from "@/components/blocks/bento-2";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default function ToolsPage() {
   return (
     <>
+      <ToolsWorkflowCanvas />
       <BentoBlock />
       <Container className="pb-16 sm:pb-24">
         <SectionHeading
