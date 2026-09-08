@@ -57,8 +57,10 @@ export function AgentStudio({
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.dataset.studio = "open";
     return () => {
       document.body.style.overflow = previous;
+      delete document.body.dataset.studio;
     };
   }, []);
 
@@ -66,7 +68,7 @@ export function AgentStudio({
   const target = host ?? fallback;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
+    <div className="fixed inset-0 z-[80] bg-background">
       <div
         ref={setFallback}
         hidden

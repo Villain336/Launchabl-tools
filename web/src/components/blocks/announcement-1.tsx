@@ -10,7 +10,7 @@ export default function AnnouncementBlock() {
   if (dismissed) return null;
 
   return (
-    <div className="flex w-full items-center justify-between gap-3 bg-primary px-4 py-2.5 text-primary-foreground">
+    <div data-site-chrome className="flex w-full items-center justify-between gap-3 bg-primary px-4 py-2.5 text-primary-foreground">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-sm font-medium">
           <Megaphone className="size-4 shrink-0" aria-hidden="true" />

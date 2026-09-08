@@ -31,7 +31,7 @@ const columns = [
 
 export function SiteFooter() {
   return (
-    <footer className="w-full border-t border-border bg-background text-foreground">
+    <footer data-site-chrome className="w-full border-t border-border bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl px-6">
         <div className="flex flex-col items-center gap-5 border-b border-border py-12 text-center">
           <h2 className="font-heading text-2xl font-bold tracking-tight text-balance sm:text-3xl">

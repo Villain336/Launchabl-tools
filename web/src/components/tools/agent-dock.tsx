@@ -39,15 +39,17 @@ export function AgentDock({
   if (phase === "review") {
     return (
       <div className="space-y-4">
+        {canApprove && (
+          <Button className="sticky top-0 z-10 w-full" onClick={run.approve}>
+            {run.agent?.approveLabel ?? "Approve result"}
+          </Button>
+        )}
         {review}
         {run.deliverable?.warnings.map((warning) => (
           <p key={warning} className="text-sm text-amber-800">
             {warning}
           </p>
         ))}
-        {canApprove && (
-          <Button onClick={run.approve}>{run.agent?.approveLabel ?? "Approve result"}</Button>
-        )}
       </div>
     );
   }
