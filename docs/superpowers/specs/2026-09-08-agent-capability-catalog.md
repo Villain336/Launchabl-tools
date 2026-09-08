@@ -503,6 +503,10 @@ Internal ids in this catalog are for implementers.
 
 Does not replace the Studio implementation plan. Studio is still layer 1 — without it, these packs have no run surface.
 
+**How to build it** (workflow, accuracy wiring, waves): `docs/plans/2026-09-08-agent-delivery-os.md`. Execute Wave 1 from `docs/plans/2026-09-08-agent-approval-studio.md`, then Waves 2–10 in that delivery-OS plan. Do not skip waves: each one is a complete operator loop.
+
+Capability order inside those waves:
+
 1. **Studio kernel** on audit + watermark (skills visible, approve-to-export).  
 2. **Name shared engines** in code: `fetch-page`, `score-seo`, `dns-lookup`, `compose-image`.  
 3. **Accuracy pack** on every research/produce job (`verify-url`, `cite-source`, `no-fake-metrics`).  

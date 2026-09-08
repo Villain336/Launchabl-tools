@@ -65,7 +65,7 @@ Outbound is how white-label agencies and technical founders plug Launchabl in. I
 0  Tools + clusters     what exists today
 ```
 
-Layer 0 is live. Layer 1 is the studio plan (`docs/plans/2026-09-08-agent-approval-studio.md`). Layers 2–5 are this document. Do not skip 1: without a real run surface, crews and APIs have nowhere to show work.
+Layer 0 is live. Layer 1 is the studio plan (`docs/plans/2026-09-08-agent-approval-studio.md`). How layers 1–5 stay one workflow (accuracy envelope, Vault, crews, GitHub/Vercel gates) is `docs/plans/2026-09-08-agent-delivery-os.md`. Do not skip 1: without a real run surface, crews and APIs have nowhere to show work.
 
 ### Layer 1 — One tool, one agent
 

@@ -10,7 +10,7 @@ origin: docs/superpowers/specs/2026-09-08-agent-approval-studio-design.md
 
 # Agent Run Studio for delivery tools
 
-Capabilities the studio must eventually host (trademark-ready logos, GitHub repos, Vercel publish, SEO, research, accuracy) are catalogued in `docs/superpowers/specs/2026-09-08-agent-capability-catalog.md`. This plan still only ships the studio kernel on the 10 existing delivery tools.
+Capabilities the studio must eventually host (trademark-ready logos, GitHub repos, Vercel publish, SEO, research, accuracy) are catalogued in `docs/superpowers/specs/2026-09-08-agent-capability-catalog.md`. Build order, accuracy wiring, and the four-node delivery loop are in `docs/plans/2026-09-08-agent-delivery-os.md`. This plan is Wave 1 of that sequence (studio kernel on the 10 existing delivery tools).
 
 ## Goal Capsule
 
