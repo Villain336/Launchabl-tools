@@ -28,6 +28,8 @@ export type DeliveryRunValue = {
   error: string | null;
   scanning: boolean;
   gates: { download: GateState; push?: GateState; publish?: GateState };
+  brief: string;
+  setBrief: (brief: string) => void;
   setPhase: (id: string) => void;
   setDockId: (id: string) => void;
   approve: () => void;
@@ -61,6 +63,7 @@ export function DeliveryRunProvider({
   const [gates, setGates] = useState<{ download: GateState; push?: GateState; publish?: GateState }>({
     download: "locked",
   });
+  const [brief, setBrief] = useState("");
 
   const setPhase = useCallback((nextId: string) => {
     setCurrentId((prev) => {
@@ -90,6 +93,7 @@ export function DeliveryRunProvider({
     setError(null);
     setScanning(false);
     setGates({ download: "locked" });
+    setBrief("");
   }, [root]);
 
   const runScan = useCallback(
@@ -148,6 +152,8 @@ export function DeliveryRunProvider({
       error,
       scanning,
       gates,
+      brief,
+      setBrief,
       setPhase,
       setDockId,
       approve,
@@ -167,6 +173,7 @@ export function DeliveryRunProvider({
       error,
       scanning,
       gates,
+      brief,
       setPhase,
       approve,
       reset,

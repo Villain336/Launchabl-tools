@@ -16,7 +16,8 @@ export function BrandIdentityKit() {
   const run = useDeliveryRunOrThrow();
   const [name, setName] = useState("");
   const packed = (run.output as KitOutput | null) ?? null;
-  const seed = packed?.name ?? (name.trim() || "Your Brand");
+  const filledName = name || run.brief.trim().split(/\s+/).slice(0, 6).join(" ");
+  const seed = packed?.name ?? (filledName.trim() || "Your Brand");
   const palette = useMemo(() => paletteForSeed(seed), [seed]);
   const fonts = useMemo(() => fontPairingForSeed(seed), [seed]);
   const logo = useMemo(() => monogramSvg(seed, 512), [seed]);
@@ -24,7 +25,7 @@ export function BrandIdentityKit() {
   const source = operatorSource("Brand name from this run");
 
   const start = async () => {
-    const seedName = name.trim();
+    const seedName = filledName.trim();
     if (!seedName) return;
     await run.runScan(
       async (skill) => {
@@ -84,13 +85,13 @@ Body:     ${fonts.body}
           <div>
             <label className="text-sm font-medium text-foreground">Brand name</label>
             <input
-              value={name}
+              value={filledName}
               onChange={(e) => setName(e.target.value)}
               placeholder="Riverside Roasters"
               className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
             />
           </div>
-          <Button onClick={start} disabled={run.scanning || !name.trim()}>
+          <Button onClick={start} disabled={run.scanning || !filledName.trim()}>
             Generate kit
           </Button>
         </div>

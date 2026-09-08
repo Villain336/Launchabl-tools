@@ -11,6 +11,7 @@ import { requestSiteAudit } from "@/lib/skills/fetch-site-audit";
 import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
 import { AgentDock } from "@/components/tools/agent-dock";
 import { SourceChip } from "@/components/tools/source-chip";
+import { extractUrls } from "@/lib/studio-triggers";
 
 type ConversionCheck = {
   label: string;
@@ -78,17 +79,18 @@ type GradeOutput = { result: AuditResult; grade: { checks: ConversionCheck[]; sc
 export function LandingPageGrader() {
   const delivery = useDeliveryRunOrThrow();
   const [url, setUrl] = useState("");
+  const filledUrl = url || extractUrls(delivery.brief)[0] || "";
   const packed = (delivery.output as GradeOutput | null) ?? null;
   const grade = packed?.grade ?? null;
   const result = packed?.result ?? null;
 
   const start = async () => {
-    if (!url.trim()) return;
+    if (!filledUrl.trim()) return;
     let audit: AuditResult | null = null;
     await delivery.runScan(
       async (skill) => {
         if (skill.id === "fetch-page") {
-          const rows = await requestSiteAudit({ url });
+          const rows = await requestSiteAudit({ url: filledUrl });
           const first = rows[0];
           if (!first?.ok || !first.result) throw new Error(first?.error ?? "Could not grade that page.");
           audit = first.result;
@@ -131,7 +133,7 @@ export function LandingPageGrader() {
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              value={url}
+              value={filledUrl}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && start()}
               placeholder="https://yourbrand.com/landing-page"

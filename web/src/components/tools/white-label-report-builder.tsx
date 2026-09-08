@@ -85,6 +85,7 @@ export function WhiteLabelReportBuilder() {
   const [findings, setFindings] = useState<Finding[]>([{ title: "", detail: "", severity: "warning" }]);
   const html = (run.output as string | null) ?? "";
   const source = operatorSource("Agency, client, and findings from this run");
+  const filledSummary = summary || run.brief.trim();
 
   const compose = () =>
     buildReportHtml({
@@ -92,7 +93,7 @@ export function WhiteLabelReportBuilder() {
       accentColor,
       clientName,
       reportTitle,
-      summary,
+      summary: filledSummary,
       score,
       findings: findings.filter((f) => f.title.trim()),
       recommendations,
@@ -100,7 +101,7 @@ export function WhiteLabelReportBuilder() {
 
   const start = async () => {
     const branded = Boolean(agencyName.trim() || clientName.trim());
-    const hasContent = Boolean(summary.trim() || recommendations.trim() || score.trim() || findings.some((f) => f.title.trim()));
+    const hasContent = Boolean(filledSummary.trim() || recommendations.trim() || score.trim() || findings.some((f) => f.title.trim()));
     if (!branded || !hasContent) return;
     const next = compose();
     await run.runScan(
@@ -151,7 +152,7 @@ export function WhiteLabelReportBuilder() {
             <Field label="Client name" value={clientName} onChange={setClientName} />
             <Field label="Report title" value={reportTitle} onChange={setReportTitle} />
           </div>
-          <Field label="Executive summary" value={summary} onChange={setSummary} textarea />
+          <Field label="Executive summary" value={filledSummary} onChange={setSummary} textarea />
           <Field label="Headline score (optional, e.g. 72/100)" value={score} onChange={setScore} />
           <div>
             <div className="flex items-center justify-between">

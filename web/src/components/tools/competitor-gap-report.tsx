@@ -10,6 +10,7 @@ import { requestSiteAudit, type SiteAuditRow } from "@/lib/skills/fetch-site-aud
 import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
 import { AgentDock } from "@/components/tools/agent-dock";
 import { SourceChip } from "@/components/tools/source-chip";
+import { extractUrls } from "@/lib/studio-triggers";
 
 const metrics: { key: keyof AuditResult; label: string; format: (v: unknown) => string }[] = [
   { key: "score", label: "Overall score", format: (v) => `${v}/100` },
@@ -24,9 +25,12 @@ export function CompetitorGapReport() {
   const [you, setYou] = useState("");
   const [competitors, setCompetitors] = useState(["", "", ""]);
   const rows = (delivery.output as SiteAuditRow[] | null) ?? null;
+  const found = extractUrls(delivery.brief);
+  const filledYou = you || found[0] || "";
+  const filledCompetitors = competitors.map((value, index) => value || found[index + 1] || "");
 
   const start = async () => {
-    const urls = [you, ...competitors].map((u) => u.trim()).filter(Boolean);
+    const urls = [filledYou, ...filledCompetitors].map((u) => u.trim()).filter(Boolean);
     if (urls.length < 2) return;
     let nextRows: SiteAuditRow[] = [];
     await delivery.runScan(
@@ -71,12 +75,12 @@ export function CompetitorGapReport() {
       intake={
         <div className="space-y-3">
           <input
-            value={you}
+            value={filledYou}
             onChange={(e) => setYou(e.target.value)}
             placeholder="Your URL — https://yourbrand.com"
             className="w-full rounded-lg border-2 border-indigo-200 px-3 py-2 text-sm outline-none focus:border-ring"
           />
-          {competitors.map((c, i) => (
+          {filledCompetitors.map((c, i) => (
             <input
               key={i}
               value={c}

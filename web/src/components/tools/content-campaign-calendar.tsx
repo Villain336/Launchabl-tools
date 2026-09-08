@@ -23,11 +23,12 @@ export function ContentCampaignCalendar() {
   const [goal, setGoal] = useState(goals[0].value);
   const [days, setDays] = useState(30);
   const entries = (run.output as CalendarEntry[] | null) ?? [];
+  const filledBrand = brand || run.brief.trim();
   const source = operatorSource("Brand, goal, and duration from this run");
 
   const start = async () => {
-    if (!brand.trim()) return;
-    const next = generateCalendar(brand, goal, days);
+    if (!filledBrand.trim()) return;
+    const next = generateCalendar(filledBrand, goal, days);
     await run.runScan(
       async (skill) => {
         if (skill.id === "calendar.30-day") {
@@ -60,7 +61,7 @@ export function ContentCampaignCalendar() {
             <div>
               <label className="text-sm font-medium text-foreground">Brand / business</label>
               <input
-                value={brand}
+                value={filledBrand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="Riverside Roasters"
                 className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
@@ -85,7 +86,7 @@ export function ContentCampaignCalendar() {
               <input type="range" min={7} max={30} step={1} value={days} onChange={(e) => setDays(Number(e.target.value))} className="mt-4 w-full" />
             </div>
           </div>
-          <Button className="mt-5" onClick={start} disabled={run.scanning || !brand.trim()}>
+          <Button className="mt-5" onClick={start} disabled={run.scanning || !filledBrand.trim()}>
             Build calendar
           </Button>
         </div>

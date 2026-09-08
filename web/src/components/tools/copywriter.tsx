@@ -23,6 +23,7 @@ export function Copywriter() {
   const [tone, setTone] = useState("bold");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const variations = (run.output as string[] | null) ?? null;
+  const filledProduct = product || run.brief.trim();
   const source = operatorSource("Brief provided in this run");
 
   const start = async () => {
@@ -33,7 +34,7 @@ export function Copywriter() {
           const res = await fetch("/api/copywriter", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ format, brand, product, tone }),
+            body: JSON.stringify({ format, brand, product: filledProduct, tone }),
           });
           const data = await res.json();
           next = data.variations ?? [];
@@ -97,7 +98,7 @@ export function Copywriter() {
             <div>
               <label className="text-sm font-medium text-foreground">Product / offer</label>
               <input
-                value={product}
+                value={filledProduct}
                 onChange={(e) => setProduct(e.target.value)}
                 placeholder="unlimited marketing help"
                 className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"

@@ -7,6 +7,7 @@ import { operatorSource, sourcesFromLog } from "@/lib/deliverable";
 import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
 import { AgentDock } from "@/components/tools/agent-dock";
 import { SourceChip } from "@/components/tools/source-chip";
+import { extractUrls } from "@/lib/studio-triggers";
 
 type SchemaType = "Organization" | "LocalBusiness" | "Product" | "FAQPage" | "Article";
 
@@ -32,11 +33,12 @@ export function SchemaGenerator() {
   const [copied, setCopied] = useState(false);
   const scriptTag = (run.output as string | null) ?? "";
   const source = operatorSource("Fields entered in this run");
+  const filledUrl = url || extractUrls(run.brief)[0] || "";
 
-  const json = useMemo(() => buildJson({ type, name, url, description, logo, phone, address, price, faqs }), [
+  const json = useMemo(() => buildJson({ type, name, url: filledUrl, description, logo, phone, address, price, faqs }), [
     type,
     name,
-    url,
+    filledUrl,
     description,
     logo,
     phone,
@@ -98,7 +100,7 @@ export function SchemaGenerator() {
             <>
               <Field label={type === "Article" ? "Headline" : "Name"} value={name} onChange={setName} />
               {(type === "Organization" || type === "LocalBusiness") && (
-                <Field label="Website URL" value={url} onChange={setUrl} placeholder="https://yourbrand.com" />
+                <Field label="Website URL" value={filledUrl} onChange={setUrl} placeholder="https://yourbrand.com" />
               )}
               <Field label="Description" value={description} onChange={setDescription} textarea />
               <Field label="Logo / image URL" value={logo} onChange={setLogo} placeholder="https://yourbrand.com/logo.png" />

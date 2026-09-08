@@ -21,10 +21,11 @@ export function BrandCreator() {
   const run = useDeliveryRunOrThrow();
   const [seed, setSeed] = useState("");
   const packed = (run.output as BrandOutput | null) ?? null;
+  const filledSeed = seed || run.brief.trim();
   const source = operatorSource("Business description from this run");
 
   const start = async () => {
-    const suggestions = generateNames(seed || "your brand");
+    const suggestions = generateNames(filledSeed || "your brand");
     const picked = suggestions[0];
     if (!picked) throw new Error("Could not generate names.");
     let domains: DomainResult[] = [];
@@ -72,7 +73,7 @@ export function BrandCreator() {
       intake={
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
-            value={seed}
+            value={filledSeed}
             onChange={(e) => setSeed(e.target.value)}
             placeholder="Describe your business in a few words (e.g. handmade candle shop)"
             className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"

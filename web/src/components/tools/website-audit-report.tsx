@@ -10,19 +10,21 @@ import { requestSiteAudit } from "@/lib/skills/fetch-site-audit";
 import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
 import { AgentDock } from "@/components/tools/agent-dock";
 import { SourceChip } from "@/components/tools/source-chip";
+import { extractUrls } from "@/lib/studio-triggers";
 
 export function WebsiteAuditReport() {
   const run = useDeliveryRunOrThrow();
   const [url, setUrl] = useState("");
   const result = (run.output as AuditResult | null) ?? null;
+  const filledUrl = url || extractUrls(run.brief)[0] || "";
 
   const start = async () => {
-    if (!url.trim()) return;
+    if (!filledUrl.trim()) return;
     let audit: AuditResult | null = null;
     await run.runScan(
       async (skill) => {
         if (skill.id === "fetch-page") {
-          const rows = await requestSiteAudit({ url });
+          const rows = await requestSiteAudit({ url: filledUrl });
           const first = rows[0];
           if (!first?.ok || !first.result) throw new Error(first?.error ?? "Could not audit that URL.");
           audit = first.result;
@@ -65,7 +67,7 @@ export function WebsiteAuditReport() {
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
-              value={url}
+              value={filledUrl}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && start()}
               placeholder="https://yourbrand.com"
