@@ -39,7 +39,7 @@ export const TerminalNode = ({ data }: NodeProps<TerminalFlowNode>) => {
       <StudioStep
         kind={kindForStepId(step.id, true)}
         title={step.label}
-        caption={isApproved ? "Ready to export" : "Locked until you approve"}
+        caption={data.status === "approved" ? "Ready to export" : "Locked until you approve"}
         active={Boolean(data.selected) || workbenchActive}
         dimmed={data.status === "skipped"}
         workbench={workbenchActive}
