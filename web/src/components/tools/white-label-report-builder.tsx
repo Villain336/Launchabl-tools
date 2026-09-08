@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Download, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
-import { useDeliveryPhase } from "@/components/tools/delivery-run";
-import { ApproveGate } from "@/components/tools/approve-gate";
+import { operatorSource, sourcesFromLog } from "@/lib/deliverable";
+import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
+import { AgentDock } from "@/components/tools/agent-dock";
+import { SourceChip } from "@/components/tools/source-chip";
 
 type Finding = { title: string; detail: string; severity: "critical" | "warning" | "info" };
 
@@ -59,57 +61,71 @@ function buildReportHtml(opts: {
     <h1>${escapeHtml(opts.reportTitle || "Marketing Report")}</h1>
     <p class="subtitle">Prepared for ${escapeHtml(opts.clientName || "Client")}</p>
   </div>
-
   ${opts.summary ? `<p style="font-size:15px; color:#334155; line-height:1.6;">${escapeHtml(opts.summary)}</p>` : ""}
-
   ${opts.score ? `<div class="score"><div class="value">${escapeHtml(opts.score)}</div></div>` : ""}
-
   ${opts.findings.length ? `<h2>Key findings</h2>${findingsHtml}` : ""}
-
   ${opts.recommendations ? `<h2>Recommendations</h2><div class="recs">${escapeHtml(opts.recommendations)}</div>` : ""}
 </body>
 </html>`;
 }
 
 function escapeHtml(s: string) {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export function WhiteLabelReportBuilder() {
+  const run = useDeliveryRunOrThrow();
   const [agencyName, setAgencyName] = useState("");
-  const [accentColor, setAccentColor] = useState("#4338CA");
+  const [accentColor, setAccentColor] = useState("#FF6600");
   const [clientName, setClientName] = useState("");
   const [reportTitle, setReportTitle] = useState("Marketing Audit Report");
   const [summary, setSummary] = useState("");
   const [score, setScore] = useState("");
   const [recommendations, setRecommendations] = useState("");
-  const [findings, setFindings] = useState<Finding[]>([
-    { title: "", detail: "", severity: "warning" },
-  ]);
+  const [findings, setFindings] = useState<Finding[]>([{ title: "", detail: "", severity: "warning" }]);
+  const html = (run.output as string | null) ?? "";
+  const source = operatorSource("Agency, client, and findings from this run");
 
-  const html = buildReportHtml({
-    agencyName,
-    accentColor,
-    clientName,
-    reportTitle,
-    summary,
-    score,
-    findings: findings.filter((f) => f.title.trim()),
-    recommendations,
-  });
+  const compose = () =>
+    buildReportHtml({
+      agencyName,
+      accentColor,
+      clientName,
+      reportTitle,
+      summary,
+      score,
+      findings: findings.filter((f) => f.title.trim()),
+      recommendations,
+    });
 
-  const branded = Boolean(agencyName.trim() || clientName.trim());
-  const hasContent = Boolean(
-    summary.trim() ||
-      recommendations.trim() ||
-      score.trim() ||
-      findings.some((f) => f.title.trim()),
-  );
-  useDeliveryPhase(!branded ? "submit" : hasContent ? "review" : "scan");
+  const start = async () => {
+    const branded = Boolean(agencyName.trim() || clientName.trim());
+    const hasContent = Boolean(summary.trim() || recommendations.trim() || score.trim() || findings.some((f) => f.title.trim()));
+    if (!branded || !hasContent) return;
+    const next = compose();
+    await run.runScan(
+      async (skill) => {
+        if (skill.id === "compose-report") {
+          return { payload: { clientName, reportTitle }, sources: [source], detail: clientName || "Client" };
+        }
+        if (skill.id === "cite-source") {
+          return { sources: [source], detail: "Operator-provided findings" };
+        }
+        throw new Error(`Unknown skill ${skill.id}`);
+      },
+      (log) => ({
+        output: next,
+        deliverable: {
+          kind: "report",
+          title: reportTitle,
+          artifacts: [{ name: "report.html", mime: "text/html", text: next }],
+          sources: sourcesFromLog(log),
+          warnings: [],
+          gates: { download: "locked" },
+        },
+      }),
+    );
+  };
 
   const printReport = () => {
     const win = window.open("", "_blank");
@@ -121,87 +137,96 @@ export function WhiteLabelReportBuilder() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1fr]">
-      <div className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Your agency name" value={agencyName} onChange={setAgencyName} />
+    <AgentDock
+      intake={
+        <div className="space-y-5">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Your agency name" value={agencyName} onChange={setAgencyName} />
+            <div>
+              <label className="text-sm font-medium text-foreground">Accent color</label>
+              <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="mt-2 h-10 w-full rounded-lg border border-border" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Client name" value={clientName} onChange={setClientName} />
+            <Field label="Report title" value={reportTitle} onChange={setReportTitle} />
+          </div>
+          <Field label="Executive summary" value={summary} onChange={setSummary} textarea />
+          <Field label="Headline score (optional, e.g. 72/100)" value={score} onChange={setScore} />
           <div>
-            <label className="text-sm font-medium text-foreground">Accent color</label>
-            <input
-              type="color"
-              value={accentColor}
-              onChange={(e) => setAccentColor(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-border"
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Client name" value={clientName} onChange={setClientName} />
-          <Field label="Report title" value={reportTitle} onChange={setReportTitle} />
-        </div>
-        <Field label="Executive summary" value={summary} onChange={setSummary} textarea />
-        <Field label="Headline score (optional, e.g. 72/100)" value={score} onChange={setScore} />
-
-        <div>
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground">Key findings</label>
-            <button
-              type="button"
-              onClick={() => setFindings([...findings, { title: "", detail: "", severity: "warning" }])}
-              className="flex items-center gap-1 text-xs font-medium text-primary"
-            >
-              <Plus className="h-3.5 w-3.5" /> Add finding
-            </button>
-          </div>
-          <div className="mt-2 space-y-3">
-            {findings.map((f, i) => (
-              <div key={i} className="rounded-lg border border-border p-3">
-                <div className="flex gap-2">
-                  <input
-                    value={f.title}
-                    placeholder="Finding title (e.g. No mobile viewport tag)"
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground">Key findings</label>
+              <button
+                type="button"
+                onClick={() => setFindings([...findings, { title: "", detail: "", severity: "warning" }])}
+                className="flex items-center gap-1 text-xs font-medium text-primary"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add finding
+              </button>
+            </div>
+            <div className="mt-2 space-y-3">
+              {findings.map((f, i) => (
+                <div key={i} className="rounded-lg border border-border p-3">
+                  <div className="flex gap-2">
+                    <input
+                      value={f.title}
+                      placeholder="Finding title"
+                      onChange={(e) => {
+                        const next = [...findings];
+                        next[i] = { ...next[i], title: e.target.value };
+                        setFindings(next);
+                      }}
+                      className="flex-1 rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
+                    />
+                    <select
+                      value={f.severity}
+                      onChange={(e) => {
+                        const next = [...findings];
+                        next[i] = { ...next[i], severity: e.target.value as Finding["severity"] };
+                        setFindings(next);
+                      }}
+                      className="rounded-md border border-border px-2 py-1.5 text-xs outline-none"
+                    >
+                      <option value="critical">Critical</option>
+                      <option value="warning">Warning</option>
+                      <option value="info">Info</option>
+                    </select>
+                    <button onClick={() => setFindings(findings.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-red-500">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <textarea
+                    value={f.detail}
+                    placeholder="Detail / explanation"
                     onChange={(e) => {
                       const next = [...findings];
-                      next[i] = { ...next[i], title: e.target.value };
+                      next[i] = { ...next[i], detail: e.target.value };
                       setFindings(next);
                     }}
-                    className="flex-1 rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
+                    className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
                   />
-                  <select
-                    value={f.severity}
-                    onChange={(e) => {
-                      const next = [...findings];
-                      next[i] = { ...next[i], severity: e.target.value as Finding["severity"] };
-                      setFindings(next);
-                    }}
-                    className="rounded-md border border-border px-2 py-1.5 text-xs outline-none"
-                  >
-                    <option value="critical">Critical</option>
-                    <option value="warning">Warning</option>
-                    <option value="info">Info</option>
-                  </select>
-                  <button onClick={() => setFindings(findings.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-red-500">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
                 </div>
-                <textarea
-                  value={f.detail}
-                  placeholder="Detail / explanation"
-                  onChange={(e) => {
-                    const next = [...findings];
-                    next[i] = { ...next[i], detail: e.target.value };
-                    setFindings(next);
-                  }}
-                  className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+          <Field label="Recommendations" value={recommendations} onChange={setRecommendations} textarea rows={5} />
+          <Button onClick={start} disabled={run.scanning}>
+            Compose report
+          </Button>
         </div>
-
-        <Field label="Recommendations" value={recommendations} onChange={setRecommendations} textarea rows={5} />
-
-        <ApproveGate ready={branded && hasContent} label="Approve report">
+      }
+      review={
+        html ? (
+          <div>
+            <SourceChip source={source} />
+            <iframe title="Report preview" srcDoc={html} className="mt-3 h-[480px] w-full rounded-xl border border-border bg-white" />
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No report yet.</p>
+        )
+      }
+      exportPanel={
+        html ? (
           <div className="flex gap-3">
             <Button onClick={printReport}>
               <Printer className="h-4 w-4" /> Print / Save as PDF
@@ -218,14 +243,9 @@ export function WhiteLabelReportBuilder() {
               <Download className="h-4 w-4" /> Download .html
             </Button>
           </div>
-        </ApproveGate>
-      </div>
-
-      <div>
-        <p className="text-sm font-medium text-foreground">Live preview</p>
-        <iframe title="Report preview" srcDoc={html} className="mt-2 h-[600px] w-full rounded-xl border border-border bg-white" />
-      </div>
-    </div>
+        ) : null
+      }
+    />
   );
 }
 

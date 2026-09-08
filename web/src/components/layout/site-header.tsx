@@ -27,7 +27,7 @@ export function SiteHeader() {
   const [active, setActive] = useState<string | null>(null);
 
   return (
-    <header className="sticky top-0 z-50 overflow-visible border-b border-border bg-background/85 text-foreground backdrop-blur">
+    <header data-site-chrome className="sticky top-0 z-50 overflow-visible border-b border-border bg-background/85 text-foreground backdrop-blur">
       <div className="mx-auto flex h-[5.5rem] w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-3 text-foreground">
           <BrandMark size={64} withWordmark={false} />

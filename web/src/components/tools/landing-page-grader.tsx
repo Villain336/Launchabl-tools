@@ -1,13 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2, Search, XCircle } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { ScoreDial } from "@/components/tools/website-audit-report";
 import type { AuditResult } from "@/lib/site-audit";
 import { downloadBlob } from "@/lib/download";
-import { useDeliveryPhase } from "@/components/tools/delivery-run";
-import { ApproveGate } from "@/components/tools/approve-gate";
+import { liveFetchSource, sourcesFromLog } from "@/lib/deliverable";
+import { requestSiteAudit } from "@/lib/skills/fetch-site-audit";
+import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
+import { AgentDock } from "@/components/tools/agent-dock";
+import { SourceChip } from "@/components/tools/source-chip";
 
 type ConversionCheck = {
   label: string;
@@ -70,109 +73,130 @@ function gradeConversion(result: AuditResult): { checks: ConversionCheck[]; scor
   return { checks, score: Math.round((rawScore / maxScore) * 100) };
 }
 
+type GradeOutput = { result: AuditResult; grade: { checks: ConversionCheck[]; score: number } };
+
 export function LandingPageGrader() {
+  const delivery = useDeliveryRunOrThrow();
   const [url, setUrl] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<AuditResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useDeliveryPhase(busy ? "scan" : result ? "review" : "submit");
+  const packed = (delivery.output as GradeOutput | null) ?? null;
+  const grade = packed?.grade ?? null;
+  const result = packed?.result ?? null;
 
-  const grade = useMemo(() => (result ? gradeConversion(result) : null), [result]);
-
-  const run = async () => {
+  const start = async () => {
     if (!url.trim()) return;
-    setBusy(true);
-    setError(null);
-    setResult(null);
-    try {
-      const res = await fetch("/api/site-audit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      const data = await res.json();
-      const first = data.results?.[0];
-      if (!first?.ok) {
-        setError(first?.error ?? "Could not grade that page. Check it's publicly reachable.");
-        return;
-      }
-      setResult(first.result);
-    } catch {
-      setError("Something went wrong reaching that page.");
-    } finally {
-      setBusy(false);
-    }
+    let audit: AuditResult | null = null;
+    await delivery.runScan(
+      async (skill) => {
+        if (skill.id === "fetch-page") {
+          const rows = await requestSiteAudit({ url });
+          const first = rows[0];
+          if (!first?.ok || !first.result) throw new Error(first?.error ?? "Could not grade that page.");
+          audit = first.result;
+          return { payload: audit, sources: [liveFetchSource(audit.url, audit.fetchedAt)], detail: audit.url };
+        }
+        if (!audit) throw new Error("No page fetched.");
+        const source = liveFetchSource(audit.url, audit.fetchedAt);
+        if (skill.id === "score-landing") {
+          const next = gradeConversion(audit);
+          return { payload: next, sources: [source], detail: `${next.score}/100` };
+        }
+        if (skill.id === "cite-source") {
+          return { sources: [source], detail: "Sourced from live fetch" };
+        }
+        throw new Error(`Unknown skill ${skill.id}`);
+      },
+      (log) => {
+        const next = gradeConversion(audit!);
+        return {
+          output: { result: audit, grade: next },
+          deliverable: {
+            kind: "report",
+            title: `Landing page grade — ${audit!.url}`,
+            artifacts: [{ name: "landing-page-grade.txt", mime: "text/plain", text: gradeText(audit!, next) }],
+            sources: sourcesFromLog(log),
+            warnings: [],
+            gates: { download: "locked" },
+          },
+        };
+      },
+    );
   };
 
+  const source = result ? liveFetchSource(result.url, result.fetchedAt) : null;
+
   return (
-    <div>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && run()}
-            placeholder="https://yourbrand.com/landing-page"
-            className="w-full rounded-full border border-border py-2.5 pl-9 pr-4 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
-          />
-        </div>
-        <Button onClick={run} disabled={busy}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Grade page"}
-        </Button>
-      </div>
-
-      {error && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" /> {error}
-        </div>
-      )}
-
-      {grade && (
-        <div className="mt-8">
-          <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6 sm:flex-row sm:justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Conversion grade for</p>
-              <p className="font-medium text-foreground">{result?.url}</p>
-            </div>
-            <ScoreDial score={grade.score} />
+    <AgentDock
+      intake={
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && start()}
+              placeholder="https://yourbrand.com/landing-page"
+              className="w-full rounded-full border border-border py-2.5 pr-4 pl-9 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
           </div>
-
-          <ul className="mt-6 space-y-3">
-            {grade.checks.map((c) => (
-              <li key={c.label} className="flex items-start gap-3 rounded-lg border border-border p-4">
-                {c.passed ? (
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
-                ) : (
-                  <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
-                )}
-                <div>
-                  <p className="text-sm font-medium text-foreground">{c.label}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{c.detail}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <ApproveGate ready={Boolean(grade)} label="Approve grade">
-            <Button
-              onClick={() => {
-                if (!grade || !result) return;
-                const body = [
-                  `Landing page grade — ${result.url}`,
-                  `Score: ${grade.score}/100`,
-                  "",
-                  ...grade.checks.map(
-                    (c) => `${c.passed ? "PASS" : "FAIL"} ${c.label}: ${c.detail}`,
-                  ),
-                ].join("\n");
-                downloadBlob(new Blob([body], { type: "text/plain" }), "landing-page-grade.txt");
-              }}
-            >
-              Download grade
-            </Button>
-          </ApproveGate>
+          <Button onClick={start} disabled={delivery.scanning}>
+            Grade page
+          </Button>
         </div>
-      )}
-    </div>
+      }
+      review={
+        grade && result && source ? (
+          <div>
+            <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6 sm:flex-row sm:justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Conversion grade for</p>
+                <p className="font-medium text-foreground">{result.url}</p>
+                <div className="mt-2">
+                  <SourceChip source={source} />
+                </div>
+              </div>
+              <ScoreDial score={grade.score} />
+            </div>
+            <ul className="mt-6 space-y-3">
+              {grade.checks.map((c) => (
+                <li key={c.label} className="flex items-start gap-3 rounded-lg border border-border p-4">
+                  {c.passed ? (
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
+                  ) : (
+                    <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{c.label}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{c.detail}</p>
+                    <div className="mt-2">
+                      <SourceChip source={source} />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No grade yet.</p>
+        )
+      }
+      exportPanel={
+        grade && result ? (
+          <Button onClick={() => downloadBlob(new Blob([gradeText(result, grade)], { type: "text/plain" }), "landing-page-grade.txt")}>
+            Download grade
+          </Button>
+        ) : null
+      }
+    />
   );
+}
+
+function gradeText(result: AuditResult, grade: { checks: ConversionCheck[]; score: number }) {
+  return [
+    `Landing page grade — ${result.url}`,
+    `Fetched: ${result.fetchedAt}`,
+    `Source: live fetch`,
+    `Score: ${grade.score}/100`,
+    "",
+    ...grade.checks.map((c) => `${c.passed ? "PASS" : "FAIL"} ${c.label}: ${c.detail}`),
+  ].join("\n");
 }

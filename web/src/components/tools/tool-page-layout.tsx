@@ -9,8 +9,10 @@ import type { ReactNode } from "react";
 import type { Tool } from "@/lib/site-config";
 import { getRelatedTools } from "@/lib/site-config";
 import { getDeliveryPolicy } from "@/lib/tool-delivery";
+import { getToolAgent } from "@/lib/tool-agents";
 import { DeliveryRunProvider } from "@/components/tools/delivery-run";
 import { ToolDeliveryCanvas } from "@/components/tools/tool-delivery-canvas";
+import { AgentStudio } from "@/components/tools/agent-studio";
 
 const processingCopy: Record<Tool["processing"], { icon: ReactNode; label: string; note: string }> = {
   client: {
@@ -36,12 +38,23 @@ export function ToolPageLayout({
   about,
 }: {
   tool: Tool;
-  children: ReactNode;
+  children?: ReactNode;
   about: ReactNode;
 }) {
   const processing = processingCopy[tool.processing];
   const related = getRelatedTools(tool);
   const policy = getDeliveryPolicy(tool.slug);
+  const agent = getToolAgent(tool.slug);
+
+  if (policy && agent) {
+    return (
+      <DeliveryRunProvider policy={policy} agent={agent}>
+        <AgentStudio tool={tool} about={about}>
+          {children}
+        </AgentStudio>
+      </DeliveryRunProvider>
+    );
+  }
 
   const toolBody = (
     <>
