@@ -7,6 +7,10 @@ import { useMemo } from "react";
 import type { StepChange } from "@/lib/approvals-ui/diff";
 import type { IssueSeverity } from "@/lib/approvals-ui/validate";
 
+import { ReviewGates } from "@/components/flow/review-gates";
+import { ScanChips } from "@/components/flow/scan-chips";
+import { kindForStepId } from "@/components/flow/step-kind";
+import { StudioStep } from "@/components/flow/studio-step";
 import { Badge } from "@/components/ui/badge";
 import { type ApprovalStep, humanizeCondition, summarizeMode } from "@/lib/approvals-ui/policy";
 import { cn } from "@/lib/utils";
@@ -110,6 +114,38 @@ export const ApprovalNode = ({ data }: NodeProps<ApprovalFlowNode>) => {
   const workbenchActive = Boolean(data.workbenchActive);
   const hideChrome = Boolean(data.studio);
   const onWorkbenchHost = data.onWorkbenchHost;
+
+  if (hideChrome) {
+    const kind = kindForStepId(step.id);
+    return (
+      <StudioStep
+        kind={kind}
+        title={step.label}
+        caption={step.approvers[0]?.title}
+        active={Boolean(data.selected) || workbenchActive}
+        dimmed={data.status === "skipped"}
+        workbench={workbenchActive}
+        extra={
+          step.id === "review" && workbenchActive ? (
+            <ReviewGates />
+          ) : step.id === "scan" && !workbenchActive ? (
+            <ScanChips />
+          ) : null
+        }
+        onHost={(el) => {
+          if (!el) {
+            onWorkbenchHost?.(step.id, null);
+            return;
+          }
+          onWorkbenchHost?.(step.id, el);
+          return () => onWorkbenchHost?.(step.id, null);
+        }}
+        isVertical={isVertical}
+        hasIncoming={data.hasIncoming}
+        hasOutgoing={data.hasOutgoing}
+      />
+    );
+  }
 
   return (
     <div

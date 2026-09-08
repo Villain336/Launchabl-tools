@@ -131,3 +131,34 @@
     display: none !important;
   }
 }
+
+@keyframes flow-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+.studio-canvas {
+  background-color: var(--background);
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--border) 90%, var(--foreground)) 1px,
+    transparent 1.25px
+  );
+  background-size: 22px 22px;
+  background-position: center;
+}
+
+.flow-edge-pending {
+  animation: flow-dash 0.9s linear infinite;
+}

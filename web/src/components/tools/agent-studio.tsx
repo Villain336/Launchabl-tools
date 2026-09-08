@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, CircleHelp } from "lucide-react";
 import { WorkflowCanvas } from "@/components/approvals-ui/workflow-canvas";
-import { Button } from "@/components/ui/agency-button";
 import { LinkButton } from "@/components/ui/agency-button";
 import { Card } from "@/components/ui/card";
 import {
@@ -79,32 +78,36 @@ export function AgentStudio({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4">
         <Link
           href="/tools"
-          className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm text-foreground shadow-sm hover:bg-muted"
+          className="pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-card px-2.5 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_var(--border)] hover:bg-muted"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3.5 w-3.5" />
           Tools
         </Link>
         <div className="pointer-events-auto flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
+          <button
+            type="button"
             onClick={() => setInfoOpen(true)}
             aria-label={`About ${tool.name}`}
+            className="inline-flex size-8 items-center justify-center rounded-[8px] bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_var(--border)] hover:bg-muted"
           >
             <CircleHelp className="h-4 w-4" />
-          </Button>
-          <Button variant="secondary" size="sm" onClick={run.reset}>
+          </button>
+          <button
+            type="button"
+            onClick={run.reset}
+            className="inline-flex h-8 items-center rounded-[8px] bg-card px-2.5 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04),0_0_0_1px_var(--border)] hover:bg-muted"
+          >
             Reset
-          </Button>
+          </button>
         </div>
       </div>
 
       <WorkflowCanvas
         policy={run.policy}
-        direction="LR"
+        direction="TB"
         variant="studio"
-        nodeSep={48}
-        rankSep={160}
+        nodeSep={56}
+        rankSep={88}
         selectedId={selectedId}
         workbenchStepId={run.dockId}
         onWorkbenchHost={onWorkbenchHost}

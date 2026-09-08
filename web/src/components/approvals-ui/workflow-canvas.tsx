@@ -25,6 +25,7 @@ import {
   type StepStatus,
 } from "@/components/approvals-ui/approval-node";
 import { type TerminalFlowNode, TerminalNode } from "@/components/approvals-ui/terminal-node";
+import { FlowBezierEdge } from "@/components/flow/bezier-edge";
 import { cn } from "@/lib/utils";
 
 export type CanvasNode = ApprovalFlowNode | TerminalFlowNode;
@@ -36,6 +37,7 @@ const NODE_TYPES = {
 
 const EDGE_TYPES = {
   alignedStep: AlignedStepEdge,
+  flowBezier: FlowBezierEdge,
 } satisfies EdgeTypes;
 
 export type WorkflowCanvasProps = {
@@ -134,21 +136,33 @@ const buildNodes = (
   });
 };
 
-const buildEdges = (policy: ApprovalPolicy): Edge[] => {
+const buildEdges = (
+  policy: ApprovalPolicy,
+  options?: {
+    studio?: boolean;
+    selectedId?: string | null;
+    statuses?: Record<string, StepStatus>;
+  }
+): Edge[] => {
   const ids = new Set(policy.steps.map((s) => s.id));
   const edges: Edge[] = [];
   for (const step of policy.steps) {
     for (const nextId of step.next) {
       if (ids.has(nextId)) {
+        const lit = options?.selectedId === step.id || options?.selectedId === nextId;
+        const pending = options?.statuses?.[nextId] === "pending";
         edges.push({
           id: `${step.id}->${nextId}`,
           source: step.id,
           target: nextId,
-          style: { stroke: "var(--border)", strokeWidth: 1.5 },
+          style: options?.studio ? undefined : { stroke: "var(--border)", strokeWidth: 1.5 },
+          type: options?.studio ? "flowBezier" : undefined,
+          data: options?.studio ? { lit, pending } : undefined,
         });
       }
     }
   }
+  if (options?.studio) return edges;
   return withAlignedElbows(edges).map((edge) => ({ ...edge, type: "alignedStep" }));
 };
 
@@ -192,7 +206,10 @@ const CanvasInner = ({
       isVertical,
     ]
   );
-  const sourceEdges = useMemo(() => buildEdges(policy), [policy]);
+  const sourceEdges = useMemo(
+    () => buildEdges(policy, { studio, selectedId, statuses }),
+    [policy, studio, selectedId, statuses]
+  );
 
   const { nodes, edges, onNodesChange, onEdgesChange, isLaidOut } = useAutoLayout({
     nodes: sourceNodes,
@@ -200,8 +217,8 @@ const CanvasInner = ({
     vertical: isVertical,
     nodeSep,
     rankSep,
-    defaultWidth: studio ? 512 : 256,
-    defaultHeight: studio ? 220 : 112,
+    defaultWidth: studio ? 320 : 256,
+    defaultHeight: studio ? 140 : 112,
     fitViewOnLayout: true,
     fitViewOptions: studio
       ? { padding: 0.18, maxZoom: 1.05, minZoom: 0.2 }
@@ -245,9 +262,9 @@ const CanvasInner = ({
       onPaneClick={() => onSelectStep?.(null)}
       onNodeMouseEnter={(_, node) => onHoverStep?.(node.id)}
       onNodeMouseLeave={() => onHoverStep?.(null)}
-      className="bg-background"
+      className={studio ? "studio-canvas" : "bg-background"}
     >
-      <Background gap={18} />
+      {studio ? null : <Background gap={18} />}
       <Controls showInteractive={false} />
       {children}
     </ReactFlow>

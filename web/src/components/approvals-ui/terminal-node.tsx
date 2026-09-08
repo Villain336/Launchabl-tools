@@ -7,6 +7,8 @@ import type { TerminalStep } from "@/lib/approvals-ui/policy";
 import type { IssueSeverity } from "@/lib/approvals-ui/validate";
 
 import { stateRing, type StepStatus } from "@/components/approvals-ui/approval-node";
+import { kindForStepId } from "@/components/flow/step-kind";
+import { StudioStep } from "@/components/flow/studio-step";
 import { cn } from "@/lib/utils";
 
 export type TerminalNodeData = {
@@ -30,6 +32,30 @@ export const TerminalNode = ({ data }: NodeProps<TerminalFlowNode>) => {
   const isApproved = step.outcome === "approved";
   const workbenchActive = Boolean(data.workbenchActive);
   const onWorkbenchHost = data.onWorkbenchHost;
+  const studio = Boolean(data.studio);
+
+  if (studio) {
+    return (
+      <StudioStep
+        kind={kindForStepId(step.id, true)}
+        title={step.label}
+        caption={isApproved ? "Ready to export" : "Locked until you approve"}
+        active={Boolean(data.selected) || workbenchActive}
+        dimmed={data.status === "skipped"}
+        workbench={workbenchActive}
+        onHost={(el) => {
+          if (!el) {
+            onWorkbenchHost?.(step.id, null);
+            return;
+          }
+          onWorkbenchHost?.(step.id, el);
+          return () => onWorkbenchHost?.(step.id, null);
+        }}
+        isVertical={isVertical}
+        hasOutgoing={false}
+      />
+    );
+  }
 
   if (workbenchActive) {
     return (
