@@ -55,6 +55,11 @@ export const toolClusters: ToolCluster[] = [
     description:
       "Heavier, multi-part deliverables — real audits, brand kits, and reports other free tool sites don't attempt.",
   },
+  {
+    slug: "create-produce",
+    name: "Create & produce",
+    description: "Record, edit, and produce real marketing assets — video and imagery — without extra software.",
+  },
 ];
 
 export type ToolStatus = "live" | "beta" | "coming-soon";
@@ -486,6 +491,149 @@ export const tools: Tool[] = [
       {
         question: "Can I white-label this with my own agency's branding?",
         answer: "Yes — set your brand name and accent color before generating the report or proposal.",
+      },
+    ],
+  },
+
+  // --- Phase 1 additions: extends the audit engine + zero-dependency wins --
+  {
+    slug: "broken-link-checker",
+    name: "Broken Link Checker",
+    shortDescription: "Scan a page's links and find the ones that are dead, redirected, or erroring out.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "One page is easy. Your whole site is the job.",
+      body: "Unlimited plan members get every page on their site crawled and every broken link fixed, on an ongoing basis.",
+    },
+    faq: [
+      {
+        question: "Does this check my whole site?",
+        answer:
+          "No — v1 checks the links found on a single page you provide (up to 25 links). A full-site crawl is on the roadmap.",
+      },
+    ],
+  },
+  {
+    slug: "accessibility-checker",
+    name: "Accessibility Checker",
+    shortDescription: "A fast, free WCAG-lite scan — missing alt text, skipped headings, blocked zoom, and more.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "This catches the obvious gaps. A real audit catches the rest.",
+      body: "Unlimited plan members get a full accessibility remediation pass — including the things a static scan can't see, like color contrast and keyboard navigation.",
+    },
+    faq: [
+      {
+        question: "Is this a full WCAG compliance audit?",
+        answer:
+          "No — this is a fast static-HTML heuristic scan, not a substitute for a full audit (which needs a rendered-DOM tool and manual keyboard/screen-reader testing). Treat a passing score here as a starting point, not a compliance certification.",
+      },
+    ],
+  },
+  {
+    slug: "security-headers-checker",
+    name: "Security Headers Checker",
+    shortDescription: "Check whether your site sends the HTTP security headers that protect against common attacks.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Headers are one layer. Full hardening is the job.",
+      body: "Unlimited plan members get their entire security posture reviewed and fixed, not just one header check.",
+    },
+    faq: [],
+  },
+  {
+    slug: "ssl-certificate-checker",
+    name: "SSL/TLS Certificate Checker",
+    shortDescription: "Check a domain's SSL certificate — issuer, expiry date, and days remaining — in seconds.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "An expired certificate takes your whole site down.",
+      body: "Unlimited plan members get certificate renewal monitored and handled automatically — never an unplanned outage.",
+    },
+    faq: [
+      {
+        question: "How does this check the certificate?",
+        answer:
+          "It opens a real TLS connection to your domain on port 443 and reads the certificate the server presents — the same thing a browser does when you visit the site.",
+      },
+    ],
+  },
+  {
+    slug: "email-finder",
+    name: "B2B Email Finder & Verifier",
+    shortDescription: "Guess the likely business email pattern for a person at a company, and confirm the domain accepts mail.",
+    cluster: "audits-reports",
+    status: "beta",
+    processing: "server",
+    upsell: {
+      headline: "A guess is a start. A real list is the job.",
+      body: "Unlimited plan members get outreach lists built and verified for them at scale, not one lookup at a time.",
+    },
+    faq: [
+      {
+        question: "Does this guarantee the email is real?",
+        answer:
+          "No — this ranks likely patterns and confirms the domain can receive mail (MX lookup). It does not perform mailbox-level SMTP verification, which is unreliable to run from most servers and easy to abuse. Always confirm before sending anything important.",
+      },
+      {
+        question: "Is this okay to use for cold outreach?",
+        answer:
+          "Use it responsibly and in line with applicable anti-spam law (e.g. CAN-SPAM, GDPR) — this tool finds a likely address, it doesn't grant permission to email anyone about anything.",
+      },
+    ],
+  },
+  {
+    slug: "background-remover",
+    name: "Background Remover",
+    shortDescription: "Remove the background from a photo — product shots, headshots, or social images — right in your browser.",
+    cluster: "convert-ship",
+    status: "beta",
+    processing: "client",
+    upsell: {
+      headline: "One photo is easy. A whole catalog isn't.",
+      body: "Unlimited plan members get batch background removal and full product photo editing for their whole catalog.",
+    },
+    faq: [
+      {
+        question: "Does this upload my photo anywhere?",
+        answer:
+          "No — background removal runs entirely in your browser using an on-device ML model. Your image never leaves your device.",
+      },
+      {
+        question: "Why did it take a few seconds to load the first time?",
+        answer:
+          "The first use downloads a small ML model to your browser so processing can run locally. It's cached after that, so it's instant on repeat use.",
+      },
+    ],
+  },
+  {
+    slug: "demo-video-creator",
+    name: "Demo Video Creator",
+    shortDescription: "Record your screen with a branded watermark overlay and export a ready-to-share demo video.",
+    cluster: "create-produce",
+    status: "beta",
+    processing: "client",
+    upsell: {
+      headline: "A raw recording is a start. A produced demo converts.",
+      body: "Unlimited plan members get real demo videos scripted, recorded, edited, and captioned for them — not just a raw screen capture.",
+    },
+    faq: [
+      {
+        question: "Does this upload my recording anywhere?",
+        answer: "No — recording, watermarking, and export all happen locally in your browser.",
+      },
+      {
+        question: "Can I trim or edit the recording afterward?",
+        answer:
+          "Not yet — v1 is record-and-export only. Trimming and auto-captions (via the upcoming Transcriber tool) are on the roadmap.",
       },
     ],
   },

@@ -291,16 +291,35 @@ Add a sixth cluster, **Developer Tools**, distinct from the marketer-facing five
 - Background remover and Transcriber (above) both become inputs other tools can build on — background removal feeds the Ad Creative Resizer and Brand Identity Kit; transcription feeds the Clipping tool, the Demo Video Creator, and a future closed-captioning tool.
 - The Broken Link Checker, Accessibility Checker, Security Headers Checker, and SSL Checker are all thin additional scoring lenses on the *same* `site-audit.ts` engine used by the Website Audit Report / Landing Page Grader / Competitor Gap Report — each one is a small, high-leverage addition, not a new subsystem.
 
-### 12.4 Suggested next-build priority
+### 12.4 Build phases
 
-Ordered by (build cost) × (how directly it reuses existing engines):
+Grouped into explicit phases by (build cost) × (how directly it reuses existing engines) × (external dependency risk). Each phase is meant to ship as a unit before starting the next.
 
-1. **Broken Link Checker, Accessibility Checker, Security Headers Checker, SSL Checker** — near-zero new infrastructure; each is a new scoring function on the existing audit engine.
-2. **B2B Email Finder & Verifier** — reuses the DNS/MX lookup work already built for the Email Deliverability Health Check.
-3. **Background Remover** — client-side, zero server cost, closes an obvious gap next to the existing Watermark Generator/Remover.
-4. **Demo Video Creator (v1: record + trim + brand outro, no captions yet)** — client-side, zero server cost, and a strong differentiator (nobody bundles this into a marketing-tools site).
-5. **Competitor Ad Intelligence (ad-transparency aggregation only, no supplier data yet)** — directly answers the founder's original ask and is legally clean since it only surfaces official transparency-API data.
-6. **App/SaaS QA Test Plan Generator (v1: static checks only)** — reuses the audit engine; a strong developer-cluster anchor tool.
-7. **Business Name + Trademark Availability Checker** — small extension of the existing Brand Creator.
-8. **Transcriber (short files only, gated)** — first tool with meaningful per-use compute cost; ship after there's an account/plan gate to control cost exposure.
-9. Everything requiring a paid third-party data license or partner contract (Phone Number Lookup, Burner Email, Business Formation, Clipping's AI highlight detection, Supplier Intelligence) — sequence these once there's a partnerships/procurement process in place; they're valuable but shouldn't block the tools that can ship with zero external dependencies.
+**Phase 1 — Zero external dependencies, reuses engines already built (this phase is implemented in this repo):**
+- Broken Link Checker — new lightweight crawler that reuses the same fetch pattern as `site-audit.ts`
+- Accessibility (WCAG-lite) Checker — new heuristic scorer, same fetch pattern
+- Security Headers Checker — inspects response headers from the same kind of fetch
+- SSL/TLS Certificate Checker — new engine using Node's `tls` module (no third-party API)
+- B2B Email Finder & Verifier — pattern-guessing + MX lookup, directly reuses the DNS engine built for the Email Deliverability Health Check
+- Background Remover — client-side ML segmentation, zero server cost, no API key
+- Demo Video Creator (v1: screen/webcam record + canvas-composited brand watermark, download as video file; no trimming or auto-captions yet) — client-side, zero server cost
+
+**Phase 2 — Needs a real external API or heavier logic, but no paid data license or partner contract:**
+- Competitor Ad Intelligence (ad-transparency aggregation via Meta Ad Library API, Google Ads Transparency Center, TikTok Commercial Content Library, LinkedIn Ad Library)
+- App/SaaS QA Test Plan Generator v2 (flow-based test generation from a plain-English description, needs an LLM call)
+- Business Name + Trademark Availability Checker (needs USPTO TESS/TSDR integration)
+- Transcriber (needs a real ASR API and a usage/cost gate — sequence after accounts exist)
+- Reverse Image Lookup (smart-redirect + perceptual-hash dedup — the dedup half needs the Vault/accounts feature to exist first)
+- Clipping Software v2 (AI highlight detection — depends on the Transcriber shipping first)
+- The full Developer Tools cluster (§12.1) — each tool is individually cheap, but stood up as a batch once there's bandwidth for a new cluster's worth of IA/nav/SEO work
+
+**Phase 3 — Needs a paid data license, partner contract, or extra compliance review:**
+- Phone Number Lookup (carrier API + strict use-case scoping)
+- Burner Email (real email-receiving infrastructure + abuse controls)
+- Business Formation (registrar-style reseller/affiliate partnership)
+- Supplier/import-export intelligence (licensed customs/shipping data)
+- Inbox/Drive Deep Search (OAuth into a user's own Gmail/Drive — heavy privacy/compliance lift)
+
+**Phase 4 — Lower-priority template/form tools (cheap to build, lower differentiation, good for long-tail SEO volume once the heavier tools are shipped):**
+- The remaining marketer ideas from §12.3 (subject-line checker, social previewer, OG card generator, hashtag tool, UTM builder, persona generator, testimonial widget, NPS builder, link-in-bio builder, press release generator, media kit generator, competitor page-change monitor, ad copy compliance scanner, content repurposing tool)
+- The remaining entrepreneur ideas from §12.3 (business plan generator, financial projections, break-even calculator, freelance rate calculator, invoice generator, contract/NDA generator, elevator pitch generator, pitch deck outline generator, digital business card generator, loan/grant matcher)

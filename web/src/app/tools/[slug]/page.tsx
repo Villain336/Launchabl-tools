@@ -24,6 +24,13 @@ import { ContentCampaignCalendar } from "@/components/tools/content-campaign-cal
 import { LocalSeoOptimizer } from "@/components/tools/local-seo-optimizer";
 import { SitemapRobotsGenerator } from "@/components/tools/sitemap-robots-generator";
 import { WhiteLabelReportBuilder } from "@/components/tools/white-label-report-builder";
+import { BrokenLinkChecker } from "@/components/tools/broken-link-checker";
+import { AccessibilityChecker } from "@/components/tools/accessibility-checker";
+import { SecurityHeadersChecker } from "@/components/tools/security-headers-checker";
+import { SslCertificateChecker } from "@/components/tools/ssl-certificate-checker";
+import { EmailFinder } from "@/components/tools/email-finder";
+import { BackgroundRemover } from "@/components/tools/background-remover";
+import { DemoVideoCreator } from "@/components/tools/demo-video-creator";
 
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
@@ -61,6 +68,13 @@ const toolUi: Record<string, ReactNode> = {
   "local-seo-optimizer": <LocalSeoOptimizer />,
   "sitemap-robots-generator": <SitemapRobotsGenerator />,
   "white-label-report-builder": <WhiteLabelReportBuilder />,
+  "broken-link-checker": <BrokenLinkChecker />,
+  "accessibility-checker": <AccessibilityChecker />,
+  "security-headers-checker": <SecurityHeadersChecker />,
+  "ssl-certificate-checker": <SslCertificateChecker />,
+  "email-finder": <EmailFinder />,
+  "background-remover": <BackgroundRemover />,
+  "demo-video-creator": <DemoVideoCreator />,
   "domain-purchase": (
     <ComingSoonTool
       architectureNotes={[
@@ -145,6 +159,20 @@ function AboutCopy({ slug }: { slug: string }) {
       "A generic sitemap generator gives you a boilerplate file. This one builds a real `sitemap.xml` and matching `robots.txt` from the actual list of URLs on your site, so what you submit to Google is what's actually live.",
     "white-label-report-builder":
       "This is the one tool on the platform that's explicitly built to combine the output of the others. Paste in findings from the Website Audit Report, Competitor Gap Report, or your own notes, add your agency's branding, and generate a polished, printable report or proposal — the exact kind of deliverable a freelancer or agency would otherwise pay a designer to lay out.",
+    "broken-link-checker":
+      "A single dead link can quietly tank a landing page's conversion rate and its SEO. This scans the links on a page you provide and checks each one's live status, so you find the 404s before your customers — or Google — do.",
+    "accessibility-checker":
+      "Accessibility is treated as an afterthought by most marketing sites, and it's a real legal and reputational risk, not just a nice-to-have. This runs a fast static scan for the most common, most damaging accessibility gaps — missing alt text, skipped heading levels, disabled pinch-to-zoom — and explains why each one matters.",
+    "security-headers-checker":
+      "HTTP security headers are a five-minute fix that most marketing sites simply never make. This checks whether your site sends the headers that defend against clickjacking, MIME-sniffing attacks, and script injection, and explains exactly what each missing header exposes you to.",
+    "ssl-certificate-checker":
+      "An expired SSL certificate takes your entire site offline behind a scary browser warning — and it always happens at the worst time. This opens a real TLS connection to your domain, the same way a browser does, and reports the issuer, expiry date, and days remaining.",
+    "email-finder":
+      "Finding a specific person's work email usually means guessing at a pattern and hoping. This generates every common pattern for a name at a domain, ranks them by how common each convention is, and confirms the domain itself can receive mail — a real research step, not a guarantee.",
+    "background-remover":
+      "Clean product shots and headshots usually mean a trip to Photoshop or a paid app. This runs a real image-segmentation model entirely on your device — no upload, no account, no watermark — and hands back a transparent PNG in seconds.",
+    "demo-video-creator":
+      "A raw, unbranded screen recording looks unfinished the moment you share it. This records your screen (and optionally your mic), composites a branded watermark onto every frame in real time, and exports a ready-to-share video file — no separate editing software required.",
   };
 
   return <p>{copy[slug] ?? "More detail on this tool is coming soon."}</p>;
