@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
-import { Container } from "@/components/ui/container";
+import { Separator } from "@/components/ui/separator";
 import { siteConfig, toolClusters } from "@/lib/site-config";
 
 const footerColumns = [
@@ -37,38 +37,52 @@ const footerColumns = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
-      <Container className="py-16">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-          <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 font-bold text-slate-900">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+    <section className="border-t border-border bg-muted/30 px-4 py-16 text-foreground sm:px-6">
+      <footer className="mx-auto w-full max-w-6xl">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 md:grid-cols-6">
+          <div className="col-span-2 sm:col-span-3 md:col-span-2">
+            <Link href="/" className="flex items-center gap-2 font-bold text-foreground">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Sparkles className="h-4 w-4" />
               </span>
               {siteConfig.name}
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-slate-600">{siteConfig.description}</p>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              {siteConfig.description}
+            </p>
           </div>
-          {footerColumns.map((col) => (
-            <div key={col.heading}>
-              <h3 className="text-sm font-semibold text-slate-900">{col.heading}</h3>
-              <ul className="mt-4 space-y-3">
-                {col.links.map((link) => (
+
+          {footerColumns.map((column) => (
+            <nav key={column.heading} className="flex flex-col gap-3">
+              <h3 className="font-heading text-sm font-semibold text-foreground">{column.heading}</h3>
+              <ul className="flex flex-col gap-2.5">
+                {column.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-slate-600 hover:text-slate-900">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 text-sm text-slate-500 sm:flex-row">
-          <p>© {new Date().getFullYear()} {siteConfig.name}. All rights reserved.</p>
-          <p>Built as a strategy + platform scaffold — see <code className="rounded bg-slate-200 px-1.5 py-0.5">docs/STRATEGY.md</code>.</p>
+
+        <Separator className="my-8" />
+
+        <div className="flex flex-col-reverse items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Built as a strategy + platform scaffold — see{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5">docs/STRATEGY.md</code>.
+          </p>
         </div>
-      </Container>
-    </footer>
+      </footer>
+    </section>
   );
 }
