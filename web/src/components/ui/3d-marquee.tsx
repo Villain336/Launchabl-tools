@@ -38,7 +38,7 @@ export const ThreeDMarquee = ({
       )}
     >
       <div className="flex size-full items-center justify-center [perspective:4000px]">
-        <div className="size-[1720px] shrink-0 scale-50 sm:scale-75 lg:scale-100">
+        <div className="size-[1720px] shrink-0 scale-[0.42] sm:scale-[0.55] lg:scale-[0.68]">
           <div
             style={{
               transform: "rotateX(55deg) rotateY(0deg) rotateZ(-45deg)",
@@ -63,28 +63,28 @@ export const ThreeDMarquee = ({
                     <motion.div
                       whileHover={{ y: -10 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="relative overflow-hidden rounded-lg bg-white ring ring-black/10 hover:shadow-2xl"
-                      style={{ width: 970, height: 700 }}
+                      className="relative flex flex-col overflow-hidden rounded-lg bg-white ring ring-black/10 hover:shadow-2xl"
+                      style={{ width: 560, height: 420 }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="/brand/logo.jpg"
                         alt=""
-                        width={112}
-                        height={112}
-                        className="absolute top-10 left-10 size-28 object-contain"
+                        width={48}
+                        height={48}
+                        className="absolute top-4 left-4 z-10 size-12 rounded-md object-contain"
                       />
-                      <div className="absolute inset-x-[8%] top-[18%] bottom-[22%] flex items-center justify-center">
+                      <div className="flex min-h-0 flex-1 items-center justify-center px-12 pt-16 pb-4">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={item.src}
                           alt=""
-                          width={640}
-                          height={480}
+                          width={420}
+                          height={280}
                           className="max-h-full max-w-full object-contain"
                         />
                       </div>
-                      <p className="absolute inset-x-0 bottom-0 line-clamp-2 px-12 pb-10 text-4xl leading-tight font-semibold tracking-tight text-neutral-900">
+                      <p className="shrink-0 px-8 pb-6 text-center text-2xl leading-tight font-semibold tracking-tight text-neutral-900">
                         {item.title}
                       </p>
                     </motion.div>

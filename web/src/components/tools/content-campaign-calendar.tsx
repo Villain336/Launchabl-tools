@@ -5,6 +5,8 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 import { calendarToCsv, generateCalendar } from "@/lib/content-calendar";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 const goals = [
   { value: "awareness", label: "Brand awareness" },
@@ -19,6 +21,7 @@ export function ContentCampaignCalendar() {
   const [days, setDays] = useState(30);
 
   const entries = useMemo(() => generateCalendar(brand, goal, days), [brand, goal, days]);
+  useDeliveryPhase(brand.trim() ? "review" : "submit");
 
   return (
     <div>
@@ -60,17 +63,19 @@ export function ContentCampaignCalendar() {
         </div>
       </div>
 
-      <Button
-        className="mt-6"
-        onClick={() =>
-          downloadBlob(
-            new Blob([calendarToCsv(entries)], { type: "text/csv" }),
-            `${(brand || "content").toLowerCase().replace(/\s+/g, "-")}-calendar.csv`,
-          )
-        }
-      >
-        <Download className="h-4 w-4" /> Download CSV
-      </Button>
+      <ApproveGate ready={Boolean(brand.trim())} label="Approve calendar">
+        <Button
+          className="mt-6"
+          onClick={() =>
+            downloadBlob(
+              new Blob([calendarToCsv(entries)], { type: "text/csv" }),
+              `${(brand || "content").toLowerCase().replace(/\s+/g, "-")}-calendar.csv`,
+            )
+          }
+        >
+          <Download className="h-4 w-4" /> Download CSV
+        </Button>
+      </ApproveGate>
 
       <div className="mt-6 max-h-[420px] overflow-y-auto rounded-xl border border-border">
         <table className="w-full text-sm">

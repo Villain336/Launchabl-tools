@@ -5,10 +5,13 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 import { faviconSvg, fontPairingForSeed, monogramSvg, paletteForSeed } from "@/lib/brand-kit";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 export function BrandIdentityKit() {
   const [name, setName] = useState("");
   const seed = name.trim() || "Your Brand";
+  useDeliveryPhase(name.trim() ? "review" : "submit");
 
   const palette = useMemo(() => paletteForSeed(seed), [seed]);
   const fonts = useMemo(() => fontPairingForSeed(seed), [seed]);
@@ -81,9 +84,11 @@ visual identity system — real logo design, guidelines, and templates.
           </div>
         </div>
 
-        <Button className="mt-8" onClick={downloadKit}>
-          <Download className="h-4 w-4" /> Download brand kit (.zip)
-        </Button>
+        <ApproveGate ready={Boolean(name.trim())} label="Approve kit">
+          <Button className="mt-8" onClick={downloadKit}>
+            <Download className="h-4 w-4" /> Download brand kit (.zip)
+          </Button>
+        </ApproveGate>
       </div>
 
       <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6">

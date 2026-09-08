@@ -1,25 +1,71 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Search } from "lucide-react";
 import { clsx } from "clsx";
 import { toolClusters, tools } from "@/lib/site-config";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Input } from "@/components/ui/input";
 
+const CLUSTER_SLUGS = new Set(toolClusters.map((cluster) => cluster.slug));
+
+function clusterFromLocation(): string | "all" {
+  const hash = window.location.hash.replace(/^#/, "");
+  return CLUSTER_SLUGS.has(hash) ? hash : "all";
+}
+
+function subscribeClusterHash(onChange: () => void) {
+  const notify = () => onChange();
+  window.addEventListener("hashchange", notify);
+  window.addEventListener("popstate", notify);
+
+  const onClick = (event: MouseEvent) => {
+    const anchor = (event.target as HTMLElement | null)?.closest("a");
+    if (!anchor?.href) return;
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (url.pathname === "/tools" && url.hash) {
+        window.setTimeout(notify, 50);
+      }
+    } catch {
+      /* ignore malformed hrefs */
+    }
+  };
+  document.addEventListener("click", onClick);
+
+  return () => {
+    window.removeEventListener("hashchange", notify);
+    window.removeEventListener("popstate", notify);
+    document.removeEventListener("click", onClick);
+  };
+}
+
+function getClusterHashSnapshot() {
+  return clusterFromLocation();
+}
+
+function getServerClusterHash() {
+  return "all" as const;
+}
+
 export function ToolsExplorer() {
   const [query, setQuery] = useState("");
-  const [activeCluster, setActiveCluster] = useState<string | "all">("all");
+  const activeCluster = useSyncExternalStore(
+    subscribeClusterHash,
+    getClusterHashSnapshot,
+    getServerClusterHash,
+  );
 
   useEffect(() => {
-    // One-time sync from the URL hash (an external system unavailable during SSR),
-    // e.g. deep links from the homepage like /tools#audits-reports.
-    const hash = window.location.hash.replace("#", "");
-    if (hash && toolClusters.some((c) => c.slug === hash)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveCluster(hash);
-    }
-  }, []);
+    if (activeCluster === "all") return;
+    document.getElementById("toolbox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeCluster]);
+
+  const selectCluster = (slug: string | "all") => {
+    const next = slug === "all" ? "/tools" : `/tools#${slug}`;
+    window.history.replaceState(null, "", next);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
 
   const filtered = useMemo(() => {
     return tools.filter((tool) => {
@@ -33,7 +79,12 @@ export function ToolsExplorer() {
   }, [query, activeCluster]);
 
   return (
-    <div className="mt-10">
+    <div id="toolbox" className="mt-10 scroll-mt-28">
+      {toolClusters.map((cluster) => (
+        <span key={cluster.slug} id={cluster.slug} className="sr-only">
+          {cluster.name}
+        </span>
+      ))}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -47,7 +98,7 @@ export function ToolsExplorer() {
 
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => setActiveCluster("all")}
+            onClick={() => selectCluster("all")}
             className={clsx(
               "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
               activeCluster === "all"
@@ -60,7 +111,7 @@ export function ToolsExplorer() {
           {toolClusters.map((cluster) => (
             <button
               key={cluster.slug}
-              onClick={() => setActiveCluster(cluster.slug)}
+              onClick={() => selectCluster(cluster.slug)}
               className={clsx(
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 activeCluster === cluster.slug

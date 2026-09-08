@@ -14,6 +14,24 @@ export const CLUSTER_ART: Record<string, string> = {
 export const TOOL_ART: Record<string, string> = {
   "qr-code-generator": "/marquee/marquee-qr.png",
   copywriter: "/marquee/marquee-copy.png",
+  "brand-creator": "/marquee/clay-identity.png",
+  "brand-identity-kit": "/marquee/clay-identity.png",
+  "content-campaign-calendar": "/marquee/clay-calendar.png",
+  "white-label-report-builder": "/marquee/clay-report.png",
+  "landing-page-grader": "/marquee/clay-landing.png",
+  "competitor-gap-report": "/marquee/clay-gap.png",
+  "watermark-generator": "/marquee/clay-watermark.png",
+  "watermark-remover": "/marquee/clay-watermark.png",
+  "website-audit-report": "/marquee/marquee-audit.png",
+  "schema-generator": "/marquee/marquee-seo.png",
+  "demo-video-creator": "/marquee/marquee-create.png",
+  "image-converter": "/marquee/marquee-convert.png",
+  "file-converter": "/marquee/marquee-convert.png",
+  "ad-creative-resizer": "/marquee/marquee-convert.png",
+  "metadata-remover": "/marquee/marquee-protect.png",
+  "background-remover": "/marquee/marquee-convert.png",
+  "local-seo-optimizer": "/marquee/marquee-seo.png",
+  "sitemap-robots-generator": "/marquee/marquee-seo.png",
 };
 
 export const BRAND_LOGO = "/brand/logo.jpg";

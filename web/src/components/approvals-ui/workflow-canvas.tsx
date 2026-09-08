@@ -54,6 +54,7 @@ export type WorkflowCanvasProps = {
   rankSep?: number;
   selectedId?: string | null;
   onSelectStep?: (stepId: string | null) => void;
+  onHoverStep?: (stepId: string | null) => void;
   /** Pass a fresh object to pan the viewport to a step. */
   focus?: { stepId: string } | null;
   className?: string;
@@ -145,6 +146,7 @@ const CanvasInner = ({
   rankSep,
   selectedId,
   onSelectStep,
+  onHoverStep,
   focus,
   children,
 }: WorkflowCanvasProps) => {
@@ -200,6 +202,8 @@ const CanvasInner = ({
       proOptions={{ hideAttribution: true }}
       onNodeClick={(_, node) => onSelectStep?.(node.id)}
       onPaneClick={() => onSelectStep?.(null)}
+      onNodeMouseEnter={(_, node) => onHoverStep?.(node.id)}
+      onNodeMouseLeave={() => onHoverStep?.(null)}
       className="bg-background"
     >
       <Background gap={18} />

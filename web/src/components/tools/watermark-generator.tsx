@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type Position = "center" | "bottom-right" | "bottom-left" | "top-right" | "top-left" | "tile";
 
@@ -18,6 +20,7 @@ export function WatermarkGenerator() {
   const [rotation, setRotation] = useState(-30);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);
+  useDeliveryPhase(!file ? "submit" : resultBlob ? "review" : "scan");
 
   const handleFile = useCallback(async (selected: File) => {
     setFile(selected);
@@ -183,16 +186,18 @@ export function WatermarkGenerator() {
           </div>
         </div>
 
-        <Button
-          className="w-full"
-          disabled={!resultBlob}
-          onClick={() =>
-            resultBlob &&
-            downloadBlob(resultBlob, `watermarked-${file?.name?.replace(/\.[^.]+$/, "") ?? "image"}.png`)
-          }
-        >
-          Download watermarked image
-        </Button>
+        <ApproveGate ready={Boolean(resultBlob)} label="Approve watermark">
+          <Button
+            className="w-full"
+            disabled={!resultBlob}
+            onClick={() =>
+              resultBlob &&
+              downloadBlob(resultBlob, `watermarked-${file?.name?.replace(/\.[^.]+$/, "") ?? "image"}.png`)
+            }
+          >
+            Download watermarked image
+          </Button>
+        </ApproveGate>
       </div>
     </div>
   );

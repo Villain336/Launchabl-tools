@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Check, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 const formats: { value: string; label: string }[] = [
   { value: "ad-headline", label: "Ad headline" },
@@ -19,6 +21,7 @@ export function Copywriter() {
   const [variations, setVariations] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  useDeliveryPhase(busy ? "scan" : variations ? "review" : "submit");
 
   const generate = async () => {
     setBusy(true);
@@ -103,6 +106,11 @@ export function Copywriter() {
               </button>
             </div>
           ))}
+          <ApproveGate ready={Boolean(variations?.length)} label="Approve copy">
+            <p className="text-sm text-muted-foreground">
+              Copy is approved. Use the clipboard icons to export any variant.
+            </p>
+          </ApproveGate>
           <p className="pt-2 text-xs text-muted-foreground">
             Demo output from a template engine — production swaps this for an LLM call via the
             same API route, with no changes needed to this component.

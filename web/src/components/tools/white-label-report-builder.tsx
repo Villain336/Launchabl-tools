@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Download, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type Finding = { title: string; detail: string; severity: "critical" | "warning" | "info" };
 
@@ -100,6 +102,15 @@ export function WhiteLabelReportBuilder() {
     recommendations,
   });
 
+  const branded = Boolean(agencyName.trim() || clientName.trim());
+  const hasContent = Boolean(
+    summary.trim() ||
+      recommendations.trim() ||
+      score.trim() ||
+      findings.some((f) => f.title.trim()),
+  );
+  useDeliveryPhase(!branded ? "submit" : hasContent ? "review" : "scan");
+
   const printReport = () => {
     const win = window.open("", "_blank");
     if (!win) return;
@@ -190,22 +201,24 @@ export function WhiteLabelReportBuilder() {
 
         <Field label="Recommendations" value={recommendations} onChange={setRecommendations} textarea rows={5} />
 
-        <div className="flex gap-3">
-          <Button onClick={printReport}>
-            <Printer className="h-4 w-4" /> Print / Save as PDF
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() =>
-              downloadBlob(
-                new Blob([html], { type: "text/html" }),
-                `${(clientName || "report").toLowerCase().replace(/\s+/g, "-")}-report.html`,
-              )
-            }
-          >
-            <Download className="h-4 w-4" /> Download .html
-          </Button>
-        </div>
+        <ApproveGate ready={branded && hasContent} label="Approve report">
+          <div className="flex gap-3">
+            <Button onClick={printReport}>
+              <Printer className="h-4 w-4" /> Print / Save as PDF
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                downloadBlob(
+                  new Blob([html], { type: "text/html" }),
+                  `${(clientName || "report").toLowerCase().replace(/\s+/g, "-")}-report.html`,
+                )
+              }
+            >
+              <Download className="h-4 w-4" /> Download .html
+            </Button>
+          </div>
+        </ApproveGate>
       </div>
 
       <div>
