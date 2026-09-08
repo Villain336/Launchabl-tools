@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/agency-button";
 
 export const metadata: Metadata = {
   title: "Solutions",

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, Search, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { ScoreDial } from "@/components/tools/website-audit-report";
 import type { SecurityHeadersResult } from "@/lib/security-headers";
 

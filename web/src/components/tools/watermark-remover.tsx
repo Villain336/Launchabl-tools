@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, Clock, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 
 export function WatermarkRemover() {
   const [attested, setAttested] = useState(false);

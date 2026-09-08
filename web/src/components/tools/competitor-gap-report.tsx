@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, Check, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { AuditResult } from "@/lib/site-audit";
 
 type Row = { url: string; ok: boolean; result?: AuditResult; error?: string };

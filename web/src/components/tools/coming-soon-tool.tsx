@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 
 export function ComingSoonTool({
   architectureNotes,

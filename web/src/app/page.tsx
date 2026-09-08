@@ -1,10 +1,14 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/agency-button";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ToolStatusBadge } from "@/components/ui/badge";
-import { siteConfig, toolClusters, tools } from "@/lib/site-config";
+import { ToolStatusBadge } from "@/components/ui/agency-badge";
+import { siteConfig, tools } from "@/lib/site-config";
+import HeroBlock from "@/components/blocks/hero-1";
+import BentoBlock from "@/components/blocks/bento-1";
+import StatsBlock from "@/components/blocks/stats-1";
+import CtaBlock from "@/components/blocks/cta-3";
 
 const featuredToolSlugs = [
   "brand-creator",
@@ -24,60 +28,20 @@ const heavyToolSlugs = [
   "white-label-report-builder",
 ];
 
-const proof = [
-  { stat: "12+", label: "flagship tools, and growing every month" },
-  { stat: "1", label: "flat price — no retainers, no surprise invoices" },
-  { stat: "0", label: "files ever leave your browser on client-side tools" },
-];
-
 export default function Home() {
   const featured = tools.filter((t) => featuredToolSlugs.includes(t.slug));
   const heavy = tools.filter((t) => heavyToolSlugs.includes(t.slug));
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white">
-        <Container className="py-20 sm:py-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-medium text-indigo-700">
-              <Sparkles className="h-4 w-4" /> Free tools. Unlimited agency. One price.
-            </span>
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
-              The marketing platform with a free toolbox and an unlimited agency behind it
-            </h1>
-            <p className="mt-6 text-lg text-slate-600 sm:text-xl">
-              {siteConfig.description}
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <LinkButton href="/tools" size="lg">
-                Try a free tool <ArrowRight className="h-4 w-4" />
-              </LinkButton>
-              <LinkButton href="/pricing" variant="secondary" size="lg">
-                See the unlimited plan
-              </LinkButton>
-            </div>
-            <p className="mt-4 text-sm text-slate-500">
-              No account required to use the tools. No credit card to look around.
-            </p>
-          </div>
-
-          <dl className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-3">
-            {proof.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-                <dt className="text-3xl font-bold text-indigo-600">{item.stat}</dt>
-                <dd className="mt-2 text-sm text-slate-600">{item.label}</dd>
-              </div>
-            ))}
-          </dl>
-        </Container>
-      </section>
+      <HeroBlock />
 
       <section className="border-t border-slate-100 bg-white py-20">
         <Container>
           <SectionHeading
-            eyebrow="The toolbox"
-            title="Flagship tools, organized by what you're actually trying to do"
-            description="Not a dumping ground of 40 unrelated converters — every tool lives inside one of four outcome clusters, and every tool ends with a next step, not a dead end."
+            eyebrow="Featured"
+            title="A few of the flagship tools"
+            description="Every tool lives inside one of the clusters below, and every tool ends with a next step, not a dead end."
           />
 
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -106,6 +70,10 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
+      <BentoBlock />
+
+      <StatsBlock />
 
       <section className="border-t border-slate-100 bg-slate-900 py-20 text-white">
         <Container>
@@ -150,24 +118,6 @@ export default function Home() {
         </Container>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50 py-20">
-        <Container>
-          <SectionHeading
-            eyebrow="How it's organized"
-            title="Four clusters. One connective thread."
-            description="Every tool in a cluster feeds the next step in the same job — and every job connects back to what our unlimited plan handles end-to-end."
-          />
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {toolClusters.map((cluster) => (
-              <div key={cluster.slug} id={cluster.slug} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <h3 className="text-lg font-semibold text-slate-900">{cluster.name}</h3>
-                <p className="mt-2 text-sm text-slate-600">{cluster.description}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
       <section className="border-t border-slate-100 bg-white py-20">
         <Container className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
           <div>
@@ -207,6 +157,8 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
+      <CtaBlock />
     </>
   );
 }

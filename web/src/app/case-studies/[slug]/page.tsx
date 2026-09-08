@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
+import { Badge } from "@/components/ui/agency-badge";
+import { LinkButton } from "@/components/ui/agency-button";
 import { caseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
 import { toolClusters } from "@/lib/site-config";
 

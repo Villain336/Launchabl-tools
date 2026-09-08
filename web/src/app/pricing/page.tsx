@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/agency-button";
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {

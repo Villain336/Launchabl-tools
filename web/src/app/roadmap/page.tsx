@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/agency-badge";
 import { tools } from "@/lib/site-config";
 
 export const metadata: Metadata = {

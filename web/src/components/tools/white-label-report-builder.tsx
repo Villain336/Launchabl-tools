@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Download, Plus, Printer, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Finding = { title: string; detail: string; severity: "critical" | "warning" | "info" };

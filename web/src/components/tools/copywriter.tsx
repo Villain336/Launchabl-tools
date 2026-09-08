@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 
 const formats: { value: string; label: string }[] = [
   { value: "ad-headline", label: "Ad headline" },
