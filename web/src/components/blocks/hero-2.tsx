@@ -4,8 +4,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ThreeDMarquee } from "@/components/ui/3d-marquee";
 import { ArrowRight, Check } from "lucide-react";
-import { siteConfig, toolClusters, tools } from "@/lib/site-config";
+import { siteConfig, tools } from "@/lib/site-config";
 
 const TRUST_ITEMS = [
   "No account required to use the tools",
@@ -13,7 +14,17 @@ const TRUST_ITEMS = [
   "One request in the queue at a time — quality never drops",
 ];
 
-const liveCount = tools.filter((t) => t.status === "live").length;
+const LOGO = "/brand/logo.jpg";
+
+const marqueeCards = (() => {
+  const live = tools.filter((t) => t.status === "live" || t.status === "beta");
+  const source = live.length >= 8 ? live : tools;
+  const cards = source.map((tool) => ({ src: LOGO, title: tool.name }));
+  while (cards.length < 16) {
+    cards.push(...cards.slice(0, 16 - cards.length));
+  }
+  return cards.slice(0, 16);
+})();
 
 export default function HeroBlock() {
   return (
@@ -22,7 +33,7 @@ export default function HeroBlock() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_80%_10%,var(--color-primary)/0.18,transparent)]"
       />
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 md:grid-cols-2 md:items-center md:gap-16">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center lg:gap-10">
         <div className="flex flex-col">
           <Badge variant="outline" className="w-fit">
             Free toolbox. Unlimited agency. One price.
@@ -64,68 +75,10 @@ export default function HeroBlock() {
           </ul>
         </div>
 
-        <div className="relative">
-          <div className="rounded-xl border border-border bg-card p-1 shadow-sm">
-            <div className="flex items-center gap-1.5 rounded-t-lg border-b border-border bg-muted px-3 py-2">
-              <span className="size-2.5 rounded-full bg-[#FF5F57]" />
-              <span className="size-2.5 rounded-full bg-[#FEBC2E]" />
-              <span className="size-2.5 rounded-full bg-[#28C840]" />
-              <span className="ml-3 h-4 flex-1 rounded-md border border-border bg-background text-[10px] leading-4 text-muted-foreground">
-                launchabl.app/tools
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-3 rounded-b-lg bg-background p-4">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Live tools", value: String(liveCount), change: "Free to use now" },
-                  { label: "Clusters", value: String(toolClusters.length), change: "By real outcome" },
-                  { label: "Unlimited plan", value: siteConfig.price, change: "One-time, lifetime" },
-                  { label: "Queue", value: "1", change: "Request at a time" },
-                ].map((row) => (
-                  <div key={row.label} className="flex flex-col rounded-lg border border-border bg-card p-3">
-                    <p className="text-xs text-muted-foreground">{row.label}</p>
-                    <p className="mt-1 text-lg font-bold tabular-nums">{row.value}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{row.change}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-lg border border-border bg-card p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-xs font-semibold">What the toolbox is for</p>
-                  <Badge variant="secondary" className="text-xs">
-                    Outcome clusters
-                  </Badge>
-                </div>
-                <div className="flex h-28 items-end gap-1">
-                  {toolClusters.map((cluster, i) => {
-                    const heights = [62, 78, 55, 88, 96, 70];
-                    return (
-                      <div
-                        key={cluster.slug}
-                        className="flex-1 rounded-t-sm bg-primary/70"
-                        style={{ height: `${heights[i] ?? 60}%` }}
-                        title={cluster.name}
-                        aria-hidden="true"
-                      />
-                    );
-                  })}
-                </div>
-                <div className="mt-2 flex justify-between gap-1">
-                  {toolClusters.map((cluster) => (
-                    <span key={cluster.slug} className="flex-1 truncate text-center text-[10px] text-muted-foreground">
-                      {cluster.name.split(" ")[0]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="absolute -right-3 -bottom-3 -z-10 size-full rounded-xl border border-border bg-muted"
-            aria-hidden="true"
+        <div className="relative min-w-0">
+          <ThreeDMarquee
+            cards={marqueeCards}
+            className="h-[28rem] bg-neutral-950 ring-1 ring-[#FF6600]/20 sm:h-[32rem] lg:h-[36rem]"
           />
         </div>
       </div>
