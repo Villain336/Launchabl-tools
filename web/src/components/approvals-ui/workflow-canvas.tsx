@@ -157,25 +157,25 @@ const CanvasInner = ({
   );
   const sourceEdges = useMemo(() => buildEdges(policy), [policy]);
 
-  const { nodes, edges, onNodesChange, onEdgesChange } = useAutoLayout({
+  const { nodes, edges, onNodesChange, onEdgesChange, isLaidOut } = useAutoLayout({
     nodes: sourceNodes,
     edges: sourceEdges,
     vertical: isVertical,
     nodeSep,
     rankSep,
+    defaultWidth: 256,
+    defaultHeight: 112,
+    fitViewOnLayout: true,
+    fitViewOptions: { padding: 0.16, maxZoom: 0.75, minZoom: 0.15 },
   });
 
-  const structureKey = useMemo(
-    () => `${direction}:${policy.steps.map((s) => `${s.id}>${s.next.join("|")}`).join(",")}`,
-    [policy, direction]
-  );
-
   useEffect(() => {
-    const frame = setTimeout(() => {
-      void reactFlow.fitView({ duration: 300, padding: 0.2, maxZoom: 1 });
-    }, 180);
-    return () => clearTimeout(frame);
-  }, [structureKey, reactFlow]);
+    if (!isLaidOut) return;
+    const id = window.setTimeout(() => {
+      void reactFlow.fitView({ padding: 0.16, maxZoom: 0.75, minZoom: 0.15, duration: 240 });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, [isLaidOut, reactFlow]);
 
   useEffect(() => {
     if (!focus) return;
@@ -192,9 +192,8 @@ const CanvasInner = ({
       onEdgesChange={onEdgesChange}
       nodeTypes={NODE_TYPES}
       edgeTypes={EDGE_TYPES}
-      fitView
-      fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-      minZoom={0.3}
+      fitView={false}
+      minZoom={0.2}
       nodesDraggable={false}
       nodesConnectable={false}
       elementsSelectable={false}

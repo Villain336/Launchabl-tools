@@ -28,9 +28,9 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 overflow-visible border-b border-border bg-background/85 text-foreground backdrop-blur">
-      <div className="mx-auto flex h-20 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-[5.5rem] w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-3 text-foreground">
-          <BrandMark size={56} withWordmark={false} />
+          <BrandMark size={64} withWordmark={false} />
           <EncryptedText
             text={siteConfig.name}
             className="text-xl font-bold tracking-tight"
@@ -109,7 +109,7 @@ function MobileMenu() {
       <SheetContent side="right" className="w-full sm:max-w-xs">
         <SheetHeader>
           <SheetTitle>
-            <BrandMark size={48} />
+            <BrandMark size={52} />
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col px-2">

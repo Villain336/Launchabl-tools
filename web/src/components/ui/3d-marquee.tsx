@@ -84,7 +84,7 @@ export const ThreeDMarquee = ({
                           className="max-h-full max-w-full object-contain"
                         />
                       </div>
-                      <p className="absolute inset-x-0 bottom-0 truncate px-12 pb-12 text-5xl font-semibold tracking-tight text-neutral-900">
+                      <p className="absolute inset-x-0 bottom-0 line-clamp-2 px-12 pb-10 text-4xl leading-tight font-semibold tracking-tight text-neutral-900">
                         {item.title}
                       </p>
                     </motion.div>

@@ -47,19 +47,19 @@ export const EncryptedText: React.FC<EncryptedTextProps> = ({
   const isInView = useInView(ref, { once: true });
   const animationFrameRef = useRef<number | null>(null);
 
-  const [revealCount, setRevealCount] = useState(0);
+  const [revealCount, setRevealCount] = useState(text.length);
   const [scramble, setScramble] = useState(text);
 
   useEffect(() => {
     if (!isInView) return;
 
     let cancelled = false;
-    let revealLocal = 0;
-    let scrambleLocal = generateGibberishPreservingSpaces(text, charset);
-    let cycleStart = performance.now();
-    let lastFlip = cycleStart;
-    let holding = false;
-    let holdStart = 0;
+    let revealLocal = text.length;
+    let scrambleLocal = text;
+    let lastFlip = 0;
+    let holding = true;
+    let holdStart = performance.now();
+    let cycleStart = holdStart;
 
     const tick = (now: number) => {
       if (cancelled) return;

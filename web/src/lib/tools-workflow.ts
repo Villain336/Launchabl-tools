@@ -2,17 +2,13 @@ import type { ApprovalPolicy } from "@/lib/approvals-ui/policy";
 
 const always = { kind: "always" as const };
 
-/** Flagship tools shown on the canvas — one or two per outcome cluster. */
+/** Flagship tools shown on the canvas — one per outcome cluster. */
 export const TOOLBOX_CANVAS_TOOLS: { id: string; label: string; cluster: string; title: string }[] = [
   { id: "brand-creator", label: "Brand Creator", cluster: "launch", title: "Free tool" },
-  { id: "copywriter", label: "AI Copywriter", cluster: "launch", title: "Free tool" },
   { id: "watermark-generator", label: "Watermark Generator", cluster: "protect", title: "Free tool" },
-  { id: "metadata-remover", label: "Metadata Remover", cluster: "protect", title: "Free tool" },
   { id: "schema-generator", label: "Schema Markup", cluster: "get-found", title: "Free tool" },
   { id: "qr-code-generator", label: "QR Code Generator", cluster: "convert-ship", title: "Free tool" },
-  { id: "image-converter", label: "Image Converter", cluster: "convert-ship", title: "Free tool" },
   { id: "website-audit-report", label: "Website Audit", cluster: "audits-reports", title: "Free tool" },
-  { id: "competitor-gap-report", label: "Competitor Gap", cluster: "audits-reports", title: "Free tool" },
   { id: "demo-video-creator", label: "Demo Video Creator", cluster: "create-produce", title: "Free tool" },
 ];
 
@@ -29,6 +25,7 @@ export const toolboxHrefForStep = (stepId: string): string | null => {
   if (stepId === "start") return "/tools";
   if (stepId === "unlimited") return "/pricing";
   if (stepId === "free-done") return "/tools";
+  if (stepId === "next-step") return "/pricing";
   if (CLUSTERS.some((c) => c.id === stepId)) return `/tools#${stepId}`;
   if (TOOLBOX_CANVAS_TOOLS.some((t) => t.id === stepId)) return `/tools/${stepId}`;
   return null;
@@ -67,8 +64,17 @@ export const toolboxPolicy = {
       when: always,
       approvers: [{ name: tool.label, title: tool.title }],
       mode: "any" as const,
-      next: ["free-done", "unlimited"],
+      next: ["next-step"],
     })),
+    {
+      id: "next-step",
+      kind: "approval",
+      label: "What next?",
+      when: always,
+      approvers: [{ name: "You", title: "Keep going free, or go unlimited" }],
+      mode: "any",
+      next: ["free-done", "unlimited"],
+    },
     {
       id: "free-done",
       kind: "terminal",
