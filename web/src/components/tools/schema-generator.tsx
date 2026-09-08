@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type SchemaType = "Organization" | "LocalBusiness" | "Product" | "FAQPage" | "Article";
 
@@ -25,6 +27,7 @@ export function SchemaGenerator() {
   const [price, setPrice] = useState("");
   const [faqs, setFaqs] = useState([{ q: "", a: "" }]);
   const [copied, setCopied] = useState(false);
+  useDeliveryPhase(name.trim() || faqs.some((f) => f.q.trim()) ? "review" : "submit");
 
   const json = useMemo(() => {
     const base: Record<string, unknown> = {
@@ -151,18 +154,20 @@ export function SchemaGenerator() {
       <div>
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium text-foreground">Generated JSON-LD</label>
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => {
-              navigator.clipboard.writeText(scriptTag);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            }}
-          >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? "Copied" : "Copy"}
-          </Button>
+          <ApproveGate ready={Boolean(name.trim() || faqs.some((f) => f.q.trim()))} label="Approve markup">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                navigator.clipboard.writeText(scriptTag);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              }}
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? "Copied" : "Copy"}
+            </Button>
+          </ApproveGate>
         </div>
         <pre className="mt-2 max-h-[420px] overflow-auto rounded-xl bg-slate-900 p-4 text-xs text-slate-100">
           {scriptTag}

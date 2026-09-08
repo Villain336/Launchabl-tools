@@ -4,6 +4,9 @@ import { useState } from "react";
 import { AlertCircle, Check, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import type { AuditResult } from "@/lib/site-audit";
+import { downloadBlob } from "@/lib/download";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type Row = { url: string; ok: boolean; result?: AuditResult; error?: string };
 
@@ -21,6 +24,7 @@ export function CompetitorGapReport() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<Row[] | null>(null);
+  useDeliveryPhase(busy ? "scan" : rows ? "review" : "submit");
 
   const run = async () => {
     const urls = [you, ...competitors].map((u) => u.trim()).filter(Boolean);
@@ -122,6 +126,27 @@ export function CompetitorGapReport() {
               </tr>
             </tbody>
           </table>
+          <ApproveGate ready={Boolean(rows)} label="Approve comparison">
+            <Button
+              className="mt-4"
+              onClick={() => {
+                if (!rows) return;
+                const header = ["Metric", ...rows.map((r) => r.url)].join("\t");
+                const lines = metrics.map((m) =>
+                  [
+                    m.label,
+                    ...rows.map((r) => (r.ok ? m.format(r.result![m.key]) : "Failed")),
+                  ].join("\t"),
+                );
+                downloadBlob(
+                  new Blob([[header, ...lines].join("\n")], { type: "text/plain" }),
+                  "competitor-gap.txt",
+                );
+              }}
+            >
+              Download comparison
+            </Button>
+          </ApproveGate>
         </div>
       )}
     </div>

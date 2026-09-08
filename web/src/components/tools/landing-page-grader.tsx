@@ -5,6 +5,9 @@ import { AlertCircle, CheckCircle2, Loader2, Search, XCircle } from "lucide-reac
 import { Button } from "@/components/ui/agency-button";
 import { ScoreDial } from "@/components/tools/website-audit-report";
 import type { AuditResult } from "@/lib/site-audit";
+import { downloadBlob } from "@/lib/download";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type ConversionCheck = {
   label: string;
@@ -72,6 +75,7 @@ export function LandingPageGrader() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  useDeliveryPhase(busy ? "scan" : result ? "review" : "submit");
 
   const grade = useMemo(() => (result ? gradeConversion(result) : null), [result]);
 
@@ -149,6 +153,24 @@ export function LandingPageGrader() {
               </li>
             ))}
           </ul>
+          <ApproveGate ready={Boolean(grade)} label="Approve grade">
+            <Button
+              onClick={() => {
+                if (!grade || !result) return;
+                const body = [
+                  `Landing page grade — ${result.url}`,
+                  `Score: ${grade.score}/100`,
+                  "",
+                  ...grade.checks.map(
+                    (c) => `${c.passed ? "PASS" : "FAIL"} ${c.label}: ${c.detail}`,
+                  ),
+                ].join("\n");
+                downloadBlob(new Blob([body], { type: "text/plain" }), "landing-page-grade.txt");
+              }}
+            >
+              Download grade
+            </Button>
+          </ApproveGate>
         </div>
       )}
     </div>

@@ -4,12 +4,16 @@ import { useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import type { AuditResult } from "@/lib/site-audit";
+import { downloadBlob } from "@/lib/download";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 export function WebsiteAuditReport() {
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  useDeliveryPhase(busy ? "scan" : result ? "review" : "submit");
 
   const runAudit = async () => {
     if (!url.trim()) return;
@@ -90,6 +94,24 @@ export function WebsiteAuditReport() {
               </li>
             ))}
           </ul>
+          <ApproveGate ready={Boolean(result)} label="Approve report">
+            <Button
+              onClick={() => {
+                if (!result) return;
+                const body = [
+                  `Website audit — ${result.url}`,
+                  `Score: ${result.score}/100`,
+                  "",
+                  ...result.findings.map(
+                    (f) => `${f.passed ? "PASS" : "FAIL"} ${f.label}: ${f.detail}`,
+                  ),
+                ].join("\n");
+                downloadBlob(new Blob([body], { type: "text/plain" }), "website-audit.txt");
+              }}
+            >
+              Download report
+            </Button>
+          </ApproveGate>
         </div>
       )}
     </div>

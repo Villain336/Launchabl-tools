@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Check, Globe, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/agency-button";
 import { generateNames, type NameSuggestion } from "@/lib/brand-name-generator";
+import { useDeliveryPhase } from "@/components/tools/delivery-run";
+import { ApproveGate } from "@/components/tools/approve-gate";
 
 type DomainResult = { domain: string; tld: string; status: "taken" | "likely-available" };
 
@@ -14,6 +16,7 @@ export function BrandCreator() {
   const [domains, setDomains] = useState<DomainResult[] | null>(null);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useDeliveryPhase(checking ? "scan" : selected ? "review" : suggestions ? "scan" : "submit");
 
   const handleGenerate = () => {
     setSuggestions(generateNames(seed || "your brand"));
@@ -96,6 +99,7 @@ export function BrandCreator() {
           {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
           {domains && (
+            <>
             <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {domains.map((d) => (
                 <li
@@ -111,6 +115,13 @@ export function BrandCreator() {
                 </li>
               ))}
             </ul>
+            <ApproveGate ready={Boolean(domains)} label="Approve this name">
+              <p className="text-sm text-foreground">
+                <span className="font-semibold">{selected?.name}</span> is approved. Next: register
+                the domain or take it into the Brand Identity Kit.
+              </p>
+            </ApproveGate>
+            </>
           )}
         </div>
       )}

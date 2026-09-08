@@ -8,6 +8,9 @@ import FaqsBlock from "@/components/blocks/faqs-1";
 import type { ReactNode } from "react";
 import type { Tool } from "@/lib/site-config";
 import { getRelatedTools } from "@/lib/site-config";
+import { getDeliveryPolicy } from "@/lib/tool-delivery";
+import { DeliveryRunProvider } from "@/components/tools/delivery-run";
+import { ToolDeliveryCanvas } from "@/components/tools/tool-delivery-canvas";
 
 const processingCopy: Record<Tool["processing"], { icon: ReactNode; label: string; note: string }> = {
   client: {
@@ -38,6 +41,14 @@ export function ToolPageLayout({
 }) {
   const processing = processingCopy[tool.processing];
   const related = getRelatedTools(tool);
+  const policy = getDeliveryPolicy(tool.slug);
+
+  const toolBody = (
+    <>
+      {policy && <ToolDeliveryCanvas />}
+      <Card className="mt-6 p-6 sm:p-8">{children}</Card>
+    </>
+  );
 
   return (
     <Container className="py-12 sm:py-16">
@@ -55,7 +66,7 @@ export function ToolPageLayout({
         {processing.label}
       </div>
 
-      <Card className="mt-10 p-6 sm:p-8">{children}</Card>
+      {policy ? <DeliveryRunProvider policy={policy}>{toolBody}</DeliveryRunProvider> : toolBody}
 
       <p className="mt-3 text-xs text-muted-foreground">{processing.note}</p>
 
