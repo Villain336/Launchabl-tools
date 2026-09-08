@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { ComponentProps } from "react";
@@ -42,7 +42,7 @@ export const MenuItem = ({
           transition={transition}
         >
           {active === item && (
-            <div className="absolute top-[calc(100%_+_1.2rem)] left-1/2 z-50 transform -translate-x-1/2 pt-4">
+            <div className="absolute top-full left-1/2 z-50 w-max min-w-[12rem] -translate-x-1/2 pt-4 pointer-events-auto">
               <motion.div
                 transition={transition}
                 layoutId="active"
@@ -69,11 +69,24 @@ export const Menu = ({
   children: React.ReactNode;
   className?: string;
 }) => {
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
   return (
     <nav
-      onMouseLeave={() => setActive(null)}
+      onMouseEnter={cancelClose}
+      onMouseLeave={() => {
+        cancelClose();
+        closeTimer.current = setTimeout(() => setActive(null), 500);
+      }}
       className={cn(
-        "relative flex justify-center space-x-6 rounded-full border border-border bg-background px-6 py-2 shadow-sm",
+        "relative z-50 flex justify-center space-x-6 overflow-visible rounded-full border border-border bg-background px-6 py-2 shadow-sm",
         className,
       )}
     >
@@ -100,7 +113,7 @@ export const ProductItem = ({
         width={140}
         height={70}
         alt=""
-        className="h-[70px] w-[140px] shrink-0 rounded-md object-cover shadow-md"
+        className="h-[70px] w-[140px] shrink-0 rounded-md bg-white object-contain p-1 shadow-md"
       />
       <div>
         <h4 className="mb-1 text-base font-bold text-foreground">{title}</h4>

@@ -6,7 +6,7 @@ import { caseStudies } from "@/lib/case-studies";
 
 export const metadata: Metadata = {
   title: "Case Studies",
-  description: "Illustrative examples of how the tools and the unlimited plan work together.",
+  description: "Client work and illustrative examples of how the tools and the unlimited plan work together.",
 };
 
 export default function CaseStudiesPage() {
@@ -15,7 +15,7 @@ export default function CaseStudiesPage() {
       <SectionHeading
         eyebrow="Proof, not just promises"
         title="Case studies"
-        description="Illustrative examples, tagged by which tool cluster kicked things off and the metric that mattered most."
+        description="Real launches and illustrative examples, tagged by which tool cluster kicked things off."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
