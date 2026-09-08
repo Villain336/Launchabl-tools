@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, Check, Copy, Loader2, Mail, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { EmailFinderResult } from "@/lib/email-finder";
 
 export function EmailFinder() {

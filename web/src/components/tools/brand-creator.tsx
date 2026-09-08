@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Globe, Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { generateNames, type NameSuggestion } from "@/lib/brand-name-generator";
 
 type DomainResult = { domain: string; tld: string; status: "taken" | "likely-available" };

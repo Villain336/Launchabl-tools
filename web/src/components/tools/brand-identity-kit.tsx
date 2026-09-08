@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 import { faviconSvg, fontPairingForSeed, monogramSvg, paletteForSeed } from "@/lib/brand-kit";
 

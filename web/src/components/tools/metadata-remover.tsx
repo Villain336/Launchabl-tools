@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { FileImage, Loader2, ShieldCheck, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Detected = Record<string, unknown> | null;

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertCircle, Circle, Download, Mic, MicOff, Monitor, Square } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type RecorderState = "idle" | "recording" | "stopped";

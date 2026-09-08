@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Loader2, Search, X } from "lucide-react";
-import { Button, LinkButton } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/agency-button";
 
 type DomainResult = { domain: string; tld: string; status: "taken" | "likely-available" };
 

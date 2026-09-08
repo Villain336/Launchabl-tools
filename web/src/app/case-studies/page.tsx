@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/agency-badge";
 import { caseStudies } from "@/lib/case-studies";
 import { toolClusters } from "@/lib/site-config";
 

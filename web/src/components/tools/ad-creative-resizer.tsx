@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Download, Loader2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 type Preset = { id: string; label: string; width: number; height: number; group: string };

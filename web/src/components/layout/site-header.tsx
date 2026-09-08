@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Menu, Sparkles, X } from "lucide-react";
 import { clsx } from "clsx";
 import { primaryNav, siteConfig } from "@/lib/site-config";
-import { LinkButton } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/agency-button";
 import { Container } from "@/components/ui/container";
 
 export function SiteHeader() {

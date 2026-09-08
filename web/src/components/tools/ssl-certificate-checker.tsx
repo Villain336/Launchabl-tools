@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertCircle, Loader2, Lock, Search, ShieldAlert, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import type { SslResult } from "@/lib/ssl-checker";
 
 export function SslCertificateChecker() {

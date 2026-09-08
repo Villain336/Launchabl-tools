@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { AlertCircle, Download, ImageIcon, Loader2, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 
 const CHECKERBOARD_STYLE = {
