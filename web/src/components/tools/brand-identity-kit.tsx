@@ -51,32 +51,32 @@ visual identity system — real logo design, guidelines, and templates.
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
       <div>
-        <label className="text-sm font-medium text-slate-700">Brand name</label>
+        <label className="text-sm font-medium text-foreground">Brand name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Riverside Roasters"
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
 
         <div className="mt-8 grid grid-cols-2 gap-6 sm:grid-cols-3">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Palette</p>
+            <p className="text-sm font-semibold text-foreground">Palette</p>
             <div className="mt-2 flex gap-2">
               {palette.map((c) => (
                 <div key={c} className="text-center">
                   <span className="block h-10 w-10 rounded-lg" style={{ backgroundColor: c }} />
-                  <span className="mt-1 block text-[10px] text-slate-500">{c}</span>
+                  <span className="mt-1 block text-[10px] text-muted-foreground">{c}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="col-span-2 sm:col-span-2">
-            <p className="text-sm font-semibold text-slate-900">Type pairing</p>
-            <p className="mt-2 text-sm text-slate-600">
-              Headings: <span className="font-medium text-slate-900">{fonts.heading}</span>
+            <p className="text-sm font-semibold text-foreground">Type pairing</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Headings: <span className="font-medium text-foreground">{fonts.heading}</span>
               <br />
-              Body: <span className="font-medium text-slate-900">{fonts.body}</span>
+              Body: <span className="font-medium text-foreground">{fonts.body}</span>
             </p>
           </div>
         </div>
@@ -86,8 +86,8 @@ visual identity system — real logo design, guidelines, and templates.
         </Button>
       </div>
 
-      <div className="flex flex-col items-center gap-4 rounded-2xl bg-slate-50 p-6">
-        <p className="self-start text-sm font-semibold text-slate-900">Logo mark preview</p>
+      <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-6">
+        <p className="self-start text-sm font-semibold text-foreground">Logo mark preview</p>
         <div className="h-40 w-40 rounded-3xl" dangerouslySetInnerHTML={{ __html: logo }} />
       </div>
     </div>

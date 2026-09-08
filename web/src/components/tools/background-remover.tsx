@@ -77,11 +77,11 @@ export function BackgroundRemover() {
         onDragOver={(e) => e.preventDefault()}
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
-        className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/40"
+        className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-muted p-10 text-center transition-colors hover:border-primary hover:bg-accent"
       >
-        <Upload className="h-8 w-8 text-slate-400" />
-        <p className="text-sm font-medium text-slate-700">Drop an image here, or click to upload</p>
-        <p className="text-xs text-slate-500">PNG, JPG, or WebP. Processed entirely on your device — nothing is uploaded.</p>
+        <Upload className="h-8 w-8 text-muted-foreground" />
+        <p className="text-sm font-medium text-foreground">Drop an image here, or click to upload</p>
+        <p className="text-xs text-muted-foreground">PNG, JPG, or WebP. Processed entirely on your device — nothing is uploaded.</p>
       </div>
 
       {error && (
@@ -91,7 +91,7 @@ export function BackgroundRemover() {
       )}
 
       {busy && (
-        <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {progressLabel ?? "Working…"}
         </div>
@@ -100,18 +100,18 @@ export function BackgroundRemover() {
       {sourceUrl && (
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Original</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Original</p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={sourceUrl} alt="Original upload" className="w-full rounded-xl border border-slate-200" />
+            <img src={sourceUrl} alt="Original upload" className="w-full rounded-xl border border-border" />
           </div>
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Background removed</p>
-            <div className="flex min-h-[120px] items-center justify-center rounded-xl border border-slate-200" style={CHECKERBOARD_STYLE}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Background removed</p>
+            <div className="flex min-h-[120px] items-center justify-center rounded-xl border border-border" style={CHECKERBOARD_STYLE}>
               {resultUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={resultUrl} alt="Background removed" className="w-full rounded-xl" />
               ) : (
-                <ImageIcon className="h-8 w-8 text-slate-300" />
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
               )}
             </div>
             {resultBlob && (

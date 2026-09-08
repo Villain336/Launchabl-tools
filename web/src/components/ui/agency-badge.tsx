@@ -1,5 +1,14 @@
-import { clsx } from "clsx";
 import type { ReactNode } from "react";
+import { Badge as ShadcnBadge } from "@/components/ui/badge";
+
+type Tone = "default" | "success" | "warning" | "info";
+
+const toneVariant: Record<Tone, "secondary" | "success" | "warning" | "info"> = {
+  default: "secondary",
+  success: "success",
+  warning: "warning",
+  info: "info",
+};
 
 export function Badge({
   children,
@@ -7,26 +16,13 @@ export function Badge({
   className,
 }: {
   children: ReactNode;
-  tone?: "default" | "success" | "warning" | "info";
+  tone?: Tone;
   className?: string;
 }) {
-  const tones: Record<string, string> = {
-    default: "bg-slate-100 text-slate-700",
-    success: "bg-emerald-100 text-emerald-700",
-    warning: "bg-amber-100 text-amber-800",
-    info: "bg-indigo-100 text-indigo-700",
-  };
-
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-        tones[tone],
-        className,
-      )}
-    >
+    <ShadcnBadge variant={toneVariant[tone]} className={className}>
       {children}
-    </span>
+    </ShadcnBadge>
   );
 }
 

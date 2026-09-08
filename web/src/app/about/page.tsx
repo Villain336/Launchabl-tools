@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "About",
@@ -26,6 +28,13 @@ const principles = [
   },
 ];
 
+const queueSteps = [
+  { number: "01", title: "Submit a request", body: "Describe what you need — a page, a campaign, a fix — in plain language." },
+  { number: "02", title: "It joins the queue", body: "You can see exactly where your request sits and what's ahead of it." },
+  { number: "03", title: "We deliver, you review", body: "Revisions are unlimited on any active request until you're happy." },
+  { number: "04", title: "Submit the next one", body: "There's always a next one — that's what \"unlimited\" means here." },
+];
+
 export default function AboutPage() {
   return (
     <Container className="py-16 sm:py-24">
@@ -35,23 +44,32 @@ export default function AboutPage() {
         description="We built Launchable because most marketing agencies are either too expensive to try or too generic to trust. We wanted something a solo founder and a growing team could both rely on."
       />
 
-      <div className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2">
+      <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {principles.map((p) => (
-          <div key={p.title} className="rounded-2xl border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-900">{p.title}</h3>
-            <p className="mt-2 text-sm text-slate-600">{p.body}</p>
-          </div>
+          <Card key={p.title} className="p-6">
+            <CardHeader className="p-0">
+              <CardTitle className="text-lg font-semibold">{p.title}</CardTitle>
+              <CardDescription className="mt-1">{p.body}</CardDescription>
+            </CardHeader>
+          </Card>
         ))}
       </div>
 
-      <div className="mt-16 rounded-3xl bg-slate-50 p-10">
-        <h3 className="text-2xl font-bold text-slate-900">How the queue works</h3>
-        <ol className="mt-6 space-y-4 text-sm text-slate-700">
-          <li><strong>1. Submit a request.</strong> Describe what you need — a page, a campaign, a fix — in plain language.</li>
-          <li><strong>2. It joins the queue.</strong> You can see exactly where your request sits and what&apos;s ahead of it.</li>
-          <li><strong>3. We deliver, you review.</strong> Revisions are unlimited on any active request until you&apos;re happy.</li>
-          <li><strong>4. Submit the next one.</strong> There&apos;s always a next one — that&apos;s what &ldquo;unlimited&rdquo; means here.</li>
-        </ol>
+      <div className="mt-16">
+        <h3 className="text-2xl font-bold text-foreground">How the queue works</h3>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {queueSteps.map((step) => (
+            <Card key={step.number} className="relative p-6">
+              <Badge variant="secondary" className="absolute top-6 right-6 font-mono text-xs tabular-nums">
+                {step.number}
+              </Badge>
+              <CardHeader className="p-0">
+                <CardTitle className="text-base font-semibold">{step.title}</CardTitle>
+                <CardDescription className="mt-2">{step.body}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
       </div>
     </Container>
   );

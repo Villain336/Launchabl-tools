@@ -68,7 +68,7 @@ export function FileConverter() {
             key={d}
             onClick={() => setDirection(d)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              direction === d ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              direction === d ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/70"
             }`}
           >
             {d === "csv-to-json" ? "CSV → JSON" : "JSON → CSV"}
@@ -79,8 +79,8 @@ export function FileConverter() {
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-700">Input</label>
-            <label className="flex cursor-pointer items-center gap-1 text-xs font-medium text-indigo-600">
+            <label className="text-sm font-medium text-foreground">Input</label>
+            <label className="flex cursor-pointer items-center gap-1 text-xs font-medium text-primary">
               <Upload className="h-3.5 w-3.5" /> Upload file
               <input
                 type="file"
@@ -95,16 +95,16 @@ export function FileConverter() {
             onChange={(e) => setInput(e.target.value)}
             rows={10}
             placeholder={direction === "csv-to-json" ? "name,email\nJane,jane@example.com" : '[{"name":"Jane","email":"jane@example.com"}]'}
-            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+            className="mt-2 w-full rounded-lg border border-border px-3 py-2 font-mono text-xs outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-slate-700">Output</label>
+          <label className="text-sm font-medium text-foreground">Output</label>
           <textarea
             readOnly
             value={output}
             rows={10}
-            className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs outline-none"
+            className="mt-2 w-full rounded-lg border border-border bg-muted px-3 py-2 font-mono text-xs outline-none"
           />
         </div>
       </div>
@@ -127,13 +127,13 @@ export function FileConverter() {
         </Button>
       </div>
 
-      <div className="mt-8 rounded-xl bg-slate-50 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Format roadmap</p>
-        <ul className="mt-3 space-y-2 text-sm text-slate-600">
+      <div className="mt-8 rounded-xl bg-muted p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Format roadmap</p>
+        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
           {roadmap.map((r) => (
             <li key={r.pair} className="flex justify-between gap-4">
-              <span className="font-medium text-slate-800">{r.pair}</span>
-              <span className="text-right text-xs text-slate-500">{r.status}</span>
+              <span className="font-medium text-foreground">{r.pair}</span>
+              <span className="text-right text-xs text-muted-foreground">{r.status}</span>
             </li>
           ))}
         </ul>

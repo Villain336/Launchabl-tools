@@ -115,12 +115,12 @@ export function WhiteLabelReportBuilder() {
         <div className="grid grid-cols-2 gap-4">
           <Field label="Your agency name" value={agencyName} onChange={setAgencyName} />
           <div>
-            <label className="text-sm font-medium text-slate-700">Accent color</label>
+            <label className="text-sm font-medium text-foreground">Accent color</label>
             <input
               type="color"
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-slate-200"
+              className="mt-2 h-10 w-full rounded-lg border border-border"
             />
           </div>
         </div>
@@ -133,18 +133,18 @@ export function WhiteLabelReportBuilder() {
 
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-700">Key findings</label>
+            <label className="text-sm font-medium text-foreground">Key findings</label>
             <button
               type="button"
               onClick={() => setFindings([...findings, { title: "", detail: "", severity: "warning" }])}
-              className="flex items-center gap-1 text-xs font-medium text-indigo-600"
+              className="flex items-center gap-1 text-xs font-medium text-primary"
             >
               <Plus className="h-3.5 w-3.5" /> Add finding
             </button>
           </div>
           <div className="mt-2 space-y-3">
             {findings.map((f, i) => (
-              <div key={i} className="rounded-lg border border-slate-200 p-3">
+              <div key={i} className="rounded-lg border border-border p-3">
                 <div className="flex gap-2">
                   <input
                     value={f.title}
@@ -154,7 +154,7 @@ export function WhiteLabelReportBuilder() {
                       next[i] = { ...next[i], title: e.target.value };
                       setFindings(next);
                     }}
-                    className="flex-1 rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-indigo-400"
+                    className="flex-1 rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
                   />
                   <select
                     value={f.severity}
@@ -163,13 +163,13 @@ export function WhiteLabelReportBuilder() {
                       next[i] = { ...next[i], severity: e.target.value as Finding["severity"] };
                       setFindings(next);
                     }}
-                    className="rounded-md border border-slate-200 px-2 py-1.5 text-xs outline-none"
+                    className="rounded-md border border-border px-2 py-1.5 text-xs outline-none"
                   >
                     <option value="critical">Critical</option>
                     <option value="warning">Warning</option>
                     <option value="info">Info</option>
                   </select>
-                  <button onClick={() => setFindings(findings.filter((_, idx) => idx !== i))} className="text-slate-400 hover:text-red-500">
+                  <button onClick={() => setFindings(findings.filter((_, idx) => idx !== i))} className="text-muted-foreground hover:text-red-500">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -181,7 +181,7 @@ export function WhiteLabelReportBuilder() {
                     next[i] = { ...next[i], detail: e.target.value };
                     setFindings(next);
                   }}
-                  className="mt-2 w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-indigo-400"
+                  className="mt-2 w-full rounded-md border border-border px-2 py-1.5 text-sm outline-none focus:border-ring"
                 />
               </div>
             ))}
@@ -209,8 +209,8 @@ export function WhiteLabelReportBuilder() {
       </div>
 
       <div>
-        <p className="text-sm font-medium text-slate-700">Live preview</p>
-        <iframe title="Report preview" srcDoc={html} className="mt-2 h-[600px] w-full rounded-xl border border-slate-200 bg-white" />
+        <p className="text-sm font-medium text-foreground">Live preview</p>
+        <iframe title="Report preview" srcDoc={html} className="mt-2 h-[600px] w-full rounded-xl border border-border bg-white" />
       </div>
     </div>
   );
@@ -231,19 +231,19 @@ function Field({
 }) {
   return (
     <div>
-      <label className="text-sm font-medium text-slate-700">{label}</label>
+      <label className="text-sm font-medium text-foreground">{label}</label>
       {textarea ? (
         <textarea
           value={value}
           rows={rows}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+          className="mt-2 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       )}
     </div>

@@ -4,12 +4,13 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Badge } from "@/components/ui/agency-badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { caseStudies } from "@/lib/case-studies";
 import { toolClusters } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Case Studies",
-  description: "Real clients, real numbers — how the tools and the unlimited plan work together.",
+  description: "Illustrative examples of how the tools and the unlimited plan work together.",
 };
 
 export default function CaseStudiesPage() {
@@ -18,31 +19,33 @@ export default function CaseStudiesPage() {
       <SectionHeading
         eyebrow="Proof, not just promises"
         title="Case studies"
-        description="Every case study is tagged by which tool cluster kicked things off and the metric that mattered most to that client."
+        description="Illustrative examples, tagged by which tool cluster kicked things off and the metric that mattered most."
       />
 
-      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {caseStudies.map((study) => {
           const cluster = toolClusters.find((c) => c.slug === study.toolCluster);
           return (
-            <Link
-              key={study.slug}
-              href={`/case-studies/${study.slug}`}
-              className="group flex flex-col rounded-2xl border border-slate-200 p-6 transition-all hover:border-indigo-300 hover:shadow-md"
-            >
-              {cluster && <Badge tone="info">{cluster.name}</Badge>}
-              <h3 className="mt-3 text-lg font-semibold text-slate-900 group-hover:text-indigo-600">
-                {study.client}
-              </h3>
-              <p className="text-xs uppercase tracking-wide text-slate-500">{study.industry}</p>
-              <p className="mt-3 text-sm text-slate-600">{study.summary}</p>
-              <div className="mt-4 rounded-lg bg-slate-50 px-3 py-2">
-                <p className="text-2xl font-bold text-indigo-600">{study.metric.value}</p>
-                <p className="text-xs text-slate-500">{study.metric.label}</p>
-              </div>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-indigo-600">
-                Read case study <ArrowRight className="h-3.5 w-3.5" />
-              </span>
+            <Link key={study.slug} href={`/case-studies/${study.slug}`} className="group block h-full">
+              <Card className="h-full justify-between p-6 transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30">
+                <div>
+                  <CardHeader className="gap-2 p-0">
+                    {cluster && <Badge tone="info">{cluster.name}</Badge>}
+                    <CardTitle className="mt-1 text-lg font-semibold transition-colors group-hover:text-primary">
+                      {study.client}
+                    </CardTitle>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{study.industry}</p>
+                    <CardDescription>{study.summary}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-4 rounded-lg bg-muted px-3 py-2">
+                    <p className="text-2xl font-bold text-primary">{study.metric.value}</p>
+                    <p className="text-xs text-muted-foreground">{study.metric.label}</p>
+                  </CardContent>
+                </div>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  Read case study <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Card>
             </Link>
           );
         })}
