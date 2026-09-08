@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, CircleHelp } from "lucide-react";
 import { WorkflowCanvas } from "@/components/approvals-ui/workflow-canvas";
-import { ToolStatusBadge } from "@/components/ui/agency-badge";
 import { Button } from "@/components/ui/agency-button";
 import { LinkButton } from "@/components/ui/agency-button";
 import { Card } from "@/components/ui/card";
@@ -19,12 +19,6 @@ import FaqsBlock from "@/components/blocks/faqs-1";
 import type { Tool } from "@/lib/site-config";
 import { useDeliveryRunOrThrow } from "@/components/tools/delivery-run";
 
-const processingLabel: Record<Tool["processing"], string> = {
-  client: "in-browser",
-  server: "server",
-  partner: "partner",
-};
-
 export function AgentStudio({
   tool,
   about,
@@ -36,6 +30,21 @@ export function AgentStudio({
 }) {
   const run = useDeliveryRunOrThrow();
   const [infoOpen, setInfoOpen] = useState(false);
+  const [fallback, setFallback] = useState<HTMLDivElement | null>(null);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  const hostStepRef = useRef<string | null>(null);
+
+  const onWorkbenchHost = useCallback((stepId: string, el: HTMLElement | null) => {
+    if (el) {
+      hostStepRef.current = stepId;
+      setHost(el);
+      return;
+    }
+    if (hostStepRef.current === stepId) {
+      hostStepRef.current = null;
+      setHost(null);
+    }
+  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -45,26 +54,42 @@ export function AgentStudio({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
   const selectedId = run.delivered ? "deliver" : run.dockId;
+  const target = host ?? fallback;
 
   return (
-    <div className="flex min-h-[calc(100dvh-8rem)] flex-col bg-background">
-      <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
+    <div className="fixed inset-0 z-50 bg-background">
+      <div
+        ref={setFallback}
+        hidden
+        className="hidden"
+        aria-hidden
+      />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between p-4">
         <Link
           href="/tools"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-sm text-foreground shadow-sm hover:bg-muted"
         >
-          <ArrowLeft className="h-4 w-4" /> Tools
+          <ArrowLeft className="h-4 w-4" />
+          Tools
         </Link>
-        <h1 className="text-sm font-semibold text-foreground sm:text-base">{tool.name}</h1>
-        <ToolStatusBadge status={tool.status} />
-        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-          {processingLabel[tool.processing]}
-        </span>
-        <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setInfoOpen(true)} aria-label="About this tool">
+        <div className="pointer-events-auto flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setInfoOpen(true)}
+            aria-label={`About ${tool.name}`}
+          >
             <CircleHelp className="h-4 w-4" />
-            <span className="ml-1 hidden sm:inline">About</span>
           </Button>
           <Button variant="secondary" size="sm" onClick={run.reset}>
             Reset
@@ -72,29 +97,24 @@ export function AgentStudio({
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[58%_42%]">
-        <div className="h-[280px] border-b border-border md:h-auto md:border-r md:border-b-0">
-          <WorkflowCanvas
-            policy={run.policy}
-            direction="LR"
-            nodeSep={36}
-            rankSep={72}
-            selectedId={selectedId}
-            statuses={run.statuses}
-            onSelectStep={(id) => {
-              if (!id) return;
-              const status = run.statuses[id];
-              if (status === "approved" || status === "pending") run.setDockId(id);
-            }}
-          />
-        </div>
-        <div className="min-h-[320px] overflow-y-auto p-4 sm:p-6">
-          <p className="mb-4 text-xs font-semibold tracking-[0.2em] text-primary uppercase">
-            {run.policy.steps.find((step) => step.id === run.dockId)?.label ?? "Run"}
-          </p>
-          {children}
-        </div>
-      </div>
+      <WorkflowCanvas
+        policy={run.policy}
+        direction="LR"
+        variant="studio"
+        nodeSep={48}
+        rankSep={160}
+        selectedId={selectedId}
+        workbenchStepId={run.dockId}
+        onWorkbenchHost={onWorkbenchHost}
+        statuses={run.statuses}
+        onSelectStep={(id) => {
+          if (!id) return;
+          const status = run.statuses[id];
+          if (status === "approved" || status === "pending") run.setDockId(id);
+        }}
+      />
+
+      {target ? createPortal(children, target) : null}
 
       <Sheet open={infoOpen} onOpenChange={setInfoOpen}>
         <SheetContent side="right" className="overflow-y-auto">

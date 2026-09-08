@@ -57,13 +57,26 @@ export type WorkflowCanvasProps = {
   onHoverStep?: (stepId: string | null) => void;
   /** Pass a fresh object to pan the viewport to a step. */
   focus?: { stepId: string } | null;
+  /** Studio: hide ticket chrome and host the run on the active node. */
+  variant?: "default" | "studio";
+  workbenchStepId?: string | null;
+  onWorkbenchHost?: (stepId: string, el: HTMLElement | null) => void;
   className?: string;
   children?: React.ReactNode;
 };
 
 const buildNodes = (
   policy: ApprovalPolicy,
-  props: Pick<WorkflowCanvasProps, "changes" | "issues" | "statuses" | "selectedId">,
+  props: Pick<
+    WorkflowCanvasProps,
+    | "changes"
+    | "issues"
+    | "statuses"
+    | "selectedId"
+    | "variant"
+    | "workbenchStepId"
+    | "onWorkbenchHost"
+  >,
   isVertical: boolean
 ): CanvasNode[] => {
   const changes = props.changes ?? [];
@@ -95,6 +108,9 @@ const buildNodes = (
       status: props.statuses?.[step.id],
       selected: props.selectedId === step.id,
       vertical: isVertical,
+      studio: props.variant === "studio",
+      workbenchActive: props.workbenchStepId === step.id,
+      onWorkbenchHost: props.onWorkbenchHost,
     };
     if (step.kind === "terminal") {
       return {
@@ -148,14 +164,33 @@ const CanvasInner = ({
   onSelectStep,
   onHoverStep,
   focus,
+  variant,
+  workbenchStepId,
+  onWorkbenchHost,
   children,
 }: WorkflowCanvasProps) => {
   const isVertical = direction !== "LR";
   const reactFlow = useReactFlow();
+  const studio = variant === "studio";
 
   const sourceNodes = useMemo<Node[]>(
-    () => buildNodes(policy, { changes, issues, statuses, selectedId }, isVertical),
-    [policy, changes, issues, statuses, selectedId, isVertical]
+    () =>
+      buildNodes(
+        policy,
+        { changes, issues, statuses, selectedId, variant, workbenchStepId, onWorkbenchHost },
+        isVertical
+      ),
+    [
+      policy,
+      changes,
+      issues,
+      statuses,
+      selectedId,
+      variant,
+      workbenchStepId,
+      onWorkbenchHost,
+      isVertical,
+    ]
   );
   const sourceEdges = useMemo(() => buildEdges(policy), [policy]);
 
@@ -165,19 +200,25 @@ const CanvasInner = ({
     vertical: isVertical,
     nodeSep,
     rankSep,
-    defaultWidth: 256,
-    defaultHeight: 112,
+    defaultWidth: studio ? 512 : 256,
+    defaultHeight: studio ? 220 : 112,
     fitViewOnLayout: true,
-    fitViewOptions: { padding: 0.16, maxZoom: 0.75, minZoom: 0.15 },
+    fitViewOptions: studio
+      ? { padding: 0.18, maxZoom: 1.05, minZoom: 0.2 }
+      : { padding: 0.16, maxZoom: 0.75, minZoom: 0.15 },
   });
 
   useEffect(() => {
     if (!isLaidOut) return;
     const id = window.setTimeout(() => {
-      void reactFlow.fitView({ padding: 0.16, maxZoom: 0.75, minZoom: 0.15, duration: 240 });
+      void reactFlow.fitView(
+        studio
+          ? { padding: 0.18, maxZoom: 1.05, minZoom: 0.2, duration: 240 }
+          : { padding: 0.16, maxZoom: 0.75, minZoom: 0.15, duration: 240 }
+      );
     }, 80);
     return () => window.clearTimeout(id);
-  }, [isLaidOut, reactFlow]);
+  }, [isLaidOut, reactFlow, studio, workbenchStepId]);
 
   useEffect(() => {
     if (!focus) return;

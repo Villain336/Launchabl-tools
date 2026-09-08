@@ -25,6 +25,10 @@ export type ApprovalNodeData = {
   vertical?: boolean;
   hasIncoming?: boolean;
   hasOutgoing?: boolean;
+  /** Hide ticket chrome so the node is a work surface, not a card under the graph. */
+  studio?: boolean;
+  workbenchActive?: boolean;
+  onWorkbenchHost?: (stepId: string, el: HTMLElement | null) => void;
   [key: string]: unknown;
 };
 
@@ -103,11 +107,15 @@ export const ApprovalNode = ({ data }: NodeProps<ApprovalFlowNode>) => {
   const isVertical = data.vertical !== false;
   const condition = humanizeCondition(step.when);
   const keys = useMemo(() => approverKeys(step.approvers), [step.approvers]);
+  const workbenchActive = Boolean(data.workbenchActive);
+  const hideChrome = Boolean(data.studio);
+  const onWorkbenchHost = data.onWorkbenchHost;
 
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground w-64 cursor-pointer rounded-xl border shadow-sm",
+        "bg-card text-card-foreground cursor-pointer rounded-xl border shadow-sm",
+        workbenchActive ? "w-[32rem] max-w-[min(32rem,calc(100vw-2rem))]" : hideChrome ? "w-44" : "w-64",
         data.status === "skipped" && "opacity-45",
         stateRing(data)
       )}
@@ -120,12 +128,12 @@ export const ApprovalNode = ({ data }: NodeProps<ApprovalFlowNode>) => {
         />
       )}
 
-      <div className="space-y-1 px-3.5 pt-3">
+      <div className="space-y-1 px-3.5 pt-3 pb-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm leading-tight font-medium">{step.label}</p>
-          {data.status && <StatusBadge status={data.status} />}
+          {data.status && !hideChrome && <StatusBadge status={data.status} />}
         </div>
-        {condition !== "always" && (
+        {condition !== "always" && !hideChrome && (
           <Badge
             variant="outline"
             className="text-muted-foreground max-w-full font-mono text-[10px] font-normal"
@@ -135,34 +143,47 @@ export const ApprovalNode = ({ data }: NodeProps<ApprovalFlowNode>) => {
         )}
       </div>
 
-      <div className="space-y-1.5 px-3.5 py-3">
-        {step.approvers.map((approver, index) => (
-          <div key={keys[index]} className="flex items-center gap-2">
-            {approver.name === null ? (
-              <span className="border-muted-foreground/50 text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full border border-dashed">
-                <UserRound className="size-3" />
-              </span>
-            ) : (
-              <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium">
-                {initials(approver.name)}
-              </span>
-            )}
-            <div className="min-w-0 leading-tight">
-              <p
-                className={cn(
-                  "truncate text-xs",
-                  approver.name === null && "text-muted-foreground italic"
-                )}
-              >
-                {approver.name ?? "Unassigned"}
-              </p>
-              <p className="text-muted-foreground truncate text-[10px]">{approver.title}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      {workbenchActive && (
+        <div
+          ref={(el) => {
+            if (!el) return;
+            onWorkbenchHost?.(step.id, el);
+            return () => onWorkbenchHost?.(step.id, null);
+          }}
+          className="nowheel nodrag nopan max-h-[62vh] overflow-y-auto border-t border-border px-3.5 py-3"
+        />
+      )}
 
-      {(step.approvers.length > 1 || step.sla) && (
+      {!hideChrome && (
+        <div className="space-y-1.5 px-3.5 py-3">
+          {step.approvers.map((approver, index) => (
+            <div key={keys[index]} className="flex items-center gap-2">
+              {approver.name === null ? (
+                <span className="border-muted-foreground/50 text-muted-foreground flex size-6 shrink-0 items-center justify-center rounded-full border border-dashed">
+                  <UserRound className="size-3" />
+                </span>
+              ) : (
+                <span className="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-medium">
+                  {initials(approver.name)}
+                </span>
+              )}
+              <div className="min-w-0 leading-tight">
+                <p
+                  className={cn(
+                    "truncate text-xs",
+                    approver.name === null && "text-muted-foreground italic"
+                  )}
+                >
+                  {approver.name ?? "Unassigned"}
+                </p>
+                <p className="text-muted-foreground truncate text-[10px]">{approver.title}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!hideChrome && (step.approvers.length > 1 || step.sla) && (
         <div className="flex flex-wrap items-center gap-1.5 border-t px-3.5 py-2">
           {step.approvers.length > 1 && (
             <Badge variant="secondary" className="text-[10px] font-normal">
