@@ -3,7 +3,8 @@
 Date: 2026-09-08
 Status: direction (not an implementation plan)
 Audience: founders, marketers, freelancers, and small agencies — not developer-tool-calling users
-Depends on: `docs/superpowers/specs/2026-09-08-agent-approval-studio-design.md`
+Depends on: `docs/superpowers/specs/2026-09-08-agent-approval-studio-design.md`  
+Capability catalog (what the agent may do, tools, APIs): `docs/superpowers/specs/2026-09-08-agent-capability-catalog.md`
 
 ---
 
@@ -149,6 +150,8 @@ Anonymous free runs: no outbound API, no publish connections, still have Approve
 8. MCP for the same jobs, for operators who already live in an IDE.
 
 Each step is still a diagnostic that points at the unlimited plan. That is the strategy, unchanged.
+
+Must-have packs (research, images, marketing-site code, SEO, accuracy/efficiency) and the service-coverage matrix live in the capability catalog. This document stays the platform shape; that one stays the "what it is allowed to do."
 
 ## Success test
 

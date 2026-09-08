@@ -10,6 +10,8 @@ origin: docs/superpowers/specs/2026-09-08-agent-approval-studio-design.md
 
 # Agent Run Studio for delivery tools
 
+Capabilities the studio must eventually host (images, marketing-site code, SEO, research, accuracy) are catalogued in `docs/superpowers/specs/2026-09-08-agent-capability-catalog.md`. This plan still only ships the studio kernel on the 10 existing delivery tools.
+
 ## Goal Capsule
 
 Turn the 10 approval-gated Launchabl tools into a CrewAI-style run studio: the approval DAG is the entire work surface, skills fire as visible tool calls, and export stays locked until the operator approves.
