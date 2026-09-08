@@ -18,9 +18,19 @@ Then open [http://localhost:3000](http://localhost:3000).
 ## What's implemented
 
 - Marketing pages: Home, Solutions, Pricing, About, Case Studies, Roadmap, Blog, Legal
-- Tools hub (`/tools`) with search + outcome-based filtering
-- Fully functional, client-side tools: Metadata Remover, Image Converter, QR Code Generator, Watermark Generator, Schema Markup Generator
-- Working demo/beta tools with clear "production" architecture notes: Brand Creator (+ domain availability check), standalone Domain Availability search, AI Copywriter
-- Architecture-ready stubs for the remaining flagship tools: Watermark Remover (ownership-attestation gated), File Converter (CSV/JSON live, heavier formats roadmapped), Domain Purchase, Hosting
+- Tools hub (`/tools`) with search + outcome-based filtering across 5 clusters, 22 tools total
 
-See `docs/STRATEGY.md` §5 for the reasoning behind what's fully built vs. stubbed, and what each stub needs to go live.
+**Flagship tools (light, single-action):**
+- Fully functional, client-side: Metadata Remover, Image Converter, QR Code Generator, Watermark Generator, Schema Markup Generator
+- Working demo/beta with clear "production" architecture notes: Brand Creator (+ domain availability check), standalone Domain Availability search, AI Copywriter
+- Architecture-ready stubs: Watermark Remover (ownership-attestation gated), File Converter (CSV/JSON live, heavier formats roadmapped), Domain Purchase, Hosting
+
+**Heavy tools (multi-part audits, kits & reports — see `docs/STRATEGY.md` §11):**
+- Website Audit Report, Landing Page Conversion Grader, Competitor Gap Report — share one server-side fetch + scoring engine (`src/lib/site-audit.ts`) against real, live URLs
+- DNS & Email Deliverability Health Check — real SPF/DKIM/DMARC/MX lookups via Node's `dns` module
+- Full Brand Identity Kit — generated logo mark, favicon, palette, and type pairing bundled as a downloadable zip
+- Ad Creative Resizer — one image in, a zip of every major ad platform's creative size out, entirely client-side
+- Content & Campaign Calendar Generator, Local SEO / Google Business Profile Optimizer, Sitemap & Robots.txt Generator
+- White-Label Client Report Builder — composes findings from the other tools into one polished, brandable report/proposal
+
+See `docs/STRATEGY.md` §5 and §11 for the reasoning behind what's fully built vs. stubbed, and what each stub needs to go live.

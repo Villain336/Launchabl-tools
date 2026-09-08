@@ -173,10 +173,39 @@ Grouped by build complexity so the roadmap is realistic. "Client-only" tools can
 
 **Phase 3:** File converter (server workers), domain purchase + hosting (reseller/affiliate integration), watermark remover (with attestation/legal framework), public roadmap + voting.
 
-**Phase 4:** Programmatic SEO expansion (more tools per cluster), team/agency features on the Vault, referral program.
+**Phase 4:** The heavy-tools tier (§11) — Website Audit Report, Landing Page Grader, Competitor Gap Report, DNS & Email Health Check, Full Brand Identity Kit, Ad Creative Resizer, Content & Campaign Calendar, Local SEO Optimizer, Sitemap & Robots Generator, White-Label Client Report Builder.
+
+**Phase 5:** Programmatic SEO expansion (more tools per cluster), team/agency features on the Vault, referral program.
 
 ---
 
-## 10. What "unique" ultimately means here
+## 10. What "unique" ultimately means here (first 12 tools)
 
-The tools alone are commoditized (every one of the 12 exists elsewhere, often free). The agency alone is commoditized (Design Joy has direct clones already). The thing that can't be easily cloned is the **connective tissue**: outcome-based organization, a shared account/Vault across every tool, diagnostic-style results that point at real gaps in the user's brand, and a visible, public roadmap that makes the platform feel alive. Build the scaffold so every new tool automatically inherits that connective tissue (same template, same Vault hook, same upsell pattern) rather than being a one-off page — that consistency *is* the moat.
+The tools alone are commoditized (every one of the 12 exists elsewhere, often free). The agency alone is commoditized (Design Joy has direct clones already). The thing that can't be easily cloned is the **connective tissue**: outcome-based organization, a shared account/Vault across every tool, diagnostic-style results that point at real gaps in the user's brand, and a visible, public roadmap that makes the platform feel alive. Build the scaffold so every new tool automatically inherits that connective tissue (same template, same Vault hook, same upsell pattern) rather than being a one-off page — that consistency *is* the moat. §11 below is where that moat gets sharper: a second tier of tools the connective tissue alone can't fake.
+
+---
+
+## 11. The "heavy tools" tier — a second, deliberately harder-to-clone layer
+
+Everything in §5 is a **single-action utility**: upload one thing, get one thing back, in seconds. That's the right MVP — it's cheap to build and easy to use — but it's also exactly what every tool aggregator on the internet already offers, so it converges on a commodity. The genuine moat isn't in shipping more single-action tools; it's in shipping a second tier that generic tool sites structurally can't or won't build, because it requires composing several checks into a judgment call, not just transforming a file.
+
+**The dividing line:** a light tool answers "convert/generate this one thing." A heavy tool answers "tell me something true and specific about my situation that I didn't already know, and hand me a deliverable I can act on or send to someone." That second kind requires domain logic — the actual expertise the agency sells — encoded into the tool. It's also, not coincidentally, a much stronger and more specific upsell surface than a generic converter ever could be.
+
+Ten heavy tools, added as a fifth cluster — **Audits, kits & reports**:
+
+| Tool | What makes it "heavy" | MVP build approach |
+|---|---|---|
+| **Website Audit Report** | Fetches a real URL server-side and scores it across a dozen SEO/technical signals (title, meta, schema, viewport, HTTPS, image alt coverage, word count, load time) — a genuine multi-part report, not a single check. | Server route fetches + parses HTML with regex/lightweight parsing (no headless browser needed for v1); returns a scored checklist. |
+| **Landing Page Conversion Grader** | Reuses the audit engine but re-weights the signals toward conversion (CTA keyword density, form count, phone number presence, above-fold heuristics) — same data, a completely different judgment layer on top. | Same fetch/parse engine as the audit tool, different scoring function client-side. |
+| **Competitor Gap Report** | Runs the same engine against your site *and* up to three competitor URLs, side by side — no generic tool site does comparative analysis, because it requires holding multiple results in tension, not just one. | Fan out the same audit call to N URLs; render a diff table. |
+| **DNS & Email Deliverability Health Check** | Real SPF/DKIM/DMARC/MX lookups against a live domain — the kind of technical check marketers usually have to ask a developer for. | Server route using Node's `dns` module (`resolveTxt`, `resolveMx`); no third-party API needed for a first pass. |
+| **Full Brand Identity Kit** | Goes past "here's a name" (§2.1's Brand Creator) to an actual downloadable kit: a generated monogram/wordmark mark, favicon, and brand guideline export — a deliverable, not a suggestion. | Procedurally generate an SVG mark from initials + the existing palette generator; bundle as a zip client-side. |
+| **Ad Creative Resizer** | One upload in, a full set of platform-correct creative sizes out (Instagram feed/story, Facebook, LinkedIn, Google display, etc.) as a single downloadable zip — a batch deliverable, not a one-off. | Canvas-based crop/resize per preset, bundled client-side with a zip library; zero server cost. |
+| **Content & Campaign Calendar Generator** | A 30-day, multi-channel plan (not a single caption) tailored to business type and goal, exportable as CSV so it drops straight into a planning tool. | Deterministic template engine client-side (same pattern as the Copywriter), swappable for an LLM later. |
+| **Local SEO / Google Business Profile Optimizer** | Produces a full local-presence package — GBP description, category suggestions, Q&A starters, review-response templates — not just one piece of copy. | Template engine client-side; production version would layer in a real GBP API check. |
+| **Sitemap & Robots.txt Generator** | Takes a real list of a site's URLs and produces a validated `sitemap.xml` and `robots.txt` pair, not a single boilerplate file. | Client-side generation from a pasted/uploaded URL list; a later version adds live crawling server-side. |
+| **White-Label Client Report Builder** | The clearest expression of the platform's actual moat: it composes the *outputs of other tools* (audit findings, brand kit, competitor gap) into one polished, brandable report or proposal a freelancer/agency can send to a client. No tool aggregator can build this, because it requires the connective tissue described in §2.2 and §10 to already exist. | Client-side composer that accepts pasted findings/inputs and renders a printable, brand-colored HTML report. |
+
+**Why this tier is the actual differentiator, not the first 12 tools:** a single-action tool is a commodity the moment a competitor copies the UI. A tool that fetches real data, applies a judgment/scoring layer, and hands back a multi-part deliverable requires the same kind of synthesis work the agency itself sells — which means every heavy tool is simultaneously (a) a genuinely hard-to-clone product feature and (b) a live demonstration of the exact expertise the unlimited plan is selling. The White-Label Report Builder in particular should be read as a preview of what §2.2's "Brand Vault" becomes once accounts exist: a place where tool outputs compound into something no single tool visit could produce alone.
+
+**Sequencing within the tier:** ship the three tools that share the audit engine first (Website Audit Report → Landing Page Grader → Competitor Gap Report) since they're one build amortized three ways, then DNS Health (isolated, zero shared code, fast to ship), then the client-side batch/kit tools (Ad Creative Resizer, Brand Identity Kit), then the template-driven planning tools (Content Calendar, Local SEO Optimizer), then Sitemap/Robots (needs real URLs, so benefits from users already having run an audit), and the White-Label Report Builder last, since it's most valuable once there's real tool output to compose.

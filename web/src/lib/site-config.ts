@@ -49,6 +49,12 @@ export const toolClusters: ToolCluster[] = [
     name: "Convert & ship",
     description: "Turn files into the format you actually need, in the browser, in seconds.",
   },
+  {
+    slug: "audits-reports",
+    name: "Audits, kits & reports",
+    description:
+      "Heavier, multi-part deliverables — real audits, brand kits, and reports other free tool sites don't attempt.",
+  },
 ];
 
 export type ToolStatus = "live" | "beta" | "coming-soon";
@@ -292,6 +298,194 @@ export const tools: Tool[] = [
         question: "Do these QR codes expire?",
         answer:
           "No — these are static codes generated entirely in your browser. They point directly at your link forever, with no tracking or expiry.",
+      },
+    ],
+  },
+
+  // --- Heavy tools: audits, kits & reports ----------------------------------
+  {
+    slug: "website-audit-report",
+    name: "Website Audit Report",
+    shortDescription:
+      "Fetch a real URL and get a scored, multi-part report across SEO, structured data, and technical basics.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A score is a start. Fixing it is the plan.",
+      body: "Unlimited plan members get every issue in this report actually fixed across their whole site, not just flagged.",
+    },
+    faq: [
+      {
+        question: "Does this crawl my whole site?",
+        answer:
+          "No — this audits a single URL you provide. It fetches the live page server-side and scores it; nothing is stored beyond the request.",
+      },
+      {
+        question: "Why didn't it detect content rendered by JavaScript?",
+        answer:
+          "This tool reads the raw HTML response, so content injected client-side by JavaScript frameworks after load may not appear in the audit. A production crawler would add headless-browser rendering to catch this.",
+      },
+    ],
+  },
+  {
+    slug: "landing-page-grader",
+    name: "Landing Page Conversion Grader",
+    shortDescription:
+      "Score a landing page against real conversion best practices — CTAs, forms, trust signals, and speed.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A grade tells you what's wrong. We fix it.",
+      body: "Unlimited plan members get the page rebuilt and A/B tested, not just graded.",
+    },
+    faq: [
+      {
+        question: "How is this different from the Website Audit Report?",
+        answer:
+          "Same underlying fetch, a completely different scoring lens — this one weighs conversion signals (calls to action, forms, phone numbers, trust signals) instead of general SEO health.",
+      },
+    ],
+  },
+  {
+    slug: "competitor-gap-report",
+    name: "Competitor Gap Report",
+    shortDescription: "Compare your site against up to three competitors, side by side, on the same signals.",
+    cluster: "audits-reports",
+    status: "beta",
+    processing: "server",
+    upsell: {
+      headline: "Seeing the gap is easy. Closing it is the work.",
+      body: "Unlimited plan members get a full strategy built around exactly where they're behind — and stay ahead as competitors change.",
+    },
+    faq: [
+      {
+        question: "How many competitors can I compare?",
+        answer: "Up to three competitor URLs against your own, four total, in a single report.",
+      },
+    ],
+  },
+  {
+    slug: "dns-email-health",
+    name: "DNS & Email Deliverability Health Check",
+    shortDescription: "Real SPF, DKIM, DMARC, and MX checks for your domain — the kind you'd normally ask a developer for.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Failing checks here means real emails land in spam.",
+      body: "Unlimited plan members get their entire email infrastructure configured correctly, once, by someone who's done it before.",
+    },
+    faq: [
+      {
+        question: "Can this check my exact DKIM selector?",
+        answer:
+          "DKIM selectors aren't discoverable via DNS alone, so this checks a list of common selectors. If your provider uses a custom one, ask your unlimited plan team to verify it directly.",
+      },
+      {
+        question: "Do you store my domain or results?",
+        answer: "No — the check runs on demand and nothing is persisted.",
+      },
+    ],
+  },
+  {
+    slug: "brand-identity-kit",
+    name: "Full Brand Identity Kit",
+    shortDescription: "Generate a monogram mark, favicon, palette, and type pairing — bundled as a downloadable kit.",
+    cluster: "audits-reports",
+    status: "beta",
+    processing: "client",
+    upsell: {
+      headline: "A starter kit vs. a full identity system.",
+      body: "Unlimited plan members get a professionally designed identity system, not a procedurally generated placeholder — including a custom logo, not just a monogram.",
+    },
+    faq: [
+      {
+        question: "Can I use the generated logo as my real logo?",
+        answer:
+          "It's a solid placeholder for early validation, not a substitute for custom design work — especially for trademark purposes. Treat it as a starting point.",
+      },
+    ],
+  },
+  {
+    slug: "ad-creative-resizer",
+    name: "Ad Creative Resizer",
+    shortDescription: "Upload one creative, download a full zip of correctly sized variants for every major ad platform.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "client",
+    upsell: {
+      headline: "Resizing one creative is easy. A full campaign isn't.",
+      body: "Unlimited plan members get original creative designed and produced for every platform, not just resized.",
+    },
+    faq: [
+      {
+        question: "Does this upload my image anywhere?",
+        answer: "No — resizing and zipping both happen entirely in your browser.",
+      },
+    ],
+  },
+  {
+    slug: "content-campaign-calendar",
+    name: "Content & Campaign Calendar Generator",
+    shortDescription: "Generate a 30-day, multi-channel content plan tailored to your business and goal, exportable as CSV.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "client",
+    upsell: {
+      headline: "A plan is a start. Execution is the hard part.",
+      body: "Unlimited plan members get every piece of content on this calendar actually written and designed.",
+    },
+    faq: [],
+  },
+  {
+    slug: "local-seo-optimizer",
+    name: "Local SEO / Google Business Profile Optimizer",
+    shortDescription: "Generate a full local-presence package: GBP description, categories, Q&A, and review responses.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "client",
+    upsell: {
+      headline: "Copy is one piece of local SEO.",
+      body: "Unlimited plan members get citations, review generation, and ongoing local SEO work handled end to end.",
+    },
+    faq: [],
+  },
+  {
+    slug: "sitemap-robots-generator",
+    name: "Sitemap & Robots.txt Generator",
+    shortDescription: "Turn a real list of your site's URLs into a validated sitemap.xml and robots.txt pair.",
+    cluster: "audits-reports",
+    status: "live",
+    processing: "client",
+    upsell: {
+      headline: "A sitemap is table stakes. Indexing is the goal.",
+      body: "Unlimited plan members get their whole site's technical SEO — including sitemaps, robots, and canonical tags — managed continuously.",
+    },
+    faq: [
+      {
+        question: "Can this crawl my site for me?",
+        answer:
+          "Not yet — paste in the URLs you want included. Live crawling is on the roadmap and would run server-side.",
+      },
+    ],
+  },
+  {
+    slug: "white-label-report-builder",
+    name: "White-Label Client Report Builder",
+    shortDescription: "Combine audit findings, brand kit details, and competitor gaps into one polished, brandable report.",
+    cluster: "audits-reports",
+    status: "beta",
+    processing: "client",
+    upsell: {
+      headline: "This is what the unlimited plan feels like, compounding.",
+      body: "This report builder previews what the free Brand Vault becomes once accounts exist — every tool's output, composed into one deliverable. Unlimited plan members get it maintained and re-sent automatically as things change.",
+    },
+    faq: [
+      {
+        question: "Can I white-label this with my own agency's branding?",
+        answer: "Yes — set your brand name and accent color before generating the report or proposal.",
       },
     ],
   },

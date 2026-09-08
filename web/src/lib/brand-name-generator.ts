@@ -8,7 +8,7 @@
 const prefixes = ["Nova", "Bright", "Arc", "Vivid", "North", "Lumen", "Crate", "Forge", "Bloom", "Pulse"];
 const suffixes = ["ify", "Labs", "Co", "Studio", "Works", "Hive", "ly", "Base", "Craft", "House"];
 
-const palettes = [
+export const palettes = [
   ["#4338CA", "#818CF8", "#EEF2FF"],
   ["#0F766E", "#5EEAD4", "#ECFDF5"],
   ["#B45309", "#FCD34D", "#FFFBEB"],
@@ -16,7 +16,7 @@ const palettes = [
   ["#1D4ED8", "#93C5FD", "#EFF6FF"],
 ];
 
-function hashString(input: string) {
+export function hashString(input: string) {
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     hash = (hash << 5) - hash + input.charCodeAt(i);

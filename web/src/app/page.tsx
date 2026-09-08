@@ -15,6 +15,15 @@ const featuredToolSlugs = [
   "image-converter",
 ];
 
+const heavyToolSlugs = [
+  "website-audit-report",
+  "competitor-gap-report",
+  "dns-email-health",
+  "brand-identity-kit",
+  "ad-creative-resizer",
+  "white-label-report-builder",
+];
+
 const proof = [
   { stat: "12+", label: "flagship tools, and growing every month" },
   { stat: "1", label: "flat price — no retainers, no surprise invoices" },
@@ -23,6 +32,7 @@ const proof = [
 
 export default function Home() {
   const featured = tools.filter((t) => featuredToolSlugs.includes(t.slug));
+  const heavy = tools.filter((t) => heavyToolSlugs.includes(t.slug));
 
   return (
     <>
@@ -92,6 +102,49 @@ export default function Home() {
           <div className="mt-8 text-center">
             <LinkButton href="/tools" variant="secondary">
               See all tools
+            </LinkButton>
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-t border-slate-100 bg-slate-900 py-20 text-white">
+        <Container>
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-300">
+              Tools other sites won&apos;t build
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Real audits, kits, and reports — not another file converter
+            </h2>
+            <p className="mt-4 text-lg text-slate-300">
+              Anyone can clone a QR generator. A tool that fetches a real URL, applies judgment,
+              and hands back a scored, multi-part deliverable is a different kind of product —
+              and it&apos;s the exact expertise the unlimited plan is built on.
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {heavy.map((tool) => (
+              <Link
+                key={tool.slug}
+                href={`/tools/${tool.slug}`}
+                className="group flex flex-col rounded-2xl border border-slate-700 bg-slate-800/50 p-6 transition-all hover:border-indigo-400 hover:bg-slate-800"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-white group-hover:text-indigo-300">{tool.name}</h3>
+                  <ToolStatusBadge status={tool.status} />
+                </div>
+                <p className="mt-2 text-sm text-slate-300">{tool.shortDescription}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-indigo-300">
+                  Open tool <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <LinkButton href="/tools#audits-reports" variant="secondary" className="bg-white text-slate-900 hover:bg-slate-100">
+              See all audits, kits & reports
             </LinkButton>
           </div>
         </Container>
