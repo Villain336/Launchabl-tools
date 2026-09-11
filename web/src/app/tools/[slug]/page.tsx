@@ -5,7 +5,6 @@ import { ToolPageLayout } from "@/components/tools/tool-page-layout";
 import { getToolBySlug, tools } from "@/lib/site-config";
 import { MetadataRemover } from "@/components/tools/metadata-remover";
 import { ImageConverter } from "@/components/tools/image-converter";
-import { QrCodeGenerator } from "@/components/tools/qr-code-generator";
 import { WatermarkGenerator } from "@/components/tools/watermark-generator";
 import { SchemaGenerator } from "@/components/tools/schema-generator";
 import { BrandCreator } from "@/components/tools/brand-creator";
@@ -51,7 +50,7 @@ export async function generateMetadata({
 const toolUi: Record<string, ReactNode> = {
   "metadata-remover": <MetadataRemover />,
   "image-converter": <ImageConverter />,
-  "qr-code-generator": <QrCodeGenerator />,
+  "qr-code-generator": <ToolChat slug="qr-code-generator" />,
   "watermark-generator": <WatermarkGenerator />,
   "schema-generator": <SchemaGenerator />,
   "brand-creator": <BrandCreator />,
@@ -122,7 +121,7 @@ function AboutCopy({ slug }: { slug: string }) {
     "image-converter":
       "Different platforms want different image formats: WebP for fast-loading web pages, JPG for broad compatibility, PNG for transparency. This tool re-encodes your image client-side using the Canvas API, so you can move between formats without uploading anything.",
     "qr-code-generator":
-      "A QR code is just a compact, scannable link. This generator builds a high-resolution, styleable code entirely in your browser with a high error-correction level, so it still scans reliably even printed small or on textured surfaces.",
+      "Most QR generators give you a black square and a colour picker. This one treats the code as a design object: describe the look in plain language — brand colours, rounded or fluid modules, a gradient, room for a logo — and the designer translates it into a style you can still tweak by hand. Every change is scan-tested in your browser, so you know before printing that phones will read it. Export as SVG for print, PNG at up to 2048px, inline SVG or data URL for self-contained embeds, or a hosted image URL that works in emails, Notion, and any CMS.",
     "watermark-generator":
       "Protecting shared images — proofs, previews, social posts — starts with a visible watermark. This tool overlays text watermarks with full control over position, opacity, rotation, and tiling, and never uploads your source image.",
     "schema-generator":

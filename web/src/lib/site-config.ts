@@ -320,10 +320,11 @@ export const tools: Tool[] = [
   {
     slug: "qr-code-generator",
     name: "QR Code Generator",
-    shortDescription: "Create a styled, high-resolution QR code for any link in seconds.",
+    shortDescription:
+      "Describe the look you want and get a styled QR code that still scans — shapes, gradients, logo space, then SVG, PNG, or a hosted embed.",
     cluster: "convert-ship",
     status: "live",
-    processing: "client",
+    processing: "server",
     upsell: {
       headline: "Static codes are just the start.",
       body: "Unlimited plan members get dynamic QR codes with scan analytics and the ability to change the destination link after printing.",
@@ -332,7 +333,17 @@ export const tools: Tool[] = [
       {
         question: "Do these QR codes expire?",
         answer:
-          "No — these are static codes generated entirely in your browser. They point directly at your link forever, with no tracking or expiry.",
+          "No — these are static codes. They point directly at your link forever, with no tracking, no redirect, and no expiry. The hosted embed link re-renders the same static code on request.",
+      },
+      {
+        question: "Will a styled code still scan?",
+        answer:
+          "Every design is run through a scan check in your browser before you download it, and the designer warns about low contrast, oversized logos, or missing quiet zones. Codes use error correction level H by default so a logo can cover the centre.",
+      },
+      {
+        question: "What happens to my link and logo?",
+        answer:
+          "Your description and link go to our AI model to pick a style; the code itself is rendered in your browser. Your logo never leaves your device — it's composited locally and isn't part of the hosted embed.",
       },
     ],
   },

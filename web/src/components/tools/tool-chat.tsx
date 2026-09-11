@@ -7,7 +7,11 @@ import { ArrowUp, Check, Copy, RefreshCw, RotateCcw, Square, Sparkles } from "lu
 import { getChatTool } from "@/lib/ai/chat-tools";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import type { VariantsDeliverable } from "@/lib/ai/tools/ab-copy-variants";
+import type { QrDesignOutput } from "@/lib/ai/tools/qr-designer";
+import { defaultQrStyle } from "@/lib/qr/style";
+import { ArtifactSessionProvider } from "@/components/tools/chat/artifact-session";
 import { Markdown } from "@/components/tools/chat/markdown";
+import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 import { VariantsArtifact } from "@/components/tools/chat/variants-artifact";
 
 /* ─────────────────────────────────────────────────────────
@@ -23,10 +27,29 @@ type ArtifactRenderer = (part: ToolPart) => ReactNode;
 /** Maps `tool-<name>` parts to rich renderers. Tools without an entry fall back to a status line. */
 const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverVariants: (part) => <VariantsArtifact data={part.output as VariantsDeliverable} />,
+  designQr: (part) => <QrArtifact design={part.output as QrDesignOutput} />,
 };
 
 const artifactLabels: Record<string, { working: string; done: string }> = {
   deliverVariants: { working: "Writing variants", done: "Variants ready" },
+  designQr: { working: "Designing your code", done: "Design ready" },
+};
+
+/** Shown in the empty state so a tool is usable before the first message. */
+const starterArtifacts: Record<string, () => ReactNode> = {
+  qr: () => (
+    <QrArtifact
+      compact
+      design={{
+        data: "https://launchabl.com",
+        style: defaultQrStyle,
+        name: "Your QR code",
+        notes: "Paste your link, tweak the look by hand, or describe a style below and I'll design it.",
+        warnings: [],
+        encodable: true,
+      }}
+    />
+  ),
 };
 
 function Shimmer({ children }: { children: ReactNode }) {
@@ -254,7 +277,10 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
   const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   const awaitingFirstToken = status === "submitted" || (status === "streaming" && messages[messages.length - 1]?.role === "user");
 
+  const starter = meta.starter ? starterArtifacts[meta.starter] : undefined;
+
   return (
+    <ArtifactSessionProvider>
     <div
       className={`flex h-[min(72vh,760px)] min-h-[520px] w-full flex-col overflow-hidden rounded-[14px] bg-surface shadow-card ${className}`}
       data-tool-chat={slug}
@@ -276,11 +302,17 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
 
       {/* conversation */}
       <div ref={scrollRef} onScroll={onScroll} className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pt-5 pb-3 sm:px-6">
+        {messages.length === 0 && starter && (
+          <div style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>{starter()}</div>
+        )}
+
         {messages.length === 0 && (
-          <div className="my-auto flex flex-col items-center px-2 text-center" style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
-            <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Sparkles className="h-5 w-5" />
-            </div>
+          <div className={`${starter ? "" : "my-auto"} flex flex-col items-center px-2 text-center`} style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
+            {!starter && (
+              <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            )}
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-ink-2">{meta.intro}</p>
             <div className="mt-6 grid w-full max-w-2xl gap-2 sm:grid-cols-2">
               {meta.suggestions.map((suggestion) => (
@@ -411,5 +443,6 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
         </p>
       </div>
     </div>
+    </ArtifactSessionProvider>
   );
 }
