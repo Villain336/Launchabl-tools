@@ -14,6 +14,7 @@ type UsagePayload = {
   generatedAt: string;
   store: { kind: "memory" | "redis"; shared: boolean };
   limits: RateLimitTier[];
+  dailyCapUsd: number;
   chains: { writer: string[]; fast: string[] };
   credits: GatewayCredits;
   summary: { today: UsageBucket; last7: UsageBucket; last30: UsageBucket; range: UsageBucket };
@@ -239,6 +240,9 @@ export function UsageDashboard() {
                   </li>
                 ))}
               </ul>
+              <p className="mt-2">
+                Daily spend cap: <span className="font-medium text-foreground">{usd(data.dailyCapUsd)}</span> — today {usd(data.summary.today.costUsd)} ({Math.round((data.summary.today.costUsd / data.dailyCapUsd) * 100)}%). Set DAILY_SPEND_CAP_USD to change.
+              </p>
             </div>
             <div className="rounded-xl border border-border bg-white p-4">
               <p className="font-medium text-foreground">Model chains</p>

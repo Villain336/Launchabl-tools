@@ -39,7 +39,7 @@ const metas: ChatToolMeta[] = [
       "Describe the look you want — colours, shapes, a gradient, room for your logo — and I'll design a QR code that still scans. Then download it as SVG or PNG, or embed it anywhere with a hosted link.",
     placeholder: "e.g. A QR for https://mysite.com in our brand orange with rounded dots and space for a logo",
     suggestions: [
-      "Make a QR code for https://launchabl.com in Launchabl orange with fluid modules and rounded eyes.",
+      "Make a QR code for https://launchabl.io in Launchabl orange with fluid modules and rounded eyes.",
       "Design a playful QR for my café menu at https://example.com/menu — warm sunset gradient, dot modules, circle eyes.",
       "Minimal black QR code for https://example.com with a small logo space in the centre and generous margins.",
       "I need a QR for a business card: dark navy, leaf-shaped modules, transparent background.",

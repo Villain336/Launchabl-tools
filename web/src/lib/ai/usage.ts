@@ -130,6 +130,37 @@ export async function readUsage(days: number, store: KeyValueStore = getStore(),
   return wanted.map((day, i) => parseDay(day, raws[i]));
 }
 
+/* ── Daily spend cap ───────────────────────────────────────
+ * Tools are free with no account, so a runaway bot could burn the gateway
+ * balance overnight. Every AI request checks today's recorded cost first.
+ */
+
+export const DEFAULT_DAILY_CAP_USD = 25;
+
+export function dailySpendCapUsd(env: Record<string, string | undefined> = process.env): number {
+  const raw = Number(env.DAILY_SPEND_CAP_USD);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_DAILY_CAP_USD;
+}
+
+export type SpendCheck = { ok: boolean; spentUsd: number; capUsd: number; resetsInSeconds: number };
+
+export async function checkDailySpend(store: KeyValueStore = getStore(), now = new Date(), capUsd = dailySpendCapUsd()): Promise<SpendCheck> {
+  const midnight = new Date(now);
+  midnight.setUTCHours(24, 0, 0, 0);
+  const resetsInSeconds = Math.max(1, Math.round((midnight.getTime() - now.getTime()) / 1000));
+  try {
+    const raw = await store.hgetall(`${KEY_PREFIX}:day:${dayKey(now)}`);
+    const spentUsd = fromMicro(raw[field("all", "cost")] ?? 0);
+    return { ok: spentUsd < capUsd, spentUsd, capUsd, resetsInSeconds };
+  } catch (error) {
+    // Fail open: a store outage shouldn't take the tools down.
+    console.warn("[usage] spend check failed", error);
+    return { ok: true, spentUsd: 0, capUsd, resetsInSeconds };
+  }
+}
+
+export const SPEND_CAP_MESSAGE = "The free tools have hit today's usage limit. They reset at midnight UTC — come back then, or get in touch if you need more today.";
+
 export function sumBuckets(buckets: UsageBucket[]): UsageBucket {
   const out = emptyBucket();
   let durationWeighted = 0;

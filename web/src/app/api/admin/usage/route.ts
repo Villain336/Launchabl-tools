@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { getStore, redisCredentials } from "@/lib/ai/store";
-import { fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, type UsageBucket } from "@/lib/ai/usage";
+import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
 import { modelChain } from "@/lib/ai/models";
 
@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
     generatedAt: new Date().toISOString(),
     store: { kind: store.kind, shared: Boolean(redisCredentials()) },
     limits: CHAT_LIMITS,
+    dailyCapUsd: dailySpendCapUsd(),
     chains: { writer: modelChain("writer"), fast: modelChain("fast") },
     prices: MODEL_PRICES,
     credits,

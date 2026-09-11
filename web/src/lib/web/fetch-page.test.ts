@@ -7,10 +7,10 @@ const html = `<!doctype html>
   <title>  Free QR Code Generator &amp; Designer | Launchabl </title>
   <meta name="description" content="Styled QR codes that scan.">
   <meta name='robots' content='index,follow'>
-  <link rel="canonical" href="https://launchabl.com/tools/qr">
-  <link rel="alternate" hreflang="fr" href="https://launchabl.com/fr/tools/qr">
+  <link rel="canonical" href="https://launchabl.io/tools/qr">
+  <link rel="alternate" hreflang="fr" href="https://launchabl.io/fr/tools/qr">
   <meta property="og:title" content="QR Designer">
-  <meta property="og:image" content="https://launchabl.com/og.png">
+  <meta property="og:image" content="https://launchabl.io/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"QR"}</script>
 </head>
@@ -25,17 +25,17 @@ const html = `<!doctype html>
 </body></html>`;
 
 describe("parseHtml", () => {
-  const page = parseHtml(html, "launchabl.com/tools/qr", "https://launchabl.com/tools/qr");
+  const page = parseHtml(html, "launchabl.io/tools/qr", "https://launchabl.io/tools/qr");
 
   it("reads head tags with entity decoding and whitespace collapsing", () => {
     expect(page.title).toBe("Free QR Code Generator & Designer | Launchabl");
     expect(page.metaDescription).toBe("Styled QR codes that scan.");
     expect(page.metaRobots).toBe("index,follow");
-    expect(page.canonical).toBe("https://launchabl.com/tools/qr");
+    expect(page.canonical).toBe("https://launchabl.io/tools/qr");
     expect(page.lang).toBe("en");
-    expect(page.og).toEqual({ title: "QR Designer", image: "https://launchabl.com/og.png" });
+    expect(page.og).toEqual({ title: "QR Designer", image: "https://launchabl.io/og.png" });
     expect(page.twitter).toEqual({ card: "summary_large_image" });
-    expect(page.hreflang).toEqual([{ lang: "fr", href: "https://launchabl.com/fr/tools/qr" }]);
+    expect(page.hreflang).toEqual([{ lang: "fr", href: "https://launchabl.io/fr/tools/qr" }]);
     expect(page.jsonLdTypes).toEqual(["SoftwareApplication"]);
   });
 
@@ -52,7 +52,7 @@ describe("parseHtml", () => {
 
 describe("normalizeUrl", () => {
   it("adds https and strips fragments", () => {
-    expect(normalizeUrl("launchabl.com/tools#x").toString()).toBe("https://launchabl.com/tools");
+    expect(normalizeUrl("launchabl.io/tools#x").toString()).toBe("https://launchabl.io/tools");
   });
 
   it("refuses private and non-http targets", () => {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { hasGatewayKey, modelChain } from "@/lib/ai/models";
 import { generateWithFallback } from "@/lib/ai/stream";
 import { chatRateLimiter, clientKey } from "@/lib/ai/rate-limit";
-import { recordUsage } from "@/lib/ai/usage";
+import { checkDailySpend, recordUsage } from "@/lib/ai/usage";
 
 export const maxDuration = 30;
 
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
 
   const limit = await chatRateLimiter().check(`copywriter:${clientKey(request.headers)}`);
   if (!limit.ok) return fallback();
+  if (!(await checkDailySpend()).ok) return fallback();
   const startedAt = Date.now();
 
   const brief = formatBrief[format];

@@ -181,7 +181,7 @@ export function parseHtml(html: string, requestedUrl: string, finalUrl: string):
 }
 
 export const FETCH_HEADERS = {
-  "User-Agent": "Mozilla/5.0 (compatible; LaunchablBot/1.0; +https://launchabl.com/tools)",
+  "User-Agent": "Mozilla/5.0 (compatible; LaunchablBot/1.0; +https://launchabl.io/tools)",
   Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
   "Accept-Language": "en",
   "Accept-Encoding": "gzip, deflate, br",

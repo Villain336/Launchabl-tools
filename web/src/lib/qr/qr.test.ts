@@ -4,7 +4,7 @@ import { canEncode, renderQrSvg } from "@/lib/qr/render";
 import { decodeStyle, encodeStyle, hostedQrUrl } from "@/lib/qr/share";
 import { contrastRatio, defaultQrStyle, normalizeQrStyle, styleWarnings } from "@/lib/qr/style";
 
-const URL_ = "https://launchabl.com";
+const URL_ = "https://launchabl.io";
 
 describe("renderQrSvg", () => {
   it("produces a standalone SVG sized in modules", () => {
@@ -94,6 +94,6 @@ describe("style helpers", () => {
     expect(decodeStyle(encoded)).toEqual(style);
     expect(decodeStyle("not-base64!!")).toEqual(defaultQrStyle);
     expect(encodeStyle(defaultQrStyle)).toBe(encodeStyle(normalizeQrStyle({})));
-    expect(hostedQrUrl("https://launchabl.com", URL_, style, 256)).toMatch(/^https:\/\/launchabl\.com\/api\/qr\?data=.*&s=.*&size=256$/);
+    expect(hostedQrUrl("https://launchabl.io", URL_, style, 256)).toMatch(/^https:\/\/launchabl\.io\/api\/qr\?data=.*&s=.*&size=256$/);
   });
 });

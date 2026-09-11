@@ -106,7 +106,7 @@ const starterArtifacts: Record<string, () => ReactNode> = {
     <QrArtifact
       compact
       design={{
-        data: "https://launchabl.com",
+        data: "https://launchabl.io",
         style: defaultQrStyle,
         name: "Your QR code",
         notes: "Paste your link, tweak the look by hand, or describe a style below and I'll design it.",

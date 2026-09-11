@@ -6,7 +6,7 @@ import { classifyAiError, NoModelAvailableError, userFacingAiMessage } from "@/l
 import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { streamWithFallback } from "@/lib/ai/stream";
-import { recordUsage } from "@/lib/ai/usage";
+import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
 
 export const maxDuration = 60;
 
@@ -62,6 +62,12 @@ export async function POST(request: NextRequest) {
   const limit = await chatRateLimiter().check(`${slug}:${clientKey(request.headers)}`);
   if (!limit.ok) {
     return NextResponse.json({ error: describeRetry(limit) }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
+  }
+
+  const spend = await checkDailySpend();
+  if (!spend.ok) {
+    console.warn(`[tools/chat:${slug}] daily spend cap reached: $${spend.spentUsd.toFixed(2)} of $${spend.capUsd}`);
+    return NextResponse.json({ error: SPEND_CAP_MESSAGE, cause: "spend_cap" }, { status: 503, headers: { "Retry-After": String(spend.resetsInSeconds) } });
   }
 
   const chain = modelChain(runtime.modelKind);

@@ -3,7 +3,7 @@ import { classifyAiError, userFacingAiMessage } from "@/lib/ai/errors";
 import { modelChain, modelLabel } from "@/lib/ai/models";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
 import { createMemoryStore } from "@/lib/ai/store";
-import { estimateCostUsd, readUsage, recordUsage, sumBuckets } from "@/lib/ai/usage";
+import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUsage, sumBuckets } from "@/lib/ai/usage";
 import { getChatTool, listChatTools } from "@/lib/ai/chat-tools";
 import { getChatToolRuntime, listChatToolRuntimes } from "@/lib/ai/chat-runtime";
 import { tools } from "@/lib/site-config";
@@ -92,6 +92,22 @@ describe("usage accounting", () => {
     expect(today.byTool.qr.costUsd).toBeCloseTo(estimateCostUsd("anthropic/claude-sonnet-4.6", 1_000, 500), 6);
     expect(today.byModel["openai/gpt-5.4"].costUsd).toBeCloseTo(0.01, 6);
     expect(sumBuckets([today.total, today.total]).requests).toBe(4);
+  });
+
+  it("enforces the daily spend cap and resets at midnight UTC", async () => {
+    const store = createMemoryStore(() => 0);
+    const now = new Date("2026-09-11T22:00:00Z");
+    expect((await checkDailySpend(store, now, 1)).ok).toBe(true);
+    await recordUsage({ slug: "qr", model: "x", inputTokens: 0, outputTokens: 0, reportedCostUsd: 0.6, ok: true }, store, now);
+    const under = await checkDailySpend(store, now, 1);
+    expect(under.ok).toBe(true);
+    expect(under.spentUsd).toBeCloseTo(0.6, 6);
+    expect(under.resetsInSeconds).toBe(2 * 60 * 60);
+    await recordUsage({ slug: "qr", model: "x", inputTokens: 0, outputTokens: 0, reportedCostUsd: 0.5, ok: true }, store, now);
+    expect((await checkDailySpend(store, now, 1)).ok).toBe(false);
+    expect((await checkDailySpend(store, new Date("2026-09-12T00:01:00Z"), 1)).ok).toBe(true);
+    expect(dailySpendCapUsd({ DAILY_SPEND_CAP_USD: "40" })).toBe(40);
+    expect(dailySpendCapUsd({ DAILY_SPEND_CAP_USD: "nope" })).toBe(25);
   });
 });
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { ToolPageLayout } from "@/components/tools/tool-page-layout";
-import { getToolBySlug, tools } from "@/lib/site-config";
+import { getToolBySlug, siteConfig, tools, type Tool } from "@/lib/site-config";
 import { MetadataRemover } from "@/components/tools/metadata-remover";
 import { ImageConverter } from "@/components/tools/image-converter";
 import { WatermarkGenerator } from "@/components/tools/watermark-generator";
@@ -43,7 +43,51 @@ export async function generateMetadata({
   const { slug } = await params;
   const tool = getToolBySlug(slug);
   if (!tool) return {};
-  return { title: tool.name, description: tool.shortDescription };
+  const path = `/tools/${tool.slug}`;
+  const title = `${tool.name} — free, no account needed`;
+  return {
+    title: tool.name,
+    description: tool.shortDescription,
+    alternates: { canonical: path },
+    openGraph: { type: "website", url: path, title, description: tool.shortDescription },
+    twitter: { card: "summary_large_image", title, description: tool.shortDescription },
+    robots: tool.status === "coming-soon" ? { index: false, follow: true } : undefined,
+  };
+}
+
+/** Schema.org data so search engines and AI answer engines can cite the tool and its FAQ directly. */
+function toolJsonLd(tool: Tool) {
+  const url = `${siteConfig.url}/tools/${tool.slug}`;
+  const graph: Record<string, unknown>[] = [
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${url}#app`,
+      name: tool.name,
+      description: tool.shortDescription,
+      url,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      isAccessibleForFree: true,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      publisher: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: siteConfig.name, item: siteConfig.url },
+        { "@type": "ListItem", position: 2, name: "Tools", item: `${siteConfig.url}/tools` },
+        { "@type": "ListItem", position: 3, name: tool.name, item: url },
+      ],
+    },
+  ];
+  if (tool.faq.length > 0) {
+    graph.push({
+      "@type": "FAQPage",
+      "@id": `${url}#faq`,
+      mainEntity: tool.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
+    });
+  }
+  return { "@context": "https://schema.org", "@graph": graph };
 }
 
 const toolUi: Record<string, ReactNode> = {
@@ -116,11 +160,14 @@ export default async function ToolDetailPage({
   if (!tool) notFound();
 
   return (
-    <ToolPageLayout tool={tool} about={<AboutCopy slug={tool.slug} />}>
-      {toolUi[tool.slug] ?? (
-        <ComingSoonTool architectureNotes={["This tool's build notes are being written — check back soon."]} />
-      )}
-    </ToolPageLayout>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(toolJsonLd(tool)) }} />
+      <ToolPageLayout tool={tool} about={<AboutCopy slug={tool.slug} />}>
+        {toolUi[tool.slug] ?? (
+          <ComingSoonTool architectureNotes={["This tool's build notes are being written — check back soon."]} />
+        )}
+      </ToolPageLayout>
+    </>
   );
 }
 

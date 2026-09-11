@@ -1,5 +1,6 @@
 export const siteConfig = {
   name: "Launchabl",
+  url: "https://launchabl.io",
   tagline: "Unlimited marketing & design. One price. Forever.",
   description:
     "Launchabl is the marketing platform where the tools are free forever and the agency is unlimited for life — brand, website, content, and SEO, one flat price, no retainers.",
