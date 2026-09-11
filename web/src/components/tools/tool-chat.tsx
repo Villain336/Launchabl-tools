@@ -136,6 +136,14 @@ function AssistantMessage({
     });
   };
 
+  // A failed call that the model then corrected is noise to the reader;
+  // only surface the error when nothing succeeded afterwards.
+  const succeededTools = new Set(
+    message.parts
+      .filter((part): part is ToolPart => isToolUIPart(part) && part.state === "output-available")
+      .map((part) => getToolName(part)),
+  );
+
   return (
     <div className="flex w-full flex-col gap-2.5 pr-6" style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
       {message.parts.map((part, index) => {
@@ -144,7 +152,9 @@ function AssistantMessage({
           return <Markdown key={`${message.id}-${index}`} text={part.text} />;
         }
         if (isToolUIPart(part)) {
-          return <ToolPartView key={`${message.id}-${index}`} part={part as ToolPart} streaming={streaming} />;
+          const toolPart = part as ToolPart;
+          if (toolPart.state === "output-error" && succeededTools.has(getToolName(toolPart))) return null;
+          return <ToolPartView key={`${message.id}-${index}`} part={toolPart} streaming={streaming} />;
         }
         return null;
       })}
