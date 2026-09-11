@@ -13,7 +13,7 @@ export type AiFailureCause =
   | "not_found" // 404: model slug retired or mistyped
   | "rate_limited" // 429
   | "unauthorized" // 401: bad key
-  | "bad_request" // 400: prompt/tool schema problem — retrying won't help
+  | "bad_request" // 400: usually a model-specific schema/param rejection — another model may accept it
   | "upstream" // 5xx / network
   | "unknown";
 
@@ -55,7 +55,7 @@ export function classifyAiError(error: unknown): AiFailure {
   if (status === 404 || /model .*not found/i.test(message)) {
     return { cause: "not_found", status: 404, message, fallback: true };
   }
-  if (status === 400) return { cause: "bad_request", status, message, fallback: false };
+  if (status === 400) return { cause: "bad_request", status, message, fallback: true };
   if ((status && status >= 500) || /ECONNRESET|ETIMEDOUT|fetch failed|network/i.test(message)) {
     return { cause: "upstream", status, message, fallback: true };
   }
@@ -87,8 +87,11 @@ export class NoModelAvailableError extends Error {
   constructor(failures: { model: string; failure: AiFailure }[]) {
     super(
       `No model in the chain responded: ${failures
-        .map(({ model, failure }) => `${model} (${failure.cause}${failure.status ? ` ${failure.status}` : ""})`)
-        .join(", ")}`,
+        .map(
+          ({ model, failure }) =>
+            `${model} (${failure.cause}${failure.status ? ` ${failure.status}` : ""}: ${failure.message.slice(0, 160).replace(/\s+/g, " ")})`,
+        )
+        .join("; ")}`,
     );
     this.name = "NoModelAvailableError";
     this.failures = failures;

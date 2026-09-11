@@ -31,7 +31,7 @@ describe("classifyAiError", () => {
     expect(classifyAiError({ name: "GatewayRateLimitError", message: "slow down" }).cause).toBe("rate_limited");
     expect(classifyAiError({ statusCode: 404, message: "model not found" }).cause).toBe("not_found");
     expect(classifyAiError({ statusCode: 401, message: "nope" })).toMatchObject({ cause: "unauthorized", fallback: false });
-    expect(classifyAiError({ statusCode: 400, message: "bad" }).fallback).toBe(false);
+    expect(classifyAiError({ statusCode: 400, message: "bad" })).toMatchObject({ cause: "bad_request", fallback: true });
     expect(classifyAiError(new Error("fetch failed")).cause).toBe("upstream");
   });
 

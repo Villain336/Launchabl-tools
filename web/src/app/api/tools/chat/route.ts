@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     if (skipped.length > 0) {
       console.warn(
         `[tools/chat:${slug}] fell back to ${model} after`,
-        skipped.map(({ model: m, failure }) => `${m} (${failure.cause})`).join(", "),
+        skipped.map(({ model: m, failure }) => `${m} (${failure.cause}: ${failure.message.slice(0, 160)})`).join("; "),
       );
     }
 
