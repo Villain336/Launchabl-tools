@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { classifyAiError, userFacingAiMessage } from "@/lib/ai/errors";
 import { modelChain, modelLabel } from "@/lib/ai/models";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
+import { createMemoryStore } from "@/lib/ai/store";
+import { estimateCostUsd, readUsage, recordUsage, sumBuckets } from "@/lib/ai/usage";
 import { getChatTool, listChatTools } from "@/lib/ai/chat-tools";
 import { getChatToolRuntime, listChatToolRuntimes } from "@/lib/ai/chat-runtime";
 import { tools } from "@/lib/site-config";
@@ -42,15 +44,54 @@ describe("classifyAiError", () => {
 });
 
 describe("createRateLimiter", () => {
-  it("allows `limit` hits per window then blocks with a retry hint", () => {
-    const limiter = createRateLimiter({ limit: 2, windowMs: 10_000 });
-    expect(limiter.check("a", 0).ok).toBe(true);
-    expect(limiter.check("a", 1_000).ok).toBe(true);
-    const blocked = limiter.check("a", 2_000);
+  it("allows `limit` hits per window then blocks with a retry hint", async () => {
+    let clock = 0;
+    const limiter = createRateLimiter([{ name: "burst", limit: 2, windowSeconds: 10 }], createMemoryStore(() => clock));
+    expect((await limiter.check("a", 0)).ok).toBe(true);
+    clock = 1_000;
+    expect((await limiter.check("a", 1_000)).ok).toBe(true);
+    clock = 2_000;
+    const blocked = await limiter.check("a", 2_000);
     expect(blocked.ok).toBe(false);
     expect(blocked.retryAfter).toBe(8);
-    expect(limiter.check("b", 2_000).ok).toBe(true);
-    expect(limiter.check("a", 10_001).ok).toBe(true);
+    expect(blocked.tier).toBe("burst");
+    expect((await limiter.check("b", 2_000)).ok).toBe(true);
+    clock = 10_001;
+    expect((await limiter.check("a", 10_001)).ok).toBe(true);
+  });
+
+  it("applies the stricter of several tiers", async () => {
+    const limiter = createRateLimiter(
+      [
+        { name: "burst", limit: 5, windowSeconds: 60 },
+        { name: "daily", limit: 2, windowSeconds: 86_400 },
+      ],
+      createMemoryStore(() => 0),
+    );
+    await limiter.check("a", 0);
+    await limiter.check("a", 0);
+    const blocked = await limiter.check("a", 0);
+    expect(blocked.ok).toBe(false);
+    expect(blocked.tier).toBe("daily");
+  });
+});
+
+describe("usage accounting", () => {
+  it("records per-day totals by tool and model and reads them back", async () => {
+    const store = createMemoryStore(() => 0);
+    const date = new Date("2026-09-11T10:00:00Z");
+    await recordUsage({ slug: "qr", model: "anthropic/claude-sonnet-4.6", inputTokens: 1_000, outputTokens: 500, ok: true, durationMs: 1_200 }, store, date);
+    await recordUsage({ slug: "meta", model: "openai/gpt-5.4", inputTokens: 2_000, outputTokens: 100, reportedCostUsd: 0.01, ok: false, durationMs: 800 }, store, date);
+    const [today] = await readUsage(1, store, date);
+    expect(today.day).toBe("2026-09-11");
+    expect(today.total.requests).toBe(2);
+    expect(today.total.inputTokens).toBe(3_000);
+    expect(today.total.errors).toBe(1);
+    expect(today.total.avgDurationMs).toBe(1_000);
+    expect(today.estimatedRequests).toBe(1);
+    expect(today.byTool.qr.costUsd).toBeCloseTo(estimateCostUsd("anthropic/claude-sonnet-4.6", 1_000, 500), 6);
+    expect(today.byModel["openai/gpt-5.4"].costUsd).toBeCloseTo(0.01, 6);
+    expect(sumBuckets([today.total, today.total]).requests).toBe(4);
   });
 });
 

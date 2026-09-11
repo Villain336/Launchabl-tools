@@ -4,8 +4,9 @@ import { getChatToolRuntime } from "@/lib/ai/chat-runtime";
 import type { ToolChatMessage, ToolChatMetadata } from "@/lib/ai/chat-message";
 import { classifyAiError, NoModelAvailableError, userFacingAiMessage } from "@/lib/ai/errors";
 import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
-import { chatRateLimiter, clientKey } from "@/lib/ai/rate-limit";
+import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { streamWithFallback } from "@/lib/ai/stream";
+import { recordUsage } from "@/lib/ai/usage";
 
 export const maxDuration = 60;
 
@@ -58,12 +59,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const limit = chatRateLimiter().check(`${slug}:${clientKey(request.headers)}`);
+  const limit = await chatRateLimiter().check(`${slug}:${clientKey(request.headers)}`);
   if (!limit.ok) {
-    return NextResponse.json(
-      { error: `You've hit the free usage limit for this tool. Try again in about ${Math.ceil(limit.retryAfter / 60)} min.` },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
-    );
+    return NextResponse.json({ error: describeRetry(limit) }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
   }
 
   const chain = modelChain(runtime.modelKind);
@@ -72,6 +70,7 @@ export async function POST(request: NextRequest) {
     ignoreIncompleteToolCalls: true,
   });
 
+  const startedAt = Date.now();
   try {
     const { model, stream, skipped } = await streamWithFallback(chain, {
       instructions: runtime.instructions,
@@ -91,6 +90,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // The gateway reports per-step cost in provider metadata; sum it so usage
+    // accounting can prefer real cost over the price-table estimate.
+    let reportedCostUsd: number | null = null;
+    let recorded = false;
+    const record = (ok: boolean, usage?: { inputTokens?: number; outputTokens?: number }) => {
+      if (recorded) return;
+      recorded = true;
+      void recordUsage({
+        slug,
+        model,
+        inputTokens: usage?.inputTokens ?? 0,
+        outputTokens: usage?.outputTokens ?? 0,
+        reportedCostUsd,
+        durationMs: Date.now() - startedAt,
+        ok,
+      });
+    };
+
     return createUIMessageStreamResponse({
       headers: { "x-launchabl-model": model },
       stream: toUIMessageStream<typeof runtime.tools & object, ToolChatMessage>({
@@ -100,8 +117,14 @@ export async function POST(request: NextRequest) {
         sendReasoning: false,
         messageMetadata: ({ part }): ToolChatMetadata | undefined => {
           if (part.type === "start") return { model, modelLabel: modelLabel(model) };
+          if (part.type === "finish-step") {
+            const cost = (part.providerMetadata?.gateway as { cost?: string | number } | undefined)?.cost;
+            if (cost !== undefined && Number.isFinite(Number(cost))) reportedCostUsd = (reportedCostUsd ?? 0) + Number(cost);
+            return undefined;
+          }
           if (part.type === "finish") {
             const usage = part.totalUsage;
+            record(true, usage);
             return {
               model,
               modelLabel: modelLabel(model),
@@ -116,6 +139,7 @@ export async function POST(request: NextRequest) {
         },
         onError: (error) => {
           console.error(`[tools/chat:${slug}] stream error`, error);
+          record(false);
           return userFacingAiMessage(classifyAiError(error));
         },
       }),

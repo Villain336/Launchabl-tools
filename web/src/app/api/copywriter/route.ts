@@ -4,6 +4,7 @@ import { z } from "zod";
 import { hasGatewayKey, modelChain } from "@/lib/ai/models";
 import { generateWithFallback } from "@/lib/ai/stream";
 import { chatRateLimiter, clientKey } from "@/lib/ai/rate-limit";
+import { recordUsage } from "@/lib/ai/usage";
 
 export const maxDuration = 30;
 
@@ -62,8 +63,9 @@ export async function POST(request: NextRequest) {
 
   if (!hasGatewayKey()) return fallback();
 
-  const limit = chatRateLimiter().check(`copywriter:${clientKey(request.headers)}`);
+  const limit = await chatRateLimiter().check(`copywriter:${clientKey(request.headers)}`);
   if (!limit.ok) return fallback();
+  const startedAt = Date.now();
 
   const brief = formatBrief[format];
   try {
@@ -80,6 +82,16 @@ export async function POST(request: NextRequest) {
       providerOptions: { gateway: { tags: ["launchabl", "tool:copywriter"] } },
     });
     const variations = result.output?.variations ?? [];
+    const cost = (result.providerMetadata?.gateway as { cost?: string | number } | undefined)?.cost;
+    void recordUsage({
+      slug: "copywriter",
+      model,
+      inputTokens: result.usage.inputTokens ?? 0,
+      outputTokens: result.usage.outputTokens ?? 0,
+      reportedCostUsd: cost !== undefined && Number.isFinite(Number(cost)) ? Number(cost) : null,
+      durationMs: Date.now() - startedAt,
+      ok: variations.length > 0,
+    });
     if (variations.length === 0) return fallback();
     return NextResponse.json({ variations, model });
   } catch (error) {
