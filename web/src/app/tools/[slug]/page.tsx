@@ -51,6 +51,10 @@ const toolUi: Record<string, ReactNode> = {
   "metadata-remover": <MetadataRemover />,
   "image-converter": <ImageConverter />,
   "qr-code-generator": <ToolChat slug="qr-code-generator" />,
+  "meta-tag-generator": <ToolChat slug="meta-tag-generator" />,
+  "markdown-file-generator": <ToolChat slug="markdown-file-generator" />,
+  "agent-skill-generator": <ToolChat slug="agent-skill-generator" />,
+  "dataset-builder": <ToolChat slug="dataset-builder" />,
   "watermark-generator": <WatermarkGenerator />,
   "schema-generator": <SchemaGenerator />,
   "brand-creator": <BrandCreator />,
@@ -130,6 +134,14 @@ function AboutCopy({ slug }: { slug: string }) {
       "Naming a brand and checking whether the domain is actually available are usually two disconnected steps. This tool combines both: generate name and tagline ideas, then immediately see which domains are open, so you can move from idea to claimed domain in one sitting.",
     "domain-availability":
       "A fast way to check a name across the most common top-level domains before you commit to it anywhere else — social handles, business registration, or a logo.",
+    "meta-tag-generator":
+      "Title tags and meta descriptions are the only copy most people see before they decide whether to visit — and most are auto-generated, truncated, or identical across pages. This tool reads your page, writes a title and description grounded in what it actually says, adds the Open Graph and Twitter tags that control how the link looks when shared, and previews both the search result and the share card so you can see the cut-off risk before you publish. You also get three alternative pairs with different angles to test.",
+    "markdown-file-generator":
+      "Good documentation is mostly structure: the right sections in the right order, real commands in code blocks, tables where data is tabular. This tool takes a description or rough notes — or a URL to read — and produces a complete Markdown file with that structure filled in. It marks anything it can't know (licence, version, contact) as a TODO instead of inventing it, previews the rendered result, and downloads as a ready-to-commit file.",
+    "agent-skill-generator":
+      "Coding agents work far better with skills: small, procedural instruction files that tell them when a workflow applies, the exact steps, how to verify success, and what to avoid. Writing them well is a craft. This tool turns a plain-language description of a workflow, tool, API, or team convention into a SKILL.md that follows the conventions agents expect — front matter, triggers, prerequisites, numbered steps with commands, verification, pitfalls, examples — ready to drop into your agent's skills folder.",
+    "dataset-builder":
+      "Demos, seeds, import tests and small training sets all need the same thing: realistic, internally consistent tabular data with proper types. This tool builds it from a description — synthetic rows that hang together, rows extracted from a page you point it at, or messy notes normalised into columns — and gives you a typed table you can inspect, then download as CSV or JSON.",
     "ab-copy-variants":
       "Most A/B tests fail because the variants are synonyms of each other — same promise, different adjectives. This tool forces every variant onto a distinct persuasion angle (outcome, pain relief, social proof, curiosity, urgency, specificity, contrast, identity) so each one is a real hypothesis about what your audience responds to. Paste your current copy, say who it's for, and you get the variants as copyable cards plus a test plan: which metric to judge on, how much traffic you need before trusting the result, and how long to run it.",
     copywriter:

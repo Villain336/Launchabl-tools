@@ -2,6 +2,9 @@ import type { ToolSet } from "ai";
 import type { ModelKind } from "@/lib/ai/models";
 import { abCopyVariantsRuntime } from "@/lib/ai/tools/ab-copy-variants";
 import { qrDesignerRuntime } from "@/lib/ai/tools/qr-designer";
+import { metaTagsRuntime } from "@/lib/ai/tools/meta-tags";
+import { agentSkillGeneratorRuntime, markdownGeneratorRuntime } from "@/lib/ai/tools/documents";
+import { datasetBuilderRuntime } from "@/lib/ai/tools/dataset-builder";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -20,7 +23,14 @@ export type ChatToolRuntime = {
   maxSteps?: number;
 };
 
-const runtimes: ChatToolRuntime[] = [abCopyVariantsRuntime, qrDesignerRuntime];
+const runtimes: ChatToolRuntime[] = [
+  abCopyVariantsRuntime,
+  qrDesignerRuntime,
+  metaTagsRuntime,
+  markdownGeneratorRuntime,
+  agentSkillGeneratorRuntime,
+  datasetBuilderRuntime,
+];
 
 const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));
 

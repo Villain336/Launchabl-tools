@@ -41,8 +41,13 @@ export const toolClusters: ToolCluster[] = [
   },
   {
     slug: "get-found",
-    name: "Get found",
-    description: "Structured data and technical SEO fixes search engines actually reward.",
+    name: "SEO & get found",
+    description: "Meta tags, structured data and technical SEO fixes search engines actually reward.",
+  },
+  {
+    slug: "ads-conversion",
+    name: "Ads & conversion",
+    description: "Copy, variants and tests that turn traffic into customers.",
   },
   {
     slug: "convert-ship",
@@ -59,6 +64,16 @@ export const toolClusters: ToolCluster[] = [
     slug: "create-produce",
     name: "Create & produce",
     description: "Record, edit, and produce real marketing assets — video and imagery — without extra software.",
+  },
+  {
+    slug: "data-analytics",
+    name: "Data & analytics",
+    description: "Datasets, extracts and the numbers behind your decisions.",
+  },
+  {
+    slug: "build",
+    name: "Build",
+    description: "Files, docs and agent skills that make your codebase and your AI tools work better.",
   },
 ];
 
@@ -154,7 +169,7 @@ export const tools: Tool[] = [
     name: "A/B Copy Variant Generator",
     shortDescription:
       "Paste a headline, hero, ad, or CTA and get distinct variants — each on a different persuasion angle — with a plan to test them.",
-    cluster: "launch",
+    cluster: "ads-conversion",
     status: "live",
     processing: "server",
     upsell: {
@@ -344,6 +359,95 @@ export const tools: Tool[] = [
         question: "What happens to my link and logo?",
         answer:
           "Your description and link go to our AI model to pick a style; the code itself is rendered in your browser. Your logo never leaves your device — it's composited locally and isn't part of the hosted embed.",
+      },
+    ],
+  },
+
+  {
+    slug: "meta-tag-generator",
+    name: "Meta Tag Generator",
+    shortDescription:
+      "Paste a URL and get a click-worthy title, description, and full Open Graph / Twitter tag set — with search and share previews.",
+    cluster: "get-found",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Tags are one page. Rankings are the whole site.",
+      body: "Unlimited plan members get a full technical SEO pass — every page's tags, schema, canonicals and internal links — done and deployed.",
+    },
+    faq: [
+      {
+        question: "Does it read my page?",
+        answer:
+          "Yes. Give it a URL and it fetches the public HTML, reads the headings and existing tags, and writes new ones grounded in what the page actually says. JavaScript-only pages may come back sparse — describe the page instead.",
+      },
+      {
+        question: "Why 60 characters for titles?",
+        answer:
+          "Google truncates titles around 600 pixels, roughly 55–65 characters. The preview shows the cut-off risk so you can trim before publishing.",
+      },
+    ],
+  },
+  {
+    slug: "markdown-file-generator",
+    name: "Markdown File Generator",
+    shortDescription:
+      "Turn a description or rough notes into a complete README, docs page, changelog, or llms.txt — previewed, formatted, and ready to download.",
+    cluster: "build",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Need the whole docs site?",
+      body: "Unlimited plan members get a documentation site designed, written and deployed alongside their product.",
+    },
+    faq: [
+      {
+        question: "Can it write from a URL?",
+        answer: "Yes. Point it at a product page or repo site and it reads the public content to ground the document.",
+      },
+    ],
+  },
+  {
+    slug: "agent-skill-generator",
+    name: "Agent Skill Generator",
+    shortDescription:
+      "Describe a workflow or tool and get a SKILL.md your coding agent can load — triggers, exact steps, verification, and pitfalls.",
+    cluster: "build",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "We build agent workflows, too.",
+      body: "Unlimited plan members get custom agent skills and automations wired into their repo and CI — not just the file.",
+    },
+    faq: [
+      {
+        question: "Which agents use SKILL.md files?",
+        answer:
+          "Cursor, Claude Code, Codex and most agent frameworks read Markdown skills with a name/description front matter. Drop the file into your agent's skills folder (for Cursor: .cursor/skills/<name>/SKILL.md).",
+      },
+    ],
+  },
+  {
+    slug: "dataset-builder",
+    name: "Dataset Builder",
+    shortDescription:
+      "Describe the rows you need and get a typed, realistic dataset — synthetic, extracted from a page, or cleaned from your notes — as CSV or JSON.",
+    cluster: "data-analytics",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Real data pipelines, not just seeds.",
+      body: "Unlimited plan members get analytics set up end to end — tracking, warehouse, dashboards — by people who've done it before.",
+    },
+    faq: [
+      {
+        question: "Is the synthetic data safe to use?",
+        answer:
+          "It's generated, not scraped — no real people's details. Emails use example.com. Treat it as demo or test data, not as facts about the world.",
+      },
+      {
+        question: "How many rows can it make?",
+        answer: "Up to 60 per request. For more, ask for the next batch with different ranges, or extend the CSV in a spreadsheet.",
       },
     ],
   },

@@ -8,10 +8,17 @@ import { getChatTool } from "@/lib/ai/chat-tools";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import type { VariantsDeliverable } from "@/lib/ai/tools/ab-copy-variants";
 import type { QrDesignOutput } from "@/lib/ai/tools/qr-designer";
+import type { MetaTagSet } from "@/lib/ai/tools/meta-tags";
+import type { DocumentDeliverable } from "@/lib/ai/tools/documents";
+import type { Dataset } from "@/lib/ai/tools/dataset-builder";
+import type { FetchPageToolOutput } from "@/lib/ai/tools/shared/fetch-page-tool";
 import { defaultQrStyle } from "@/lib/qr/style";
 import { ArtifactSessionProvider } from "@/components/tools/chat/artifact-session";
 import { Markdown } from "@/components/tools/chat/markdown";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
+import { MetaTagsArtifact } from "@/components/tools/chat/meta-tags-artifact";
+import { DocumentArtifact } from "@/components/tools/chat/document-artifact";
+import { DatasetArtifact } from "@/components/tools/chat/dataset-artifact";
 import { VariantsArtifact } from "@/components/tools/chat/variants-artifact";
 
 /* ─────────────────────────────────────────────────────────
@@ -28,11 +35,29 @@ type ArtifactRenderer = (part: ToolPart) => ReactNode;
 const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverVariants: (part) => <VariantsArtifact data={part.output as VariantsDeliverable} />,
   designQr: (part) => <QrArtifact design={part.output as QrDesignOutput} />,
+  deliverMetaTags: (part) => <MetaTagsArtifact tags={part.output as MetaTagSet} />,
+  deliverDocument: (part) => <DocumentArtifact doc={part.output as DocumentDeliverable} />,
+  deliverDataset: (part) => <DatasetArtifact data={part.output as Dataset} />,
+  fetchPage: (part) => {
+    const result = part.output as FetchPageToolOutput;
+    const url = (part.input as { url?: string } | undefined)?.url ?? "";
+    return (
+      <p className="text-[12.5px] text-ink-3">
+        {result.ok
+          ? `Read ${result.page.finalUrl} · ${result.page.wordCount.toLocaleString()} words · HTTP ${result.page.status}`
+          : `Couldn't read ${url}: ${result.error}`}
+      </p>
+    );
+  },
 };
 
 const artifactLabels: Record<string, { working: string; done: string }> = {
   deliverVariants: { working: "Writing variants", done: "Variants ready" },
   designQr: { working: "Designing your code", done: "Design ready" },
+  deliverMetaTags: { working: "Writing meta tags", done: "Meta tags ready" },
+  deliverDocument: { working: "Writing the file", done: "File ready" },
+  deliverDataset: { working: "Building the dataset", done: "Dataset ready" },
+  fetchPage: { working: "Reading the page", done: "Read the page" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */
