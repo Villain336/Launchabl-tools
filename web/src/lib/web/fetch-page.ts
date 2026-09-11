@@ -74,7 +74,9 @@ const decodeEntities = (s: string) =>
     .replace(/&quot;/g, '"')
     .replace(/&#39;|&apos;/g, "'")
     .replace(/&nbsp;/g, " ")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&(hellip|mdash|ndash|rsquo|lsquo|rdquo|ldquo|trade|copy|reg);/g, (_, name: string) => ({ hellip: "…", mdash: "—", ndash: "–", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", trade: "™", copy: "©", reg: "®" })[name] ?? "")
     .trim();
 
 function attr(tag: string, name: string): string | null {

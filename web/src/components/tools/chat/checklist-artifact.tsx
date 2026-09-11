@@ -88,7 +88,6 @@ function CheckRow({ check }: { check: ChecklistCheck }) {
 
 const ACCESS: Record<CrawlerStatus["access"], { t: Tone; label: string }> = {
   allowed: { t: "good", label: "allowed" },
-  restricted: { t: "warn", label: "partly" },
   blocked: { t: "bad", label: "blocked" },
 };
 
@@ -98,7 +97,7 @@ function CrawlerTable({ crawlers, robotsUrl }: { crawlers: CrawlerStatus[]; robo
   return (
     <div className="border-b border-line px-4 py-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">AI crawler access · robots.txt</p>
+        <p className="text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">AI crawler access to this page · robots.txt</p>
         <a href={robotsUrl} target="_blank" rel="noreferrer" className="text-[11.5px] text-ink-3 hover:text-ink hover:underline">
           view file
         </a>

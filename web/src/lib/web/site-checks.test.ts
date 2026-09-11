@@ -119,9 +119,20 @@ describe("llm readability", () => {
     expect(parsed.groups).toHaveLength(3);
     expect(parsed.sitemaps).toEqual(["https://acme.com/sitemap.xml"]);
     expect(crawlerAccess(parsed, "GPTBot")).toEqual({ access: "blocked", via: "GPTBot" });
-    expect(crawlerAccess(parsed, "ccbot")).toEqual({ access: "blocked", via: "ccbot" });
-    expect(crawlerAccess(parsed, "ClaudeBot")).toEqual({ access: "restricted", via: "*" });
+    expect(crawlerAccess(parsed, "ccbot", "/blog/post")).toEqual({ access: "blocked", via: "ccbot" });
+    expect(crawlerAccess(parsed, "ClaudeBot", "/blog/post")).toEqual({ access: "allowed", via: "*" });
+    expect(crawlerAccess(parsed, "ClaudeBot", "/admin/users")).toEqual({ access: "blocked", via: "*" });
     expect(crawlerAccess(parsed, "PerplexityBot").access).toBe("allowed");
+  });
+
+  it("applies longest-match with wildcards and end anchors", () => {
+    const parsed = parseRobots("User-agent: *\nDisallow: /docs/\nAllow: /docs/public/\nDisallow: /*.pdf$\nDisallow: /search?*q=");
+    expect(crawlerAccess(parsed, "GPTBot", "/docs/internal").access).toBe("blocked");
+    expect(crawlerAccess(parsed, "GPTBot", "/docs/public/intro").access).toBe("allowed");
+    expect(crawlerAccess(parsed, "GPTBot", "/files/report.pdf").access).toBe("blocked");
+    expect(crawlerAccess(parsed, "GPTBot", "/files/report.pdf.html").access).toBe("allowed");
+    expect(crawlerAccess(parsed, "GPTBot", "/search?lang=en&q=x").access).toBe("blocked");
+    expect(crawlerAccess(parsed, "GPTBot", "/").access).toBe("allowed");
   });
 
   it("separates training blocks from search blocks and detects llms.txt", () => {
@@ -150,7 +161,7 @@ describe("llm readability", () => {
     expect(byId(report.checks, "author").status).toBe("pass");
     expect(byId(report.checks, "semantic").status).toBe("pass");
     expect(report.crawlers.find((c) => c.agent === "GPTBot")?.access).toBe("blocked");
-    expect(report.crawlers.find((c) => c.agent === "OAI-SearchBot")?.access).toBe("restricted");
+    expect(report.crawlers.find((c) => c.agent === "OAI-SearchBot")?.access).toBe("allowed");
     expect(report.llmsTxt.present).toBe(true);
     expect(report.robotsTxt.sitemaps).toHaveLength(1);
   });

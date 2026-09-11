@@ -10,7 +10,7 @@ import { isQuestion } from "@/lib/web/voice-search";
  * and /llms.txt (the emerging site summary for language models).
  */
 
-export type CrawlerAccess = "allowed" | "blocked" | "restricted";
+export type CrawlerAccess = "allowed" | "blocked";
 
 export type CrawlerStatus = {
   agent: string;
@@ -76,17 +76,30 @@ export function parseRobots(text: string): { groups: RobotsGroup[]; sitemaps: st
   return { groups, sitemaps };
 }
 
-export function crawlerAccess(robots: ReturnType<typeof parseRobots>, agent: string): { access: CrawlerAccess; via: string | null } {
+/** robots.txt path rule → does it match this path? Supports `*` wildcards and `$` end anchors. */
+function ruleMatches(rule: string, path: string): boolean {
+  if (!rule) return false;
+  const anchored = rule.endsWith("$");
+  const body = anchored ? rule.slice(0, -1) : rule;
+  const pattern = body.split("*").map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*");
+  return new RegExp(`^${pattern}${anchored ? "$" : ""}`).test(path);
+}
+
+/**
+ * Resolve whether `agent` may fetch `path`, following the standard: the most
+ * specific (longest) matching rule wins, and Allow beats Disallow on a tie.
+ */
+export function crawlerAccess(robots: ReturnType<typeof parseRobots>, agent: string, path = "/"): { access: CrawlerAccess; via: string | null } {
   const lower = agent.toLowerCase();
   const specific = robots.groups.find((g) => g.agents.includes(lower));
   const group = specific ?? robots.groups.find((g) => g.agents.includes("*"));
   if (!group) return { access: "allowed", via: null };
   const via = specific ? agent : "*";
-  const blocksAll = group.disallow.some((d) => d === "/" || d === "/*");
-  const allowsRoot = group.allow.some((a) => a === "/" || a === "/*");
-  if (blocksAll) return { access: allowsRoot ? "allowed" : "blocked", via };
-  if (group.disallow.some((d) => d.length > 0)) return { access: "restricted", via };
-  return { access: "allowed", via };
+  const longest = (rules: string[]) => rules.filter((r) => ruleMatches(r, path)).reduce((n, r) => Math.max(n, r.length), -1);
+  const allow = longest(group.allow);
+  const disallow = longest(group.disallow);
+  if (disallow < 0) return { access: "allowed", via };
+  return { access: allow >= disallow ? "allowed" : "blocked", via };
 }
 
 async function fetchText(url: string, timeoutMs = 6_000): Promise<{ status: number | null; text: string }> {
@@ -142,10 +155,11 @@ export function analyzeLlmReadabilityHtml(input: LlmReadabilityInput): LlmReadab
   const canonical = tags(head, "link").find((t) => /\bcanonical\b/i.test(attr(t, "rel") ?? ""));
 
   const robots = parseRobots(input.robotsText ?? "");
-  const crawlers: CrawlerStatus[] = AI_CRAWLERS.map((c) => ({ ...c, ...crawlerAccess(robots, c.agent) }));
+  const pagePath = new URL(finalUrl).pathname + new URL(finalUrl).search;
+  const crawlers: CrawlerStatus[] = AI_CRAWLERS.map((c) => ({ ...c, ...crawlerAccess(robots, c.agent, pagePath) }));
   const blockedSearch = crawlers.filter((c) => c.purpose !== "training" && c.access === "blocked");
   const blockedTraining = crawlers.filter((c) => c.purpose === "training" && c.access === "blocked");
-  const wildcardBlocksAll = crawlerAccess(robots, "SomeUnknownBot").access === "blocked";
+  const wildcardBlocksAll = crawlerAccess(robots, "SomeUnknownBot", pagePath).access === "blocked";
 
   const llmsLines = input.llmsText ? input.llmsText.split(/\r?\n/).filter((l) => l.trim()).length : 0;
   const llmsPresent = Boolean(input.llmsText && llmsLines >= 2 && /^#\s+\S/m.test(input.llmsText));
