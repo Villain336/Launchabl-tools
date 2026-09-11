@@ -10,6 +10,7 @@ import type { Tool } from "@/lib/site-config";
 import { getRelatedTools } from "@/lib/site-config";
 import { getDeliveryPolicy } from "@/lib/tool-delivery";
 import { getToolAgent } from "@/lib/tool-agents";
+import { getChatTool } from "@/lib/ai/chat-tools";
 import { DeliveryRunProvider } from "@/components/tools/delivery-run";
 import { ToolDeliveryCanvas } from "@/components/tools/tool-delivery-canvas";
 import { AgentStudio } from "@/components/tools/agent-studio";
@@ -56,7 +57,10 @@ export function ToolPageLayout({
     );
   }
 
-  const toolBody = (
+  const chat = getChatTool(tool.slug);
+  const toolBody = chat ? (
+    <div className="mt-6">{children}</div>
+  ) : (
     <>
       {policy && <ToolDeliveryCanvas />}
       <Card className="mt-6 p-6 sm:p-8">{children}</Card>

@@ -31,6 +31,7 @@ import { SslCertificateChecker } from "@/components/tools/ssl-certificate-checke
 import { EmailFinder } from "@/components/tools/email-finder";
 import { BackgroundRemover } from "@/components/tools/background-remover";
 import { DemoVideoCreator } from "@/components/tools/demo-video-creator";
+import { ToolChat } from "@/components/tools/tool-chat";
 
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
@@ -55,6 +56,7 @@ const toolUi: Record<string, ReactNode> = {
   "schema-generator": <SchemaGenerator />,
   "brand-creator": <BrandCreator />,
   "domain-availability": <DomainAvailabilitySearch />,
+  "ab-copy-variants": <ToolChat slug="ab-copy-variants" />,
   copywriter: <Copywriter />,
   "watermark-remover": <WatermarkRemover />,
   "file-converter": <FileConverter />,
@@ -129,6 +131,8 @@ function AboutCopy({ slug }: { slug: string }) {
       "Naming a brand and checking whether the domain is actually available are usually two disconnected steps. This tool combines both: generate name and tagline ideas, then immediately see which domains are open, so you can move from idea to claimed domain in one sitting.",
     "domain-availability":
       "A fast way to check a name across the most common top-level domains before you commit to it anywhere else — social handles, business registration, or a logo.",
+    "ab-copy-variants":
+      "Most A/B tests fail because the variants are synonyms of each other — same promise, different adjectives. This tool forces every variant onto a distinct persuasion angle (outcome, pain relief, social proof, curiosity, urgency, specificity, contrast, identity) so each one is a real hypothesis about what your audience responds to. Paste your current copy, say who it's for, and you get the variants as copyable cards plus a test plan: which metric to judge on, how much traffic you need before trusting the result, and how long to run it.",
     copywriter:
       "Structured copy templates for the formats marketers write over and over: ad headlines, landing page heroes, product blurbs, and email subject lines. Pick a format, describe your brand and offer, and get several usable variations back instantly.",
     "watermark-remover":

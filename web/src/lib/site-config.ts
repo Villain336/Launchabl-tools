@@ -150,6 +150,36 @@ export const tools: Tool[] = [
     faq: [],
   },
   {
+    slug: "ab-copy-variants",
+    name: "A/B Copy Variant Generator",
+    shortDescription:
+      "Paste a headline, hero, ad, or CTA and get distinct variants — each on a different persuasion angle — with a plan to test them.",
+    cluster: "launch",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Want someone to run the test for you?",
+      body: "Unlimited plan members get a conversion strategist who sets up the experiment, watches the numbers, and ships the winner.",
+    },
+    faq: [
+      {
+        question: "How is this different from asking a generic chatbot?",
+        answer:
+          "Every variant is forced onto a different persuasion angle (outcome, social proof, urgency, specificity…) so you're testing real hypotheses instead of synonyms. You also get a test plan with the metric, traffic guidance, and run length.",
+      },
+      {
+        question: "Do I need an account?",
+        answer:
+          "No. The tool is free with a fair-use limit per visitor. Nothing you paste is stored after the response is generated.",
+      },
+      {
+        question: "Which AI model powers it?",
+        answer:
+          "Requests route through Vercel AI Gateway to the best available model for copywriting, with automatic fallback if a model is busy. The model that answered is shown under each response.",
+      },
+    ],
+  },
+  {
     slug: "copywriter",
     name: "AI Copywriter",
     shortDescription:
