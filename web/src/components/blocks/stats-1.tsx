@@ -1,12 +1,12 @@
 import { Separator } from "@/components/ui/separator";
-import { tools, toolClusters } from "@/lib/site-config";
+import { tools } from "@/lib/site-config";
 
 export default function StatsBlock() {
   const liveCount = tools.filter((t) => t.status === "live").length;
   const stats = [
     { value: `${tools.length}+`, label: "tools in the toolbox" },
     { value: `${liveCount}`, label: "live and ready to use today" },
-    { value: `${toolClusters.length}`, label: "outcome clusters, not a junk drawer" },
+    { value: "$0", label: "to use any tool, no account needed" },
     { value: "1", label: "flat price for the unlimited agency" },
   ];
 

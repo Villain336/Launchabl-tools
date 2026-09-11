@@ -15,7 +15,7 @@ export default function CaseStudiesPage() {
       <SectionHeading
         eyebrow="Proof, not just promises"
         title="Case studies"
-        description="Real launches and illustrative examples, tagged by which tool cluster kicked things off."
+        description="Real launches and illustrative examples, tagged by which free tool kicked things off."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">

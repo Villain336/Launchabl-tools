@@ -5,10 +5,10 @@ import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { CometCard } from "@/components/ui/comet-card";
 import type { CaseStudy } from "@/lib/case-studies";
-import { toolClusters } from "@/lib/site-config";
+import { getToolBySlug } from "@/lib/site-config";
 
 export function CaseStudyCard({ study }: { study: CaseStudy }) {
-  const cluster = toolClusters.find((c) => c.slug === study.toolCluster);
+  const tool = getToolBySlug(study.tool);
   const imageSrc = study.image ?? "/brand/logo.jpg";
 
   return (
@@ -36,9 +36,9 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
               </Link>
               <p className="mt-0.5 text-xs text-muted-foreground">{study.industry}</p>
             </div>
-            {cluster && (
+            {tool && (
               <p className="max-w-[8rem] text-right text-[10px] uppercase tracking-wide text-primary">
-                {cluster.name}
+                {tool.name}
               </p>
             )}
           </div>

@@ -153,6 +153,19 @@ body {
   body[data-studio] [data-site-chrome] {
     display: none !important;
   }
+  /* Tool pages: lock to the viewport so the tool fills the screen below the header. */
+  body:has([data-tool-page]) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  body:has([data-tool-page]) > main {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+  body:has([data-tool-page]) [data-site-chrome]:not(header) {
+    display: none !important;
+  }
 }
 
 @keyframes flow-pop {

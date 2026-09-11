@@ -6,12 +6,7 @@ import { ArrowRight, Menu as MenuIcon } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Button } from "@/components/ui/button";
-import {
-  HoveredLink,
-  Menu,
-  MenuItem,
-  ProductItem,
-} from "@/components/ui/navbar-menu";
+import { HoveredLink, Menu, MenuItem } from "@/components/ui/navbar-menu";
 import {
   Sheet,
   SheetClose,
@@ -20,8 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { primaryNav, siteConfig, toolClusters } from "@/lib/site-config";
-import { artForCluster } from "@/lib/marquee-art";
+import { primaryNav, siteConfig } from "@/lib/site-config";
 
 export function SiteHeader() {
   const [active, setActive] = useState<string | null>(null);
@@ -44,19 +38,9 @@ export function SiteHeader() {
 
         <div className="hidden flex-1 items-center justify-center lg:flex">
           <Menu setActive={setActive}>
-            <MenuItem setActive={setActive} active={active} item="Tools">
-              <div className="grid grid-cols-2 gap-4 p-2 text-sm">
-                {toolClusters.map((cluster) => (
-                  <ProductItem
-                    key={cluster.slug}
-                    title={cluster.name}
-                    href={`/tools#${cluster.slug}`}
-                    src={artForCluster(cluster.slug)}
-                    description={cluster.description}
-                  />
-                ))}
-              </div>
-            </MenuItem>
+            <HoveredLink href="/tools" className="text-sm font-medium text-foreground hover:text-primary">
+              Tools
+            </HoveredLink>
             <MenuItem setActive={setActive} active={active} item="Solutions">
               <div className="flex flex-col space-y-3 text-sm">
                 <HoveredLink href="/solutions">All solutions</HoveredLink>
@@ -113,35 +97,16 @@ function MobileMenu() {
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col px-2">
-          <SheetClose
-            render={<Link href="/tools" />}
-            nativeButton={false}
-            className="rounded-md px-2 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            All tools
-          </SheetClose>
-          {toolClusters.map((cluster) => (
+          {primaryNav.map((link) => (
             <SheetClose
-              key={cluster.slug}
-              render={<Link href={`/tools#${cluster.slug}`} />}
+              key={link.href}
+              render={<Link href={link.href} />}
               nativeButton={false}
-              className="rounded-md px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="rounded-md px-2 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              {cluster.name}
+              {link.label}
             </SheetClose>
           ))}
-          {primaryNav
-            .filter((link) => link.href !== "/tools")
-            .map((link) => (
-              <SheetClose
-                key={link.href}
-                render={<Link href={link.href} />}
-                nativeButton={false}
-                className="rounded-md px-2 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                {link.label}
-              </SheetClose>
-            ))}
         </nav>
         <div className="mt-auto p-4">
           <SheetClose

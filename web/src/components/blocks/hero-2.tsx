@@ -11,7 +11,7 @@ import { artForTool } from "@/lib/marquee-art";
 const marqueeCards = (() => {
   const source = tools.length
     ? tools
-    : [{ name: siteConfig.name, slug: "home", cluster: "launch" }];
+    : [{ name: siteConfig.name, slug: "home" }];
   const cards = source.map((tool) => ({
     src: artForTool(tool),
     title: tool.name,

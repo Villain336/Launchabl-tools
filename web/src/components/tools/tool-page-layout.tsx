@@ -1,13 +1,9 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ShieldCheck, ServerCog, Handshake } from "lucide-react";
-import { Container } from "@/components/ui/container";
+import { ArrowLeft, ShieldCheck, ServerCog, Handshake } from "lucide-react";
 import { ToolStatusBadge } from "@/components/ui/agency-badge";
-import { LinkButton } from "@/components/ui/agency-button";
 import { Card } from "@/components/ui/card";
-import FaqsBlock from "@/components/blocks/faqs-1";
 import type { ReactNode } from "react";
 import type { Tool } from "@/lib/site-config";
-import { getRelatedTools } from "@/lib/site-config";
 import { getDeliveryPolicy } from "@/lib/tool-delivery";
 import { getToolAgent } from "@/lib/tool-agents";
 import { getChatTool } from "@/lib/ai/chat-tools";
@@ -15,24 +11,17 @@ import { DeliveryRunProvider } from "@/components/tools/delivery-run";
 import { ToolDeliveryCanvas } from "@/components/tools/tool-delivery-canvas";
 import { AgentStudio } from "@/components/tools/agent-studio";
 
-const processingCopy: Record<Tool["processing"], { icon: ReactNode; label: string; note: string }> = {
-  client: {
-    icon: <ShieldCheck className="h-4 w-4" />,
-    label: "Runs entirely in your browser",
-    note: "Your files are never uploaded — everything happens on your device.",
-  },
-  server: {
-    icon: <ServerCog className="h-4 w-4" />,
-    label: "Processed on our servers",
-    note: "Your input is sent securely for processing and deleted immediately after.",
-  },
-  partner: {
-    icon: <Handshake className="h-4 w-4" />,
-    label: "Powered by a trusted partner",
-    note: "This tool routes to a third-party registrar/hosting partner for live data and checkout.",
-  },
+const processingCopy: Record<Tool["processing"], { icon: ReactNode; label: string }> = {
+  client: { icon: <ShieldCheck className="h-3.5 w-3.5" />, label: "Runs in your browser" },
+  server: { icon: <ServerCog className="h-3.5 w-3.5" />, label: "Processed on our servers, then deleted" },
+  partner: { icon: <Handshake className="h-3.5 w-3.5" />, label: "Powered by a trusted partner" },
 };
 
+/**
+ * Tool pages show the tool and nothing else. The `data-tool-page` marker locks
+ * the body to the viewport and hides the footer/announcement (see globals.css),
+ * so the tool fills the screen below the header without page scrolling.
+ */
 export function ToolPageLayout({
   tool,
   children,
@@ -42,8 +31,6 @@ export function ToolPageLayout({
   children?: ReactNode;
   about: ReactNode;
 }) {
-  const processing = processingCopy[tool.processing];
-  const related = getRelatedTools(tool);
   const policy = getDeliveryPolicy(tool.slug);
   const agent = getToolAgent(tool.slug);
 
@@ -58,84 +45,36 @@ export function ToolPageLayout({
   }
 
   const chat = getChatTool(tool.slug);
+  const processing = processingCopy[tool.processing];
+
   const toolBody = chat ? (
-    <div className="mt-6">{children}</div>
+    children
   ) : (
-    <>
-      {policy && <ToolDeliveryCanvas />}
-      <Card className="mt-6 p-6 sm:p-8">{children}</Card>
-    </>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <Link href="/tools" className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-3.5 w-3.5" /> All tools
+        </Link>
+        <span className="text-muted-foreground/40">·</span>
+        <h1 className="text-[15px] font-semibold text-foreground">{tool.name}</h1>
+        <ToolStatusBadge status={tool.status} />
+        <span className="ml-auto inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
+          {processing.icon}
+          {processing.label}
+        </span>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto px-0.5 pt-0.5 pb-4">
+        {policy && <ToolDeliveryCanvas />}
+        <Card className="p-6 sm:p-8">{children}</Card>
+      </div>
+    </div>
   );
 
   return (
-    <Container className="py-12 sm:py-16">
-      <Link href="/tools" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> All tools
-      </Link>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">{tool.name}</h1>
-        <ToolStatusBadge status={tool.status} />
+    <div data-tool-page className="flex min-h-0 flex-1 flex-col">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-3 py-3 sm:px-6 sm:py-4">
+        {policy ? <DeliveryRunProvider policy={policy}>{toolBody}</DeliveryRunProvider> : toolBody}
       </div>
-      <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{tool.shortDescription}</p>
-      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">
-        {processing.icon}
-        {processing.label}
-      </div>
-
-      {policy ? <DeliveryRunProvider policy={policy}>{toolBody}</DeliveryRunProvider> : toolBody}
-
-      <p className="mt-3 text-xs text-muted-foreground">{processing.note}</p>
-
-      <div className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <h2 className="text-xl font-bold text-foreground">About this tool</h2>
-          <div className="prose prose-slate mt-4 max-w-none text-sm text-muted-foreground">{about}</div>
-
-          {tool.faq.length > 0 && (
-            <div className="mt-10">
-              <h2 className="text-xl font-bold text-foreground">FAQ</h2>
-              <div className="mt-4">
-                <FaqsBlock items={tool.faq} compact />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <Card className="bg-primary p-6 text-primary-foreground">
-            <h3 className="font-semibold">{tool.upsell.headline}</h3>
-            <p className="mt-2 text-sm text-primary-foreground/80">{tool.upsell.body}</p>
-            <LinkButton
-              href="/pricing"
-              variant="secondary"
-              size="sm"
-              className="mt-4 bg-background text-foreground hover:bg-background/90"
-            >
-              See the unlimited plan
-            </LinkButton>
-          </Card>
-
-          {related.length > 0 && (
-            <Card className="p-6">
-              <h3 className="font-semibold text-foreground">Related tools</h3>
-              <ul className="mt-4 space-y-3">
-                {related.map((r) => (
-                  <li key={r.slug}>
-                    <Link
-                      href={`/tools/${r.slug}`}
-                      className="flex items-center justify-between text-sm text-muted-foreground hover:text-primary"
-                    >
-                      {r.name}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          )}
-        </div>
-      </div>
-    </Container>
+    </div>
   );
 }

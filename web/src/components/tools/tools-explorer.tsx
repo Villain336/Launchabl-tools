@@ -1,90 +1,47 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { clsx } from "clsx";
-import { toolClusters, tools } from "@/lib/site-config";
+import { tools, type ToolStatus } from "@/lib/site-config";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Input } from "@/components/ui/input";
 
-const CLUSTER_SLUGS = new Set(toolClusters.map((cluster) => cluster.slug));
+type StatusFilter = "all" | ToolStatus;
 
-function clusterFromLocation(): string | "all" {
-  const hash = window.location.hash.replace(/^#/, "");
-  return CLUSTER_SLUGS.has(hash) ? hash : "all";
-}
+const statusFilters: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All tools" },
+  { value: "live", label: "Live" },
+  { value: "beta", label: "Beta" },
+  { value: "coming-soon", label: "Coming soon" },
+];
 
-function subscribeClusterHash(onChange: () => void) {
-  const notify = () => onChange();
-  window.addEventListener("hashchange", notify);
-  window.addEventListener("popstate", notify);
-
-  const onClick = (event: MouseEvent) => {
-    const anchor = (event.target as HTMLElement | null)?.closest("a");
-    if (!anchor?.href) return;
-    try {
-      const url = new URL(anchor.href, window.location.href);
-      if (url.pathname === "/tools" && url.hash) {
-        window.setTimeout(notify, 50);
-      }
-    } catch {
-      /* ignore malformed hrefs */
-    }
-  };
-  document.addEventListener("click", onClick);
-
-  return () => {
-    window.removeEventListener("hashchange", notify);
-    window.removeEventListener("popstate", notify);
-    document.removeEventListener("click", onClick);
-  };
-}
-
-function getClusterHashSnapshot() {
-  return clusterFromLocation();
-}
-
-function getServerClusterHash() {
-  return "all" as const;
-}
+const statusOrder: Record<ToolStatus, number> = { live: 0, beta: 1, "coming-soon": 2 };
 
 export function ToolsExplorer() {
   const [query, setQuery] = useState("");
-  const activeCluster = useSyncExternalStore(
-    subscribeClusterHash,
-    getClusterHashSnapshot,
-    getServerClusterHash,
-  );
-
-  useEffect(() => {
-    if (activeCluster === "all") return;
-    document.getElementById("toolbox")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [activeCluster]);
-
-  const selectCluster = (slug: string | "all") => {
-    const next = slug === "all" ? "/tools" : `/tools#${slug}`;
-    window.history.replaceState(null, "", next);
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
-  };
+  const [status, setStatus] = useState<StatusFilter>("all");
 
   const filtered = useMemo(() => {
-    return tools.filter((tool) => {
-      const matchesCluster = activeCluster === "all" || tool.cluster === activeCluster;
-      const matchesQuery =
-        query.trim().length === 0 ||
-        tool.name.toLowerCase().includes(query.toLowerCase()) ||
-        tool.shortDescription.toLowerCase().includes(query.toLowerCase());
-      return matchesCluster && matchesQuery;
-    });
-  }, [query, activeCluster]);
+    const q = query.trim().toLowerCase();
+    return tools
+      .filter((tool) => {
+        const matchesStatus = status === "all" || tool.status === status;
+        const matchesQuery =
+          q.length === 0 ||
+          tool.name.toLowerCase().includes(q) ||
+          tool.shortDescription.toLowerCase().includes(q);
+        return matchesStatus && matchesQuery;
+      })
+      .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  }, [query, status]);
+
+  const available = statusFilters.filter(
+    (f) => f.value === "all" || tools.some((tool) => tool.status === f.value),
+  );
 
   return (
     <div id="toolbox" className="mt-10 scroll-mt-28">
-      {toolClusters.map((cluster) => (
-        <span key={cluster.slug} id={cluster.slug} className="sr-only">
-          {cluster.name}
-        </span>
-      ))}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-full sm:max-w-xs">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -97,29 +54,19 @@ export function ToolsExplorer() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => selectCluster("all")}
-            className={clsx(
-              "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              activeCluster === "all"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
-            )}
-          >
-            All tools
-          </button>
-          {toolClusters.map((cluster) => (
+          {available.map((filter) => (
             <button
-              key={cluster.slug}
-              onClick={() => selectCluster(cluster.slug)}
+              key={filter.value}
+              type="button"
+              onClick={() => setStatus(filter.value)}
               className={clsx(
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                activeCluster === cluster.slug
+                status === filter.value
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
               )}
             >
-              {cluster.name}
+              {filter.label}
             </button>
           ))}
         </div>
@@ -132,7 +79,7 @@ export function ToolsExplorer() {
 
         {filtered.length === 0 && (
           <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
-            No tools match &ldquo;{query}&rdquo;. Try a different search or cluster.
+            No tools match &ldquo;{query}&rdquo;. Try a different search.
           </p>
         )}
       </div>

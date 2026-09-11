@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { Button } from "@/components/ui/button";
-import { siteConfig, toolClusters } from "@/lib/site-config";
+import { siteConfig, tools } from "@/lib/site-config";
 
 const columns = [
   {
@@ -15,8 +15,11 @@ const columns = [
     ],
   },
   {
-    heading: "Clusters",
-    links: toolClusters.slice(0, 4).map((c) => ({ label: c.name, href: `/tools#${c.slug}` })),
+    heading: "Popular tools",
+    links: ["qr-code-generator", "meta-tag-generator", "ab-copy-variants", "agent-skill-generator"]
+      .map((slug) => tools.find((tool) => tool.slug === slug))
+      .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool))
+      .map((tool) => ({ label: tool.name, href: `/tools/${tool.slug}` })),
   },
   {
     heading: "Company",

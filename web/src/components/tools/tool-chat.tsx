@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart } from "ai";
 import { ArrowUp, Check, Copy, RefreshCw, RotateCcw, Square, Sparkles } from "lucide-react";
 import { getChatTool } from "@/lib/ai/chat-tools";
+import { getToolBySlug } from "@/lib/site-config";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import type { VariantsDeliverable } from "@/lib/ai/tools/ab-copy-variants";
 import type { QrDesignOutput } from "@/lib/ai/tools/qr-designer";
@@ -277,7 +278,7 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
   // Keep the newest content in view while streaming unless the reader scrolled up.
   useEffect(() => {
     const node = scrollRef.current;
-    if (!node || !pinnedRef.current) return;
+    if (!node || !pinnedRef.current || messages.length === 0) return;
     node.scrollTop = node.scrollHeight;
   }, [messages, status]);
 
@@ -299,6 +300,8 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     return <p className="text-sm text-red">Chat tool “{slug}” is not registered.</p>;
   }
 
+  const tool = getToolBySlug(slug);
+
   const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   const awaitingFirstToken = status === "submitted" || (status === "streaming" && messages[messages.length - 1]?.role === "user");
 
@@ -307,14 +310,14 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
   return (
     <ArtifactSessionProvider>
     <div
-      className={`flex h-[min(72vh,760px)] min-h-[520px] w-full flex-col overflow-hidden rounded-[14px] bg-surface shadow-card ${className}`}
+      className={`flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[14px] bg-surface shadow-card ${className}`}
       data-tool-chat={slug}
     >
       {/* header */}
       <div className="flex shrink-0 items-center justify-between border-b border-line px-3 py-2">
         <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span className="font-medium text-ink">Launchabl</span>
+          <span className="font-medium text-ink">{tool?.name ?? "Launchabl"}</span>
           <span className="hidden sm:inline">· free, no account needed</span>
         </div>
         {messages.length > 0 && (

@@ -20,70 +20,12 @@ export const primaryNav: NavLink[] = [
   { label: "About", href: "/about" },
 ];
 
-export type ToolCluster = {
-  slug: string;
-  name: string;
-  description: string;
-};
-
-export const toolClusters: ToolCluster[] = [
-  {
-    slug: "launch",
-    name: "Launch a brand",
-    description:
-      "Name it, claim the domain, stand up hosting, and write the copy — the full 0-to-1 stack.",
-  },
-  {
-    slug: "protect",
-    name: "Protect & clean your assets",
-    description:
-      "Watermark, strip hidden metadata, and keep control over how your images travel the web.",
-  },
-  {
-    slug: "get-found",
-    name: "SEO & get found",
-    description: "Meta tags, structured data and technical SEO fixes search engines actually reward.",
-  },
-  {
-    slug: "ads-conversion",
-    name: "Ads & conversion",
-    description: "Copy, variants and tests that turn traffic into customers.",
-  },
-  {
-    slug: "convert-ship",
-    name: "Convert & ship",
-    description: "Turn files into the format you actually need, in the browser, in seconds.",
-  },
-  {
-    slug: "audits-reports",
-    name: "Audits, kits & reports",
-    description:
-      "Heavier, multi-part deliverables — real audits, brand kits, and reports other free tool sites don't attempt.",
-  },
-  {
-    slug: "create-produce",
-    name: "Create & produce",
-    description: "Record, edit, and produce real marketing assets — video and imagery — without extra software.",
-  },
-  {
-    slug: "data-analytics",
-    name: "Data & analytics",
-    description: "Datasets, extracts and the numbers behind your decisions.",
-  },
-  {
-    slug: "build",
-    name: "Build",
-    description: "Files, docs and agent skills that make your codebase and your AI tools work better.",
-  },
-];
-
 export type ToolStatus = "live" | "beta" | "coming-soon";
 
 export type Tool = {
   slug: string;
   name: string;
   shortDescription: string;
-  cluster: string;
   status: ToolStatus;
   processing: "client" | "server" | "partner";
   upsell: {
@@ -99,7 +41,6 @@ export const tools: Tool[] = [
     name: "Brand Creator",
     shortDescription:
       "Generate name ideas, a starter palette, and check domain availability in one flow.",
-    cluster: "launch",
     status: "live",
     processing: "client",
     upsell: {
@@ -123,7 +64,6 @@ export const tools: Tool[] = [
     slug: "domain-availability",
     name: "Domain Availability",
     shortDescription: "Search a name across dozens of TLDs and see what's open to register.",
-    cluster: "launch",
     status: "beta",
     processing: "partner",
     upsell: {
@@ -142,7 +82,6 @@ export const tools: Tool[] = [
     slug: "domain-purchase",
     name: "Domain Purchase",
     shortDescription: "Register the domain you found, with pricing that's transparent up front.",
-    cluster: "launch",
     status: "coming-soon",
     processing: "partner",
     upsell: {
@@ -155,7 +94,6 @@ export const tools: Tool[] = [
     slug: "hosting",
     name: "Hosting",
     shortDescription: "Fast, managed hosting for your new site — no server admin required.",
-    cluster: "launch",
     status: "coming-soon",
     processing: "partner",
     upsell: {
@@ -169,7 +107,6 @@ export const tools: Tool[] = [
     name: "A/B Copy Variant Generator",
     shortDescription:
       "Paste a headline, hero, ad, or CTA and get distinct variants — each on a different persuasion angle — with a plan to test them.",
-    cluster: "ads-conversion",
     status: "live",
     processing: "server",
     upsell: {
@@ -199,7 +136,6 @@ export const tools: Tool[] = [
     name: "AI Copywriter",
     shortDescription:
       "Structured templates for ad copy, landing page heroes, product blurbs, and email subject lines.",
-    cluster: "launch",
     status: "beta",
     processing: "server",
     upsell: {
@@ -218,7 +154,6 @@ export const tools: Tool[] = [
     slug: "watermark-generator",
     name: "Watermark Generator",
     shortDescription: "Stamp a text or logo watermark onto your images with full control.",
-    cluster: "protect",
     status: "live",
     processing: "client",
     upsell: {
@@ -237,7 +172,6 @@ export const tools: Tool[] = [
     slug: "watermark-remover",
     name: "Watermark Remover",
     shortDescription: "Remove a watermark you own the rights to, using AI-assisted inpainting.",
-    cluster: "protect",
     status: "coming-soon",
     processing: "server",
     upsell: {
@@ -256,7 +190,6 @@ export const tools: Tool[] = [
     slug: "metadata-remover",
     name: "Metadata Remover",
     shortDescription: "Strip EXIF, GPS, and hidden metadata from your images before you share them.",
-    cluster: "protect",
     status: "live",
     processing: "client",
     upsell: {
@@ -280,7 +213,6 @@ export const tools: Tool[] = [
     slug: "schema-generator",
     name: "Schema Markup Generator",
     shortDescription: "Generate valid JSON-LD structured data for Organization, Product, FAQ, and more.",
-    cluster: "get-found",
     status: "live",
     processing: "client",
     upsell: {
@@ -304,7 +236,6 @@ export const tools: Tool[] = [
     slug: "file-converter",
     name: "File Converter",
     shortDescription: "Convert documents, spreadsheets, and presentations between common formats.",
-    cluster: "convert-ship",
     status: "coming-soon",
     processing: "server",
     upsell: {
@@ -317,7 +248,6 @@ export const tools: Tool[] = [
     slug: "image-converter",
     name: "Image Converter",
     shortDescription: "Convert between PNG, JPG, and WebP right in your browser — no upload required.",
-    cluster: "convert-ship",
     status: "live",
     processing: "client",
     upsell: {
@@ -337,7 +267,6 @@ export const tools: Tool[] = [
     name: "QR Code Generator",
     shortDescription:
       "Describe the look you want and get a styled QR code that still scans — shapes, gradients, logo space, then SVG, PNG, or a hosted embed.",
-    cluster: "convert-ship",
     status: "live",
     processing: "server",
     upsell: {
@@ -368,7 +297,6 @@ export const tools: Tool[] = [
     name: "Meta Tag Generator",
     shortDescription:
       "Paste a URL and get a click-worthy title, description, and full Open Graph / Twitter tag set — with search and share previews.",
-    cluster: "get-found",
     status: "live",
     processing: "server",
     upsell: {
@@ -393,7 +321,6 @@ export const tools: Tool[] = [
     name: "Markdown File Generator",
     shortDescription:
       "Turn a description or rough notes into a complete README, docs page, changelog, or llms.txt — previewed, formatted, and ready to download.",
-    cluster: "build",
     status: "live",
     processing: "server",
     upsell: {
@@ -412,7 +339,6 @@ export const tools: Tool[] = [
     name: "Agent Skill Generator",
     shortDescription:
       "Describe a workflow or tool and get a SKILL.md your coding agent can load — triggers, exact steps, verification, and pitfalls.",
-    cluster: "build",
     status: "live",
     processing: "server",
     upsell: {
@@ -432,7 +358,6 @@ export const tools: Tool[] = [
     name: "Dataset Builder",
     shortDescription:
       "Describe the rows you need and get a typed, realistic dataset — synthetic, extracted from a page, or cleaned from your notes — as CSV or JSON.",
-    cluster: "data-analytics",
     status: "live",
     processing: "server",
     upsell: {
@@ -458,7 +383,6 @@ export const tools: Tool[] = [
     name: "Website Audit Report",
     shortDescription:
       "Fetch a real URL and get a scored, multi-part report across SEO, structured data, and technical basics.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -483,7 +407,6 @@ export const tools: Tool[] = [
     name: "Landing Page Conversion Grader",
     shortDescription:
       "Score a landing page against real conversion best practices — CTAs, forms, trust signals, and speed.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -502,7 +425,6 @@ export const tools: Tool[] = [
     slug: "competitor-gap-report",
     name: "Competitor Gap Report",
     shortDescription: "Compare your site against up to three competitors, side by side, on the same signals.",
-    cluster: "audits-reports",
     status: "beta",
     processing: "server",
     upsell: {
@@ -520,7 +442,6 @@ export const tools: Tool[] = [
     slug: "dns-email-health",
     name: "DNS & Email Deliverability Health Check",
     shortDescription: "Real SPF, DKIM, DMARC, and MX checks for your domain — the kind you'd normally ask a developer for.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -543,7 +464,6 @@ export const tools: Tool[] = [
     slug: "brand-identity-kit",
     name: "Full Brand Identity Kit",
     shortDescription: "Generate a monogram mark, favicon, palette, and type pairing — bundled as a downloadable kit.",
-    cluster: "audits-reports",
     status: "beta",
     processing: "client",
     upsell: {
@@ -562,7 +482,6 @@ export const tools: Tool[] = [
     slug: "ad-creative-resizer",
     name: "Ad Creative Resizer",
     shortDescription: "Upload one creative, download a full zip of correctly sized variants for every major ad platform.",
-    cluster: "audits-reports",
     status: "live",
     processing: "client",
     upsell: {
@@ -580,7 +499,6 @@ export const tools: Tool[] = [
     slug: "content-campaign-calendar",
     name: "Content & Campaign Calendar Generator",
     shortDescription: "Generate a 30-day, multi-channel content plan tailored to your business and goal, exportable as CSV.",
-    cluster: "audits-reports",
     status: "live",
     processing: "client",
     upsell: {
@@ -593,7 +511,6 @@ export const tools: Tool[] = [
     slug: "local-seo-optimizer",
     name: "Local SEO / Google Business Profile Optimizer",
     shortDescription: "Generate a full local-presence package: GBP description, categories, Q&A, and review responses.",
-    cluster: "audits-reports",
     status: "live",
     processing: "client",
     upsell: {
@@ -606,7 +523,6 @@ export const tools: Tool[] = [
     slug: "sitemap-robots-generator",
     name: "Sitemap & Robots.txt Generator",
     shortDescription: "Turn a real list of your site's URLs into a validated sitemap.xml and robots.txt pair.",
-    cluster: "audits-reports",
     status: "live",
     processing: "client",
     upsell: {
@@ -625,7 +541,6 @@ export const tools: Tool[] = [
     slug: "white-label-report-builder",
     name: "White-Label Client Report Builder",
     shortDescription: "Combine audit findings, brand kit details, and competitor gaps into one polished, brandable report.",
-    cluster: "audits-reports",
     status: "beta",
     processing: "client",
     upsell: {
@@ -645,7 +560,6 @@ export const tools: Tool[] = [
     slug: "broken-link-checker",
     name: "Broken Link Checker",
     shortDescription: "Scan a page's links and find the ones that are dead, redirected, or erroring out.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -664,7 +578,6 @@ export const tools: Tool[] = [
     slug: "accessibility-checker",
     name: "Accessibility Checker",
     shortDescription: "A fast, free WCAG-lite scan — missing alt text, skipped headings, blocked zoom, and more.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -683,7 +596,6 @@ export const tools: Tool[] = [
     slug: "security-headers-checker",
     name: "Security Headers Checker",
     shortDescription: "Check whether your site sends the HTTP security headers that protect against common attacks.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -696,7 +608,6 @@ export const tools: Tool[] = [
     slug: "ssl-certificate-checker",
     name: "SSL/TLS Certificate Checker",
     shortDescription: "Check a domain's SSL certificate — issuer, expiry date, and days remaining — in seconds.",
-    cluster: "audits-reports",
     status: "live",
     processing: "server",
     upsell: {
@@ -715,7 +626,6 @@ export const tools: Tool[] = [
     slug: "email-finder",
     name: "B2B Email Finder & Verifier",
     shortDescription: "Guess the likely business email pattern for a person at a company, and confirm the domain accepts mail.",
-    cluster: "audits-reports",
     status: "beta",
     processing: "server",
     upsell: {
@@ -739,7 +649,6 @@ export const tools: Tool[] = [
     slug: "background-remover",
     name: "Background Remover",
     shortDescription: "Remove the background from a photo — product shots, headshots, or social images — right in your browser.",
-    cluster: "convert-ship",
     status: "beta",
     processing: "client",
     upsell: {
@@ -763,7 +672,6 @@ export const tools: Tool[] = [
     slug: "demo-video-creator",
     name: "Demo Video Creator",
     shortDescription: "Record your screen with a branded watermark overlay and export a ready-to-share demo video.",
-    cluster: "create-produce",
     status: "beta",
     processing: "client",
     upsell: {
@@ -788,10 +696,3 @@ export function getToolBySlug(slug: string) {
   return tools.find((tool) => tool.slug === slug);
 }
 
-export function getToolsByCluster(clusterSlug: string) {
-  return tools.filter((tool) => tool.cluster === clusterSlug);
-}
-
-export function getRelatedTools(tool: Tool, limit = 3) {
-  return tools.filter((t) => t.cluster === tool.cluster && t.slug !== tool.slug).slice(0, limit);
-}

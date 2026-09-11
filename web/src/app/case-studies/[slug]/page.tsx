@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/agency-badge";
 import { LinkButton } from "@/components/ui/agency-button";
 import { Card } from "@/components/ui/card";
 import { caseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
-import { toolClusters } from "@/lib/site-config";
+import { getToolBySlug } from "@/lib/site-config";
 
 export function generateStaticParams() {
   return caseStudies.map((study) => ({ slug: study.slug }));
@@ -34,7 +34,7 @@ export default async function CaseStudyPage({
   const study = getCaseStudyBySlug(slug);
   if (!study) notFound();
 
-  const cluster = toolClusters.find((c) => c.slug === study.toolCluster);
+  const tool = getToolBySlug(study.tool);
 
   return (
     <Container className="py-16 sm:py-24">
@@ -43,7 +43,7 @@ export default async function CaseStudyPage({
       </Link>
 
       <div className="mt-6 max-w-2xl">
-        {cluster && <Badge tone="info">{cluster.name}</Badge>}
+        {tool && <Badge tone="info">Started with {tool.name}</Badge>}
         <h1 className="mt-3 text-3xl font-bold text-foreground sm:text-4xl">{study.client}</h1>
         <p className="mt-1 text-sm uppercase tracking-wide text-muted-foreground">{study.industry}</p>
         <p className="mt-6 text-lg text-muted-foreground">{study.summary}</p>
