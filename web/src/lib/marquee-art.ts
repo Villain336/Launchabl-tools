@@ -39,6 +39,10 @@ export const TOOL_ART: Record<string, string> = {
   "canonical-tag-detector": "/marquee/marquee-seo.png",
   "page-speed-audit": "/marquee/marquee-audit.png",
   "backlink-health-check": "/marquee/marquee-seo.png",
+  "voice-search-optimizer": "/marquee/marquee-seo.png",
+  "compliance-scanner": "/marquee/marquee-protect.png",
+  "llm-readability-check": "/marquee/marquee-seo.png",
+  "email-newsletter-builder": "/marquee/marquee-copy.png",
 };
 
 export const BRAND_LOGO = "/brand/logo.jpg";

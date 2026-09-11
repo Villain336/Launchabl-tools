@@ -151,6 +151,58 @@ const metas: ChatToolMeta[] = [
     ],
     artifacts: ["checkBacklinks"],
   },
+  {
+    slug: "voice-search-optimizer",
+    intro:
+      "Give me a URL and I'll score how ready the page is to be read aloud by Google Assistant, Siri and Alexa — question headings, snippet-length answers, FAQ schema, speed — then write the FAQ section and JSON-LD that gets you chosen as the answer.",
+    placeholder: "Paste a page URL, e.g. https://example.com/pricing",
+    suggestions: [
+      "How voice-search ready is https://vercel.com/pricing?",
+      "Audit https://example.com/services for voice search and write the FAQ schema",
+      "We're a local plumber. Check https://example.com and tell me what to add for “near me” searches",
+      "Turn the questions on https://example.com/faq into FAQPage JSON-LD",
+    ],
+    artifacts: ["analyzeVoiceSearch", "deliverFaqSchema", "fetchPage"],
+  },
+  {
+    slug: "compliance-scanner",
+    intro:
+      "Paste a URL and I'll scan it the way a privacy regulator or a cautious visitor would: trackers firing before consent, missing privacy or cookie policies, insecure cookies, weak security headers, accessibility basics — then tell you what to fix first and how.",
+    placeholder: "Paste a page URL — the homepage or a signup/checkout page is best",
+    suggestions: [
+      "Scan https://vercel.com for compliance issues",
+      "Is https://example.com GDPR compliant? Our customers are mostly in Germany and France.",
+      "Check https://example.com/signup — we collect emails and run Meta ads",
+      "Which laws apply to my site if I sell to the US and the EU?",
+    ],
+    artifacts: ["scanCompliance"],
+  },
+  {
+    slug: "llm-readability-check",
+    intro:
+      "Give me a URL and I'll check whether ChatGPT, Perplexity, Claude and Google's AI Overviews can reach, read and cite it — which AI crawlers your robots.txt allows, whether you have an llms.txt, how clearly the page states what it is, and what structured data it carries. Then I'll draft what's missing.",
+    placeholder: "Paste a page URL, e.g. https://example.com/docs",
+    suggestions: [
+      "How readable is https://vercel.com/docs for AI search engines?",
+      "Check https://example.com and tell me which AI crawlers we're blocking",
+      "Draft an llms.txt for https://example.com",
+      "Make https://example.com/blog/our-guide easier for ChatGPT to cite",
+    ],
+    artifacts: ["analyzeLlmReadability", "deliverDocument", "fetchPage"],
+  },
+  {
+    slug: "email-newsletter-builder",
+    intro:
+      "Tell me what the email is about — a product update, a promotion, a monthly digest — and who it's for, or paste a link to the announcement. You'll get a subject line, preheader, a table-based HTML email that renders everywhere, and a plain-text version, previewed on desktop and mobile.",
+    placeholder: "e.g. Monthly update for our 4,000 SaaS customers: new dashboard, 2 integrations, webinar on the 21st…",
+    suggestions: [
+      "Write a product-update newsletter announcing our new analytics dashboard, Slack integration and a webinar next Thursday. Brand: Ledgerly, navy and mint.",
+      "Turn https://vercel.com/blog into a weekly digest email for developers with three highlights and one CTA.",
+      "A re-engagement email for customers who haven't logged in for 60 days. Friendly, short, one button back to the app.",
+      "Black Friday promo: 30% off annual plans until Monday. Urgent but not shouty, one CTA, dark theme.",
+    ],
+    artifacts: ["deliverEmail", "fetchPage"],
+  },
 ];
 
 const bySlug = new Map(metas.map((meta) => [meta.slug, meta]));

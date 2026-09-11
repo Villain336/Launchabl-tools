@@ -6,6 +6,8 @@ import { metaTagsRuntime } from "@/lib/ai/tools/meta-tags";
 import { agentSkillGeneratorRuntime, markdownGeneratorRuntime } from "@/lib/ai/tools/documents";
 import { datasetBuilderRuntime } from "@/lib/ai/tools/dataset-builder";
 import { backlinkHealthRuntime, brokenLinkAssistantRuntime, canonicalDetectorRuntime, pageSpeedAuditRuntime } from "@/lib/ai/tools/seo-audits";
+import { complianceScannerRuntime, llmReadabilityRuntime, voiceSearchRuntime } from "@/lib/ai/tools/site-checks";
+import { newsletterBuilderRuntime } from "@/lib/ai/tools/newsletter";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -35,6 +37,10 @@ const runtimes: ChatToolRuntime[] = [
   brokenLinkAssistantRuntime,
   pageSpeedAuditRuntime,
   backlinkHealthRuntime,
+  voiceSearchRuntime,
+  complianceScannerRuntime,
+  llmReadabilityRuntime,
+  newsletterBuilderRuntime,
 ];
 
 const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));

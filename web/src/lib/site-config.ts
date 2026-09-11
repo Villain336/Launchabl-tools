@@ -647,6 +647,97 @@ export const tools: Tool[] = [
     ],
   },
   {
+    slug: "voice-search-optimizer",
+    name: "Voice Search Optimizer",
+    shortDescription: "Score a page for spoken answers — question headings, snippet-length answers, FAQ schema, speed — and get the FAQ section and JSON-LD written for you.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Being the answer is a content strategy, not a checklist.",
+      body: "Unlimited plan members get question-led content written, marked up and measured across their whole site.",
+    },
+    faq: [
+      {
+        question: "What makes a page voice-search friendly?",
+        answer:
+          "Assistants read one short answer aloud. Pages that win are fast, secure, mobile-ready, phrase headings as the questions people say, answer each in 30–50 plain words directly underneath, and mark the pairs up as FAQPage schema. The checklist tests exactly those things.",
+      },
+      {
+        question: "Can it write the FAQ for me?",
+        answer: "Yes — after the audit, ask for it. You'll get spoken-style questions and answers based on the page, plus the HTML section and FAQPage JSON-LD to paste in.",
+      },
+    ],
+  },
+  {
+    slug: "compliance-scanner",
+    name: "Compliance Scanner",
+    shortDescription: "Find the GDPR, cookie-consent, CCPA, accessibility and security gaps a regulator or a privacy-minded visitor would spot first — with the fix for each.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A scan finds the gaps. We close them.",
+      body: "Unlimited plan members get consent management, policies and security headers implemented and kept current as the law changes.",
+    },
+    faq: [
+      {
+        question: "Is this legal advice?",
+        answer:
+          "No. It's a technical scan of the page's HTML and response headers for signals — trackers loading without a consent manager, missing policy links, insecure cookies, absent security headers, accessibility basics. Use it to know what to ask your lawyer or developer about.",
+      },
+      {
+        question: "What can't it see?",
+        answer:
+          "Anything that happens after the page loads in a browser: whether the cookie banner actually blocks scripts until you accept, cookie lifetimes set by JavaScript, or what your processors do with the data. It tells you how to check those by hand.",
+      },
+    ],
+  },
+  {
+    slug: "llm-readability-check",
+    name: "LLM Readability Check",
+    shortDescription: "See whether ChatGPT, Perplexity, Claude and AI Overviews can read and cite your page — crawler access, llms.txt, structure, schema — and get the fixes drafted.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "AI search is the new front page. We'll get you cited.",
+      body: "Unlimited plan members get their content restructured, marked up and monitored for citations across AI answer engines.",
+    },
+    faq: [
+      {
+        question: "What does it check?",
+        answer:
+          "Three things: access (which AI crawlers robots.txt allows or blocks, noindex/nosnippet, whether content is JavaScript-only, /llms.txt), clarity (a definitional opening, clean headings, question sections, lists and tables, text-to-markup ratio) and machine-readable signals (JSON-LD, dates, author, canonical, semantic landmarks).",
+      },
+      {
+        question: "Should I block AI crawlers?",
+        answer:
+          "Blocking training bots (GPTBot, Google-Extended, CCBot) keeps you out of training data and has no effect on being cited. Blocking search and user-fetch bots (OAI-SearchBot, ChatGPT-User, PerplexityBot, ClaudeBot) removes you from AI answers. The report separates the two so you can choose deliberately.",
+      },
+    ],
+  },
+  {
+    slug: "email-newsletter-builder",
+    name: "Email Newsletter Builder",
+    shortDescription: "Describe the update or paste a link and get a complete, inbox-safe newsletter — subject, preheader, table-based HTML, plain text — previewed on desktop and mobile.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "One email is easy. A programme that converts is the job.",
+      body: "Unlimited plan members get their email calendar written, designed, tested and sent — with the automations behind it.",
+    },
+    faq: [
+      {
+        question: "Will it render in Outlook and Gmail?",
+        answer:
+          "The HTML follows the rules that make email render reliably: nested tables, all CSS inline, a 600px container, no JavaScript or external stylesheets, images with widths and alt text. Always send yourself a test from your email platform before a real send.",
+      },
+      {
+        question: "Can I use it with Mailchimp, Klaviyo, HubSpot…?",
+        answer:
+          "Yes. Download the .html and import it as a custom-coded template, or paste it into your platform's HTML editor. Merge tags and the unsubscribe link are left as {{placeholders}} for your platform to fill.",
+      },
+    ],
+  },
+  {
     slug: "accessibility-checker",
     name: "Accessibility Checker",
     shortDescription: "A fast, free WCAG-lite scan — missing alt text, skipped headings, blocked zoom, and more.",

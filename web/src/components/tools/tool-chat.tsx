@@ -33,6 +33,10 @@ import { DatasetArtifact } from "@/components/tools/chat/dataset-artifact";
 import { VariantsArtifact } from "@/components/tools/chat/variants-artifact";
 import { BacklinksArtifact, CanonicalArtifact, LinksArtifact, PerformanceArtifact } from "@/components/tools/chat/audit-artifacts";
 import type { BacklinksToolOutput, CanonicalToolOutput, LinksToolOutput, PerformanceToolOutput } from "@/lib/ai/tools/seo-audits";
+import { ChecklistArtifact, FaqSchemaArtifact } from "@/components/tools/chat/checklist-artifact";
+import { EmailArtifact } from "@/components/tools/chat/email-artifact";
+import type { ChecklistToolOutput, FaqSchemaDeliverable, LlmReadabilityToolOutput } from "@/lib/ai/tools/site-checks";
+import type { EmailDeliverable } from "@/lib/ai/tools/newsletter";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -60,6 +64,11 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   checkLinks: (part) => auditOrError(part.output as LinksToolOutput, (r) => <LinksArtifact report={r.report} />),
   auditPerformance: (part) => auditOrError(part.output as PerformanceToolOutput, (r) => <PerformanceArtifact report={r.report} />),
   checkBacklinks: (part) => auditOrError(part.output as BacklinksToolOutput, (r) => <BacklinksArtifact report={r.report} />),
+  analyzeVoiceSearch: (part) => auditOrError(part.output as ChecklistToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  scanCompliance: (part) => auditOrError(part.output as ChecklistToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  analyzeLlmReadability: (part) => auditOrError(part.output as LlmReadabilityToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  deliverFaqSchema: (part) => <FaqSchemaArtifact data={part.output as FaqSchemaDeliverable} />,
+  deliverEmail: (part) => <EmailArtifact email={part.output as EmailDeliverable} />,
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -84,6 +93,11 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   checkLinks: { working: "Checking every link", done: "Link check ready" },
   auditPerformance: { working: "Auditing page delivery", done: "Audit ready" },
   checkBacklinks: { working: "Verifying backlinks", done: "Backlink check ready" },
+  analyzeVoiceSearch: { working: "Listening to the page", done: "Voice search audit ready" },
+  scanCompliance: { working: "Scanning for compliance signals", done: "Compliance scan ready" },
+  analyzeLlmReadability: { working: "Reading like an AI crawler", done: "LLM readability report ready" },
+  deliverFaqSchema: { working: "Writing the FAQ", done: "FAQ ready" },
+  deliverEmail: { working: "Designing the email", done: "Email ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */
