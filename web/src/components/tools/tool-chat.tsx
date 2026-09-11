@@ -21,6 +21,8 @@ import { MetaTagsArtifact } from "@/components/tools/chat/meta-tags-artifact";
 import { DocumentArtifact } from "@/components/tools/chat/document-artifact";
 import { DatasetArtifact } from "@/components/tools/chat/dataset-artifact";
 import { VariantsArtifact } from "@/components/tools/chat/variants-artifact";
+import { BacklinksArtifact, CanonicalArtifact, LinksArtifact, PerformanceArtifact } from "@/components/tools/chat/audit-artifacts";
+import type { BacklinksToolOutput, CanonicalToolOutput, LinksToolOutput, PerformanceToolOutput } from "@/lib/ai/tools/seo-audits";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -32,6 +34,11 @@ type ToolPart = Extract<ToolChatMessage["parts"][number], { type: `tool-${string
 
 type ArtifactRenderer = (part: ToolPart) => ReactNode;
 
+function auditOrError<T extends { ok: true }>(output: T | { ok: false; error: string }, render: (ok: T) => ReactNode): ReactNode {
+  if (!output.ok) return <p className="text-[12.5px] text-red">{output.error}</p>;
+  return render(output);
+}
+
 /** Maps `tool-<name>` parts to rich renderers. Tools without an entry fall back to a status line. */
 const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverVariants: (part) => <VariantsArtifact data={part.output as VariantsDeliverable} />,
@@ -39,6 +46,10 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverMetaTags: (part) => <MetaTagsArtifact tags={part.output as MetaTagSet} />,
   deliverDocument: (part) => <DocumentArtifact doc={part.output as DocumentDeliverable} />,
   deliverDataset: (part) => <DatasetArtifact data={part.output as Dataset} />,
+  analyzeCanonical: (part) => auditOrError(part.output as CanonicalToolOutput, (r) => <CanonicalArtifact report={r.report} />),
+  checkLinks: (part) => auditOrError(part.output as LinksToolOutput, (r) => <LinksArtifact report={r.report} />),
+  auditPerformance: (part) => auditOrError(part.output as PerformanceToolOutput, (r) => <PerformanceArtifact report={r.report} />),
+  checkBacklinks: (part) => auditOrError(part.output as BacklinksToolOutput, (r) => <BacklinksArtifact report={r.report} />),
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -59,6 +70,10 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   deliverDocument: { working: "Writing the file", done: "File ready" },
   deliverDataset: { working: "Building the dataset", done: "Dataset ready" },
   fetchPage: { working: "Reading the page", done: "Read the page" },
+  analyzeCanonical: { working: "Checking canonicals", done: "Canonical audit ready" },
+  checkLinks: { working: "Checking every link", done: "Link check ready" },
+  auditPerformance: { working: "Auditing page delivery", done: "Audit ready" },
+  checkBacklinks: { working: "Verifying backlinks", done: "Backlink check ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */

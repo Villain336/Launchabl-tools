@@ -99,6 +99,58 @@ const metas: ChatToolMeta[] = [
     ],
     artifacts: ["deliverDataset", "fetchPage"],
   },
+  {
+    slug: "canonical-tag-detector",
+    intro:
+      "Give me a URL and I'll find every canonical it declares — in the HTML and the HTTP headers — check that it's single, absolute, secure and pointing somewhere live, then tell you exactly what to change and why it matters for rankings.",
+    placeholder: "Paste a page URL, e.g. https://example.com/blog/post?utm_source=x",
+    suggestions: [
+      "Check the canonical on https://vercel.com/pricing",
+      "Does https://www.example.com/products/shoes/ have the right canonical? We also serve it without www.",
+      "Audit canonicals on these three pages: https://example.com, https://example.com/?ref=home, https://example.com/index.html",
+      "Our blog posts show a different Google-selected canonical in Search Console. Check https://example.com/blog/first-post",
+    ],
+    artifacts: ["analyzeCanonical"],
+  },
+  {
+    slug: "broken-link-checker",
+    intro:
+      "Paste a page URL. I'll check every link on it, flag the dead and redirecting ones, try the most likely repairs, and hand you a find-and-replace list you can act on in minutes.",
+    placeholder: "Paste the page to scan, e.g. https://example.com/resources",
+    suggestions: [
+      "Scan https://vercel.com/docs for broken links",
+      "Check the links on https://example.com/blog/older-post and suggest replacements for anything broken",
+      "Find redirecting links on https://example.com and give me a find-and-replace list",
+      "Our footer links might be dead after a redesign. Check https://example.com",
+    ],
+    artifacts: ["checkLinks", "fetchPage"],
+  },
+  {
+    slug: "page-speed-audit",
+    intro:
+      "Give me a URL and I'll audit how the page is delivered — server response, compression, render-blocking scripts, JavaScript weight, images, fonts and third-party tags — then tell you the two or three fixes that will actually move Core Web Vitals.",
+    placeholder: "Paste a page URL and, if you like, your stack (Next.js, WordPress, Shopify…)",
+    suggestions: [
+      "Audit https://vercel.com for performance",
+      "Why does https://example.com feel slow on mobile? It's a WordPress site.",
+      "Check https://example.com/landing for render-blocking scripts and heavy JavaScript",
+      "Audit https://example.com and tell me what to fix first for LCP",
+    ],
+    artifacts: ["auditPerformance"],
+  },
+  {
+    slug: "backlink-health-check",
+    intro:
+      "Tell me your page or domain and paste the pages that should link to it. I'll verify each link is still there, whether it passes authority (follow vs nofollow), what the anchor says and whether the referring page can even be indexed — then help you recover what's missing.",
+    placeholder: "Target: https://example.com — then paste referring page URLs, one per line",
+    suggestions: [
+      "Check that https://github.com/vercel/next.js still links to https://nextjs.org",
+      "Target: https://example.com. Referrers: https://partner-site.com/resources, https://blog.example.org/tools-we-love",
+      "Where can I get a list of pages linking to my site for free?",
+      "Verify these backlinks to example.com and draft an outreach email for any that were removed: https://site-a.com/post, https://site-b.com/links",
+    ],
+    artifacts: ["checkBacklinks"],
+  },
 ];
 
 const bySlug = new Map(metas.map((meta) => [meta.slug, meta]));

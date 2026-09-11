@@ -23,7 +23,6 @@ import { ContentCampaignCalendar } from "@/components/tools/content-campaign-cal
 import { LocalSeoOptimizer } from "@/components/tools/local-seo-optimizer";
 import { SitemapRobotsGenerator } from "@/components/tools/sitemap-robots-generator";
 import { WhiteLabelReportBuilder } from "@/components/tools/white-label-report-builder";
-import { BrokenLinkChecker } from "@/components/tools/broken-link-checker";
 import { AccessibilityChecker } from "@/components/tools/accessibility-checker";
 import { SecurityHeadersChecker } from "@/components/tools/security-headers-checker";
 import { SslCertificateChecker } from "@/components/tools/ssl-certificate-checker";
@@ -73,7 +72,10 @@ const toolUi: Record<string, ReactNode> = {
   "local-seo-optimizer": <LocalSeoOptimizer />,
   "sitemap-robots-generator": <SitemapRobotsGenerator />,
   "white-label-report-builder": <WhiteLabelReportBuilder />,
-  "broken-link-checker": <BrokenLinkChecker />,
+  "broken-link-checker": <ToolChat slug="broken-link-checker" />,
+  "canonical-tag-detector": <ToolChat slug="canonical-tag-detector" />,
+  "page-speed-audit": <ToolChat slug="page-speed-audit" />,
+  "backlink-health-check": <ToolChat slug="backlink-health-check" />,
   "accessibility-checker": <AccessibilityChecker />,
   "security-headers-checker": <SecurityHeadersChecker />,
   "ssl-certificate-checker": <SslCertificateChecker />,

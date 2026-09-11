@@ -558,8 +558,8 @@ export const tools: Tool[] = [
   // --- Phase 1 additions: extends the audit engine + zero-dependency wins --
   {
     slug: "broken-link-checker",
-    name: "Broken Link Checker",
-    shortDescription: "Scan a page's links and find the ones that are dead, redirected, or erroring out.",
+    name: "Broken Link Repair Assistant",
+    shortDescription: "Scan a page, find every dead or redirecting link, and get verified replacements plus a find-and-replace list.",
     status: "live",
     processing: "server",
     upsell: {
@@ -570,7 +570,79 @@ export const tools: Tool[] = [
       {
         question: "Does this check my whole site?",
         answer:
-          "No — v1 checks the links found on a single page you provide (up to 25 links). A full-site crawl is on the roadmap.",
+          "It checks the links found on the page you give it (up to 60 per page). Point it at your sitemap page, footer-heavy pages or old blog posts to cover the most ground.",
+      },
+      {
+        question: "How are replacements suggested?",
+        answer:
+          "For internal links it tries common URL fixes (trailing slash, https, lowercase, .html) and looks for a similar live page on your site, and marks anything it confirmed with a request. External fixes are suggestions to verify.",
+      },
+    ],
+  },
+  {
+    slug: "canonical-tag-detector",
+    name: "Canonical Tag Detector",
+    shortDescription: "Find every canonical a page declares, catch conflicts, chains and tracking parameters, and get the exact tag to ship.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Canonicals are one signal. We manage all of them.",
+      body: "Unlimited plan members get their whole site's technical SEO — canonicals, redirects, sitemaps, structured data — handled continuously.",
+    },
+    faq: [
+      {
+        question: "What does it check?",
+        answer:
+          "Presence, duplicates and conflicts between HTML and HTTP header canonicals, absolute vs relative URLs, http vs https, www variants, self-referencing vs cross-page, tracking parameters, fragments, og:url and robots consistency, and whether the canonical target is live, redirecting or part of a chain.",
+      },
+      {
+        question: "Why does Search Console show a different canonical than mine?",
+        answer:
+          "Google treats your tag as a strong hint, not a rule. If the target redirects, is in a chain, conflicts with a header, or is on a noindexed page, Google may pick its own. The audit flags exactly those cases.",
+      },
+    ],
+  },
+  {
+    slug: "page-speed-audit",
+    name: "Page Speed Audit",
+    shortDescription: "A prioritised delivery audit — server response, blocking scripts, JavaScript weight, images, fonts and third parties — with the fixes that move Core Web Vitals.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "We'll make the fixes, not just list them.",
+      body: "Unlimited plan members get performance work shipped — bundle splitting, image pipelines, caching — measured against real-user data.",
+    },
+    faq: [
+      {
+        question: "Is this the same as PageSpeed Insights?",
+        answer:
+          "No. This is a static read of how the page is delivered: response time, compression, blocking resources, measured script and stylesheet sizes, image and font hints. It doesn't run a browser, so it can't measure LCP, CLS or INP directly — use it to know what to fix, then confirm with PageSpeed Insights.",
+      },
+      {
+        question: "What is the score?",
+        answer: "A heuristic from the findings' severity, useful for tracking progress between runs. It is not a Lighthouse score.",
+      },
+    ],
+  },
+  {
+    slug: "backlink-health-check",
+    name: "Backlink Health Check",
+    shortDescription: "Paste the pages that should link to you and verify each link is live, follow, deep-linked and on an indexable page.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Links that stay live are earned, not checked.",
+      body: "Unlimited plan members get ongoing digital PR and link reclamation — we find the mentions, win the links, and keep them.",
+    },
+    faq: [
+      {
+        question: "Can it find my backlinks for me?",
+        answer:
+          "Not yet — there's no free, reliable public index of the web's links. Export your list from Google Search Console (Links → Top linking pages), Bing Webmaster Tools or Ahrefs Webmaster Tools, paste it in, and this verifies every one. Up to 20 pages per check.",
+      },
+      {
+        question: "What does 'domain only' mean?",
+        answer: "The page links to your homepage or another page on your domain, but not the URL you asked about. Worth a polite request to deep-link.",
       },
     ],
   },

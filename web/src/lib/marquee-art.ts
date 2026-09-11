@@ -36,6 +36,9 @@ export const TOOL_ART: Record<string, string> = {
   "markdown-file-generator": "/marquee/clay-report.png",
   "agent-skill-generator": "/marquee/clay-report.png",
   "dataset-builder": "/marquee/clay-report.png",
+  "canonical-tag-detector": "/marquee/marquee-seo.png",
+  "page-speed-audit": "/marquee/marquee-audit.png",
+  "backlink-health-check": "/marquee/marquee-seo.png",
 };
 
 export const BRAND_LOGO = "/brand/logo.jpg";
