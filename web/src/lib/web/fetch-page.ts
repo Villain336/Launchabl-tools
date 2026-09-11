@@ -178,37 +178,55 @@ export function parseHtml(html: string, requestedUrl: string, finalUrl: string):
   };
 }
 
-export async function fetchPage(rawUrl: string, { timeoutMs = 10_000, maxBytes = 1_500_000 } = {}): Promise<PageSnapshot> {
+export const FETCH_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (compatible; LaunchablBot/1.0; +https://launchabl.com/tools)",
+  Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
+  "Accept-Language": "en",
+  "Accept-Encoding": "gzip, deflate, br",
+};
+
+export type RawPage = {
+  requestedUrl: string;
+  url: URL;
+  finalUrl: string;
+  status: number;
+  headers: Headers;
+  contentType: string | null;
+  html: string;
+  /** Time until response headers arrived — a server-side TTFB approximation. */
+  ttfbMs: number;
+  loadTimeMs: number;
+  bytes: number;
+  truncated: boolean;
+};
+
+/** Fetch a public HTML page with SSRF guards, a byte cap and a timeout. */
+export async function fetchHtml(rawUrl: string, { timeoutMs = 10_000, maxBytes = 1_500_000 } = {}): Promise<RawPage> {
   const url = normalizeUrl(rawUrl);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const started = Date.now();
   let response: Response;
   try {
-    response = await fetch(url, {
-      signal: controller.signal,
-      redirect: "follow",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; LaunchablBot/1.0; +https://launchabl.com/tools)",
-        Accept: "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
-        "Accept-Language": "en",
-      },
-    });
+    response = await fetch(url, { signal: controller.signal, redirect: "follow", headers: FETCH_HEADERS });
   } catch (error) {
     clearTimeout(timer);
     if ((error as Error).name === "AbortError") throw new FetchPageError("The site took too long to respond.", "timeout");
     throw new FetchPageError("Couldn't reach that site.", "network");
   }
+  const ttfbMs = Date.now() - started;
 
   const contentType = response.headers.get("content-type");
   if (contentType && !/html|xml/i.test(contentType)) {
     clearTimeout(timer);
+    response.body?.cancel().catch(() => undefined);
     throw new FetchPageError(`That URL returned ${contentType.split(";")[0]}, not a web page.`, "not_html");
   }
 
   const reader = response.body?.getReader();
   const chunks: Uint8Array[] = [];
   let received = 0;
+  let truncated = false;
   if (reader) {
     for (;;) {
       const { value, done } = await reader.read();
@@ -216,6 +234,7 @@ export async function fetchPage(rawUrl: string, { timeoutMs = 10_000, maxBytes =
       chunks.push(value);
       received += value.byteLength;
       if (received >= maxBytes) {
+        truncated = true;
         reader.cancel().catch(() => undefined);
         break;
       }
@@ -230,11 +249,84 @@ export async function fetchPage(rawUrl: string, { timeoutMs = 10_000, maxBytes =
   }
 
   return {
-    ...parseHtml(html, rawUrl, response.url || url.toString()),
+    requestedUrl: rawUrl,
+    url,
+    finalUrl: response.url || url.toString(),
     status: response.status,
+    headers: response.headers,
     contentType,
-    fetchedAt: new Date().toISOString(),
+    html,
+    ttfbMs,
     loadTimeMs,
-    sizeKb: Math.round(received / 1024),
+    bytes: received,
+    truncated,
   };
 }
+
+export async function fetchPage(rawUrl: string, options?: { timeoutMs?: number; maxBytes?: number }): Promise<PageSnapshot> {
+  const raw = await fetchHtml(rawUrl, options);
+  return {
+    ...parseHtml(raw.html, rawUrl, raw.finalUrl),
+    status: raw.status,
+    contentType: raw.contentType,
+    fetchedAt: new Date().toISOString(),
+    loadTimeMs: raw.loadTimeMs,
+    sizeKb: Math.round(raw.bytes / 1024),
+  };
+}
+
+/**
+ * Probe a URL cheaply: HEAD first, GET (body discarded) when HEAD is refused.
+ * Returns the final status after redirects plus where it landed.
+ */
+export async function probeUrl(
+  target: string,
+  { timeoutMs = 8_000 }: { timeoutMs?: number } = {},
+): Promise<{ status: number | null; finalUrl: string | null; redirected: boolean; error?: string }> {
+  let url: URL;
+  try {
+    url = normalizeUrl(target);
+  } catch (error) {
+    return { status: null, finalUrl: null, redirected: false, error: (error as Error).message };
+  }
+  const attempt = async (method: "HEAD" | "GET") => {
+    const response = await fetch(url, {
+      method,
+      redirect: "follow",
+      signal: AbortSignal.timeout(timeoutMs),
+      headers: FETCH_HEADERS,
+    });
+    if (method === "GET") response.body?.cancel().catch(() => undefined);
+    return response;
+  };
+  try {
+    let response = await attempt("HEAD");
+    if (response.status === 405 || response.status === 501 || response.status === 403) response = await attempt("GET");
+    return { status: response.status, finalUrl: response.url || url.toString(), redirected: response.redirected };
+  } catch (error) {
+    const name = (error as Error).name;
+    return {
+      status: null,
+      finalUrl: null,
+      redirected: false,
+      error: name === "TimeoutError" || name === "AbortError" ? "Timed out" : "Unreachable",
+    };
+  }
+}
+
+/** Run `fn` over `items` with bounded concurrency, preserving order. */
+export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    for (;;) {
+      const index = next++;
+      if (index >= items.length) return;
+      results[index] = await fn(items[index], index);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+export { attr, tags, decodeEntities };
