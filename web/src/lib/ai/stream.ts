@@ -1,8 +1,10 @@
 import {
   generateText,
   streamText,
+  type GenerateTextResult,
   type LanguageModel,
   type ModelMessage,
+  type OutputInterface,
   type TextStreamPart,
   type ToolChoice,
   type ToolSet,
@@ -29,7 +31,10 @@ type CallOptions<TOOLS extends ToolSet> = {
 };
 
 type StreamOptions<TOOLS extends ToolSet> = CallOptions<TOOLS>;
-type GenerateOptions<TOOLS extends ToolSet> = CallOptions<TOOLS>;
+type GenerateOptions<TOOLS extends ToolSet, OUTPUT extends OutputInterface> = CallOptions<TOOLS> & {
+  /** Structured output spec, e.g. `Output.object({ schema })`. */
+  output?: OUTPUT;
+};
 
 /** Gateway slugs in production; model objects are accepted so tests can inject mocks. */
 export type ModelChain = LanguageModel[];
@@ -125,15 +130,18 @@ export async function streamWithFallback<TOOLS extends ToolSet>(
 }
 
 /** Non-streaming counterpart for API routes that return JSON. */
-export async function generateWithFallback<TOOLS extends ToolSet>(
+export async function generateWithFallback<
+  TOOLS extends ToolSet,
+  OUTPUT extends OutputInterface = OutputInterface<string, string, never>,
+>(
   chain: ModelChain,
-  options: GenerateOptions<TOOLS>,
-): Promise<{ model: string; result: Awaited<ReturnType<typeof generateText<TOOLS>>>; skipped: ModelAttempt[] }> {
+  options: GenerateOptions<TOOLS, OUTPUT>,
+): Promise<{ model: string; result: GenerateTextResult<TOOLS, never, OUTPUT>; skipped: ModelAttempt[] }> {
   const skipped: ModelAttempt[] = [];
   for (const candidate of chain) {
     const model = slugOf(candidate);
     try {
-      const result = await generateText<TOOLS>({ ...options, model: candidate, maxRetries: 0 });
+      const result = await generateText<TOOLS, never, OUTPUT>({ ...options, model: candidate, maxRetries: 0 });
       return { model, result, skipped };
     } catch (error) {
       const failure = classifyAiError(error);
