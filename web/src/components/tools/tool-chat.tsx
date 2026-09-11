@@ -3,10 +3,20 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart } from "ai";
-import { ArrowUp, Check, Copy, RefreshCw, RotateCcw, Square, Sparkles } from "lucide-react";
+import { ArrowUp, Check, Copy, History, RefreshCw, RotateCcw, Square, Sparkles, Trash2 } from "lucide-react";
 import { getChatTool } from "@/lib/ai/chat-tools";
 import { getToolBySlug } from "@/lib/site-config";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
+import {
+  clearHistory,
+  deleteConversation,
+  newConversationId,
+  readHistory,
+  relativeTime,
+  saveConversation,
+  setCurrentConversation,
+  useChatHistory,
+} from "@/lib/chat/history";
 import type { VariantsDeliverable } from "@/lib/ai/tools/ab-copy-variants";
 import type { QrDesignOutput } from "@/lib/ai/tools/qr-designer";
 import type { MetaTagSet } from "@/lib/ai/tools/meta-tags";
@@ -253,12 +263,116 @@ function AssistantMessage({
   );
 }
 
+/** Recent conversations for this tool, read from localStorage. */
+function HistoryMenu({
+  slug,
+  currentId,
+  onOpen,
+  onDelete,
+  onClear,
+}: {
+  slug: string;
+  currentId: string | null;
+  onOpen: (id: string) => void;
+  onDelete: (id: string) => void;
+  onClear: () => void;
+}) {
+  const history = useChatHistory(slug);
+  // `openedAt` doubles as the "open" flag and the reference time for relative labels.
+  const [openedAt, setOpenedAt] = useState<number | null>(null);
+  const open = openedAt !== null;
+  const setOpen = (value: boolean) => setOpenedAt(value ? Date.now() : null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  if (history.conversations.length === 0) return null;
+  const now = openedAt ?? 0;
+
+  return (
+    <div ref={rootRef} className="relative">
+      <IconButton label="Recent conversations" onClick={() => setOpen(!open)} active={open}>
+        <History className="h-3.5 w-3.5" />
+        <span>History</span>
+      </IconButton>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-20 mt-1 w-[300px] overflow-hidden rounded-[10px] border border-line bg-surface shadow-card"
+          style={{ animation: "fade-up 200ms cubic-bezier(0.23,1,0.32,1) both" }}
+        >
+          <div className="flex items-center justify-between border-b border-line px-3 py-2">
+            <span className="text-[11.5px] font-medium tracking-wide text-ink-3 uppercase">Saved on this device</span>
+            <button
+              type="button"
+              onClick={() => {
+                onClear();
+                setOpen(false);
+              }}
+              className="text-[11.5px] text-ink-3 hover:text-red"
+            >
+              Clear all
+            </button>
+          </div>
+          <ul className="max-h-[320px] overflow-y-auto py-1">
+            {history.conversations.map((conversation) => {
+              const active = conversation.id === currentId;
+              return (
+                <li key={conversation.id} className="group flex items-stretch">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      onOpen(conversation.id);
+                      setOpen(false);
+                    }}
+                    className={`flex min-w-0 flex-1 flex-col items-start gap-0.5 px-3 py-2 text-left transition-colors duration-100 hover:bg-hover ${active ? "bg-field" : ""}`}
+                  >
+                    <span className="w-full truncate text-[13px] text-ink">{conversation.title}</span>
+                    <span className="text-[11.5px] text-ink-3">
+                      {relativeTime(conversation.updatedAt, now)} · {conversation.messages.length} messages
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Delete “${conversation.title}”`}
+                    title="Delete"
+                    onClick={() => onDelete(conversation.id)}
+                    className="flex w-9 shrink-0 items-center justify-center text-ink-3 opacity-0 transition-opacity duration-100 group-hover:opacity-100 hover:text-red focus-visible:opacity-100"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ToolChat({ slug, className = "" }: { slug: string; className?: string }) {
   const meta = getChatTool(slug);
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
+  const restoredRef = useRef(false);
 
   const transport = useMemo(
     () => new DefaultChatTransport<ToolChatMessage>({ api: "/api/tools/chat", body: () => ({ tool: slug }) }),
@@ -303,12 +417,63 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     pinnedRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48;
   };
 
+  // Restore the last conversation for this tool once, after hydration.
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const index = readHistory(slug);
+    const conversation = index.conversations.find((c) => c.id === index.current);
+    if (conversation && conversation.messages.length > 0) {
+      pinnedRef.current = true;
+      setMessages(conversation.messages);
+    }
+  }, [slug, setMessages]);
+
+  // Persist after each completed turn (never mid-stream).
+  useEffect(() => {
+    if (busy || messages.length === 0) return;
+    const index = readHistory(slug);
+    saveConversation(slug, index.current ?? newConversationId(), messages);
+  }, [messages, busy, slug]);
+
+  const currentId = useChatHistory(slug).current;
+
   const reset = () => {
     stop();
     clearError();
     setMessages([]);
+    setCurrentConversation(slug, null);
     setDraft("");
     inputRef.current?.focus();
+  };
+
+  const openConversation = (id: string) => {
+    const conversation = readHistory(slug).conversations.find((c) => c.id === id);
+    if (!conversation) return;
+    stop();
+    clearError();
+    pinnedRef.current = true;
+    setCurrentConversation(slug, id);
+    setMessages(conversation.messages);
+    inputRef.current?.focus();
+  };
+
+  const removeConversation = (id: string) => {
+    const wasCurrent = readHistory(slug).current === id;
+    deleteConversation(slug, id);
+    if (wasCurrent) {
+      stop();
+      clearError();
+      setMessages([]);
+    }
+  };
+
+  const clearAll = () => {
+    stop();
+    clearError();
+    clearHistory(slug);
+    setMessages([]);
+    setDraft("");
   };
 
   if (!meta) {
@@ -335,12 +500,15 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
           <span className="font-medium text-ink">{tool?.name ?? "Launchabl"}</span>
           <span className="hidden sm:inline">· free, no account needed</span>
         </div>
-        {messages.length > 0 && (
-          <IconButton label="Start a new conversation" onClick={reset}>
-            <RotateCcw className="h-3.5 w-3.5" />
-            <span>New chat</span>
-          </IconButton>
-        )}
+        <div className="flex items-center gap-0.5">
+          <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
+          {messages.length > 0 && (
+            <IconButton label="Start a new conversation" onClick={reset}>
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>New chat</span>
+            </IconButton>
+          )}
+        </div>
       </div>
 
       {/* conversation */}
