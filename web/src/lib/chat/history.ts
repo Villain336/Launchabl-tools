@@ -9,6 +9,7 @@
 
 import { useSyncExternalStore } from "react";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
+import { stripGeneratedPixels } from "@/lib/chat/pixels";
 
 export type StoredConversation = {
   id: string;
@@ -91,21 +92,6 @@ function shrinkConversation(conversation: StoredConversation): StoredConversatio
     });
   }
   return { ...conversation, messages };
-}
-
-/**
- * Generated images (image generator, social card backdrops) carry their
- * pixels inline. When history is over budget the pixels go and the
- * artifact shows an "ask again" placeholder with the prompt intact.
- */
-function stripGeneratedPixels(output: Record<string, unknown>): Record<string, unknown> {
-  if (Array.isArray(output.images) && output.images.some((i) => i && typeof i === "object" && "dataUrl" in i)) {
-    return { ...output, images: [], expired: true };
-  }
-  if (output.backgroundImage && typeof output.backgroundImage === "object") {
-    return { ...output, backgroundImage: null, expired: true };
-  }
-  return output;
 }
 
 function write(slug: string, index: HistoryIndex) {

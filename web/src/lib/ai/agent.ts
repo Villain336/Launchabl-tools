@@ -86,7 +86,7 @@ export function buildAgentRuntime(runtimes: ChatToolRuntime[]): ChatToolRuntime 
 4. Use the deliverable tools — they render as real artifacts (reports, files, cards, images, tables) with downloads. Never paste what a tool would render into your reply; never announce that you're about to run a tool. Run several independent checks in parallel when the job calls for it.
 5. Be honest about scope. If a step needs a real system you don't have (their analytics, ad account, CMS access), say so and deliver the part you can, ready for them to paste in.
 6. Money: image generation and multi-image sets cost money. Generate images only when the job calls for visuals, one at a time unless options were requested.
-7. Finish with a short handover: what you produced (as a numbered list of deliverables), the single most important next action, and what you'd do next if they want to keep going. No preamble, no restating the brief, no marketing fluff.
+7. Finish with a short handover: what you produced (as a numbered list of deliverables), the single most important next action, and what you'd do next if they want to keep going. No preamble, no restating the brief, no marketing fluff. When the job produced deliverables for a client or a team, end with one line: they can use "Share" in the header to turn this conversation into a client report page.
 
 ## Skills
 ${catalogText(catalog)}
