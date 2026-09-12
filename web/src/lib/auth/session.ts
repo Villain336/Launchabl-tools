@@ -22,7 +22,30 @@ const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
 const ANON_TTL_SECONDS = 365 * 24 * 60 * 60;
 
 export type Session = { uid: string; email: string; name: string | null; iat: number };
-export type UserRecord = { uid: string; email: string; name: string | null; createdAt: string; lastSeenAt: string; signIns: number; source?: string };
+
+/**
+ * Subscription fields are optional and only ever written by the Stripe
+ * webhook (`/api/billing/webhook`) and the checkout/portal routes — never
+ * trust a client-supplied value for these.
+ */
+export type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled" | "unpaid" | "incomplete" | "incomplete_expired" | "paused";
+
+export type UserRecord = {
+  uid: string;
+  email: string;
+  name: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+  signIns: number;
+  source?: string;
+  /** Stripe customer id, once one exists (created lazily at first checkout). */
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: SubscriptionStatus;
+  planInterval?: "month" | "year";
+  /** ISO timestamp of the current billing period's end, from Stripe. Display only — access is driven by subscriptionStatus. */
+  proCurrentPeriodEnd?: string;
+};
 
 const enc = new TextEncoder();
 
@@ -142,6 +165,66 @@ export async function upsertUser(
 export async function getUser(uid: string, store: KeyValueStore = getStore()): Promise<UserRecord | null> {
   const raw = await store.get(`user:${uid}`);
   return raw ? (JSON.parse(raw) as UserRecord) : null;
+}
+
+/* ── billing (Tools Pro subscription) ───────────────────
+ * Access is a boolean: subscriptionStatus is "active" or "trialing", or it
+ * isn't. There's no atomic credit ledger here — that's Phase 3 (credit
+ * packs), which needs a store primitive this one doesn't.
+ */
+
+const PRO_STATUSES = new Set<SubscriptionStatus>(["active", "trialing"]);
+
+export function hasProAccess(user: UserRecord | null | undefined): boolean {
+  return Boolean(user?.subscriptionStatus && PRO_STATUSES.has(user.subscriptionStatus));
+}
+
+/** Every uid with an active or trialing subscription right now — small set, cheap to read for admin/MRR. */
+const PRO_ACTIVE_SET = "billing:pro:active";
+
+/**
+ * Applied by the Stripe webhook (and by checkout, to attach a customer id
+ * before the first webhook arrives). Also maintains the customer→uid index
+ * and the active-subscribers set the admin dashboard reads for MRR.
+ */
+export async function setUserBilling(
+  uid: string,
+  patch: Partial<Pick<UserRecord, "stripeCustomerId" | "stripeSubscriptionId" | "subscriptionStatus" | "planInterval" | "proCurrentPeriodEnd">>,
+  store: KeyValueStore = getStore(),
+): Promise<UserRecord | null> {
+  const key = `user:${uid}`;
+  const raw = await store.get(key);
+  if (!raw) return null;
+  const prev = JSON.parse(raw) as UserRecord;
+  const user: UserRecord = { ...prev, ...patch };
+  await store.set(key, JSON.stringify(user));
+  if (patch.stripeCustomerId) await store.set(`stripeCustomer:${patch.stripeCustomerId}`, uid, 400 * 24 * 60 * 60);
+  if (patch.subscriptionStatus !== undefined) {
+    if (PRO_STATUSES.has(patch.subscriptionStatus)) await store.sadd(PRO_ACTIVE_SET, uid);
+    else await store.srem(PRO_ACTIVE_SET, uid);
+  }
+  return user;
+}
+
+export async function getUserByStripeCustomerId(customerId: string, store: KeyValueStore = getStore()): Promise<UserRecord | null> {
+  const uid = await store.get(`stripeCustomer:${customerId}`);
+  return uid ? getUser(uid, store) : null;
+}
+
+export type BillingStats = { activeSubscribers: number; byInterval: Record<"month" | "year", number> };
+
+/** Active/trialing subscriber count, split by interval, for the admin dashboard's MRR estimate. */
+export async function billingStats(store: KeyValueStore = getStore()): Promise<BillingStats> {
+  const uids = await store.smembers(PRO_ACTIVE_SET);
+  const users = await Promise.all(uids.map((uid) => getUser(uid, store)));
+  const byInterval: Record<"month" | "year", number> = { month: 0, year: 0 };
+  let activeSubscribers = 0;
+  for (const user of users) {
+    if (!hasProAccess(user)) continue;
+    activeSubscribers += 1;
+    byInterval[user?.planInterval ?? "month"] += 1;
+  }
+  return { activeSubscribers, byInterval };
 }
 
 export type AuthStats = {
