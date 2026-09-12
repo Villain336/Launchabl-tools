@@ -35,6 +35,16 @@ export const qrLogoSchema = z.object({
   radius: z.number().min(0).max(0.5).default(0.2),
 });
 
+export const qrLabelSchema = z.object({
+  text: z.string().min(1).max(48).describe("Caption printed with the code, e.g. 'Scan for the menu'."),
+  position: z.enum(["below", "above"]).default("below"),
+  color: hex.optional().describe("Defaults to the foreground colour."),
+  font: z.enum(["sans", "serif", "mono"]).default("sans"),
+  weight: z.enum(["regular", "bold"]).default("bold"),
+});
+
+export type QrLabel = z.infer<typeof qrLabelSchema>;
+
 export const qrStyleSchema = z.object({
   moduleShape: z.enum(moduleShapes).default("square"),
   eyeFrameShape: z.enum(eyeFrameShapes).default("square"),
@@ -50,6 +60,8 @@ export const qrStyleSchema = z.object({
   /** Corner radius of the whole tile as a fraction of its size. */
   cornerRadius: z.number().min(0).max(0.5).default(0),
   logo: qrLogoSchema.optional(),
+  /** Caption rendered in a band above or below the code, part of the exported image. */
+  label: qrLabelSchema.optional(),
 });
 
 export type QrStyle = z.infer<typeof qrStyleSchema>;

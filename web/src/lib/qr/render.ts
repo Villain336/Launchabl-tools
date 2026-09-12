@@ -23,7 +23,16 @@ export type RenderResult = {
   /** Modules per side, excluding the quiet zone. */
   modules: number;
   version: number;
+  /** Pixel dimensions written to the SVG; height exceeds width when a label band is present. */
+  width: number;
+  height: number;
 };
+
+const LABEL_FONTS = { sans: "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif", serif: "Georgia, 'Times New Roman', serif", mono: "ui-monospace, Menlo, Consolas, monospace" } as const;
+
+function escapeText(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 type Corners = [tl: number, tr: number, br: number, bl: number];
 
@@ -207,16 +216,33 @@ export function renderQrSvg(data: string, style: QrStyle, options: RenderOptions
   const defs = style.gradient ? `<defs>${gradientDef(style, total)}</defs>` : "";
   const xmlns = options.inline ? "" : ' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"';
 
+  /* ── label band ── */
+  const label = style.label;
+  // Band height in modules; the font shrinks for long captions so they fit the code's width.
+  const fontSize = label ? Math.min(2.4, Math.max(1.1, (total * 0.86) / (label.text.length * 0.58))) : 0;
+  const bandH = label ? fontSize * 1.9 : 0;
+  const totalH = total + bandH;
+  const codeY = label?.position === "above" ? bandH : 0;
+  const bandY = label?.position === "above" ? 0 : total;
+  const labelSvg = label
+    ? `<text x="${fmt(total / 2)}" y="${fmt(bandY + bandH / 2)}" text-anchor="middle" dominant-baseline="central" font-family="${LABEL_FONTS[label.font]}" font-size="${fmt(fontSize)}" font-weight="${label.weight === "bold" ? 700 : 400}" fill="${label.color ?? (style.gradient ? style.gradient.from : style.foreground)}">${escapeText(label.text)}</text>`
+    : "";
+  const bgFull =
+    style.background === "transparent"
+      ? ""
+      : `<rect width="${total}" height="${fmt(totalH)}" rx="${fmt(style.cornerRadius * total)}" fill="${style.background}"/>`;
+
+  const code = `<path d="${parts.join("")}" fill="${fill}"/>` + eyes.join("") + logo;
+  const body = label ? bgFull + `<g transform="translate(0 ${fmt(codeY)})">${code}</g>` + labelSvg : bg + code;
+  const height = Math.round((size * totalH) / total);
+
   const svg =
-    `<svg${xmlns} width="${size}" height="${size}" viewBox="0 0 ${total} ${total}" shape-rendering="geometricPrecision" role="img" aria-label="QR code">` +
+    `<svg${xmlns} width="${size}" height="${height}" viewBox="0 0 ${total} ${fmt(totalH)}" shape-rendering="geometricPrecision" role="img" aria-label="QR code${label ? `: ${escapeAttr(label.text)}` : ""}">` +
     defs +
-    bg +
-    `<path d="${parts.join("")}" fill="${fill}"/>` +
-    eyes.join("") +
-    logo +
+    body +
     "</svg>";
 
-  return { svg, modules: n, version: qr.version };
+  return { svg, modules: n, version: qr.version, width: size, height };
 }
 
 /** Upper bound on payload length the encoder will accept before we show a friendlier error. */

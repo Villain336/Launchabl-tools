@@ -229,7 +229,7 @@ export function QrArtifact({ design, compact = false }: { design: QrDesignOutput
         {/* preview */}
         <div className="flex flex-col gap-3">
           <div
-            className="qr-preview aspect-square w-full max-w-[260px] overflow-hidden rounded-[10px] [&>svg]:h-full [&>svg]:w-full"
+            className="qr-preview w-full max-w-[260px] overflow-hidden rounded-[10px] [&>svg]:h-auto [&>svg]:w-full"
             style={{
               backgroundImage:
                 style.background === "transparent"
@@ -393,6 +393,33 @@ export function QrArtifact({ design, compact = false }: { design: QrDesignOutput
                       </>
                     )}
                     {!logoHref && style.logo && <span className="text-[12px] text-ink-3">Space reserved — upload your mark to fill it.</span>}
+                  </div>
+                </Field>
+              </div>
+
+              <div className="sm:col-span-2">
+                <Field label="Caption">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      value={style.label?.text ?? ""}
+                      onChange={(e) => {
+                        const text = e.target.value.slice(0, 48);
+                        patch({ label: text ? { text, position: style.label?.position ?? "below", font: style.label?.font ?? "sans", weight: style.label?.weight ?? "bold", color: style.label?.color } : undefined });
+                      }}
+                      placeholder="Scan for the menu"
+                      className="h-7 min-w-[160px] flex-1 rounded-[6px] border border-line bg-surface px-2 text-[12.5px] text-ink outline-none focus:border-line-strong"
+                      data-qr-label
+                    />
+                    {style.label && (
+                      <>
+                        <Chips value={style.label.position} options={["below", "above"] as const} onChange={(v) => patch({ label: { ...style.label!, position: v } })} />
+                        <Chips value={style.label.font} options={["sans", "serif", "mono"] as const} onChange={(v) => patch({ label: { ...style.label!, font: v } })} />
+                        <SmallButton active={style.label.weight === "bold"} onClick={() => patch({ label: { ...style.label!, weight: style.label!.weight === "bold" ? "regular" : "bold" } })}>
+                          Bold
+                        </SmallButton>
+                        <ColorInput value={style.label.color ?? (style.gradient ? style.gradient.from : style.foreground)} onChange={(v) => patch({ label: { ...style.label!, color: v } })} />
+                      </>
+                    )}
                   </div>
                 </Field>
               </div>

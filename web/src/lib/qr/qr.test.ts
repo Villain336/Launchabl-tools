@@ -97,3 +97,15 @@ describe("style helpers", () => {
     expect(hostedQrUrl("https://launchabl.io", URL_, style, 256)).toMatch(/^https:\/\/launchabl\.io\/api\/qr\?data=.*&s=.*&size=256$/);
   });
 });
+
+describe("label band", () => {
+  it("adds a caption band and grows the height", () => {
+    const style = normalizeQrStyle({ label: { text: "Scan for the menu", position: "below" } });
+    const { svg, width, height } = renderQrSvg("https://example.com/menu", style, { size: 400 });
+    expect(height).toBeGreaterThan(width);
+    expect(svg).toContain(">Scan for the menu</text>");
+    expect(svg).toMatch(/viewBox="0 0 \d+ [\d.]+"/);
+    const above = renderQrSvg("https://example.com/menu", normalizeQrStyle({ label: { text: "Menu", position: "above" } })).svg;
+    expect(above).toMatch(/<g transform="translate\(0 [\d.]+\)"/);
+  });
+});
