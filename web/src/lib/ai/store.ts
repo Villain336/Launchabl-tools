@@ -16,6 +16,7 @@ export type KeyValueStore = {
   hgetall(key: string): Promise<Record<string, number>>;
   sadd(key: string, member: string, ttlSeconds?: number): Promise<void>;
   smembers(key: string): Promise<string[]>;
+  srem(key: string, member: string): Promise<void>;
   /** Plain string value with optional TTL; used for small records (sessions, codes, users). */
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
   get(key: string): Promise<string | null>;
@@ -75,6 +76,9 @@ export function createMemoryStore(now: () => number = Date.now): KeyValueStore {
     async smembers(key) {
       const entry = live(sets, key);
       return entry ? Array.from(entry.value) : [];
+    },
+    async srem(key, member) {
+      live(sets, key)?.value.delete(member);
     },
     async set(key, value, ttl) {
       strings.set(key, { value, expiresAt: expiry(ttl) });
@@ -138,6 +142,9 @@ export function createRedisRestStore(url: string, token: string): KeyValueStore 
       const [members] = (await pipeline([["SMEMBERS", key]])) as [unknown[]];
       return Array.isArray(members) ? members.map(String) : [];
     },
+    async srem(key, member) {
+      await pipeline([["SREM", key, member]]);
+    },
     async set(key, value, ttl) {
       await pipeline([ttl ? ["SET", key, value, "EX", ttl] : ["SET", key, value]]);
     },
@@ -164,7 +171,7 @@ declare global {
 /** Process-wide store: Redis when configured, otherwise memory (survives HMR in dev). */
 export function getStore(): KeyValueStore {
   // A dev HMR cycle can leave an instance built from an older module version.
-  if (globalThis.__launchablStore && typeof globalThis.__launchablStore.get !== "function") globalThis.__launchablStore = undefined;
+  if (globalThis.__launchablStore && typeof globalThis.__launchablStore.srem !== "function") globalThis.__launchablStore = undefined;
   if (!globalThis.__launchablStore) {
     const creds = redisCredentials();
     globalThis.__launchablStore = creds ? createRedisRestStore(creds.url, creds.token) : createMemoryStore();

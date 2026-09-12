@@ -4,7 +4,7 @@ import { clientKey, createRateLimiter, type RateLimiter } from "@/lib/ai/rate-li
 import { readSession } from "@/lib/auth/session";
 import { getToolBySlug } from "@/lib/site-config";
 import { extractReportItems, fitReport, reportTitle, type Report } from "@/lib/reports/extract";
-import { newReportId, saveReport } from "@/lib/reports/storage";
+import { listReports, newReportId, saveReport } from "@/lib/reports/storage";
 
 /**
  * Freeze a conversation's deliverables into a shareable report.
@@ -28,6 +28,16 @@ function limiter(): RateLimiter {
     getStore(),
   );
   return globalThis.__launchablReportLimiter;
+}
+
+/** The caller's own reports, newest first. */
+export async function GET(request: NextRequest) {
+  const session = await readSession(request.cookies);
+  if (!session) {
+    return NextResponse.json({ error: "Sign in to see your reports.", cause: "sign_in_required" }, { status: 401 });
+  }
+  const reports = await listReports(session.uid);
+  return NextResponse.json({ reports }, { headers: { "cache-control": "private, no-store" } });
 }
 
 export async function POST(request: NextRequest) {

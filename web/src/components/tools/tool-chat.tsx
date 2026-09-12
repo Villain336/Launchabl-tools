@@ -41,6 +41,7 @@ import { ArtifactSessionProvider } from "@/components/tools/chat/artifact-sessio
 import { Markdown } from "@/components/tools/chat/markdown";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 import { ShareReportButton } from "@/components/tools/chat/share-report";
+import { MyReportsMenu } from "@/components/tools/chat/my-reports";
 import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/tools/chat/artifact-registry";
 
 /* ─────────────────────────────────────────────────────────
@@ -736,6 +737,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
         </div>
         <div className="flex items-center gap-0.5">
           <AccountChip />
+          <MyReportsMenu />
           <ShareReportButton slug={slug} messages={messages} disabled={busy} source={`report:${slug}`} />
           <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
           {messages.length > 0 && (
