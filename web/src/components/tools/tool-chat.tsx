@@ -577,10 +577,32 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     pinnedRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48;
   };
 
-  // Restore the last conversation for this tool once, after hydration.
+  // Restore the last conversation for this tool once, after hydration — unless
+  // another tool handed us a prompt (?q=), in which case start fresh with it.
   useEffect(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const handoff = params.get("q")?.trim();
+    if (handoff) {
+      params.delete("q");
+      const query = params.toString();
+      window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+      setCurrentConversation(slug, null);
+      // Deferred so the prefill isn't a synchronous state update inside the effect.
+      queueMicrotask(() => {
+        setDraft(handoff.slice(0, 2_000));
+        requestAnimationFrame(() => {
+          const node = inputRef.current;
+          if (!node) return;
+          node.style.height = "auto";
+          node.style.height = `${Math.min(node.scrollHeight, 200)}px`;
+          node.focus();
+          node.setSelectionRange(node.value.length, node.value.length);
+        });
+      });
+      return;
+    }
     const index = readHistory(slug);
     const conversation = index.conversations.find((c) => c.id === index.current);
     if (conversation && conversation.messages.length > 0) {

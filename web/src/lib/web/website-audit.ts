@@ -76,6 +76,26 @@ export function auditWebsiteHtml(input: WebsiteAuditInput): WebsiteAuditReport {
   }
   const keywords = topKeywords(text, 8).map((k) => k.word);
 
+  // Mixed content: http:// subresources on an https page are blocked or flagged by browsers.
+  const insecureSrc = (list: string[]) => list.filter((t) => /^http:\/\//i.test(attr(t, "src") ?? attr(t, "href") ?? ""));
+  const mixedActive = url.protocol === "https:" ? insecureSrc([...tags(html, "script"), ...tags(html, "iframe"), ...tags(html, "link").filter((t) => /stylesheet/i.test(attr(t, "rel") ?? ""))]).length : 0;
+  const mixedPassive = url.protocol === "https:" ? insecureSrc([...imgs, ...tags(html, "video"), ...tags(html, "audio"), ...tags(html, "source")]).length : 0;
+
+  // Scripts in <head> without async/defer/module block parsing until they download and run.
+  const headHtml = html.match(/<head[\s>][\s\S]*?<\/head>/i)?.[0] ?? html.slice(0, 50_000);
+  const blockingScripts = tags(headHtml, "script").filter((t) => attr(t, "src") && !/\b(async|defer)\b/i.test(t) && !/type\s*=\s*["']?module/i.test(t)).length;
+
+  // Images without intrinsic size cause layout shift as they load.
+  const sizedImgs = imgs.filter((t) => attr(t, "width") && attr(t, "height")).length;
+  const unsizedImgs = imgs.length - sizedImgs;
+
+  // href="#" / javascript: anchors are buttons pretending to be links: dead ends for crawlers and keyboards.
+  const anchors = tags(html, "a");
+  const deadAnchors = anchors.filter((t) => {
+    const href = (attr(t, "href") ?? "").trim();
+    return href === "#" || /^javascript:/i.test(href);
+  }).length;
+
   const checks: Check[] = [];
   const add = (c: Check) => checks.push(c);
 
@@ -197,11 +217,43 @@ export function auditWebsiteHtml(input: WebsiteAuditInput): WebsiteAuditReport {
       : { id: "lazy", status: "warn", group: "Content", title: "No lazy-loaded images", detail: `${imgs.length} images and none use loading="lazy", so all download before the page settles.`, fix: 'Add loading="lazy" to images below the fold; keep the hero image eager.' },
   );
 
+  if (imgs.length >= 3) {
+    add(
+      unsizedImgs / imgs.length <= 0.25
+        ? { id: "img-dimensions", status: "pass", group: "Content", title: "Images declare their size", detail: `${sizedImgs} of ${imgs.length} have width and height, so the layout doesn't jump as they load.` }
+        : { id: "img-dimensions", status: unsizedImgs / imgs.length > 0.75 ? "fail" : "warn", group: "Content", title: `${unsizedImgs} images without width/height`, detail: "Browsers can't reserve space for them, so text shifts as each image arrives — that's Cumulative Layout Shift, a Core Web Vital.", fix: "Add width and height attributes (or CSS aspect-ratio) to every <img>; frameworks' image components do this automatically." },
+    );
+  }
+
+  if (anchors.length > 0) {
+    add(
+      deadAnchors === 0
+        ? { id: "dead-links", status: "pass", group: "Content", title: "No placeholder links", detail: `All ${anchors.length} anchors point somewhere.` }
+        : { id: "dead-links", status: deadAnchors > 5 ? "warn" : "info", group: "Content", title: `${plural(deadAnchors, "placeholder link")}`, detail: 'href="#" or javascript: anchors are buttons pretending to be links: crawlers hit a dead end and keyboard users get a link that does nothing.', fix: "Use <button> for actions and give real links a real URL." },
+    );
+  }
+
   /* ── Technical ───────────────────────────────────────── */
   add(
     url.protocol === "https:"
       ? { id: "https", status: "pass", group: "Technical", title: "Served over HTTPS", detail: "" }
       : { id: "https", status: "fail", group: "Technical", title: "Not HTTPS", detail: "Browsers flag the page as not secure and Google prefers https URLs.", fix: "Install a certificate and 301 http → https." },
+  );
+
+  if (url.protocol === "https:") {
+    add(
+      mixedActive > 0
+        ? { id: "mixed-content", status: "fail", group: "Technical", title: `${plural(mixedActive, "insecure script/style/iframe")}`, detail: "Browsers block http:// scripts, stylesheets and frames on an https page, so those resources never load.", fix: "Change the URLs to https:// (or protocol-relative) and fix the padlock." }
+        : mixedPassive > 0
+          ? { id: "mixed-content", status: "warn", group: "Technical", title: `${plural(mixedPassive, "insecure image/media file")}`, detail: "Loaded over http:// — Chrome upgrades or blocks them, and the page loses its secure indicator.", fix: "Serve every image, video and audio file over https://." }
+          : { id: "mixed-content", status: "pass", group: "Technical", title: "No mixed content", detail: "Every subresource is requested over https." },
+    );
+  }
+
+  add(
+    blockingScripts === 0
+      ? { id: "blocking-scripts", status: "pass", group: "Technical", title: "No render-blocking scripts in <head>", detail: "Head scripts are async, deferred or modules." }
+      : { id: "blocking-scripts", status: blockingScripts >= 4 ? "fail" : "warn", group: "Technical", title: `${plural(blockingScripts, "render-blocking script")} in <head>`, detail: "Each synchronous <script src> in <head> stops the browser from painting anything until it's downloaded and executed.", fix: "Add defer (or async for independent tags like analytics), or move the tag to the end of <body>." },
   );
 
   add(

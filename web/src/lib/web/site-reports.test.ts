@@ -5,6 +5,7 @@ import { buildComparison, COMPARE_METRICS, leaderFor, type ComparedSite } from "
 import { buildRobotsTxt, buildSitemapXml } from "@/lib/web/crawl";
 import { callsToAction, forms, topKeywords } from "@/lib/web/html";
 import { validateJsonLd, expandCalendar } from "@/lib/ai/tools/marketing-kits";
+import { handoffFor } from "@/lib/chat/handoffs";
 
 const GOOD_LANDING = `<!doctype html><html lang="en"><head><title>Invoices out in 60 seconds — Ledgerly</title>
 <meta name="description" content="Ledgerly gets freelancers paid twice as fast with one-click invoices, reminders and card payments. Free for 14 days, no credit card.">
@@ -125,6 +126,39 @@ describe("website audit", () => {
     expect(byId.https).toBe("fail");
     expect(byId.viewport).toBe("fail");
     expect(byId["security-headers"]).toBe("fail");
+  });
+
+  it("flags mixed content, render-blocking head scripts, unsized images and placeholder links", () => {
+    const html = `<html><head><title>Mixed page title for testing</title><meta name="description" content="${"d".repeat(120)}">
+      <script src="http://cdn.example.com/a.js"></script><script src="/b.js"></script><script src="/c.js" defer></script><script type="module" src="/d.js"></script>
+      <link rel="stylesheet" href="http://cdn.example.com/x.css"></head>
+      <body><h1>Hi</h1><img src="http://img.example.com/1.png" alt="a"><img src="/2.png" alt="b"><img src="/3.png" alt="c" width="10" height="10">
+      <a href="#">Menu</a><a href="javascript:void(0)">More</a><a href="/about">About</a></body></html>`;
+    const report = auditWebsiteHtml({ ...base, html, finalUrl: "https://example.com/", headers: new Headers() });
+    const byId = Object.fromEntries(report.checks.map((c) => [c.id, c]));
+    expect(byId["mixed-content"].status).toBe("fail");
+    expect(byId["mixed-content"].title).toContain("2 insecure");
+    expect(byId["blocking-scripts"].status).toBe("warn");
+    expect(byId["blocking-scripts"].title).toContain("2 render-blocking");
+    expect(byId["img-dimensions"].status).toBe("warn");
+    expect(byId["dead-links"].status).toBe("info");
+    expect(byId["dead-links"].title).toBe("2 placeholder links");
+
+    const clean = auditWebsiteHtml({ ...base, html: AUDIT_HTML, finalUrl: "https://example.com/", headers: new Headers() });
+    const cleanById = Object.fromEntries(clean.checks.map((c) => [c.id, c.status]));
+    expect(cleanById["mixed-content"]).toBe("pass");
+    expect(cleanById["blocking-scripts"]).toBe("pass");
+  });
+
+  it("hands failing checks to the right specialist tool with a prefilled prompt", () => {
+    const report = auditWebsiteHtml({ ...base, html: "<html><body><p>hi</p></body></html>", finalUrl: "https://example.com/pricing", headers: new Headers() });
+    const meta = handoffFor(report, "description", "website-audit-report");
+    expect(meta?.slug).toBe("meta-tag-generator");
+    expect(meta?.href).toContain("/tools/meta-tag-generator?q=");
+    expect(decodeURIComponent(meta?.href ?? "")).toContain("https://example.com/pricing");
+    expect(handoffFor(report, "security-headers", "website-audit-report")).toMatchObject({ slug: "security-headers-checker", prompt: null, href: "/tools/security-headers-checker" });
+    expect(handoffFor(report, "lang", "website-audit-report")).toBeNull();
+    expect(handoffFor(report, "description", "meta-tag-generator")).toBeNull();
   });
 });
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Bot, Download, FileText, Gauge, Mic, MousePointerClick, Scale, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Bot, Download, FileText, Gauge, Mic, MousePointerClick, Scale, ShieldCheck } from "lucide-react";
 import type { Check as ChecklistCheck, ChecklistReport, CheckStatus } from "@/lib/web/checklist";
 import type { CrawlerStatus, LlmReadabilityReport } from "@/lib/web/llm-readability";
 import type { LandingPageReport } from "@/lib/web/landing-page";
@@ -9,6 +10,8 @@ import type { FaqSchemaDeliverable } from "@/lib/ai/tools/site-checks";
 import { downloadBlob } from "@/lib/download";
 import { CopyButton, Pill, ScoreRing, shorten, tone, type Tone } from "@/components/tools/chat/bits";
 import { AgencyUpsell } from "@/components/tools/chat/agency-upsell";
+import { useArtifactSession } from "@/components/tools/chat/artifact-session";
+import { handoffFor, type Handoff } from "@/lib/chat/handoffs";
 
 const statusTone: Record<CheckStatus, Tone> = { pass: "good", warn: "warn", fail: "bad", info: "info" };
 
@@ -21,7 +24,7 @@ const KIND: Record<ChecklistReport["kind"], { title: string; icon: ReactNode; ca
   "website-audit": { title: "Website audit", icon: <Gauge className="h-4 w-4" />, caveat: "server-rendered HTML + headers" },
 };
 
-function CheckRow({ check }: { check: ChecklistCheck }) {
+function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff | null }) {
   const T = tone[statusTone[check.status]];
   const Icon = T.icon;
   return (
@@ -34,6 +37,15 @@ function CheckRow({ check }: { check: ChecklistCheck }) {
           <p className="mt-1 text-[12.5px] leading-relaxed break-words text-ink">
             <span className="font-medium">Fix:</span> {check.fix}
           </p>
+        )}
+        {handoff && check.status !== "pass" && (
+          <Link
+            href={handoff.href}
+            className="mt-1.5 inline-flex h-6 items-center gap-1 rounded-chip bg-field px-2 text-[11.5px] font-medium text-ink-2 transition-colors duration-100 hover:bg-hover hover:text-ink"
+            title={handoff.prompt ?? `Open ${handoff.name}`}
+          >
+            {handoff.prompt ? "Fix with" : "Check with"} {handoff.name} <ArrowUpRight className="h-3 w-3" />
+          </Link>
         )}
       </div>
     </li>
@@ -89,6 +101,7 @@ function CtaStrip({ report }: { report: LandingPageReport }) {
 
 export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmReadabilityReport | LandingPageReport }) {
   const [showPass, setShowPass] = useState(false);
+  const { slug } = useArtifactSession();
   const meta = KIND[report.kind];
   const issues = report.checks.filter((c) => c.status !== "pass");
   const passes = report.checks.filter((c) => c.status === "pass");
@@ -152,7 +165,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
           <div key={group}>
             {groups.length > 1 && <p className="bg-field/60 px-4 py-1.5 text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">{group}</p>}
             <ul className="divide-y divide-line">
-              {visible.filter((c) => (c.group ?? "Checks") === group).map((c) => <CheckRow key={c.id} check={c} />)}
+              {visible.filter((c) => (c.group ?? "Checks") === group).map((c) => <CheckRow key={c.id} check={c} handoff={handoffFor(report, c.id, slug)} />)}
             </ul>
           </div>
         ))
