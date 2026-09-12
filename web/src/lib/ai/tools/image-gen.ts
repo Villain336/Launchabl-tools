@@ -55,6 +55,7 @@ export const imageGeneratorRuntime: ChatToolRuntime = {
   modelKind: "writer",
   maxSteps: 4,
   tools: { generateImage: generateImageTool },
+  tier: "pro",
   skill: {
     summary: "Generate images from a brief: hero visuals, ad creatives, blog headers, product scenes, illustrations, icons, social visuals.",
     cost: "media",

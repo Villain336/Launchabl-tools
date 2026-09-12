@@ -341,6 +341,7 @@ export const transcriberRuntime: ChatToolRuntime = {
   modelKind: "writer",
   maxSteps: 12,
   tools: { readTranscript: readTranscriptTool, deliverTranscript: deliverTranscriptTool, deliverPublishKit: deliverPublishKitTool },
+  tier: "pro",
   skill: {
     summary:
       "Transcribe an attached recording (Whisper, timestamped) and deliver a summary, chapters, takeaways, verbatim quotes, action items and TXT/SRT/VTT downloads, plus a publish kit: YouTube description with chapters, blog draft, social post or meeting follow-up email.",
@@ -368,6 +369,7 @@ export const clipFinderRuntime: ChatToolRuntime = {
   modelKind: "writer",
   maxSteps: 12,
   tools: { readTranscript: readTranscriptTool, deliverClips: deliverClipsTool },
+  tier: "pro",
   skill: {
     summary:
       "Find the 3–6 most clippable moments in an attached recording and deliver each with exact timestamps, hook, caption, spoken words, SRT/VTT, and a render kit (ffmpeg script that cuts, reframes to 9:16/4:5/1:1/16:9 and burns captions).",
