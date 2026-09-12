@@ -7,6 +7,7 @@ import { BrandMark } from "@/components/brand/brand-mark";
 import { EncryptedText } from "@/components/ui/encrypted-text";
 import { Button } from "@/components/ui/button";
 import { HoveredLink, Menu, MenuItem } from "@/components/ui/navbar-menu";
+import { HeaderAccountLink } from "@/components/auth/header-account-link";
 import {
   Sheet,
   SheetClose,
@@ -66,10 +67,12 @@ export function SiteHeader() {
           </Menu>
         </div>
 
+        <HeaderAccountLink className="ml-auto hidden lg:flex" />
+
         <Button
           render={<Link href="/pricing" />}
           nativeButton={false}
-          className="ml-auto hidden lg:inline-flex"
+          className="hidden lg:inline-flex"
         >
           Get unlimited
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
@@ -108,7 +111,8 @@ function MobileMenu() {
             </SheetClose>
           ))}
         </nav>
-        <div className="mt-auto p-4">
+        <div className="mt-auto flex flex-col gap-3 border-t border-border p-4">
+          <HeaderAccountLink className="justify-center" />
           <SheetClose
             render={<Link href="/pricing" />}
             nativeButton={false}
