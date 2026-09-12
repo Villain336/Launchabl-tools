@@ -22,6 +22,7 @@ type UsagePayload = {
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
   byTemplate?: Record<string, UsageBucket>;
+  templatePicks?: Record<string, number>;
   upsell: { today: UpsellBucket; last7: UpsellBucket; range: UpsellBucket; byTool: Record<string, UpsellBucket> };
   accounts?: { users: number; byDay: { date: string; signUps: number; signIns: number }[]; signUpsBySource?: Record<string, number> };
   reports?: { created: number; views: number; byTool: Record<string, number> };
@@ -45,21 +46,44 @@ function sourceLabel(source: string, toolLabel: (slug: string) => string): strin
  * create. A template's sign-ups come from the free-run gate shown inside a
  * conversation that started from it.
  */
-function TemplatesPanel({ byTemplate, signUpsBySource, days }: { byTemplate: Record<string, UsageBucket>; signUpsBySource: Record<string, number>; days: number }) {
-  const rows = Object.entries(byTemplate);
+function TemplatesPanel({
+  byTemplate,
+  picks,
+  signUpsBySource,
+  days,
+}: {
+  byTemplate: Record<string, UsageBucket>;
+  picks: Record<string, number>;
+  signUpsBySource: Record<string, number>;
+  days: number;
+}) {
+  const ids = Array.from(new Set([...Object.keys(byTemplate), ...Object.keys(picks)]));
+  const empty: UsageBucket = { requests: 0, inputTokens: 0, outputTokens: 0, costUsd: 0, errors: 0, avgDurationMs: null };
+  const rows = ids
+    .map((id) => [id, byTemplate[id] ?? empty, picks[id] ?? 0] as const)
+    .sort((a, b) => b[2] - a[2] || b[1].requests - a[1].requests);
   const signUpsFor = (id: string) => signUpsBySource[`template:${id}`] ?? 0;
+  const totalPicks = rows.reduce((acc, [, , p]) => acc + p, 0);
   const totalRuns = rows.reduce((acc, [, b]) => acc + b.requests, 0);
   const totalSignUps = rows.reduce((acc, [id]) => acc + signUpsFor(id), 0);
+  // Picks count the card click; runs count every turn in that conversation, so a
+  // "start rate" above 100% means people kept going after the first brief.
+  const startRate = (p: number, runs: number) => (p ? `${Math.round((Math.min(runs, p) / p) * 100)}%` : "—");
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-white">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold text-foreground">Agent templates</h2>
-          <p className="text-xs text-muted-foreground">Runs started from a &ldquo;Start from a job&rdquo; card, and the accounts those conversations created.</p>
+          <p className="text-xs text-muted-foreground">
+            Card clicks (&ldquo;picks&rdquo;), runs started from each card, and the accounts those conversations created. A card with many picks and few runs needs a better prompt or fewer blanks.
+          </p>
         </div>
         <div className="flex gap-4 text-xs text-muted-foreground">
           <span>
-            {days} days <span className="font-medium text-foreground">{int(totalRuns)}</span> template runs
+            {days} days <span className="font-medium text-foreground">{int(totalPicks)}</span> picks
+          </span>
+          <span>
+            <span className="font-medium text-foreground">{int(totalRuns)}</span> runs
           </span>
           <span>
             <span className="font-medium text-foreground">{int(totalSignUps)}</span> sign-ups
@@ -67,13 +91,15 @@ function TemplatesPanel({ byTemplate, signUpsBySource, days }: { byTemplate: Rec
         </div>
       </div>
       {rows.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-muted-foreground">No template runs recorded yet.</p>
+        <p className="px-4 py-6 text-sm text-muted-foreground">No template activity recorded yet.</p>
       ) : (
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs text-muted-foreground">
             <tr>
               <th className="px-4 py-2 text-left font-medium">Template</th>
+              <th className="px-4 py-2 text-right font-medium">Picks</th>
               <th className="px-4 py-2 text-right font-medium">Runs</th>
+              <th className="px-4 py-2 text-right font-medium">Started</th>
               <th className="px-4 py-2 text-right font-medium">Errors</th>
               <th className="px-4 py-2 text-right font-medium">Avg time</th>
               <th className="px-4 py-2 text-right font-medium">Cost</th>
@@ -82,14 +108,17 @@ function TemplatesPanel({ byTemplate, signUpsBySource, days }: { byTemplate: Rec
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {rows.map(([id, b]) => {
+            {rows.map(([id, b, p]) => {
               const signUps = signUpsFor(id);
+              const stalled = p >= 3 && b.requests === 0;
               return (
                 <tr key={id}>
                   <td className="px-4 py-2 text-foreground">
                     {templateTitle(id)} <span className="font-mono text-[11px] text-muted-foreground">{id}</span>
                   </td>
+                  <td className="px-4 py-2 text-right tabular-nums">{int(p)}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{int(b.requests)}</td>
+                  <td className={`px-4 py-2 text-right tabular-nums ${stalled ? "text-red-600" : "text-muted-foreground"}`}>{startRate(p, b.requests)}</td>
                   <td className={`px-4 py-2 text-right tabular-nums ${b.errors ? "text-red-600" : ""}`}>{int(b.errors)}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{b.avgDurationMs !== null ? `${(b.avgDurationMs / 1000).toFixed(1)}s` : "—"}</td>
                   <td className="px-4 py-2 text-right tabular-nums font-medium">{usd(b.costUsd)}</td>
@@ -412,7 +441,9 @@ export function UsageDashboard() {
           </div>
 
           <BucketTable title="By tool" rows={Object.entries(data.byTool)} labelFor={toolLabel} />
-          {data.byTemplate && <TemplatesPanel byTemplate={data.byTemplate} signUpsBySource={data.accounts?.signUpsBySource ?? {}} days={days} />}
+          {data.byTemplate && (
+            <TemplatesPanel byTemplate={data.byTemplate} picks={data.templatePicks ?? {}} signUpsBySource={data.accounts?.signUpsBySource ?? {}} days={days} />
+          )}
           {data.accounts && <AccountsPanel accounts={data.accounts} days={days} labelFor={toolLabel} />}
           {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}

@@ -3,7 +3,7 @@ import { classifyAiError, userFacingAiMessage } from "@/lib/ai/errors";
 import { modelChain, modelLabel } from "@/lib/ai/models";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
 import { createMemoryStore } from "@/lib/ai/store";
-import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUpsell, recordUsage, sumBuckets, sumUpsell } from "@/lib/ai/usage";
+import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUpsell, recordTemplatePick, recordUsage, sumBuckets, sumUpsell } from "@/lib/ai/usage";
 import { getChatTool, listChatTools } from "@/lib/ai/chat-tools";
 import { getChatToolRuntime, listChatToolRuntimes } from "@/lib/ai/chat-runtime";
 import { tools } from "@/lib/site-config";
@@ -105,6 +105,20 @@ describe("usage accounting", () => {
     expect(Object.keys(today.byTemplate)).toEqual(["launch-page"]);
     expect(today.byTemplate["launch-page"].requests).toBe(2);
     expect(today.byTemplate["launch-page"].costUsd).toBeCloseTo(0.05, 6);
+  });
+
+  it("counts template card picks separately from runs", async () => {
+    const store = createMemoryStore(() => 0);
+    const date = new Date("2026-09-11T10:00:00Z");
+    await recordTemplatePick("launch-page", store, date);
+    await recordTemplatePick("launch-page", store, date);
+    await recordTemplatePick("fix-email", store, date);
+    await recordUsage({ slug: "agent", model: "x", inputTokens: 1, outputTokens: 1, reportedCostUsd: 0, ok: true, template: "launch-page" }, store, date);
+    const [today] = await readUsage(1, store, date);
+    expect(today.templatePicks).toEqual({ "launch-page": 2, "fix-email": 1 });
+    expect(Object.keys(today.byTemplate)).toEqual(["launch-page"]);
+    expect(today.byTemplate["launch-page"].requests).toBe(1);
+    expect(today.total.requests).toBe(1);
   });
 
   it("counts upsell impressions, clicks and dismissals per tool without touching request totals", async () => {

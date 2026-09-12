@@ -6,6 +6,7 @@ import { ArrowRight, Sparkles, X } from "lucide-react";
 import { track } from "@/components/analytics";
 import { useArtifactSession } from "@/components/tools/chat/artifact-session";
 import { siteConfig } from "@/lib/site-config";
+import { sendBeaconJson } from "@/lib/chat/beacon";
 import type { UpsellKind } from "@/lib/ai/usage";
 
 /**
@@ -54,13 +55,7 @@ function dismiss() {
 
 export function sendUpsellEvent(slug: string, kind: UpsellKind) {
   track(`upsell_${kind}`, { tool: slug });
-  const payload = JSON.stringify({ slug, kind });
-  try {
-    if (typeof navigator !== "undefined" && navigator.sendBeacon?.("/api/upsell", new Blob([payload], { type: "application/json" }))) return;
-  } catch {
-    // fall through to fetch
-  }
-  void fetch("/api/upsell", { method: "POST", body: payload, headers: { "content-type": "application/json" }, keepalive: true }).catch(() => undefined);
+  sendBeaconJson("/api/upsell", { slug, kind });
 }
 
 export function AgencyUpsell({ issues, noun = "issue" }: { issues: number; noun?: string }) {

@@ -42,6 +42,7 @@ import { Markdown } from "@/components/tools/chat/markdown";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 import { ShareReportButton } from "@/components/tools/chat/share-report";
 import { MyReportsMenu } from "@/components/tools/chat/my-reports";
+import { sendBeaconJson } from "@/lib/chat/beacon";
 import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/tools/chat/artifact-registry";
 
 /* ─────────────────────────────────────────────────────────
@@ -54,7 +55,14 @@ import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/t
 type StarterContext = { prefill: (text: string, template?: string) => void };
 
 const starterArtifacts: Record<string, (ctx: StarterContext) => ReactNode> = {
-  agent: ({ prefill }) => <AgentTemplates onPick={(template) => prefill(template.prompt, template.id)} />,
+  agent: ({ prefill }) => (
+    <AgentTemplates
+      onPick={(template) => {
+        sendBeaconJson("/api/templates/pick", { template: template.id });
+        prefill(template.prompt, template.id);
+      }}
+    />
+  ),
   qr: () => (
     <QrArtifact
       compact

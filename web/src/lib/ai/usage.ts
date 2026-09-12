@@ -72,6 +72,20 @@ export async function recordUsage(event: UsageEvent, store: KeyValueStore = getS
   }
 }
 
+/**
+ * A "Start from a job" card was clicked. Compared with the template's runs
+ * this shows which cards attract attention but don't turn into a sent brief.
+ */
+export async function recordTemplatePick(templateId: string, store: KeyValueStore = getStore(), date = new Date()): Promise<void> {
+  const day = dayKey(date);
+  const fields = { [field("template", templateId, "picks")]: 1 };
+  try {
+    await Promise.all([store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS), store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS)]);
+  } catch (error) {
+    console.warn("[usage] failed to record template pick", error);
+  }
+}
+
 /* ── Agency upsell ─────────────────────────────────────────
  * The free tools exist to sell the agency. Reports with failures show a
  * "want this done for you?" card; every impression, click and dismissal is
@@ -122,6 +136,8 @@ export type UsageDay = {
   byModel: Record<string, UsageBucket>;
   /** Runs started from an agent template, by template id. */
   byTemplate: Record<string, UsageBucket>;
+  /** Template card clicks, by template id (a pick doesn't always become a run). */
+  templatePicks: Record<string, number>;
   estimatedRequests: number;
   upsell: UpsellBucket;
   upsellByTool: Record<string, UpsellBucket>;
@@ -142,6 +158,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
   const byTool: Record<string, UsageBucket> = {};
   const byModel: Record<string, UsageBucket> = {};
   const byTemplate: Record<string, UsageBucket> = {};
+  const templatePicks: Record<string, number> = {};
   const upsell = emptyUpsell();
   const upsellByTool: Record<string, UpsellBucket> = {};
   const durations: Record<string, number> = {};
@@ -169,6 +186,10 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
       applyUpsell((upsellByTool[scope.slice("upsell:tool:".length)] ??= emptyUpsell()), metric, value);
       continue;
     }
+    if (scope.startsWith("template:") && metric === "picks") {
+      templatePicks[scope.slice(9)] = value;
+      continue;
+    }
     const bucket = bucketFor(scope);
     if (!bucket) continue;
     if (metric === "requests") bucket.requests = value;
@@ -182,7 +203,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
     const bucket = bucketFor(scope);
     if (bucket && bucket.requests) bucket.avgDurationMs = Math.round(sum / bucket.requests);
   }
-  return { day, total, byTool, byModel, byTemplate, estimatedRequests, upsell, upsellByTool };
+  return { day, total, byTool, byModel, byTemplate, templatePicks, estimatedRequests, upsell, upsellByTool };
 }
 
 export async function readUsage(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<UsageDay[]> {

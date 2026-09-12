@@ -35,10 +35,12 @@ export async function GET(request: NextRequest) {
   const toolBuckets: Record<string, UsageBucket[]> = {};
   const modelBuckets: Record<string, UsageBucket[]> = {};
   const templateBuckets: Record<string, UsageBucket[]> = {};
+  const templatePicks: Record<string, number> = {};
   for (const day of usage) {
     for (const [slug, bucket] of Object.entries(day.byTool)) (toolBuckets[slug] ??= []).push(bucket);
     for (const [model, bucket] of Object.entries(day.byModel)) (modelBuckets[model] ??= []).push(bucket);
     for (const [id, bucket] of Object.entries(day.byTemplate ?? {})) (templateBuckets[id] ??= []).push(bucket);
+    for (const [id, picks] of Object.entries(day.templatePicks ?? {})) templatePicks[id] = (templatePicks[id] ?? 0) + picks;
   }
   const aggregate = (groups: Record<string, UsageBucket[]>) =>
     Object.fromEntries(
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest) {
     byTool,
     byModel,
     byTemplate,
+    templatePicks,
     upsell,
     accounts,
     reports,
