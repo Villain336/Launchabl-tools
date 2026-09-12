@@ -4,18 +4,12 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { AlertTriangle, Check, ChevronDown, ChevronRight, CircleAlert, FileDiff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { diffStats, type AppliedEdit } from "@/lib/ide/workspace";
+import { diffStats, type AppliedEdit, type Review } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
 
 const DiffView = dynamic(() => import("@/components/ide/diff-view"), { ssr: false, loading: () => <div className="p-3 text-[12px] text-muted-foreground">Loading diff…</div> });
 
-export type ReviewDecision = "pending" | "accepted" | "rejected";
-
-export type Review = {
-  summary: string;
-  edits: AppliedEdit[];
-  decisions: Record<string, ReviewDecision>;
-};
+export type { Review, ReviewDecision } from "@/lib/ide/workspace";
 
 type Props = {
   review: Review;

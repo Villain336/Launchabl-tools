@@ -17,9 +17,15 @@ import { useWorkspace } from "@/components/ide/use-workspace";
 import { runChecks, type Problem } from "@/lib/ide/checks";
 import { exportZip } from "@/lib/ide/import";
 import type { PreviewRuntimeError } from "@/lib/ide/preview";
-import { loadSettings, saveSettings, type IdeSettings } from "@/lib/ide/store";
+import { loadSettings, loadTabState, saveSettings, saveTabState, type IdeSettings, type TabState } from "@/lib/ide/store";
 import { pendingChanges, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
+
+/** Land on the obvious entry file when there is one. */
+function entryTabs(ws: Workspace | null): TabState {
+  const entry = ws ? ["index.html", "README.md", "readme.md", "src/app/page.tsx", "app/page.tsx", "src/index.ts", "index.js", "package.json"].find((p) => ws.files[p]) : undefined;
+  return entry ? { tabs: [entry], active: entry } : { tabs: [], active: null };
+}
 
 /**
  * The editor shell: explorer | editor + preview | assistant. The workspace is
@@ -32,46 +38,60 @@ export function Ide() {
   const [settings, setSettings] = useState<IdeSettings>(loadSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [commitOpen, setCommitOpen] = useState(false);
-  const [rawTabs, setTabs] = useState<string[]>([]);
-  const [rawActive, setActivePath] = useState<string | null>(null);
+  // Open tabs are keyed by workspace id: the saved set is restored when a
+  // workspace appears, and whatever the user opens afterwards is saved back.
+  const [tabState, setTabState] = useState<(TabState & { id: string }) | null>(null);
+  const workspaceId = workspace?.id ?? null;
+  const currentTabs = useMemo<TabState>(() => {
+    if (!workspaceId) return { tabs: [], active: null };
+    if (tabState?.id === workspaceId) return tabState;
+    return loadTabState(workspaceId) ?? entryTabs(workspace);
+  }, [tabState, workspaceId, workspace]);
+  const updateTabs = useCallback(
+    (fn: (current: TabState) => TabState) => {
+      if (!workspaceId) return;
+      setTabState((prev) => {
+        const base = prev?.id === workspaceId ? prev : (loadTabState(workspaceId) ?? entryTabs(workspace));
+        return { id: workspaceId, ...fn(base) };
+      });
+    },
+    [workspaceId, workspace],
+  );
+  useEffect(() => {
+    if (tabState) saveTabState(tabState.id, { tabs: tabState.tabs, active: tabState.active });
+  }, [tabState]);
   // Tabs pointing at files that no longer exist (deleted, renamed, accepted delete) drop out.
-  const tabs = useMemo(() => (workspace ? rawTabs.filter((p) => workspace.files[p]) : rawTabs), [rawTabs, workspace]);
-  const activePath = workspace && rawActive && !workspace.files[rawActive] ? null : rawActive;
+  const tabs = useMemo(() => (workspace ? currentTabs.tabs.filter((p) => workspace.files[p]) : currentTabs.tabs), [currentTabs, workspace]);
+  const activePath = workspace && currentTabs.active && !workspace.files[currentTabs.active] ? null : currentTabs.active;
   const [jumpToLine, setJumpToLine] = useState<number | null>(null);
   const [showExplorer, setShowExplorer] = useState(true);
   const [showAssistant, setShowAssistant] = useState(true);
   const [mobileView, setMobileView] = useState<"files" | "editor" | "chat">("editor");
   const [selection, setSelection] = useState<Selection | null>(null);
 
-  const open = useCallback((path: string, line?: number) => {
-    setTabs((current) => (current.includes(path) ? current : [...current, path]));
-    setActivePath(path);
-    setJumpToLine(line ?? null);
-  }, []);
+  const open = useCallback(
+    (path: string, line?: number) => {
+      updateTabs((current) => ({ tabs: current.tabs.includes(path) ? current.tabs : [...current.tabs, path], active: path }));
+      setJumpToLine(line ?? null);
+    },
+    [updateTabs],
+  );
 
   const close = useCallback(
     (path: string) => {
-      setTabs((current) => {
-        const index = current.indexOf(path);
-        const next = current.filter((p) => p !== path);
-        setActivePath((active) => (active === path ? next[Math.min(index, next.length - 1)] ?? null : active));
-        return next;
+      updateTabs((current) => {
+        const index = current.tabs.indexOf(path);
+        const next = current.tabs.filter((p) => p !== path);
+        return { tabs: next, active: current.active === path ? next[Math.min(index, next.length - 1)] ?? null : current.active };
       });
     },
-    [],
+    [updateTabs],
   );
 
   const onOpenWorkspace = useCallback(
     (next: Workspace) => {
       ws.setWorkspace(next);
-      setTabs([]);
-      setActivePath(null);
-      // Land on the obvious entry file when there is one.
-      const entry = ["index.html", "README.md", "readme.md", "src/app/page.tsx", "app/page.tsx", "src/index.ts", "index.js", "package.json"].find((p) => next.files[p]);
-      if (entry) {
-        setTabs([entry]);
-        setActivePath(entry);
-      }
+      setTabState({ id: next.id, ...(loadTabState(next.id) ?? entryTabs(next)) });
     },
     [ws],
   );

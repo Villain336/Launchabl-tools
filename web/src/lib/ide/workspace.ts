@@ -368,6 +368,10 @@ export type ProposedEdit =
 export type EditProblem = { line: number | null; severity: "error" | "warning"; message: string };
 export type AppliedEdit = { path: string; before: string | null; after: string | null; ok: boolean; error?: string; problems?: EditProblem[] };
 
+export type ReviewDecision = "pending" | "accepted" | "rejected";
+/** One proposeEdits call as the user sees it: the diffs plus a per-file decision. */
+export type Review = { summary: string; edits: AppliedEdit[]; decisions: Record<string, ReviewDecision> };
+
 /** Compute the after-state of each edit without mutating the workspace. */
 export function previewEdits(files: Record<string, WorkspaceFile>, edits: ProposedEdit[]): AppliedEdit[] {
   const out: AppliedEdit[] = [];

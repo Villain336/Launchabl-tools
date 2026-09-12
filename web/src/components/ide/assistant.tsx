@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { Bot, FileSearch, FileText, FolderTree, KeyRound, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
@@ -16,7 +16,7 @@ import { EditReview, type Review } from "@/components/ide/edit-review";
 import type { Selection } from "@/components/ide/code-editor";
 import type { CodeEditorTools, IdeMessage, ListFilesResult, ProposeEditsResult, ReadFileResult, RunChecksResult, SearchFilesResult } from "@/lib/ai/tools/code-editor";
 import { annotateEdits, canCheck, runChecks, UNCHECKED_NOTE, type Problem } from "@/lib/ide/checks";
-import type { IdeSettings } from "@/lib/ide/store";
+import { loadChat, saveChat, type IdeSettings, type StoredChat } from "@/lib/ide/store";
 import { describeTree, diffStats, globToRegExp, languageOf, numberedSlice, pendingChanges, previewEdits, searchWorkspace, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
 
 type Props = {
@@ -129,11 +129,34 @@ function toolTitle(part: Extract<IdeMessage["parts"][number], { type: `tool-${st
 }
 
 /**
- * The right-hand assistant. Tools run here against the workspace ref (never
- * stale), edits land as diffs the user accepts per file.
+ * Loads the saved conversation for this workspace, then mounts the chat with
+ * it. Keyed by workspace id so switching projects never bleeds messages.
  */
-export function Assistant({ workspace, activePath, selection, settings, runtimeProblems, onAcceptEdits, onOpenFile, onOpenSettings }: Props) {
-  const [reviews, setReviews] = useState<Record<string, Review>>({});
+export function Assistant(props: Props) {
+  const id = props.workspace.id;
+  const [stored, setStored] = useState<{ id: string; chat: StoredChat | null } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void loadChat(id).then((chat) => {
+      if (!cancelled) setStored({ id, chat });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+  if (!stored || stored.id !== id) {
+    return <div className="flex h-full items-center justify-center text-[12.5px] text-muted-foreground" data-ide-assistant-loading />;
+  }
+  return <AssistantChat key={id} {...props} initialMessages={stored.chat?.messages ?? []} initialReviews={stored.chat?.reviews ?? {}} />;
+}
+
+/**
+ * The right-hand assistant. Tools run here against the current workspace,
+ * edits land as diffs the user accepts per file. The conversation and review
+ * decisions are saved per workspace in IndexedDB a moment after they change.
+ */
+function AssistantChat({ workspace, activePath, selection, settings, runtimeProblems, onAcceptEdits, onOpenFile, onOpenSettings, initialMessages, initialReviews }: Props & { initialMessages: IdeMessage[]; initialReviews: Record<string, Review> }) {
+  const [reviews, setReviews] = useState<Record<string, Review>>(initialReviews);
 
   // useChat reads the latest transport and callbacks on every request, so a
   // fresh transport per render is the simplest way to send current context.
@@ -152,6 +175,8 @@ export function Assistant({ workspace, activePath, selection, settings, runtimeP
   });
 
   const { messages, sendMessage, status, stop, error, clearError, setMessages, addToolOutput, regenerate } = useChat<IdeMessage>({
+    id: workspace.id,
+    messages: initialMessages,
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
     onToolCall: ({ toolCall }) => {
@@ -188,6 +213,15 @@ export function Assistant({ workspace, activePath, selection, settings, runtimeP
   });
 
   const busy = status === "submitted" || status === "streaming";
+
+  // Persist the conversation (and which diffs were accepted) shortly after it settles.
+  useEffect(() => {
+    if (busy) return;
+    if (messages === initialMessages && reviews === initialReviews) return;
+    const timer = setTimeout(() => void saveChat(workspace.id, { messages, reviews }), 600);
+    return () => clearTimeout(timer);
+  }, [messages, reviews, busy, workspace.id, initialMessages, initialReviews]);
+
   const parsedError = parseError(error);
   const signInRequired = parsedError?.cause === "sign_in_required";
   const awaitingFirstToken = status === "submitted" || (status === "streaming" && messages[messages.length - 1]?.role === "user");
@@ -227,7 +261,18 @@ export function Assistant({ workspace, activePath, selection, settings, runtimeP
         <span className="truncate text-muted-foreground">{modelLabel ?? (byok ? `${settings.provider} · your key` : "Launchabl models")}</span>
         <span className="ml-auto" />
         {messages.length > 0 && (
-          <Button type="button" variant="ghost" size="icon-xs" aria-label="New chat" title="New chat" onClick={() => setMessages([])}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label="New chat"
+            title="New chat"
+            onClick={() => {
+              setMessages([]);
+              setReviews({});
+            }}
+            data-ide-new-chat
+          >
             <RotateCcw className="size-3.5" />
           </Button>
         )}
