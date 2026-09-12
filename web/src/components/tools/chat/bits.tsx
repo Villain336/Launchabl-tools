@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { AlertTriangle, Check, CheckCircle2, Copy, Download, Info, XCircle } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, Copy, Download, Info, Pencil, XCircle } from "lucide-react";
 import { downloadBlob } from "@/lib/download";
 
 /** Shared primitives for chat artifacts so every card reads the same. */
@@ -36,6 +36,70 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
       {copied ? "Copied" : label}
     </button>
+  );
+}
+
+/**
+ * Text the user can fix in place before copying or downloading. Shows as
+ * prose; a pencil switches to a textarea that grows with the content.
+ * `original` lets the caller offer a reset and mark the block as edited.
+ */
+export function EditableText({
+  value,
+  original,
+  onChange,
+  className = "",
+  editLabel = "Edit",
+  actions,
+}: {
+  value: string;
+  original?: string;
+  onChange: (next: string) => void;
+  className?: string;
+  editLabel?: string;
+  /** Extra buttons (Copy, Download) for the footer row, left of Edit. */
+  actions?: ReactNode;
+}) {
+  const [editing, setEditing] = useState(false);
+  const edited = original !== undefined && original !== value;
+  const rows = Math.min(28, Math.max(3, value.split("\n").length + Math.ceil(value.length / 90)));
+  return (
+    <div className="group/edit relative" data-editable={editing ? "editing" : edited ? "edited" : "view"}>
+      {editing ? (
+        <textarea
+          autoFocus
+          value={value}
+          rows={rows}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={() => setEditing(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className={`block w-full resize-y rounded-[8px] border border-line-strong bg-surface px-3 py-2 text-[13px] leading-relaxed text-ink outline-none focus:border-primary ${className}`}
+        />
+      ) : (
+        <p className={`text-[13px] leading-relaxed whitespace-pre-wrap text-ink ${className}`}>{value}</p>
+      )}
+      <div className="mt-1 flex items-center justify-end gap-1">
+        {actions && <span className="mr-auto flex items-center gap-1">{actions}</span>}
+        {edited && (
+          <>
+            <span className="text-[10.5px] font-medium text-orange">edited</span>
+            <button type="button" onClick={() => onChange(original)} className="h-6 rounded-[6px] px-1.5 text-[11px] text-ink-3 transition-colors hover:bg-hover hover:text-ink">
+              Reset
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setEditing((v) => !v)}
+          className={`inline-flex h-6 items-center gap-1 rounded-[6px] px-1.5 text-[11px] font-medium transition-colors hover:bg-hover hover:text-ink ${editing ? "text-ink" : "text-ink-3 opacity-60 group-hover/edit:opacity-100"}`}
+        >
+          <Pencil className="h-3 w-3" /> {editing ? "Done" : editLabel}
+        </button>
+      </div>
+    </div>
   );
 }
 

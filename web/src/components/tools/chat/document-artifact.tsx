@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, FileText } from "lucide-react";
+import { Check, Copy, Download, FileText, RotateCcw } from "lucide-react";
 import type { DocumentDeliverable } from "@/lib/ai/tools/documents";
 import CodeBlock from "@/components/primitives/CodeBlock";
 import { Markdown } from "@/components/tools/chat/markdown";
@@ -35,13 +35,18 @@ export function splitFrontMatter(content: string): { fields: [string, string][];
   return { fields, body: content.slice(match[0].length) };
 }
 
+type DocTab = "preview" | "source" | "edit";
+
 export function DocumentArtifact({ doc }: { doc: DocumentDeliverable }) {
   const renderable = doc.language === "markdown" || doc.language === "mdx";
-  const { fields, body } = renderable ? splitFrontMatter(doc.content) : { fields: [], body: doc.content };
-  const [tab, setTab] = useState<"preview" | "source">(renderable ? "preview" : "source");
+  const [content, setContent] = useState(doc.content);
+  const edited = content !== doc.content;
+  const { fields, body } = renderable ? splitFrontMatter(content) : { fields: [], body: content };
+  const [tab, setTab] = useState<DocTab>(renderable ? "preview" : "source");
   const [copied, setCopied] = useState(false);
-  const lines = doc.content.split("\n").length;
-  const words = doc.content.trim() ? doc.content.trim().split(/\s+/).length : 0;
+  const lines = content.split("\n").length;
+  const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const tabs: DocTab[] = renderable ? ["preview", "source", "edit"] : ["source", "edit"];
 
   return (
     <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
@@ -51,27 +56,31 @@ export function DocumentArtifact({ doc }: { doc: DocumentDeliverable }) {
           <p className="truncate font-mono text-[13px] font-semibold text-ink">{doc.filename}</p>
           <p className="truncate text-[12px] text-ink-2">
             {doc.summary} · {lines} lines · {words} words
+            {edited && <span className="text-orange"> · edited</span>}
           </p>
         </div>
-        {renderable && (
-          <div className="flex items-center rounded-[6px] bg-field p-0.5">
-            {(["preview", "source"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                aria-pressed={tab === t}
-                onClick={() => setTab(t)}
-                className={`rounded-[5px] px-2 py-[3px] text-[12px] font-medium capitalize ${tab === t ? "bg-surface text-ink shadow-card" : "text-ink-3 hover:text-ink"}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+        {edited && (
+          <button type="button" onClick={() => setContent(doc.content)} title="Back to the generated version" className="inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium text-ink-3 transition-colors hover:bg-hover hover:text-ink">
+            <RotateCcw className="h-3 w-3" /> Reset
+          </button>
         )}
+        <div className="flex items-center rounded-[6px] bg-field p-0.5">
+          {tabs.map((t) => (
+            <button
+              key={t}
+              type="button"
+              aria-pressed={tab === t}
+              onClick={() => setTab(t)}
+              className={`rounded-[5px] px-2 py-[3px] text-[12px] font-medium capitalize ${tab === t ? "bg-surface text-ink shadow-card" : "text-ink-3 hover:text-ink"}`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           onClick={() =>
-            navigator.clipboard.writeText(doc.content).then(() => {
+            navigator.clipboard.writeText(content).then(() => {
               setCopied(true);
               setTimeout(() => setCopied(false), 1500);
             })
@@ -83,7 +92,7 @@ export function DocumentArtifact({ doc }: { doc: DocumentDeliverable }) {
         </button>
         <button
           type="button"
-          onClick={() => downloadBlob(new Blob([doc.content], { type: mimeFor[doc.language] }), doc.filename.split("/").pop() ?? doc.filename)}
+          onClick={() => downloadBlob(new Blob([content], { type: mimeFor[doc.language] }), doc.filename.split("/").pop() ?? doc.filename)}
           className="inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium text-ink-3 transition-colors hover:bg-hover hover:text-ink"
         >
           <Download className="h-3 w-3" /> Download
@@ -104,9 +113,21 @@ export function DocumentArtifact({ doc }: { doc: DocumentDeliverable }) {
           )}
           <Markdown text={body} />
         </div>
+      ) : tab === "edit" ? (
+        <div className="p-3">
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            spellCheck={renderable}
+            rows={Math.min(30, Math.max(8, lines + 1))}
+            className="block w-full resize-y rounded-[8px] border border-line bg-field px-3 py-2.5 font-mono text-[12.5px] leading-relaxed text-ink outline-none focus:border-primary"
+            data-doc-editor
+          />
+          <p className="mt-1.5 text-[11.5px] text-ink-3">Edits stay in this card and go into Copy and Download. They aren&apos;t sent back to the model — say what to change in the chat for that.</p>
+        </div>
       ) : (
         <div className="max-h-[520px] overflow-y-auto p-3">
-          <CodeBlock lines={doc.content.split("\n")} code={doc.content} filename={doc.filename.split("/").pop() ?? doc.filename} />
+          <CodeBlock lines={content.split("\n")} code={content} filename={doc.filename.split("/").pop() ?? doc.filename} />
         </div>
       )}
     </div>

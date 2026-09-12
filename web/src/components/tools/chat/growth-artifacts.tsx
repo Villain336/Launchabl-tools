@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2, ClipboardCheck, Link2, Mail, Megaphone, Re
 import type { PersonaDeliverable, PressReleaseDeliverable, RepurposeDeliverable, SubjectLinesDeliverable, TestPlanDeliverable, UtmDeliverable } from "@/lib/ai/tools/growth-kits";
 import { utmCsv } from "@/lib/marketing/utm";
 import { MOBILE_VISIBLE } from "@/lib/marketing/subject-lines";
-import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, ScoreRing, Tabs, shorten, type Tone } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, DownloadButton, EditableText, Footnote, Pill, ScoreRing, Tabs, shorten, type Tone } from "@/components/tools/chat/bits";
 import { Markdown } from "@/components/tools/chat/markdown";
 
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "file";
@@ -519,15 +519,23 @@ export function TestPlanArtifact({ data }: { data: TestPlanDeliverable }) {
 
 /* ── Repurposed content ──────────────────────────────── */
 
-function pieceText(p: RepurposeDeliverable["pieces"][number]): string {
+type Piece = RepurposeDeliverable["pieces"][number];
+
+function pieceText(p: Piece): string {
   const body = p.parts.length ? p.parts.join("\n\n") : p.body;
   return [p.title, body, p.cta, p.hashtags.length ? p.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)).join(" ") : ""].filter(Boolean).join("\n\n");
 }
 
 export function RepurposeArtifact({ data }: { data: RepurposeDeliverable }) {
   const [tab, setTab] = useState<string>(data.pieces[0]?.channel ?? "source");
-  const piece = data.pieces.find((p) => p.channel === tab);
-  const all = data.pieces.map((p) => `## ${p.label}\n\n${pieceText(p)}`).join("\n\n---\n\n");
+  // Local edits per channel: body and thread parts. Copy/download read the edited version.
+  const [edits, setEdits] = useState<Record<string, { body: string; parts: string[] }>>({});
+  const withEdits = (p: Piece): Piece => (edits[p.channel] ? { ...p, body: edits[p.channel].body, parts: edits[p.channel].parts } : p);
+  const editPiece = (p: Piece, patch: Partial<{ body: string; parts: string[] }>) =>
+    setEdits((prev) => ({ ...prev, [p.channel]: { body: prev[p.channel]?.body ?? p.body, parts: prev[p.channel]?.parts ?? p.parts, ...patch } }));
+  const original = data.pieces.find((p) => p.channel === tab);
+  const piece = original ? withEdits(original) : undefined;
+  const all = data.pieces.map(withEdits).map((p) => `## ${p.label}\n\n${pieceText(p)}`).join("\n\n---\n\n");
   const overLimit = data.pieces.filter((p) => p.warnings.length).length;
 
   return (
@@ -540,11 +548,11 @@ export function RepurposeArtifact({ data }: { data: RepurposeDeliverable }) {
         <Tabs value={tab} onChange={setTab} options={[...data.pieces.map((p) => ({ key: p.channel, label: p.label })), { key: "source", label: "Source" }]} />
       </div>
 
-      {piece && (
+      {piece && original && (
         <div>
           <div className="flex flex-wrap items-center gap-2 px-4 pt-3">
             <span className="text-[11.5px] text-ink-3">
-              {piece.chars.toLocaleString()} chars{piece.parts.length ? ` · ${piece.parts.length} parts` : ""}
+              {[...pieceText(piece)].length.toLocaleString()} chars{piece.parts.length ? ` · ${piece.parts.length} parts` : ""}
               {piece.bestTime ? ` · best ${piece.bestTime}` : ""}
             </span>
             {piece.warnings.length > 0 && <Pill t="warn">{piece.warnings.length} warning{piece.warnings.length === 1 ? "" : "s"}</Pill>}
@@ -558,13 +566,22 @@ export function RepurposeArtifact({ data }: { data: RepurposeDeliverable }) {
               {piece.parts.map((part, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <span className="w-5 shrink-0 pt-[3px] text-[11px] text-ink-3 tabular-nums">{i + 1}</span>
-                  <div className="min-w-0 flex-1 rounded-[10px] bg-field/60 px-3 py-2 text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{part}</div>
+                  <div className="min-w-0 flex-1 rounded-[10px] bg-field/60 px-3 py-2">
+                    <EditableText
+                      value={part}
+                      original={original.parts[i]}
+                      onChange={(v) => editPiece(original, { parts: piece.parts.map((x, j) => (j === i ? v : x)) })}
+                      actions={<CopyButton text={part} />}
+                    />
+                  </div>
                   <span className={`w-9 shrink-0 pt-[3px] text-right text-[10.5px] tabular-nums ${[...part].length > 280 ? "text-red" : "text-ink-3"}`}>{[...part].length}</span>
                 </li>
               ))}
             </ol>
           ) : (
-            <p className="px-4 py-3 text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{piece.body}</p>
+            <div className="px-4 py-3">
+              <EditableText value={piece.body} original={original.body} onChange={(v) => editPiece(original, { body: v })} />
+            </div>
           )}
           {(piece.cta || piece.hashtags.length > 0 || piece.visual) && (
             <div className="space-y-1 border-t border-line px-4 py-2.5 text-[12px] text-ink-2">

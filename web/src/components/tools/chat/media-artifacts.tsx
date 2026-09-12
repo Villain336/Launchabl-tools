@@ -6,7 +6,7 @@ import type { ClipsDeliverable, PublishKitDeliverable, TranscriptDeliverable, Tr
 import { Markdown } from "@/components/tools/chat/markdown";
 import { formatTimestamp, markedText, toSrt, toVtt } from "@/lib/media/transcript";
 import { AUDIO_ONLY_EXT, FRAMES, PLATFORM_FRAME, renderCommand, renderScript, type Frame } from "@/lib/media/render";
-import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, DownloadButton, EditableText, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
 
 const slugify = (s: string) => s.toLowerCase().replace(/\.[a-z0-9]+$/i, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "recording";
 
@@ -175,17 +175,16 @@ function publishKitMarkdown(d: PublishKitDeliverable): string {
   return lines.join("\n");
 }
 
-function KitBlock({ label, text, action }: { label?: string; text: string; action?: React.ReactNode }) {
+function KitBlock({ label, text, original, onChange, copyLabel }: { label?: string; text: string; original: string; onChange: (v: string) => void; copyLabel: string }) {
   return (
-    <div className="rounded-[10px] bg-field/60 px-3.5 py-3">
+    <div className="rounded-[10px] bg-field/60 px-3.5 py-3" data-kit-text>
       {label && <p className="mb-1 text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">{label}</p>}
-      <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-ink" data-kit-text>
-        {text}
-      </p>
-      {action && <div className="mt-2 flex justify-end">{action}</div>}
+      <EditableText value={text} original={original} onChange={onChange} actions={<CopyButton text={text} label={copyLabel} />} />
     </div>
   );
 }
+
+type KitEdits = { ytTitle: string; ytDescription: string; post: string; subject: string; body: string };
 
 export function PublishKitArtifact({ data }: { data: PublishKitDeliverable }) {
   const tabs = useMemo(() => {
@@ -197,6 +196,18 @@ export function PublishKitArtifact({ data }: { data: PublishKitDeliverable }) {
     return t;
   }, [data]);
   const [tab, setTab] = useState<KitTab>(tabs[0]?.key ?? "youtube");
+  const originals = useMemo<KitEdits>(
+    () => ({
+      ytTitle: data.youtube?.title ?? "",
+      ytDescription: data.youtubeDescriptionFull ?? data.youtube?.description ?? "",
+      post: data.post?.text ?? "",
+      subject: data.followUpEmail?.subject ?? "",
+      body: data.followUpEmail?.body ?? "",
+    }),
+    [data],
+  );
+  const [edits, setEdits] = useState<KitEdits>(originals);
+  const set = (key: keyof KitEdits) => (v: string) => setEdits((prev) => ({ ...prev, [key]: v }));
   const base = slugify(data.name);
   const blogWords = data.blog ? data.blog.markdown.split(/\s+/).filter(Boolean).length : 0;
   return (
@@ -209,12 +220,8 @@ export function PublishKitArtifact({ data }: { data: PublishKitDeliverable }) {
       <div className="space-y-3 px-4 py-3">
         {tab === "youtube" && data.youtube && (
           <>
-            <KitBlock label={`Title · ${data.youtube.title.length}/100`} text={data.youtube.title} action={<CopyButton text={data.youtube.title} label="Copy title" />} />
-            <KitBlock
-              label="Description · chapters and tags appended"
-              text={data.youtubeDescriptionFull ?? data.youtube.description}
-              action={<CopyButton text={data.youtubeDescriptionFull ?? data.youtube.description} label="Copy description" />}
-            />
+            <KitBlock label={`Title · ${edits.ytTitle.length}/100`} text={edits.ytTitle} original={originals.ytTitle} onChange={set("ytTitle")} copyLabel="Copy title" />
+            <KitBlock label="Description · chapters and tags appended" text={edits.ytDescription} original={originals.ytDescription} onChange={set("ytDescription")} copyLabel="Copy description" />
           </>
         )}
         {tab === "blog" && data.blog && (
@@ -233,12 +240,15 @@ export function PublishKitArtifact({ data }: { data: PublishKitDeliverable }) {
           </div>
         )}
         {tab === "post" && data.post && (
-          <KitBlock label={`${POST_LABEL[data.post.platform]} · ${data.post.text.length.toLocaleString()} characters`} text={data.post.text} action={<CopyButton text={data.post.text} label="Copy post" />} />
+          <KitBlock label={`${POST_LABEL[data.post.platform]} · ${edits.post.length.toLocaleString()} characters`} text={edits.post} original={originals.post} onChange={set("post")} copyLabel="Copy post" />
         )}
         {tab === "email" && data.followUpEmail && (
           <>
-            <KitBlock label="Subject" text={data.followUpEmail.subject} action={<CopyButton text={data.followUpEmail.subject} label="Copy subject" />} />
-            <KitBlock label="Body" text={data.followUpEmail.body} action={<CopyButton text={`Subject: ${data.followUpEmail.subject}\n\n${data.followUpEmail.body}`} label="Copy email" />} />
+            <KitBlock label="Subject" text={edits.subject} original={originals.subject} onChange={set("subject")} copyLabel="Copy subject" />
+            <KitBlock label="Body" text={edits.body} original={originals.body} onChange={set("body")} copyLabel="Copy body" />
+            <div className="flex justify-end">
+              <CopyButton text={`Subject: ${edits.subject}\n\n${edits.body}`} label="Copy full email" />
+            </div>
           </>
         )}
         <WarningList items={data.warnings} />
