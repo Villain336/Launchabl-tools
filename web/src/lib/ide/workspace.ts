@@ -25,6 +25,8 @@ export type Workspace = {
   name: string;
   source: WorkspaceSource;
   files: Record<string, WorkspaceFile>;
+  /** Paths that existed in the source and were deleted or renamed away; committed as deletions. */
+  tombstones?: string[];
   createdAt: string;
   updatedAt: string;
 };
@@ -207,6 +209,32 @@ export const isNew = (file: WorkspaceFile) => file.original === null;
 
 export function dirtyFiles(ws: Workspace): WorkspaceFile[] {
   return Object.values(ws.files).filter((f) => isDirty(f) || isNew(f));
+}
+
+export type PendingChange = { path: string; kind: "added" | "modified" | "deleted"; content: string | null; binary: boolean; added: number; removed: number };
+
+/** Everything a commit would carry: new and modified files plus deletions of files that came from the source. */
+export function pendingChanges(ws: Workspace): PendingChange[] {
+  const out: PendingChange[] = [];
+  for (const file of Object.values(ws.files)) {
+    if (isNew(file)) out.push({ path: file.path, kind: "added", content: file.content, binary: file.binary, ...(file.binary ? { added: 0, removed: 0 } : diffStats(null, file.content)) });
+    else if (isDirty(file)) out.push({ path: file.path, kind: "modified", content: file.content, binary: file.binary, ...(file.binary ? { added: 0, removed: 0 } : diffStats(file.original, file.content)) });
+  }
+  for (const path of ws.tombstones ?? []) {
+    if (ws.files[path]) continue;
+    out.push({ path, kind: "deleted", content: null, binary: false, added: 0, removed: 0 });
+  }
+  return out.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+/** Remove a file, remembering it for the commit if it came from the source. */
+export function removeFile(ws: Workspace, path: string): Workspace {
+  const file = ws.files[path];
+  if (!file) return ws;
+  const files = { ...ws.files };
+  delete files[path];
+  const tombstones = file.original !== null && !(ws.tombstones ?? []).includes(path) ? [...(ws.tombstones ?? []), path] : ws.tombstones;
+  return { ...ws, files, tombstones, updatedAt: new Date().toISOString() };
 }
 
 /** Folder tree with directories first, then files, both alphabetical (case-insensitive). */
@@ -404,17 +432,21 @@ export function previewEdits(files: Record<string, WorkspaceFile>, edits: Propos
 
 /** Apply previously previewed edits (only the ok ones the user accepted). */
 export function applyEdits(ws: Workspace, accepted: AppliedEdit[]): Workspace {
-  const files = { ...ws.files };
+  let next = ws;
   for (const edit of accepted) {
     if (!edit.ok) continue;
     if (edit.after === null) {
-      delete files[edit.path];
+      next = removeFile(next, edit.path);
       continue;
     }
-    const existing = files[edit.path];
-    files[edit.path] = makeFile(edit.path, edit.after, { original: existing ? existing.original : null });
+    const existing = next.files[edit.path];
+    next = {
+      ...next,
+      files: { ...next.files, [edit.path]: makeFile(edit.path, edit.after, { original: existing ? existing.original : null }) },
+      tombstones: next.tombstones?.filter((p) => p !== edit.path),
+    };
   }
-  return { ...ws, files, updatedAt: new Date().toISOString() };
+  return { ...next, updatedAt: new Date().toISOString() };
 }
 
 /** Minimal line diff stats for a badge: +added −removed. */

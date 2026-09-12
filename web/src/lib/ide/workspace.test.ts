@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyEdits, buildTree, createWorkspace, describeTree, diffStats, globToRegExp, isIgnoredPath, languageOf, looksBinary, makeFile, normalisePath, numberedSlice, previewEdits, searchWorkspace, stripCommonRoot } from "./workspace";
+import { applyEdits, buildTree, createWorkspace, describeTree, diffStats, globToRegExp, isIgnoredPath, languageOf, looksBinary, makeFile, normalisePath, numberedSlice, pendingChanges, previewEdits, removeFile, searchWorkspace, stripCommonRoot } from "./workspace";
 import { importEntries } from "./import";
 
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -92,5 +92,20 @@ describe("proposed edits", () => {
     expect(Object.keys(next.files).sort()).toEqual(["b.ts", "img.png"]);
     expect(next.files["b.ts"].original).toBeNull();
     expect(diffStats("a\nb\nc", "a\nc\nd")).toEqual({ added: 1, removed: 1 });
+  });
+  it("tracks deletions of source files as tombstones and lists pending changes for a commit", () => {
+    const results = previewEdits(ws.files, [
+      { path: "a.ts", kind: "delete" },
+      { path: "new.ts", kind: "create", content: "x\n" },
+    ]);
+    let next = applyEdits(ws, results);
+    expect(next.tombstones).toEqual(["a.ts"]);
+    expect(pendingChanges(next).map((c) => `${c.kind}:${c.path}`)).toEqual(["deleted:a.ts", "added:new.ts"]);
+    // Re-creating a deleted path drops the tombstone; it's a modification of the original.
+    next = applyEdits(next, previewEdits(next.files, [{ path: "a.ts", kind: "create", content: "fresh\n" }]));
+    expect(next.tombstones).toEqual([]);
+    expect(pendingChanges(next).find((c) => c.path === "a.ts")?.kind).toBe("added");
+    // Deleting a never-committed file leaves no tombstone.
+    expect(removeFile(next, "new.ts").tombstones).toEqual([]);
   });
 });
