@@ -10,6 +10,8 @@ import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage"
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
 import { gateRun, SIGN_IN_REQUIRED_MESSAGE } from "@/lib/auth/session";
+import { projectContext } from "@/lib/projects/project";
+import { loadProject } from "@/lib/projects/storage";
 
 // Crawls, multi-site comparisons and long kits (local SEO, 90-day calendars)
 // legitimately run past a minute; the model stream keeps the connection alive.
@@ -39,7 +41,7 @@ function textLength(messages: ToolChatMessage[]): number {
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json().catch(() => null)) as { tool?: unknown; messages?: unknown; template?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { tool?: unknown; messages?: unknown; template?: unknown; project?: unknown } | null;
   const slug = typeof body?.tool === "string" ? body.tool : "";
   // Which agent template (if any) started this conversation, for the admin
   // dashboard; validated against the known ids so the store can't be polluted.
@@ -82,6 +84,10 @@ export async function POST(request: NextRequest) {
   }
   const account = gate.kind === "user" ? gate.session.uid : `anon:${clientKey(request.headers)}`;
 
+  // Active project (signed-in only, must be theirs): its context goes into the
+  // system prompt so tools stop asking for company, site, audience and tone.
+  const project = gate.kind === "user" && typeof body?.project === "string" ? await loadProject(body.project, gate.session.uid) : null;
+
   const spend = await checkDailySpend();
   if (!spend.ok) {
     console.warn(`[tools/chat:${slug}] daily spend cap reached: $${spend.spentUsd.toFixed(2)} of $${spend.capUsd}`);
@@ -107,6 +113,7 @@ export async function POST(request: NextRequest) {
       // "how old is this post" all depend on it.
       instructions: [
         runtime.instructions,
+        project ? projectContext(project) : null,
         prepared.attachments > 0 ? ATTACHMENT_INSTRUCTIONS : null,
         `Today is ${today.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })} (${today.toISOString().slice(0, 10)}).`,
       ]
@@ -118,7 +125,7 @@ export async function POST(request: NextRequest) {
       abortSignal: request.signal,
       providerOptions: {
         gateway: {
-          tags: ["launchabl", `tool:${slug}`, gate.kind === "user" ? "account" : "anon", ...(template ? [`template:${template}`] : [])],
+          tags: ["launchabl", `tool:${slug}`, gate.kind === "user" ? "account" : "anon", ...(template ? [`template:${template}`] : []), ...(project ? ["project"] : [])],
           user: account,
         },
       },
