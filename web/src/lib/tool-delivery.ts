@@ -80,15 +80,6 @@ export const TOOL_DELIVERY_POLICIES: Record<string, ApprovalPolicy> = {
     ],
     "Download kit",
   ),
-  copywriter: linearPolicy(
-    "AI copywriter",
-    [
-      { id: "submit", label: "Write the brief", title: "Format, brand, offer, tone" },
-      { id: "scan", label: "Generate variants", title: "Drafts to choose from" },
-      { id: "review", label: "Approve copy", title: "You sign off before export" },
-    ],
-    "Export copy",
-  ),
   "schema-generator": linearPolicy(
     "Schema markup",
     [

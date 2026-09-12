@@ -133,25 +133,6 @@ export const tools: Tool[] = [
     ],
   },
   {
-    slug: "copywriter",
-    name: "AI Copywriter",
-    shortDescription:
-      "Structured templates for ad copy, landing page heroes, product blurbs, and email subject lines.",
-    status: "beta",
-    processing: "server",
-    upsell: {
-      headline: "Great copy still needs a great strategist.",
-      body: "Unlimited plan members get human copywriters who write and test full campaigns — not just a first draft.",
-    },
-    faq: [
-      {
-        question: "Is the output guaranteed original / plagiarism-free?",
-        answer:
-          "No AI writing tool can guarantee full originality. Always run generated copy through your own plagiarism/fact check before publishing.",
-      },
-    ],
-  },
-  {
     slug: "watermark-generator",
     name: "Watermark Generator",
     shortDescription: "Stamp a text or logo watermark onto your images with full control.",
@@ -213,9 +194,9 @@ export const tools: Tool[] = [
   {
     slug: "schema-generator",
     name: "Schema Markup Generator",
-    shortDescription: "Generate valid JSON-LD structured data for Organization, Product, FAQ, and more.",
+    shortDescription: "Paste a URL and get validated JSON-LD for the page — Organization, LocalBusiness, Product, Article, FAQ, Event and more.",
     status: "live",
-    processing: "client",
+    processing: "server",
     upsell: {
       headline: "One snippet is a start. Full technical SEO is the win.",
       body: "Unlimited plan members get a full technical SEO audit and every page on their site fitted with the right schema — not just one snippet.",
@@ -224,12 +205,17 @@ export const tools: Tool[] = [
       {
         question: "Where do I put the generated code?",
         answer:
-          "Paste the JSON-LD output inside a <script type=\"application/ld+json\"> tag in your page's <head>, or use your CMS's structured data field.",
+          "Copy the <script type=\"application/ld+json\"> snippet and paste it inside your page's <head> (or anywhere in the body), or use your CMS's structured data field. One script per page is fine, even with several types combined in @graph.",
       },
       {
         question: "How do I know if it's valid?",
         answer:
-          "Test it with Google's Rich Results Test or Schema.org's validator before publishing.",
+          "The tool parses the JSON and checks the required and recommended properties for every schema.org type it generated, flagging placeholders and relative URLs. Confirm eligibility for rich results with Google's Rich Results Test before publishing.",
+      },
+      {
+        question: "Does it invent details?",
+        answer:
+          "No. It uses facts from the page you give it or from your description. Anything it can't know — a phone number, a date, a price — is inserted as a clearly marked placeholder and listed for you to replace.",
       },
     ],
   },
@@ -383,7 +369,7 @@ export const tools: Tool[] = [
     slug: "website-audit-report",
     name: "Website Audit Report",
     shortDescription:
-      "Fetch a real URL and get a scored, multi-part report across SEO, structured data, and technical basics.",
+      "Paste a URL and get a scored, 20+ point technical and on-page SEO audit with the exact fix for every issue — and which tool goes deeper.",
     status: "live",
     processing: "server",
     upsell: {
@@ -399,7 +385,12 @@ export const tools: Tool[] = [
       {
         question: "Why didn't it detect content rendered by JavaScript?",
         answer:
-          "This tool reads the raw HTML response, so content injected client-side by JavaScript frameworks after load may not appear in the audit. A production crawler would add headless-browser rendering to catch this.",
+          "This tool reads the raw HTML response, so content injected client-side by JavaScript frameworks after load may not appear in the audit. That's also what search engines index first — if the audit sees an empty page, so do they until the render queue catches up.",
+      },
+      {
+        question: "What does it check?",
+        answer:
+          "Title and description length, H1 count and heading outline, canonical, indexability, language, structured-data validity and types, Open Graph and Twitter cards, favicon, word count, alt-text coverage, internal links, lazy loading, HTTPS, mobile viewport, server response time, HTML weight, compression, external scripts and third parties, security headers, and Cache-Control.",
       },
     ],
   },
@@ -407,7 +398,7 @@ export const tools: Tool[] = [
     slug: "landing-page-grader",
     name: "Landing Page Conversion Grader",
     shortDescription:
-      "Score a landing page against real conversion best practices — CTAs, forms, trust signals, and speed.",
+      "Grade a landing page for conversion — headline, calls to action, form friction, trust signals, distractions and speed — then get the hero rewritten.",
     status: "live",
     processing: "server",
     upsell: {
@@ -418,15 +409,20 @@ export const tools: Tool[] = [
       {
         question: "How is this different from the Website Audit Report?",
         answer:
-          "Same underlying fetch, a completely different scoring lens — this one weighs conversion signals (calls to action, forms, phone numbers, trust signals) instead of general SEO health.",
+          "Same underlying fetch, a completely different scoring lens — this one weighs conversion signals (headline clarity, calls to action and their wording, form length, testimonials and social proof, navigation distractions) instead of general SEO health.",
+      },
+      {
+        question: "Can it tell me what to change, not just what's wrong?",
+        answer:
+          "Yes. Every failing check comes with a concrete fix, and the assistant will write three alternative heroes (headline, subheadline, button) grounded in what your page already says. Pair it with the A/B Copy Variant Generator to turn the rewrite into a test plan.",
       },
     ],
   },
   {
     slug: "competitor-gap-report",
     name: "Competitor Gap Report",
-    shortDescription: "Compare your site against up to three competitors, side by side, on the same signals.",
-    status: "beta",
+    shortDescription: "Compare your page against up to three competitors on identical signals — see where you're behind, where you lead, and the terms they use that you don't.",
+    status: "live",
     processing: "server",
     upsell: {
       headline: "Seeing the gap is easy. Closing it is the work.",
@@ -435,7 +431,12 @@ export const tools: Tool[] = [
     faq: [
       {
         question: "How many competitors can I compare?",
-        answer: "Up to three competitor URLs against your own, four total, in a single report.",
+        answer: "Up to three competitor URLs against your own, four total, in a single report. Compare like with like — homepage against homepage, pricing page against pricing page — for a fair read.",
+      },
+      {
+        question: "What gets compared?",
+        answer:
+          "Audit score and failing checks, visible words, H2 sections, images and alt coverage, internal and outbound links, title and description length, H1 count, schema types, Open Graph image, HTML load time and weight, external scripts, third-party hosts, security headers and HTTPS — plus each page's most frequent terms.",
       },
     ],
   },
@@ -499,33 +500,52 @@ export const tools: Tool[] = [
   {
     slug: "content-campaign-calendar",
     name: "Content & Campaign Calendar Generator",
-    shortDescription: "Generate a 30-day, multi-channel content plan tailored to your business and goal, exportable as CSV.",
+    shortDescription: "Plan a dated, multi-channel content calendar where every piece has a real hook and brief — export as CSV, ICS or JSON.",
     status: "live",
-    processing: "client",
+    processing: "server",
     upsell: {
       headline: "A plan is a start. Execution is the hard part.",
       body: "Unlimited plan members get every piece of content on this calendar actually written and designed.",
     },
-    faq: [],
+    faq: [
+      {
+        question: "How long a plan can it make?",
+        answer: "From one week to a quarter (7–90 days). It defaults to 30 days starting next Monday and to a cadence a small team can actually sustain.",
+      },
+      {
+        question: "Is every entry just 'post about your product'?",
+        answer:
+          "No. Each entry has a specific hook, a brief with the angle and the proof to include, a CTA matched to its funnel stage, and a content pillar. Blog posts are deliberately repurposed into threads, carousels and newsletter sections on later days.",
+      },
+    ],
   },
   {
     slug: "local-seo-optimizer",
     name: "Local SEO / Google Business Profile Optimizer",
-    shortDescription: "Generate a full local-presence package: GBP description, categories, Q&A, and review responses.",
+    shortDescription: "Get the full local-search kit: GBP description and categories, services, keywords, Q&A, review responses, posts, schema and a launch checklist.",
     status: "live",
-    processing: "client",
+    processing: "server",
     upsell: {
       headline: "Copy is one piece of local SEO.",
       body: "Unlimited plan members get citations, review generation, and ongoing local SEO work handled end to end.",
     },
-    faq: [],
+    faq: [
+      {
+        question: "What do I need to give it?",
+        answer: "What the business does and where it is — or just its website URL, and it will read the services, address, phone and tone from the page.",
+      },
+      {
+        question: "Are the categories real Google Business Profile categories?",
+        answer: "It uses real GBP category names, but availability varies by country. Check the suggested categories exist in your GBP dashboard before saving.",
+      },
+    ],
   },
   {
     slug: "sitemap-robots-generator",
     name: "Sitemap & Robots.txt Generator",
-    shortDescription: "Turn a real list of your site's URLs into a validated sitemap.xml and robots.txt pair.",
+    shortDescription: "Crawl your site and get a sitemap.xml built from what's actually linked, plus a robots.txt with optional AI-crawler rules.",
     status: "live",
-    processing: "client",
+    processing: "server",
     upsell: {
       headline: "A sitemap is table stakes. Indexing is the goal.",
       body: "Unlimited plan members get their whole site's technical SEO — including sitemaps, robots, and canonical tags — managed continuously.",
@@ -534,7 +554,12 @@ export const tools: Tool[] = [
       {
         question: "Can this crawl my site for me?",
         answer:
-          "Not yet — paste in the URLs you want included. Live crawling is on the roadmap and would run server-side.",
+          "Yes. Give it your homepage and it follows internal links up to a few levels deep and up to 150 pages, skipping redirects, errors, noindex pages and any path prefixes you exclude.",
+      },
+      {
+        question: "Should I block AI crawlers?",
+        answer:
+          "Blocking training crawlers (GPTBot, CCBot, Google-Extended) doesn't affect whether ChatGPT, Perplexity or Claude can cite you — blocking their search agents does. The tool can write either rule set; it recommends blocking training only unless you want out of AI search entirely.",
       },
     ],
   },

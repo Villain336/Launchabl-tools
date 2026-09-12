@@ -23,12 +23,13 @@ const metas: ChatToolMeta[] = [
   {
     slug: "ab-copy-variants",
     intro:
-      "Paste the copy you want to test — a headline, hero, ad, email, or CTA — and say who it's for. You'll get distinct variants, each built on a different persuasion angle, plus a plan for how to test them.",
-    placeholder: "Paste your current copy and describe the audience…",
+      "Paste the copy you want to test — a headline, hero, ad, product blurb, email subject or CTA — or describe the offer and audience if you're starting from nothing. You'll get distinct variants, each built on a different persuasion angle, plus a plan for how to test them.",
+    placeholder: "Paste your current copy (or describe the offer) and say who it's for…",
     suggestions: [
       "Write 4 headline variants for a landing page selling a $29/mo invoicing app to freelancers. Current: \"Invoicing made simple.\"",
       "A/B test my Google Ads headline: \"Affordable web design for small business\". Audience: local restaurants and salons.",
       "Give me 3 variants of this email subject line for a SaaS onboarding sequence: \"Welcome to Acme — let's get started\"",
+      "Write a landing-page hero (headline + subheadline + button) from scratch for a meal-prep delivery service for busy parents in Chicago.",
       "Rewrite this CTA button for higher clicks: \"Submit\". Context: free trial signup form for a B2B analytics tool.",
     ],
     artifacts: ["deliverVariants"],
@@ -202,6 +203,97 @@ const metas: ChatToolMeta[] = [
       "Black Friday promo: 30% off annual plans until Monday. Urgent but not shouty, one CTA, dark theme.",
     ],
     artifacts: ["deliverEmail", "fetchPage"],
+  },
+  {
+    slug: "website-audit-report",
+    intro:
+      "Paste a URL and I'll audit the page the way a technical SEO would — title and description, headings, canonical, indexability, structured data, Open Graph, alt text, speed, security headers and more — then tell you what to fix first and which of our tools goes deeper on each problem.",
+    placeholder: "Paste a page URL, e.g. https://example.com",
+    suggestions: [
+      "Audit https://vercel.com",
+      "Run a full SEO audit on https://example.com/pricing and tell me what to fix first",
+      "Why isn't https://example.com/blog/our-post showing a preview when shared on LinkedIn?",
+      "Audit https://example.com — we're a WordPress site and it feels slow",
+    ],
+    artifacts: ["auditWebsite"],
+  },
+  {
+    slug: "landing-page-grader",
+    intro:
+      "Give me a landing page URL — and, if you like, who lands on it and from where — and I'll grade it for conversion: headline clarity, calls to action, form friction, trust signals, distractions and speed. Then I'll rewrite the hero if you want.",
+    placeholder: "Paste a landing page URL and say what the visitor should do…",
+    suggestions: [
+      "Grade https://vercel.com/pricing for conversion",
+      "Grade https://example.com/free-trial — visitors come from Google Ads for “invoicing software”",
+      "Why isn't https://example.com/webinar converting? Rewrite the hero.",
+      "Compare the CTAs on https://example.com and tell me which one to keep",
+    ],
+    artifacts: ["gradeLandingPage", "fetchPage"],
+  },
+  {
+    slug: "competitor-gap-report",
+    intro:
+      "Give me your page and one to three competitors' equivalent pages. I'll fetch them all, compare them on identical signals — content depth, structure, schema, speed, security, sharing — and show you exactly where you're behind, where you lead, and which terms they use that you don't.",
+    placeholder: "Your URL first, then competitors: https://mysite.com, https://competitor.com…",
+    suggestions: [
+      "Compare https://vercel.com with https://netlify.com and https://render.com",
+      "My site is https://example.com — compare it to https://competitor-a.com and https://competitor-b.com",
+      "Compare our pricing page https://example.com/pricing against https://competitor.com/pricing",
+      "Where is https://example.com behind https://competitor.com on technical SEO?",
+    ],
+    artifacts: ["compareSites", "fetchPage"],
+  },
+  {
+    slug: "sitemap-robots-generator",
+    intro:
+      "Give me your homepage and I'll crawl the site — following real links, skipping redirects, errors and noindex pages — then build a sitemap.xml and a matching robots.txt you can download. Tell me what to leave out, or whether to block AI training crawlers.",
+    placeholder: "Paste your homepage, e.g. https://example.com",
+    suggestions: [
+      "Generate a sitemap and robots.txt for https://vercel.com/docs",
+      "Crawl https://example.com and build the sitemap, but leave out /tag/ and /author/ pages",
+      "Sitemap for https://example.com and a robots.txt that blocks AI training crawlers but keeps AI search",
+      "Does https://example.com already have a sitemap? Compare it with what's actually linked.",
+    ],
+    artifacts: ["generateSitemap"],
+  },
+  {
+    slug: "schema-generator",
+    intro:
+      "Paste a URL and I'll read the page and write the right schema.org JSON-LD for it — Organization, LocalBusiness, Product, Article, FAQ, Event, JobPosting and more — validated against the required properties, with a copy-ready script tag. Or describe the business and I'll build it from that.",
+    placeholder: "Paste a page URL, or describe the page and business…",
+    suggestions: [
+      "Write schema markup for https://vercel.com/pricing",
+      "Generate LocalBusiness schema for a dental clinic in Austin, TX: Bright Smile Dental, 512-555-0100, open Mon–Fri 8–5",
+      "Turn the questions on https://example.com/faq into FAQPage JSON-LD",
+      "Product schema for https://example.com/products/blue-widget with price and availability",
+    ],
+    artifacts: ["deliverSchema", "fetchPage"],
+  },
+  {
+    slug: "local-seo-optimizer",
+    intro:
+      "Tell me about the business — what it does and where, or just paste its website — and I'll build the full local-search kit: Google Business Profile description and categories, services, local keywords, Q&A, review responses, a month of posts, review-request messages, LocalBusiness schema and a launch checklist.",
+    placeholder: "e.g. Family-run plumbing company in Leeds, 24h emergency callouts, 15 years…",
+    suggestions: [
+      "Build a local SEO kit for a family-run plumber in Leeds, UK: 24-hour emergency callouts, boiler repairs, 15 years in business",
+      "Local SEO kit from this website: https://example.com",
+      "Google Business Profile description and categories for a vegan bakery in Portland, Oregon",
+      "Write review responses for a dental clinic — including one for a 2-star review about waiting times",
+    ],
+    artifacts: ["deliverLocalSeoKit", "fetchPage"],
+  },
+  {
+    slug: "content-campaign-calendar",
+    intro:
+      "Tell me what you sell, who it's for, the goal and how much you can publish — or paste your site — and I'll plan a dated, multi-channel content calendar where every piece has a real angle and brief. Filter by channel, expand any entry, download as CSV, ICS or JSON.",
+    placeholder: "e.g. 30-day plan for a B2B invoicing app, goal: trials, channels: LinkedIn + blog + newsletter…",
+    suggestions: [
+      "30-day content calendar for Ledgerly, a $29/mo invoicing app for freelancers. Goal: free-trial signups. Channels: LinkedIn, blog, newsletter. Solo founder.",
+      "Plan a 6-week product launch campaign for https://vercel.com/blog across X, LinkedIn and email",
+      "Two-week Instagram and TikTok plan for a Portland coffee roaster — goal: foot traffic and online orders",
+      "Quarterly (90-day) thought-leadership plan for a B2B cybersecurity consultancy: LinkedIn 3×/week, one blog a week, monthly webinar",
+    ],
+    artifacts: ["deliverCalendar", "fetchPage"],
   },
 ];
 

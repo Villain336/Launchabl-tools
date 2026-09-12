@@ -1,7 +1,7 @@
 // Deterministic, client-side name/palette generator.
 //
 // Production notes: swap `generateNames` for an LLM-backed call (via a server
-// route, same pattern as /api/copywriter) once quality needs outpace what a
+// route, same pattern as /api/tools/chat) once quality needs outpace what a
 // combinatorial generator can do — keep the output shape stable so the UI
 // doesn't need to change.
 

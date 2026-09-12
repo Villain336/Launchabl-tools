@@ -17,7 +17,7 @@ export type Check = {
 };
 
 export type ChecklistReport = {
-  kind: "voice-search" | "compliance" | "llm-readability";
+  kind: "voice-search" | "compliance" | "llm-readability" | "landing-page" | "website-audit";
   requestedUrl: string;
   finalUrl: string;
   status: number;

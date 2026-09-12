@@ -31,8 +31,10 @@ export function ToolPageLayout({
   children?: ReactNode;
   about: ReactNode;
 }) {
-  const policy = getDeliveryPolicy(tool.slug);
-  const agent = getToolAgent(tool.slug);
+  // Chat tools own their whole surface; the studio/approval flow is only for legacy form tools.
+  const chat = getChatTool(tool.slug);
+  const policy = chat ? null : getDeliveryPolicy(tool.slug);
+  const agent = chat ? null : getToolAgent(tool.slug);
 
   if (policy && agent) {
     return (
@@ -44,7 +46,6 @@ export function ToolPageLayout({
     );
   }
 
-  const chat = getChatTool(tool.slug);
   const processing = processingCopy[tool.processing];
 
   const toolBody = chat ? (

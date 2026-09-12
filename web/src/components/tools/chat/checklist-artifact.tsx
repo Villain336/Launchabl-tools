@@ -1,70 +1,23 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { AlertTriangle, Bot, Check, CheckCircle2, Copy, Download, FileText, Info, Mic, Scale, ShieldCheck, XCircle } from "lucide-react";
+import { Bot, Download, FileText, Gauge, Mic, MousePointerClick, Scale, ShieldCheck } from "lucide-react";
 import type { Check as ChecklistCheck, ChecklistReport, CheckStatus } from "@/lib/web/checklist";
 import type { CrawlerStatus, LlmReadabilityReport } from "@/lib/web/llm-readability";
+import type { LandingPageReport } from "@/lib/web/landing-page";
 import type { FaqSchemaDeliverable } from "@/lib/ai/tools/site-checks";
 import { downloadBlob } from "@/lib/download";
+import { CopyButton, Pill, ScoreRing, shorten, tone, type Tone } from "@/components/tools/chat/bits";
 
-const tone = {
-  good: { text: "text-green", bg: "bg-green-tint", icon: CheckCircle2 },
-  warn: { text: "text-orange", bg: "bg-orange-tint", icon: AlertTriangle },
-  bad: { text: "text-red", bg: "bg-red-tint", icon: XCircle },
-  info: { text: "text-accent-ink", bg: "bg-accent-tint", icon: Info },
-  muted: { text: "text-ink-3", bg: "bg-field", icon: Info },
-} as const;
-
-type Tone = keyof typeof tone;
 const statusTone: Record<CheckStatus, Tone> = { pass: "good", warn: "warn", fail: "bad", info: "info" };
 
-function Pill({ t, children }: { t: Tone; children: ReactNode }) {
-  return <span className={`inline-flex h-[20px] items-center gap-1 rounded-[5px] px-1.5 text-[11px] font-medium ${tone[t].text} ${tone[t].bg}`}>{children}</span>;
-}
-
-function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() =>
-        navigator.clipboard.writeText(text).then(() => {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1500);
-        })
-      }
-      className={`inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium transition-colors hover:bg-hover ${copied ? "text-green" : "text-ink-3 hover:text-ink"}`}
-    >
-      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-      {copied ? "Copied" : label}
-    </button>
-  );
-}
-
-function ScoreRing({ score }: { score: number }) {
-  const t: Tone = score >= 80 ? "good" : score >= 55 ? "warn" : "bad";
-  const r = 22;
-  const c = 2 * Math.PI * r;
-  return (
-    <div className="relative flex size-14 shrink-0 items-center justify-center">
-      <svg viewBox="0 0 56 56" className="absolute inset-0 -rotate-90">
-        <circle cx="28" cy="28" r={r} fill="none" strokeWidth="5" className="stroke-line" />
-        <circle cx="28" cy="28" r={r} fill="none" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${(score / 100) * c} ${c}`} className={tone[t].text} stroke="currentColor" />
-      </svg>
-      <span className={`text-[16px] font-semibold tabular-nums ${tone[t].text}`}>{score}</span>
-    </div>
-  );
-}
-
-const shorten = (url: string, max = 70) => {
-  const s = url.replace(/^https?:\/\//, "");
-  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
-};
 
 const KIND: Record<ChecklistReport["kind"], { title: string; icon: ReactNode; caveat: string }> = {
   "voice-search": { title: "Voice search readiness", icon: <Mic className="h-4 w-4" />, caveat: "static read of the HTML" },
   compliance: { title: "Compliance scan", icon: <Scale className="h-4 w-4" />, caveat: "technical signals, not legal advice" },
   "llm-readability": { title: "LLM readability", icon: <Bot className="h-4 w-4" />, caveat: "page + robots.txt + llms.txt" },
+  "landing-page": { title: "Conversion grade", icon: <MousePointerClick className="h-4 w-4" />, caveat: "CRO heuristics, not a test" },
+  "website-audit": { title: "Website audit", icon: <Gauge className="h-4 w-4" />, caveat: "server-rendered HTML + headers" },
 };
 
 function CheckRow({ check }: { check: ChecklistCheck }) {
@@ -117,7 +70,23 @@ function CrawlerTable({ crawlers, robotsUrl }: { crawlers: CrawlerStatus[]; robo
   );
 }
 
-export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmReadabilityReport }) {
+function CtaStrip({ report }: { report: LandingPageReport }) {
+  if (report.ctas.length === 0) return null;
+  return (
+    <div className="border-b border-line px-4 py-3">
+      <p className="text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">Calls to action found · in page order</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {report.ctas.map((c, i) => (
+          <span key={`${c.text}-${i}`} className={`inline-flex h-6 items-center gap-1 rounded-control px-2 text-[12px] ${c.weak ? "bg-orange-tint text-orange" : i === 0 ? "bg-accent-tint text-accent-ink" : "bg-field text-ink"}`} title={c.kind}>
+            {c.text}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmReadabilityReport | LandingPageReport }) {
   const [showPass, setShowPass] = useState(false);
   const meta = KIND[report.kind];
   const issues = report.checks.filter((c) => c.status !== "pass");
@@ -131,6 +100,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
   const visible = showPass ? report.checks : issues;
   const groups = Array.from(new Set(visible.map((c) => c.group ?? "Checks")));
   const llm = "crawlers" in report ? report : null;
+  const landing = "ctas" in report ? report : null;
 
   return (
     <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
@@ -171,6 +141,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
       </div>
 
       {llm && <CrawlerTable crawlers={llm.crawlers} robotsUrl={llm.robotsTxt.url} />}
+      {landing && <CtaStrip report={landing} />}
 
       {visible.length === 0 ? (
         <p className="px-4 py-6 text-center text-[13px] text-ink-2">Everything checked passes.</p>

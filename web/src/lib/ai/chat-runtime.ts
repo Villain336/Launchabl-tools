@@ -8,6 +8,8 @@ import { datasetBuilderRuntime } from "@/lib/ai/tools/dataset-builder";
 import { backlinkHealthRuntime, brokenLinkAssistantRuntime, canonicalDetectorRuntime, pageSpeedAuditRuntime } from "@/lib/ai/tools/seo-audits";
 import { complianceScannerRuntime, llmReadabilityRuntime, voiceSearchRuntime } from "@/lib/ai/tools/site-checks";
 import { newsletterBuilderRuntime } from "@/lib/ai/tools/newsletter";
+import { competitorGapRuntime, landingPageGraderRuntime, sitemapRobotsRuntime, websiteAuditRuntime } from "@/lib/ai/tools/site-reports";
+import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from "@/lib/ai/tools/marketing-kits";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -41,6 +43,13 @@ const runtimes: ChatToolRuntime[] = [
   complianceScannerRuntime,
   llmReadabilityRuntime,
   newsletterBuilderRuntime,
+  websiteAuditRuntime,
+  landingPageGraderRuntime,
+  competitorGapRuntime,
+  sitemapRobotsRuntime,
+  schemaGeneratorRuntime,
+  localSeoRuntime,
+  contentCalendarRuntime,
 ];
 
 const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));

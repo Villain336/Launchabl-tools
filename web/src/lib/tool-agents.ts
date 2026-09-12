@@ -90,15 +90,6 @@ const agents: Record<string, ToolAgent> = Object.fromEntries(
       "Approve kit",
     ),
     agent(
-      "copywriter",
-      [
-        { id: "copy.structured", label: "Write the variants", processing: "server" },
-        { id: "cite-source", label: "Attach sources", processing: "server" },
-      ],
-      ["cite-source"],
-      "Approve copy",
-    ),
-    agent(
       "schema-generator",
       [
         { id: "seo.draft-schema", label: "Draft structured data", processing: "client" },

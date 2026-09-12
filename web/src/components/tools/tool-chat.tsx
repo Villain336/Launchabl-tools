@@ -37,6 +37,13 @@ import { ChecklistArtifact, FaqSchemaArtifact } from "@/components/tools/chat/ch
 import { EmailArtifact } from "@/components/tools/chat/email-artifact";
 import type { ChecklistToolOutput, FaqSchemaDeliverable, LlmReadabilityToolOutput } from "@/lib/ai/tools/site-checks";
 import type { EmailDeliverable } from "@/lib/ai/tools/newsletter";
+import type { ComparisonToolOutput, LandingPageToolOutput, SitemapToolOutput, WebsiteAuditToolOutput } from "@/lib/ai/tools/site-reports";
+import type { CalendarDeliverable, LocalSeoKit, SchemaDeliverable } from "@/lib/ai/tools/marketing-kits";
+import { ComparisonArtifact } from "@/components/tools/chat/comparison-artifact";
+import { SitemapArtifact } from "@/components/tools/chat/sitemap-artifact";
+import { SchemaArtifact } from "@/components/tools/chat/schema-artifact";
+import { LocalSeoArtifact } from "@/components/tools/chat/local-seo-artifact";
+import { CalendarArtifact } from "@/components/tools/chat/calendar-artifact";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -69,6 +76,13 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   analyzeLlmReadability: (part) => auditOrError(part.output as LlmReadabilityToolOutput, (r) => <ChecklistArtifact report={r.report} />),
   deliverFaqSchema: (part) => <FaqSchemaArtifact data={part.output as FaqSchemaDeliverable} />,
   deliverEmail: (part) => <EmailArtifact email={part.output as EmailDeliverable} />,
+  auditWebsite: (part) => auditOrError(part.output as WebsiteAuditToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  gradeLandingPage: (part) => auditOrError(part.output as LandingPageToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  compareSites: (part) => auditOrError(part.output as ComparisonToolOutput, (r) => <ComparisonArtifact report={r.report} />),
+  generateSitemap: (part) => auditOrError(part.output as SitemapToolOutput, (r) => <SitemapArtifact data={r} />),
+  deliverSchema: (part) => <SchemaArtifact data={part.output as SchemaDeliverable} />,
+  deliverLocalSeoKit: (part) => <LocalSeoArtifact kit={part.output as LocalSeoKit} />,
+  deliverCalendar: (part) => <CalendarArtifact cal={part.output as CalendarDeliverable} />,
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -98,6 +112,13 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   analyzeLlmReadability: { working: "Reading like an AI crawler", done: "LLM readability report ready" },
   deliverFaqSchema: { working: "Writing the FAQ", done: "FAQ ready" },
   deliverEmail: { working: "Designing the email", done: "Email ready" },
+  auditWebsite: { working: "Auditing the page", done: "Audit ready" },
+  gradeLandingPage: { working: "Grading the landing page", done: "Grade ready" },
+  compareSites: { working: "Fetching and comparing the sites", done: "Comparison ready" },
+  generateSitemap: { working: "Crawling the site", done: "Sitemap and robots.txt ready" },
+  deliverSchema: { working: "Writing and validating the schema", done: "Schema ready" },
+  deliverLocalSeoKit: { working: "Building the local SEO kit", done: "Kit ready" },
+  deliverCalendar: { working: "Planning the calendar", done: "Calendar ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */

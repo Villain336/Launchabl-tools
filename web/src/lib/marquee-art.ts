@@ -3,7 +3,6 @@ import type { Tool } from "@/lib/site-config";
 /** Clay-style illustrations, one per tool, used in the 3D marquee and tool cards. */
 export const TOOL_ART: Record<string, string> = {
   "qr-code-generator": "/marquee/marquee-qr.png",
-  copywriter: "/marquee/marquee-copy.png",
   "ab-copy-variants": "/marquee/marquee-copy.png",
   "brand-creator": "/marquee/clay-identity.png",
   "brand-identity-kit": "/marquee/clay-identity.png",

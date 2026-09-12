@@ -6,22 +6,14 @@ import { getToolBySlug, siteConfig, tools, type Tool } from "@/lib/site-config";
 import { MetadataRemover } from "@/components/tools/metadata-remover";
 import { ImageConverter } from "@/components/tools/image-converter";
 import { WatermarkGenerator } from "@/components/tools/watermark-generator";
-import { SchemaGenerator } from "@/components/tools/schema-generator";
 import { BrandCreator } from "@/components/tools/brand-creator";
 import { DomainAvailabilitySearch } from "@/components/tools/domain-availability-search";
-import { Copywriter } from "@/components/tools/copywriter";
 import { WatermarkRemover } from "@/components/tools/watermark-remover";
 import { FileConverter } from "@/components/tools/file-converter";
 import { ComingSoonTool } from "@/components/tools/coming-soon-tool";
-import { WebsiteAuditReport } from "@/components/tools/website-audit-report";
-import { LandingPageGrader } from "@/components/tools/landing-page-grader";
-import { CompetitorGapReport } from "@/components/tools/competitor-gap-report";
 import { DnsEmailHealth } from "@/components/tools/dns-email-health";
 import { BrandIdentityKit } from "@/components/tools/brand-identity-kit";
 import { AdCreativeResizer } from "@/components/tools/ad-creative-resizer";
-import { ContentCampaignCalendar } from "@/components/tools/content-campaign-calendar";
-import { LocalSeoOptimizer } from "@/components/tools/local-seo-optimizer";
-import { SitemapRobotsGenerator } from "@/components/tools/sitemap-robots-generator";
 import { WhiteLabelReportBuilder } from "@/components/tools/white-label-report-builder";
 import { AccessibilityChecker } from "@/components/tools/accessibility-checker";
 import { SecurityHeadersChecker } from "@/components/tools/security-headers-checker";
@@ -99,22 +91,21 @@ const toolUi: Record<string, ReactNode> = {
   "agent-skill-generator": <ToolChat slug="agent-skill-generator" />,
   "dataset-builder": <ToolChat slug="dataset-builder" />,
   "watermark-generator": <WatermarkGenerator />,
-  "schema-generator": <SchemaGenerator />,
+  "schema-generator": <ToolChat slug="schema-generator" />,
   "brand-creator": <BrandCreator />,
   "domain-availability": <DomainAvailabilitySearch />,
   "ab-copy-variants": <ToolChat slug="ab-copy-variants" />,
-  copywriter: <Copywriter />,
   "watermark-remover": <WatermarkRemover />,
   "file-converter": <FileConverter />,
-  "website-audit-report": <WebsiteAuditReport />,
-  "landing-page-grader": <LandingPageGrader />,
-  "competitor-gap-report": <CompetitorGapReport />,
+  "website-audit-report": <ToolChat slug="website-audit-report" />,
+  "landing-page-grader": <ToolChat slug="landing-page-grader" />,
+  "competitor-gap-report": <ToolChat slug="competitor-gap-report" />,
   "dns-email-health": <DnsEmailHealth />,
   "brand-identity-kit": <BrandIdentityKit />,
   "ad-creative-resizer": <AdCreativeResizer />,
-  "content-campaign-calendar": <ContentCampaignCalendar />,
-  "local-seo-optimizer": <LocalSeoOptimizer />,
-  "sitemap-robots-generator": <SitemapRobotsGenerator />,
+  "content-campaign-calendar": <ToolChat slug="content-campaign-calendar" />,
+  "local-seo-optimizer": <ToolChat slug="local-seo-optimizer" />,
+  "sitemap-robots-generator": <ToolChat slug="sitemap-robots-generator" />,
   "white-label-report-builder": <WhiteLabelReportBuilder />,
   "broken-link-checker": <ToolChat slug="broken-link-checker" />,
   "canonical-tag-detector": <ToolChat slug="canonical-tag-detector" />,
@@ -182,7 +173,7 @@ function AboutCopy({ slug }: { slug: string }) {
     "watermark-generator":
       "Protecting shared images — proofs, previews, social posts — starts with a visible watermark. This tool overlays text watermarks with full control over position, opacity, rotation, and tiling, and never uploads your source image.",
     "schema-generator":
-      "Structured data (JSON-LD) tells search engines exactly what's on your page — your business details, your product pricing, your FAQ content — in a format they can parse with certainty instead of guessing from page text. This generator builds valid schema for the most common page types.",
+      "Structured data (JSON-LD) tells search engines and AI answer engines exactly what a page is — the business, the product and its price, the article and its author, the questions it answers — instead of leaving them to guess from the text. This tool reads your page, picks the right schema.org types (often several, combined in one @graph), fills every property it can support with facts from the page, and validates the result against the required and recommended properties for each type before handing you a copy-ready script tag. Anything it couldn't know is marked as a placeholder rather than invented.",
     "brand-creator":
       "Naming a brand and checking whether the domain is actually available are usually two disconnected steps. This tool combines both: generate name and tagline ideas, then immediately see which domains are open, so you can move from idea to claimed domain in one sitting.",
     "domain-availability":
@@ -197,8 +188,6 @@ function AboutCopy({ slug }: { slug: string }) {
       "Demos, seeds, import tests and small training sets all need the same thing: realistic, internally consistent tabular data with proper types. This tool builds it from a description — synthetic rows that hang together, rows extracted from a page you point it at, or messy notes normalised into columns — and gives you a typed table you can inspect, then download as CSV or JSON.",
     "ab-copy-variants":
       "Most A/B tests fail because the variants are synonyms of each other — same promise, different adjectives. This tool forces every variant onto a distinct persuasion angle (outcome, pain relief, social proof, curiosity, urgency, specificity, contrast, identity) so each one is a real hypothesis about what your audience responds to. Paste your current copy, say who it's for, and you get the variants as copyable cards plus a test plan: which metric to judge on, how much traffic you need before trusting the result, and how long to run it.",
-    copywriter:
-      "Structured copy templates for the formats marketers write over and over: ad headlines, landing page heroes, product blurbs, and email subject lines. Pick a format, describe your brand and offer, and get several usable variations back instantly.",
     "watermark-remover":
       "Sometimes you need to clean up a watermark you added yourself — an old proof stamp, a placeholder mark from an earlier draft. This tool is intentionally gated behind an ownership attestation so it can't be used to strip protection from content you don't have rights to edit.",
     "file-converter":
@@ -208,11 +197,11 @@ function AboutCopy({ slug }: { slug: string }) {
     hosting:
       "Hosting is the step most 'launch your brand' tools quietly skip. We're building this to be bundled directly into the unlimited plan, with a standalone option for tool-only users.",
     "website-audit-report":
-      "Most free 'SEO checkers' run a handful of shallow checks and gate the real results behind a signup wall. This one fetches your actual page server-side and scores it across ten real technical and SEO signals — title, meta description, mobile viewport, structured data, image accessibility, and more — with a full explanation for every result, free.",
+      "Most free 'SEO checkers' run a handful of shallow checks and gate the real results behind a signup wall. This one fetches your page server-side and runs more than twenty real checks — title and description length, heading outline, canonical, indexability, structured-data validity, Open Graph, alt text, internal links, server response time, HTML weight, compression, third-party scripts, security headers, caching — each with why it matters and the exact fix. Then it tells you, in plain language, what to fix first and which of the specialist tools on this site goes deeper on each problem.",
     "landing-page-grader":
-      "SEO health and conversion-readiness are different questions. This tool reuses the same fetch as the Website Audit Report but grades a completely different set of signals — calls to action, lead-capture forms, trust signals, and page speed — because a page can rank fine and still fail to convert a single visitor.",
+      "SEO health and conversion-readiness are different questions. This tool grades a page the way a CRO consultant would: is there one clear promise, one obvious next step, low friction to take it, reasons to believe, and nothing in the way? It reads the headline and subheadline, counts and positions every call to action, measures form length, looks for testimonials, logos, guarantees and social-proof numbers, flags navigation and outbound-link distractions, and checks speed and mobile basics — then rewrites your hero if you ask.",
     "competitor-gap-report":
-      "Most tool sites can only tell you about your own site. This one holds up to four sites — yours and three competitors' — side by side on the same signals, so you can see exactly where you're ahead and where you're behind, at a glance.",
+      "Most tool sites can only tell you about your own site. This one fetches up to four pages — yours and three competitors' — and puts them side by side on identical signals: audit score, content depth and structure, images and alt text, links, title and description, schema types, Open Graph, load time, page weight, scripts, third parties, security headers. It marks the leader on every row, lists where you're behind and where you lead, and surfaces the terms competitors use that your page never does — so the plan writes itself.",
     "dns-email-health":
       "If your SPF, DKIM, or DMARC records aren't configured correctly, a real percentage of your marketing emails are silently landing in spam — invisible unless you go looking. This tool runs the actual DNS lookups a developer would run by hand and explains each result in plain language.",
     "brand-identity-kit":
@@ -220,11 +209,11 @@ function AboutCopy({ slug }: { slug: string }) {
     "ad-creative-resizer":
       "Every ad platform wants a different creative size, and manually cropping one image a dozen times is exactly the kind of busywork this platform exists to eliminate. Upload one master creative and download a zip with every major platform's size, correctly cropped, entirely in your browser.",
     "content-campaign-calendar":
-      "A single AI-generated caption doesn't move a business forward — a plan does. This tool generates a full multi-week, multi-channel content calendar tailored to your stated goal, exportable as a CSV that drops straight into whatever planning tool you already use.",
+      "A single AI-generated caption doesn't move a business forward — a plan does. This tool turns your business, audience, goal and realistic publishing capacity into a dated, multi-channel calendar built on content pillars and, where it fits, a campaign arc. Every entry has a real hook, a brief with the angle and proof to include, a CTA matched to its funnel stage, and deliberate repurposing across channels. Filter by channel, expand any entry, and export as CSV for Notion or Sheets, ICS for your calendar, or JSON.",
     "local-seo-optimizer":
-      "Local SEO is more than one Google Business Profile description. This tool generates the full first draft of a local presence: your GBP description, suggested categories for your industry, common Q&A starters, and review response templates for both positive and negative reviews.",
+      "Local SEO is more than one Google Business Profile description. From a short description of the business — or its website — this tool drafts the whole local presence: the GBP description and real category names, services with descriptions, the local search phrases customers type, seeded Q&A, review responses for positive, negative and mixed reviews, a month of GBP posts, review-request SMS and email, LocalBusiness JSON-LD built from the profile, and a ten-step launch checklist. Everything is grounded in what you told it; anything it couldn't know is flagged.",
     "sitemap-robots-generator":
-      "A generic sitemap generator gives you a boilerplate file. This one builds a real `sitemap.xml` and matching `robots.txt` from the actual list of URLs on your site, so what you submit to Google is what's actually live.",
+      "A generic sitemap generator gives you a boilerplate file. This one crawls your site from the homepage — following real links, same host only, a couple of levels deep — and leaves out anything that redirects, errors or is marked noindex, so what you submit to Google is what's actually live. The matching robots.txt can exclude whole sections and, if you want, block AI training crawlers while leaving AI search crawlers alone so the site can still be cited. Ask for changes in plain language and it re-crawls with the new rules.",
     "white-label-report-builder":
       "This is the one tool on the platform that's explicitly built to combine the output of the others. Paste in findings from the Website Audit Report, Competitor Gap Report, or your own notes, add your agency's branding, and generate a polished, printable report or proposal — the exact kind of deliverable a freelancer or agency would otherwise pay a designer to lay out.",
     "broken-link-checker":

@@ -78,8 +78,11 @@ export async function POST(request: NextRequest) {
 
   const startedAt = Date.now();
   try {
+    const today = new Date();
     const { model, stream, skipped } = await streamWithFallback(chain, {
-      instructions: runtime.instructions,
+      // Models don't know the date; calendars, "next Monday", dates in schema and
+      // "how old is this post" all depend on it.
+      instructions: `${runtime.instructions}\n\nToday is ${today.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })} (${today.toISOString().slice(0, 10)}).`,
       messages: modelMessages,
       tools: runtime.tools,
       stopWhen: isStepCount(runtime.maxSteps ?? 3),

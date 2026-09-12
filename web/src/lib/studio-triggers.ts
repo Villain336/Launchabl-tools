@@ -85,26 +85,6 @@ const SPECS: Record<string, TriggerSpec> = {
       { label: "Plan", sub: "Compare", time: "1s", body: "Fetch each site, then you approve the gaps." },
     ],
   },
-  copywriter: {
-    suggestions: ["Brief", "Tone", "Format"],
-    placeholder: "Brand, offer, and the format you need…",
-    questions: [
-      {
-        q: "Which format should we write?",
-        type: "radio",
-        options: ["Ad headline", "Landing hero", "Product blurb", "Email subject"],
-      },
-      {
-        q: "What tone should it carry?",
-        type: "radio",
-        options: ["Bold", "Calm", "Direct", "Premium"],
-      },
-    ],
-    messages: [
-      { label: "Intake", sub: "Brief", time: "1s", body: "I'll draft variants from that brief." },
-      { label: "Plan", sub: "Copy", time: "1s", body: "Write, cite the brief, then you approve before export." },
-    ],
-  },
   "schema-generator": {
     suggestions: ["Schema", "Type", "Fields"],
     placeholder: "Business name, page type, or what the markup is for…",
