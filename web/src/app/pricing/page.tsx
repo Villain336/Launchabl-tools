@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
 import PricingBlock from "@/components/blocks/pricing-3";
+import ToolsProPricing from "@/components/blocks/tools-pro-pricing";
 import FeaturesBlock from "@/components/blocks/features-3";
 import ComparisonBlock from "@/components/blocks/comparison-2";
 import FaqsBlock from "@/components/blocks/faqs-1";
@@ -38,6 +39,11 @@ const faqs = [
       "Great — the tools in our toolbox, including the free audit, are free to use (your first run needs no account), whether or not you ever upgrade.",
   },
   {
+    question: "What does Tools Pro unlock?",
+    answer:
+      "Unlimited use of the three tools that cost real compute per call: the AI Image Generator, Transcriber and Clip Finder. Every other tool in the toolbox stays free either way — Tools Pro just removes the daily limits on those three.",
+  },
+  {
     question: "Is there a guarantee?",
     answer: siteConfig.guarantee,
   },
@@ -73,6 +79,15 @@ function pricingJsonLd() {
           description: "One-time payment for unlimited, lifetime marketing and design requests — no retainer.",
           url,
         },
+        {
+          "@type": "Offer",
+          "@id": `${url}#tools-pro`,
+          name: "Tools Pro subscription",
+          price: "17",
+          priceCurrency: "USD",
+          description: "Monthly subscription for unlimited AI image generation, transcription and clip-finding across the free toolbox.",
+          url,
+        },
       ],
     },
     {
@@ -96,6 +111,7 @@ export default function PricingPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd()) }} />
       <PricingBlock />
+      <ToolsProPricing />
       <ComparisonBlock />
       <FeaturesBlock />
       <FaqsBlock

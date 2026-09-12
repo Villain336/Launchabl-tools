@@ -19,6 +19,7 @@ import { ArrowUp, AudioLines, Check, Copy, FileText, History, Loader2, Paperclip
 import { getChatTool } from "@/lib/ai/chat-tools";
 import { signOut, useSession } from "@/lib/auth/use-session";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { ProUpgradeCard } from "@/components/tools/pro-upgrade-card";
 import { AgentTemplates } from "@/components/agent/agent-templates";
 import { ACCEPT, ATTACHMENT_LIMITS, AttachmentError, dataUrlBytes, fileToPart, formatBytes, isImageType } from "@/lib/chat/attachments";
 import { trimImageHistory } from "@/lib/chat/inline-attachments";
@@ -508,7 +509,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const busy = status === "submitted" || status === "streaming";
   const parsedError = parseError(error);
   const signInRequired = parsedError?.cause === "sign_in_required";
-  const errorMessage = signInRequired ? null : parsedError?.message ?? null;
+  const needsPro = parsedError?.cause === "needs_pro";
+  const errorMessage = signInRequired || needsPro ? null : parsedError?.message ?? null;
   const canSend = (draft.trim().length > 0 || attachments.length > 0 || transcripts.length > 0) && !busy && !mediaJob;
 
   const send = (text: string) => {
@@ -902,6 +904,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
             />
           </div>
         )}
+
+        {needsPro && <ProUpgradeCard />}
 
         {errorMessage && (
           <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-red/30 bg-red-tint px-3 py-2 text-[13px] text-ink">
