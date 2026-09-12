@@ -43,7 +43,7 @@ export type Report = {
 };
 
 /** Tools whose output is a working step, not a deliverable; left out of reports. */
-const INTERNAL_TOOLS = new Set(["fetchPage", "readTranscript", "loadSkillGuide", "reviewDeliverables"]);
+const INTERNAL_TOOLS = new Set(["fetchPage", "readTranscript", "loadSkillGuide", "reviewDeliverables", "detectStack"]);
 
 type LoosePart = { type?: unknown; text?: unknown; state?: unknown; input?: unknown; output?: unknown; toolCallId?: unknown };
 type LooseMessage = { role?: unknown; parts?: unknown };

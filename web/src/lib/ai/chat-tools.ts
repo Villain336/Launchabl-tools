@@ -498,6 +498,32 @@ const metas: ChatToolMeta[] = [
     artifacts: ["deliverClips", "readTranscript"],
   },
   {
+    slug: "domain-purchase",
+    intro:
+      "Tell me the brand name, or paste the domains you're weighing up. I'll check the registries live, tell you what's actually available and worth buying, and hand you a plan with pricing, the right registrar and what to set up the moment you own it.",
+    placeholder: "e.g. Brand is \"Northwind\" — a B2B analytics tool. Which domain should I buy?",
+    suggestions: [
+      "Brand is \"Launchabl\" — a marketing tools platform. Check .com, .io, .ai, .co and .app and tell me what to buy.",
+      "I'm opening a bakery in Austin called Sunny Crumb. Which domain and what will it cost per year?",
+      "Is getflowly.com or flowly.app the better pick for a productivity app? Check both plus alternatives.",
+      "Compare northwindlabs.com, northwind.ai and northwind.dev for an AI startup and give me a shortlist.",
+    ],
+    artifacts: ["checkDomains", "deliverDomainPlan"],
+  },
+  {
+    slug: "hosting",
+    intro:
+      "Tell me what the site is built with (or give me the URL of the one you have), roughly how much traffic you expect and what you can spend. You'll get a clear recommendation with the plan and cost, how to deploy, and the exact DNS records to publish.",
+    placeholder: "e.g. Next.js app with Postgres, ~5k visits/month at launch, small budget, domain is acme.com",
+    suggestions: [
+      "Where should I host a Next.js marketing site with a blog? Domain is example.com, budget under $25/month.",
+      "We have a WordPress site at https://wordpress.org — where should it live for a 20k-visits/month business?",
+      "Static Astro docs site, free if possible, domain docs.example.dev.",
+      "Rails app with Postgres and background jobs, two developers, want deploys from GitHub, ~$50/month.",
+    ],
+    artifacts: ["detectStack", "deliverHostingPlan"],
+  },
+  {
     slug: "agent",
     media: true,
     intro:

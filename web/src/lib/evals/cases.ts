@@ -139,6 +139,22 @@ export const EVAL_CASES: EvalCase[] = [
     rubric: "At least two independent checks ran; the reply merges their findings into one prioritised list rather than repeating each tool's output; findings are specific to the site.",
     cost: "cheap",
   },
+  {
+    id: "domain-brand-pick",
+    slug: "domain-purchase",
+    prompt: "Brand is \"Northwind Traders\", a B2B analytics startup. Which domain should I buy?",
+    expectTools: ["checkDomains", "deliverDomainPlan"],
+    rubric: "Availability was actually checked before recommending; the recommendation is a domain marked available; the reasoning covers memorability and what the TLD signals; renewal pricing or a TLD caveat is mentioned; taken domains are not proposed as the pick.",
+    cost: "cheap",
+  },
+  {
+    id: "hosting-nextjs-budget",
+    slug: "hosting",
+    prompt: "Where should I host a Next.js marketing site with a blog for a small business? Domain is acme.com, budget under $25/month, ~3k visits a month.",
+    expectTools: ["deliverHostingPlan"],
+    rubric: "Recommends a provider suited to Next.js (Vercel or a close alternative) with a specific plan and realistic monthly cost; does not recommend Vercel's Hobby plan for a commercial site without flagging the restriction; alternatives explain when to choose them; the plan includes a launch checklist.",
+    cost: "cheap",
+  },
 ];
 
 export function findEvalCase(id: string): EvalCase | undefined {

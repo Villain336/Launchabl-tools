@@ -65,9 +65,9 @@ export const tools: Tool[] = [
   {
     slug: "domain-availability",
     name: "Domain Availability",
-    shortDescription: "Search a name across dozens of TLDs and see what's open to register.",
-    status: "beta",
-    processing: "partner",
+    shortDescription: "Search a name across the common TLDs and see, from the registries themselves, what's open to register.",
+    status: "live",
+    processing: "server",
     upsell: {
       headline: "We'll handle the whole setup.",
       body: "Unlimited plan members get domain registration, DNS, and hosting configured for them — zero technical setup required.",
@@ -76,33 +76,65 @@ export const tools: Tool[] = [
       {
         question: "Who do you register domains through?",
         answer:
-          "This tool is designed to plug into a registrar/reseller API (e.g. a domain-search + registration partner). Purchases route through that partner, not through Launchabl directly.",
+          "Availability comes from the registries via RDAP. When a name is open, you get direct checkout links to cost-plus registrars (Cloudflare Registrar, Porkbun) — purchases go through them, not through Launchabl. The Domain Purchase tool adds a recommendation, pricing and the post-purchase checklist.",
       },
     ],
   },
   {
     slug: "domain-purchase",
     name: "Domain Purchase",
-    shortDescription: "Register the domain you found, with pricing that's transparent up front.",
-    status: "coming-soon",
-    processing: "partner",
+    shortDescription: "Check candidates live against the registries, get a recommendation with pricing, registrar checkout links and the post-purchase setup checklist.",
+    status: "live",
+    processing: "server",
     upsell: {
       headline: "Included free with the unlimited plan.",
       body: "Domain registration and renewal for your primary domain is included for the life of your plan.",
     },
-    faq: [],
+    faq: [
+      {
+        question: "Do you sell domains directly?",
+        answer:
+          "Not yet. The tool checks availability against the registries (RDAP) and links you to checkout at cost-plus registrars — Cloudflare, Porkbun, Namecheap, Squarespace — so you pay wholesale-ish prices with no markup from us. Unlimited plan members get their primary domain registered and managed for them.",
+      },
+      {
+        question: "How accurate is the availability check?",
+        answer:
+          "For TLDs that publish RDAP (.com, .net, .org, .io, .ai, .app, .dev and most others) the answer comes straight from the registry and is authoritative at the moment of checking. A handful of country-code TLDs don't publish RDAP; for those the tool falls back to DNS and tells you it's a heuristic.",
+      },
+      {
+        question: "Are the prices exact?",
+        answer:
+          "They're typical first-year and renewal ranges at cost-plus registrars, maintained by us. Registrars change promos often, and premium names carry registry-set prices, so confirm at checkout.",
+      },
+    ],
   },
   {
     slug: "hosting",
     name: "Hosting",
-    shortDescription: "Fast, managed hosting for your new site — no server admin required.",
-    status: "coming-soon",
-    processing: "partner",
+    shortDescription: "Get a hosting recommendation for your stack, traffic and budget — plan, cost, deploy steps and paste-ready DNS records.",
+    status: "live",
+    processing: "server",
     upsell: {
       headline: "Hosting is included, not extra.",
       body: "Every unlimited plan includes managed hosting for the site we build you — no separate hosting bill to juggle.",
     },
-    faq: [],
+    faq: [
+      {
+        question: "Do you host sites yourselves?",
+        answer:
+          "For unlimited plan members, yes — hosting for the site we build is included. For everyone else this tool recommends the right provider from a curated catalog (Vercel, Netlify, Cloudflare Pages, GitHub Pages, Render, Railway, Fly, DigitalOcean, Hetzner + Coolify, Kinsta, WP Engine, Hostinger, Webflow, Framer, Squarespace, Shopify) and gives you everything needed to set it up.",
+      },
+      {
+        question: "Can it look at my existing site?",
+        answer:
+          "Yes. Give it the URL and it reads the response headers and HTML to detect the framework, CMS, current host and CDN, then recommends with a migration path that avoids downtime.",
+      },
+      {
+        question: "Where do the DNS records come from?",
+        answer:
+          "From a maintained knowledge base of each provider's documented records, filled in with your domain. Values shown in braces — like a server IP or project subdomain — come from the provider's dashboard after you create the project.",
+      },
+    ],
   },
   {
     slug: "ab-copy-variants",

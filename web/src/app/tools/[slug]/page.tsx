@@ -126,24 +126,8 @@ const toolUi: Record<string, ReactNode> = {
   "clip-finder": <ToolChat slug="clip-finder" />,
   "background-remover": <BackgroundRemover />,
   "demo-video-creator": <DemoVideoCreator />,
-  "domain-purchase": (
-    <ComingSoonTool
-      architectureNotes={[
-        "Route through a registrar/reseller API or affiliate partner rather than becoming a registrar directly.",
-        "Reuse the availability check from the Brand Creator / Domain Availability tools as the entry point.",
-        "Bundle free with the unlimited plan for the primary domain; à la carte purchase for everyone else.",
-      ]}
-    />
-  ),
-  hosting: (
-    <ComingSoonTool
-      architectureNotes={[
-        "Partner with a managed host or reseller panel rather than operating infrastructure from scratch.",
-        "Include hosting for the site we build inside the unlimited plan by default.",
-        "Offer a low-cost standalone hosting SKU for tool users who aren't plan members yet.",
-      ]}
-    />
-  ),
+  "domain-purchase": <ToolChat slug="domain-purchase" />,
+  hosting: <ToolChat slug="hosting" />,
 };
 
 export default async function ToolDetailPage({
@@ -198,9 +182,9 @@ function AboutCopy({ slug }: { slug: string }) {
     "file-converter":
       "Format conversion is one of the most common, most annoying small tasks in marketing work — a CSV export that needs to be JSON for a developer, a Markdown table for a doc, a YAML file for a config, a PNG that should be WebP, a screen recording you only need the audio from. This tool does all of that in your browser: data files in any direction (CSV, TSV, JSON, NDJSON, Markdown, YAML, HTML), image re-encoding with resizing, audio extraction to WAV and Markdown to a styled standalone HTML page. Nothing is uploaded; native Office formats are the one thing still on the roadmap.",
     "domain-purchase":
-      "Once you've found a domain you like, registering it shouldn't require leaving to compare five different registrars. This tool is designed to route directly to a registrar/reseller partner for checkout.",
+      "Picking a domain is a hundred small judgement calls — .com or .io, is the taken one worth chasing, will the renewal price sting, does the TLD need HTTPS or a local address. This tool checks your candidates live against the registries (RDAP, the data behind WHOIS) instead of guessing from DNS, recommends one with the reasoning a domain strategist would give, shows typical first-year and renewal pricing per TLD, links straight to checkout at cost-plus registrars, and hands you the post-purchase checklist: DNS to your host, SPF/DKIM/DMARC before your first email, redirects and the defensive registrations that actually earn their keep.",
     hosting:
-      "Hosting is the step most 'launch your brand' tools quietly skip. We're building this to be bundled directly into the unlimited plan, with a standalone option for tool-only users.",
+      "Hosting is the step most 'launch your brand' tools quietly skip, and the one where a wrong pick costs months. Tell this tool what the site is built with — or give it the URL of your current site and it reads the headers to work out the framework, CMS, host and CDN — plus your traffic and budget, and it recommends where to host from a curated catalog of sixteen providers, with the exact plan, realistic monthly cost, deploy steps, caveats and the paste-ready DNS records for your domain. Provider facts come from a maintained knowledge base, not the model, so the IPs and prices are real.",
     "website-audit-report":
       "Most free 'SEO checkers' run a handful of shallow checks and gate the real results behind a signup wall. This one fetches your page server-side and runs more than twenty real checks — title and description length, heading outline, canonical, indexability, structured-data validity, Open Graph, alt text, internal links, server response time, HTML weight, compression, third-party scripts, security headers, caching — each with why it matters and the exact fix. Then it tells you, in plain language, what to fix first and which of the specialist tools on this site goes deeper on each problem.",
     "landing-page-grader":

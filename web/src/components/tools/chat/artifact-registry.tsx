@@ -38,6 +38,8 @@ import { PersonasArtifact, PressReleaseArtifact, RepurposeArtifact, SubjectLines
 import { ClipsArtifact, TranscriptArtifact, TranscriptReadNote } from "@/components/tools/chat/media-artifacts";
 import type { ClipsDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
+import { DomainCheckArtifact, DomainPlanArtifact, HostingPlanArtifact, StackArtifact } from "@/components/tools/chat/launch-artifacts";
+import type { DomainCheckToolOutput, DomainPlanDeliverable, HostingPlanDeliverable, StackToolOutput } from "@/lib/ai/tools/launch-kits";
 
 /**
  * Maps `tool-<name>` parts to rich renderers and status labels. Shared by the
@@ -93,6 +95,10 @@ export const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverPressRelease: (part) => <PressReleaseArtifact data={part.output as PressReleaseDeliverable} />,
   deliverTestPlan: (part) => <TestPlanArtifact data={part.output as TestPlanDeliverable} />,
   deliverRepurposed: (part) => <RepurposeArtifact data={part.output as RepurposeDeliverable} />,
+  checkDomains: (part) => <DomainCheckArtifact data={part.output as DomainCheckToolOutput} />,
+  deliverDomainPlan: (part) => <DomainPlanArtifact data={part.output as DomainPlanDeliverable} />,
+  detectStack: (part) => <StackArtifact data={part.output as StackToolOutput} />,
+  deliverHostingPlan: (part) => <HostingPlanArtifact data={part.output as HostingPlanDeliverable} />,
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -147,6 +153,10 @@ export const artifactLabels: Record<string, { working: string; done: string }> =
   deliverPressRelease: { working: "Writing and checking the release", done: "Press release ready" },
   deliverTestPlan: { working: "Writing the test plan", done: "Test plan ready" },
   deliverRepurposed: { working: "Rewriting for each channel", done: "Pieces ready" },
+  checkDomains: { working: "Asking the registries", done: "Availability checked" },
+  deliverDomainPlan: { working: "Writing the domain plan", done: "Domain plan ready" },
+  detectStack: { working: "Reading the site's headers", done: "Stack detected" },
+  deliverHostingPlan: { working: "Writing the hosting plan", done: "Hosting plan ready" },
 };
 
 
