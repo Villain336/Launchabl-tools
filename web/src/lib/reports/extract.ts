@@ -34,6 +34,8 @@ export type Report = {
   ownerUid: string;
   /** Display name for "Prepared by"; null when the account has no name. */
   preparedBy: string | null;
+  /** Project the conversation ran under; its brand settings white-label the page. */
+  projectId?: string | null;
   createdAt: string;
   items: ReportItem[];
   /** Set when images were dropped to fit the size budget. */

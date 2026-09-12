@@ -48,6 +48,7 @@ import { ShareReportButton } from "@/components/tools/chat/share-report";
 import { MyReportsMenu } from "@/components/tools/chat/my-reports";
 import { sendBeaconJson } from "@/lib/chat/beacon";
 import { ProjectSwitcher } from "@/components/projects/project-switcher";
+import { ScheduleButton } from "@/components/schedules/schedule-button";
 import { currentProject } from "@/lib/projects/use-projects";
 import { fillTemplateSlots } from "@/lib/projects/project";
 import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/tools/chat/artifact-registry";
@@ -760,6 +761,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const tool = getToolBySlug(slug);
 
   const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+  const firstBrief = messages.find((m) => m.role === "user")?.parts.filter((p) => p.type === "text").map((p) => (p as { text: string }).text).join("\n\n") ?? null;
   const awaitingFirstToken = status === "submitted" || (status === "streaming" && messages[messages.length - 1]?.role === "user");
 
   const Starter = meta.starter ? starterArtifacts[meta.starter] : undefined;
@@ -783,6 +785,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
           <ProjectSwitcher />
           <MyReportsMenu />
           <ShareReportButton slug={slug} messages={messages} disabled={busy} source={`report:${slug}`} />
+          <ScheduleButton slug={slug} brief={firstBrief ?? (draft.trim() || null)} />
           <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
           {messages.length > 0 && (
             <IconButton label="Start a new conversation" onClick={reset}>
