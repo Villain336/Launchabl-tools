@@ -3,35 +3,10 @@
 import { useMemo } from "react";
 import { Markdown } from "@/components/tools/chat/markdown";
 import { WebPreview, WebPreviewBody } from "@/components/ai-elements/web-preview";
-import { mimeOf, normalisePath, previewKind, type WorkspaceFile } from "@/lib/ide/workspace";
+import { inlineAssets, toDataUrl } from "@/lib/ide/preview";
+import { previewKind, type WorkspaceFile } from "@/lib/ide/workspace";
 
 type Props = { path: string; files: Record<string, WorkspaceFile> };
-
-const RELATIVE_ATTR = /(\s(?:src|href)=)(["'])([^"']+)\2/gi;
-
-function toDataUrl(file: WorkspaceFile): string {
-  const mime = mimeOf(file.path);
-  if (file.binary) return `data:${mime};base64,${file.content}`;
-  return `data:${mime};charset=utf-8,${encodeURIComponent(file.content)}`;
-}
-
-/**
- * Resolve relative `src`/`href` values against the workspace so a page can
- * load its own stylesheet, script and images inside the sandboxed iframe.
- * Absolute URLs and anchors are left alone.
- */
-export function inlineAssets(html: string, path: string, files: Record<string, WorkspaceFile>): string {
-  const dir = path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
-  return html.replace(RELATIVE_ATTR, (whole, attr: string, quote: string, value: string) => {
-    if (/^(?:[a-z]+:|\/\/|#|data:)/i.test(value)) return whole;
-    const clean = value.split(/[?#]/)[0];
-    const resolved = normalisePath(clean.startsWith("/") ? clean.slice(1) : dir ? `${dir}/${clean}` : clean);
-    const file = files[resolved];
-    if (!file) return whole;
-    if (previewKind(file.path) === "html") return whole;
-    return `${attr}${quote}${toDataUrl(file)}${quote}`;
-  });
-}
 
 export function Preview({ path, files }: Props) {
   const file = files[path];

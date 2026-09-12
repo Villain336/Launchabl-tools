@@ -141,7 +141,7 @@ export function Ide() {
     <TooltipProvider>
       <div className="flex min-h-0 flex-1 flex-col" data-ide data-workspace={workspace.id}>
         <div className="flex items-center gap-2 border-b border-border px-2 py-1.5 sm:px-3">
-          <Button type="button" variant="ghost" size="icon-xs" aria-label={showExplorer ? "Hide files" : "Show files"} aria-pressed={showExplorer} onClick={() => setShowExplorer((s) => !s)} data-ide-toggle-explorer>
+          <Button type="button" variant="ghost" size="icon-xs" className="hidden md:inline-flex" aria-label={showExplorer ? "Hide files" : "Show files"} aria-pressed={showExplorer} onClick={() => setShowExplorer((s) => !s)} data-ide-toggle-explorer>
             <PanelLeft className="size-3.5" />
           </Button>
           <div className="flex min-w-0 items-center gap-1.5 text-[13px]">
@@ -168,7 +168,7 @@ export function Ide() {
           <Button type="button" variant="ghost" size="icon-xs" aria-label="Settings" onClick={() => setSettingsOpen(true)}>
             <Settings2 className="size-3.5" />
           </Button>
-          <Button type="button" variant="ghost" size="icon-xs" aria-label={showAssistant ? "Hide assistant" : "Show assistant"} aria-pressed={showAssistant} onClick={() => setShowAssistant((s) => !s)} data-ide-toggle-assistant>
+          <Button type="button" variant="ghost" size="icon-xs" className="hidden md:inline-flex" aria-label={showAssistant ? "Hide assistant" : "Show assistant"} aria-pressed={showAssistant} onClick={() => setShowAssistant((s) => !s)} data-ide-toggle-assistant>
             <Bot className="size-3.5" />
           </Button>
           <Button type="button" variant="ghost" size="icon-xs" aria-label="Close project" title="Close project" onClick={() => void ws.closeWorkspace()} data-ide-close>

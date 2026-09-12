@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyEdits, buildTree, createWorkspace, describeTree, diffStats, globToRegExp, isIgnoredPath, languageOf, looksBinary, makeFile, normalisePath, numberedSlice, pendingChanges, previewEdits, removeFile, searchWorkspace, stripCommonRoot } from "./workspace";
 import { importEntries } from "./import";
+import { inlineAssets } from "./preview";
 
 const enc = (s: string) => new TextEncoder().encode(s);
 
@@ -107,5 +108,24 @@ describe("proposed edits", () => {
     expect(pendingChanges(next).find((c) => c.path === "a.ts")?.kind).toBe("added");
     // Deleting a never-committed file leaves no tombstone.
     expect(removeFile(next, "new.ts").tombstones).toEqual([]);
+  });
+});
+
+describe("preview asset inlining", () => {
+  it("rewrites relative src/href to data URLs, escapes quotes, leaves absolute and page links alone", () => {
+    const files = {
+      "pages/index.html": makeFile("pages/index.html", "<html></html>"),
+      "pages/about.html": makeFile("pages/about.html", "<html></html>"),
+      "css/app.css": makeFile("css/app.css", "h1{color:red}"),
+      "pages/app.js": makeFile("pages/app.js", "document.title='x'"),
+      "img/dot.png": makeFile("img/dot.png", "AAAA", { binary: true }),
+    };
+    const html = `<link href='../css/app.css'><script src="app.js"></script><img src="/img/dot.png?v=1"><a href="about.html">x</a><a href="https://x.com/a.css">y</a>`;
+    const out = inlineAssets(html, "pages/index.html", files);
+    expect(out).toContain("href='data:text/css;charset=utf-8,h1%7Bcolor%3Ared%7D'");
+    expect(out).toContain('src="data:text/javascript;charset=utf-8,document.title%3D%27x%27"');
+    expect(out).toContain('src="data:image/png;base64,AAAA"');
+    expect(out).toContain('href="about.html"');
+    expect(out).toContain('href="https://x.com/a.css"');
   });
 });
