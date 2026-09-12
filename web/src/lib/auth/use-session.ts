@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
+import { resetHistorySync } from "@/lib/chat/history";
+import { resetProjects } from "@/lib/projects/use-projects";
 
 /**
  * Client view of the account: fetched once per page load from /api/auth/me,
@@ -41,6 +43,8 @@ export function setSessionUser(user: SessionUser | null) {
 export async function signOut(): Promise<void> {
   await fetch("/api/auth/sign-out", { method: "POST", credentials: "same-origin" }).catch(() => undefined);
   emit({ status: "ready", user: null, freeRunsLeft: 0 });
+  resetHistorySync();
+  resetProjects();
 }
 
 const subscribe = (listener: () => void) => {

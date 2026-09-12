@@ -1,9 +1,10 @@
 /**
  * Per-tool conversation history in localStorage.
  *
- * No accounts yet, so this is the persistence layer: the last 20
- * conversations per tool, restored on return, switchable from the chat
- * header. Sized to stay well inside browser quotas; oldest conversations
+ * The fast local cache: the last 20 conversations per tool, restored on
+ * return, switchable from the chat header. Signed-in users also sync to the
+ * account (see the server-sync section) so history follows them between
+ * devices. Sized to stay well inside browser quotas; oldest conversations
  * are pruned first.
  */
 
@@ -164,6 +165,74 @@ export function clearHistory(slug: string) {
   window.localStorage.removeItem(storageKey(slug));
   cache.delete(slug);
   notify();
+}
+
+/* ── server sync (signed-in users) ───────────────────── */
+
+type RemoteConversation = StoredConversation & { slug: string };
+
+/** Merge the server's list into local storage; the newer copy of each conversation wins. */
+export function mergeRemote(slug: string, remote: RemoteConversation[]): void {
+  if (!available() || remote.length === 0) return;
+  const index = readHistory(slug);
+  const byId = new Map(index.conversations.map((c) => [c.id, c]));
+  for (const r of remote) {
+    const local = byId.get(r.id);
+    if (!local || r.updatedAt > local.updatedAt) byId.set(r.id, { id: r.id, title: r.title, createdAt: r.createdAt, updatedAt: r.updatedAt, messages: r.messages });
+  }
+  write(slug, { current: index.current, conversations: Array.from(byId.values()) });
+}
+
+const synced = new Set<string>();
+
+/** Pull this tool's conversations from the account once per page load. */
+export async function syncHistoryFromServer(slug: string): Promise<void> {
+  if (synced.has(slug)) return;
+  synced.add(slug);
+  try {
+    const res = await fetch(`/api/conversations?slug=${encodeURIComponent(slug)}`, { cache: "no-store", credentials: "same-origin" });
+    if (!res.ok) return;
+    const body = (await res.json()) as { conversations: RemoteConversation[] };
+    mergeRemote(slug, body.conversations);
+  } catch {
+    // offline or signed out — local history still works
+  }
+}
+
+/** Forget sync state (sign-out or account switch) so the next session pulls again. */
+export function resetHistorySync() {
+  synced.clear();
+}
+
+const pushTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** Push a conversation to the account, debounced per conversation. */
+export function pushConversation(slug: string, id: string, projectId: string | null = null): void {
+  const existing = pushTimers.get(id);
+  if (existing) clearTimeout(existing);
+  pushTimers.set(
+    id,
+    setTimeout(() => {
+      pushTimers.delete(id);
+      const conversation = readHistory(slug).conversations.find((c) => c.id === id);
+      if (!conversation) return;
+      void fetch("/api/conversations", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        keepalive: true,
+        body: JSON.stringify({ ...conversation, slug, projectId }),
+      }).catch(() => undefined);
+    }, 800),
+  );
+}
+
+export function deleteRemoteConversation(id: string): void {
+  void fetch(`/api/conversations/${encodeURIComponent(id)}`, { method: "DELETE", credentials: "same-origin", keepalive: true }).catch(() => undefined);
+}
+
+export function clearRemoteHistory(slug: string): void {
+  void fetch(`/api/conversations?slug=${encodeURIComponent(slug)}`, { method: "DELETE", credentials: "same-origin", keepalive: true }).catch(() => undefined);
 }
 
 function subscribe(listener: () => void) {

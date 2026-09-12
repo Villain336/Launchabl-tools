@@ -28,12 +28,16 @@ import { getToolBySlug } from "@/lib/site-config";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import {
   clearHistory,
+  clearRemoteHistory,
   deleteConversation,
+  deleteRemoteConversation,
   newConversationId,
+  pushConversation,
   readHistory,
   relativeTime,
   saveConversation,
   setCurrentConversation,
+  syncHistoryFromServer,
   useChatHistory,
 } from "@/lib/chat/history";
 import { defaultQrStyle } from "@/lib/qr/style";
@@ -43,6 +47,9 @@ import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 import { ShareReportButton } from "@/components/tools/chat/share-report";
 import { MyReportsMenu } from "@/components/tools/chat/my-reports";
 import { sendBeaconJson } from "@/lib/chat/beacon";
+import { ProjectSwitcher } from "@/components/projects/project-switcher";
+import { currentProject } from "@/lib/projects/use-projects";
+import { fillTemplateSlots } from "@/lib/projects/project";
 import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/tools/chat/artifact-registry";
 
 /* ─────────────────────────────────────────────────────────
@@ -417,7 +424,7 @@ function HistoryMenu({
           style={{ animation: "fade-up 200ms cubic-bezier(0.23,1,0.32,1) both" }}
         >
           <div className="flex items-center justify-between border-b border-line px-3 py-2">
-            <span className="text-[11.5px] font-medium tracking-wide text-ink-3 uppercase">Saved on this device</span>
+            <span className="text-[11.5px] font-medium tracking-wide text-ink-3 uppercase">Recent conversations</span>
             <button
               type="button"
               onClick={() => {
@@ -512,7 +519,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     const fallback = transcripts.length > 0 ? "Here's the recording." : files.length === 1 ? "Here's the file." : "Here are the files.";
     // Transcripts travel as a line of text: the id is all the tools need, and it survives history and reports.
     const body = [trimmed || fallback, ...transcripts.map(transcriptLine)].join("\n\n");
-    void sendMessage({ text: body, files }, { body: { template } });
+    void sendMessage({ text: body, files }, { body: { template, project: currentProject()?.id ?? null } });
     setDraft("");
     setAttachments([]);
     setTranscripts([]);
@@ -525,7 +532,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   /** Drop a template into the composer and select its first [slot] so typing replaces it. */
   const prefill = (text: string, templateId?: string) => {
     setTemplate(templateId ?? null);
-    setDraft(text.slice(0, 4_000));
+    setDraft(fillTemplateSlots(text, currentProject()).slice(0, 4_000));
     requestAnimationFrame(() => {
       const node = inputRef.current;
       if (!node) return;
@@ -664,12 +671,38 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     }
   }, [slug, setMessages]);
 
-  // Persist after each completed turn (never mid-stream).
+  const session = useSession();
+  const signedIn = session.status === "ready" && Boolean(session.user);
+
+  // Persist after each completed turn (never mid-stream); signed-in users also push to the account.
   useEffect(() => {
     if (busy || messages.length === 0) return;
     const index = readHistory(slug);
-    saveConversation(slug, index.current ?? newConversationId(), messages);
-  }, [messages, busy, slug]);
+    const id = index.current ?? newConversationId();
+    const changed = saveConversation(slug, id, messages);
+    if (changed && signedIn) pushConversation(slug, id, currentProject()?.id ?? null);
+  }, [messages, busy, slug, signedIn]);
+
+  // Pull the account's conversations for this tool once signed in; restore the
+  // last one if nothing is open yet.
+  useEffect(() => {
+    if (!signedIn) return;
+    let cancelled = false;
+    void syncHistoryFromServer(slug).then(() => {
+      if (cancelled) return;
+      const index = readHistory(slug);
+      const conversation = index.conversations.find((c) => c.id === index.current);
+      if (conversation && conversation.messages.length > 0 && messages.length === 0) {
+        pinnedRef.current = true;
+        setMessages(conversation.messages);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // `messages` is read once at sync time; re-running on every message would fight the user.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, slug, setMessages]);
 
   const currentId = useChatHistory(slug).current;
 
@@ -701,6 +734,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const removeConversation = (id: string) => {
     const wasCurrent = readHistory(slug).current === id;
     deleteConversation(slug, id);
+    if (signedIn) deleteRemoteConversation(id);
     if (wasCurrent) {
       stop();
       clearError();
@@ -714,6 +748,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     clearError();
     setTemplate(null);
     clearHistory(slug);
+    if (signedIn) clearRemoteHistory(slug);
     setMessages([]);
     setDraft("");
   };
@@ -745,6 +780,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
         </div>
         <div className="flex items-center gap-0.5">
           <AccountChip />
+          <ProjectSwitcher />
           <MyReportsMenu />
           <ShareReportButton slug={slug} messages={messages} disabled={busy} source={`report:${slug}`} />
           <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
@@ -821,7 +857,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
                 streaming={busy && message.id === lastAssistantId}
                 onRegenerate={() => {
                   pinnedRef.current = true;
-                  void regenerate({ messageId: message.id, body: { template } });
+                  void regenerate({ messageId: message.id, body: { template, project: currentProject()?.id ?? null } });
                 }}
               />
             );
@@ -858,7 +894,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
               onSignedIn={() => {
                 clearError();
                 pinnedRef.current = true;
-                void regenerate({ body: { template } });
+                void regenerate({ body: { template, project: currentProject()?.id ?? null } });
               }}
             />
           </div>
@@ -872,7 +908,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
               onClick={() => {
                 clearError();
                 pinnedRef.current = true;
-                void regenerate({ body: { template } });
+                void regenerate({ body: { template, project: currentProject()?.id ?? null } });
               }}
               className="inline-flex h-7 items-center gap-1 rounded-[6px] bg-surface px-2 text-[12px] font-medium text-ink shadow-card hover:bg-hover"
             >
