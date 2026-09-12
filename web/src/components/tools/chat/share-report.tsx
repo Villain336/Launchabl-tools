@@ -1,5 +1,6 @@
 "use client";
 
+import { currentProject } from "@/lib/projects/use-projects";
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, ExternalLink, Share2 } from "lucide-react";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
@@ -59,7 +60,7 @@ export function ShareReportButton({ slug, messages, disabled, source }: { slug: 
       const res = await fetch("/api/reports", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ slug, messages }),
+        body: JSON.stringify({ slug, messages, project: currentProject()?.id ?? null }),
       });
       const body = (await res.json().catch(() => ({}))) as { path?: string; trimmed?: boolean; error?: string; cause?: string };
       if (!res.ok || !body.path) {

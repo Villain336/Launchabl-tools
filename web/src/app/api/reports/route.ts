@@ -5,6 +5,7 @@ import { readSession } from "@/lib/auth/session";
 import { getToolBySlug } from "@/lib/site-config";
 import { extractReportItems, fitReport, reportTitle, type Report } from "@/lib/reports/extract";
 import { listReports, newReportId, saveReport } from "@/lib/reports/storage";
+import { loadProject } from "@/lib/projects/storage";
 
 /**
  * Freeze a conversation's deliverables into a shareable report.
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many reports in a short time. Try again in a few minutes." }, { status: 429, headers: { "retry-after": String(limit.retryAfter) } });
   }
 
-  const body = (await request.json().catch(() => null)) as { slug?: unknown; messages?: unknown; title?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { slug?: unknown; messages?: unknown; title?: unknown; project?: unknown } | null;
   const slug = typeof body?.slug === "string" ? body.slug : "";
   if (!(slug === "agent" || getToolBySlug(slug)) || !Array.isArray(body?.messages)) {
     return NextResponse.json({ error: "Bad request." }, { status: 400 });
@@ -61,12 +62,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Nothing to share yet — run a tool first so the report has a deliverable." }, { status: 422 });
   }
   const requestedTitle = typeof body.title === "string" ? body.title.trim().slice(0, 90) : "";
+  const project = typeof body.project === "string" ? await loadProject(body.project, session.uid) : null;
   const draft: Report = {
     id: newReportId(),
     slug,
     title: requestedTitle || reportTitle(items),
     ownerUid: session.uid,
     preparedBy: session.name?.trim() || null,
+    projectId: project?.id ?? null,
     createdAt: new Date().toISOString(),
     items,
   };

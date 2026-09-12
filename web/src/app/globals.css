@@ -153,6 +153,10 @@ body {
   body[data-studio] [data-site-chrome] {
     display: none !important;
   }
+  /* White-label report pages: the client's agency is the only brand on the page. */
+  body:has([data-white-label]) [data-site-chrome] {
+    display: none !important;
+  }
   /* Tool pages: lock to the viewport so the tool fills the screen below the header. */
   body:has([data-tool-page]) {
     height: 100dvh;
