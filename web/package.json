@@ -15,6 +15,7 @@
     "@imgly/background-removal": "^1.7.0",
     "@react-three/fiber": "^9.7.0",
     "@tabler/icons-react": "^3.46.0",
+    "@vercel/blob": "^2.8.0",
     "@xyflow/react": "^12.11.6",
     "ai": "^7.0.98",
     "class-variance-authority": "^0.7.1",
