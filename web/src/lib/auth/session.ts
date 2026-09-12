@@ -203,7 +203,10 @@ export async function sendCodeEmail(email: string, code: string): Promise<void> 
     }),
     signal: AbortSignal.timeout(8_000),
   });
-  if (!res.ok) throw new Error(`Resend ${res.status}`);
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Resend ${res.status}${detail ? `: ${detail.slice(0, 500)}` : ""}`);
+  }
 }
 
 /* ── anonymous free run ──────────────────────────────── */
