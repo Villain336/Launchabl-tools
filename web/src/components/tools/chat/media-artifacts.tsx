@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, AudioLines, BookOpen, Clapperboard, Quote, Scissors } from "lucide-react";
 import type { ClipsDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
 import { formatTimestamp, markedText, toSrt, toVtt } from "@/lib/media/transcript";
+import { AUDIO_ONLY_EXT, FRAMES, PLATFORM_FRAME, renderCommand, renderScript, type Frame } from "@/lib/media/render";
 import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
 
 const slugify = (s: string) => s.toLowerCase().replace(/\.[a-z0-9]+$/i, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "recording";
@@ -174,11 +175,12 @@ function clipsMarkdown(d: ClipsDeliverable): string {
   d.clips.forEach((c, i) => {
     lines.push(`## ${i + 1}. ${c.title} (${c.range}, ${c.durationSec}s)`, "", `**Hook:** ${c.hook}`, "", `**Caption:** ${c.caption}`, "", `**Why:** ${c.why}`, "", `> ${c.excerpt}`, "", "```", c.ffmpeg, "```", "");
   });
-  if (d.notes) lines.push(`_${d.notes}_`);
+  if (d.notes) lines.push(`_${d.notes}_`, "");
+  lines.push("Reframed, captioned renders: download `render-clips.sh` from the Clip Finder artifact and run it next to the recording (needs ffmpeg).");
   return lines.join("\n");
 }
 
-function ClipRow({ clip, index, base }: { clip: ClipsDeliverable["clips"][number]; index: number; base: string }) {
+function ClipRow({ clip, index, base, render }: { clip: ClipsDeliverable["clips"][number]; index: number; base: string; render: string }) {
   const [open, setOpen] = useState(false);
   const t = clip.warnings.length ? "warn" : "good";
   return (
@@ -204,13 +206,17 @@ function ClipRow({ clip, index, base }: { clip: ClipsDeliverable["clips"][number
               {open ? "Hide words" : "Spoken words"}
             </button>
             <CopyButton text={clip.caption} label="Copy caption" />
-            <CopyButton text={clip.ffmpeg} label="Copy ffmpeg" />
+            <CopyButton text={clip.ffmpeg} label="Copy cut" />
+            <CopyButton text={render} label="Copy render" />
             {clip.segments.length > 0 && <DownloadButton content={toSrt(clip.segments)} filename={`${base}-clip-${index + 1}.srt`} type="application/x-subrip" label="SRT" />}
           </div>
           {open && (
             <div className="mt-2 rounded-[8px] bg-field/60 px-3 py-2">
               <p className="text-[12.5px] leading-relaxed text-ink">{clip.excerpt || "No speech in this range."}</p>
-              <p className="mt-1.5 font-mono text-[11px] break-all text-ink-3">{clip.ffmpeg}</p>
+              <p className="mt-1.5 text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">Lossless cut</p>
+              <p className="mt-0.5 font-mono text-[11px] break-all text-ink-3">{clip.ffmpeg}</p>
+              <p className="mt-1.5 text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">Reframe + captions</p>
+              <p className="mt-0.5 font-mono text-[11px] break-all text-ink-3">{render}</p>
             </div>
           )}
         </div>
@@ -219,9 +225,29 @@ function ClipRow({ clip, index, base }: { clip: ClipsDeliverable["clips"][number
   );
 }
 
+const FRAME_OPTIONS: { key: Frame; label: string }[] = [
+  { key: "9:16", label: "9:16" },
+  { key: "4:5", label: "4:5" },
+  { key: "1:1", label: "1:1" },
+  { key: "16:9", label: "16:9" },
+];
+
 export function ClipsArtifact({ data }: { data: ClipsDeliverable }) {
   const base = slugify(data.name);
-  const allCommands = data.clips.map((c) => c.ffmpeg).join("\n");
+  const audioOnly = AUDIO_ONLY_EXT.test(data.name);
+  const [frame, setFrame] = useState<Frame>(PLATFORM_FRAME[data.platform] ?? "9:16");
+  const captionsAvailable = data.clips.some((c) => c.segments.length > 0);
+  const [captions, setCaptions] = useState(true);
+  const renderOptions = useMemo(
+    () => ({ source: data.name || "input.mp4", frame, captions: captions && captionsAvailable, audioOnly }),
+    [data.name, frame, captions, captionsAvailable, audioOnly],
+  );
+  const renders = useMemo(() => data.clips.map((clip, i) => renderCommand(clip, i, renderOptions)), [data.clips, renderOptions]);
+  const script = useMemo(
+    () => renderScript(data.clips, renderOptions, { title: `Clips from ${data.name}`, platform: PLATFORM_LABEL[data.platform] }),
+    [data.clips, data.name, data.platform, renderOptions],
+  );
+  const allCuts = data.clips.map((c) => c.ffmpeg).join("\n");
   return (
     <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card" data-clips-artifact>
       <ArtifactHeader
@@ -229,12 +255,30 @@ export function ClipsArtifact({ data }: { data: ClipsDeliverable }) {
         title={`${data.clips.length} clip${data.clips.length === 1 ? "" : "s"} for ${PLATFORM_LABEL[data.platform]}`}
         subtitle={`${data.name} · ${formatTimestamp(data.mediaDurationSec)} source`}
       >
-        <CopyButton text={allCommands} label="Copy all ffmpeg" />
+        <CopyButton text={allCuts} label="Copy all cuts" />
         <DownloadButton content={clipsMarkdown(data)} filename={`${base}-clips.md`} type="text/markdown" label="Brief (MD)" />
       </ArtifactHeader>
+      <div className="flex flex-wrap items-center gap-2 border-b border-line bg-field/40 px-4 py-2" data-render-kit>
+        <span className="text-[11.5px] font-medium text-ink-2">Render kit</span>
+        <Tabs value={frame} onChange={setFrame} options={FRAME_OPTIONS} />
+        {captionsAvailable && (
+          <label className="flex items-center gap-1.5 text-[12px] text-ink-2">
+            <input type="checkbox" checked={captions} onChange={(e) => setCaptions(e.target.checked)} className="accent-primary" />
+            Burn captions
+          </label>
+        )}
+        <span className="text-[11.5px] text-ink-3">
+          {FRAMES[frame].label}
+          {audioOnly ? " · audiogram (waveform on a dark card)" : " · centre crop"}
+        </span>
+        <div className="ml-auto flex items-center gap-1">
+          <CopyButton text={renders.join("\n")} label="Copy all renders" />
+          <DownloadButton content={script} filename="render-clips.sh" type="text/x-shellscript" label="Script (.sh)" />
+        </div>
+      </div>
       <div className="divide-y divide-line">
         {data.clips.map((clip, i) => (
-          <ClipRow key={i} clip={clip} index={i} base={base} />
+          <ClipRow key={i} clip={clip} index={i} base={base} render={renders[i]} />
         ))}
       </div>
       {(data.warnings.length > 0 || data.notes) && (
@@ -244,7 +288,8 @@ export function ClipsArtifact({ data }: { data: ClipsDeliverable }) {
         </div>
       )}
       <Footnote icon={<Clapperboard className="h-3 w-3" />}>
-        Cut with the ffmpeg commands (lossless, seconds), or type the timestamps into CapCut / Descript / Premiere. Each clip&rsquo;s SRT is already re-timed to start at 0.
+        Put <span className="font-mono">render-clips.sh</span> next to the recording and run <span className="font-mono">sh render-clips.sh</span> — it writes each clip&rsquo;s captions and renders finished MP4s with ffmpeg
+        (brew / apt / winget install ffmpeg). Or type the timestamps into CapCut / Descript / Premiere; each SRT is re-timed to start at 0.
       </Footnote>
     </div>
   );

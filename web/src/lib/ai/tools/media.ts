@@ -259,7 +259,8 @@ export const clipFinderRuntime: ChatToolRuntime = {
   maxSteps: 12,
   tools: { readTranscript: readTranscriptTool, deliverClips: deliverClipsTool },
   skill: {
-    summary: "Find the 3–6 most clippable moments in an attached recording and deliver each with exact timestamps, hook, caption, spoken words, SRT/VTT and ffmpeg cut commands.",
+    summary:
+      "Find the 3–6 most clippable moments in an attached recording and deliver each with exact timestamps, hook, caption, spoken words, SRT/VTT, and a render kit (ffmpeg script that cuts, reframes to 9:16/4:5/1:1/16:9 and burns captions).",
     cost: "media",
     runsIn: "server",
     sideEffects: "none",
@@ -274,7 +275,7 @@ How to work:
 2. Pick 3–6 clips (fewer for recordings under 10 minutes; at least one for anything over 2). Each must be self-contained: the viewer needs no context from before the start, and it ends on a payoff, not mid-thought. Length by platform: TikTok/Reels/Shorts 20–60 s, LinkedIn 30–90 s, X 20–45 s, podcast teaser 30–60 s. Never under 15 or over 90.
 3. Timestamps: use the [m:ss] markers and the flow of sentences to land start on the first word of a sentence and end right after the last word of the thought. Convert m:ss to seconds correctly (12:30 = 750).
 4. Hooks are the first line on screen — a claim or a question, not a topic label. Captions match the platform: TikTok/Reels short and conversational with 2–4 hashtags; LinkedIn a two-sentence setup that makes people click; X one line. Say why each moment works in one honest sentence.
-5. Call deliverClips once with the set (editor notes go in its notes field), then reply in one or two sentences: which clip to post first and why. Don't repeat the hooks, captions or notes.
+5. Call deliverClips once with the set (editor notes go in its notes field), then reply in one or two sentences: which clip to post first and why. Don't repeat the hooks, captions or notes. The artifact already includes a render kit (a script that cuts, reframes and burns captions with ffmpeg), so don't explain how to edit the clips.
 
 ${NO_LISTS}`,
 };
