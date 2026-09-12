@@ -154,9 +154,9 @@ export const tools: Tool[] = [
   {
     slug: "watermark-remover",
     name: "Watermark Remover",
-    shortDescription: "Remove a watermark you own the rights to, using AI-assisted inpainting.",
-    status: "coming-soon",
-    processing: "server",
+    shortDescription: "Remove a watermark you own the rights to — box it, pick smooth fill, blur or pixelate, done in your browser.",
+    status: "live",
+    processing: "client",
     upsell: {
       headline: "For your own assets, done right.",
       body: "This tool is intentionally limited to content you attest you own or have explicit rights to edit — see our Acceptable Use Policy. Unlimited plan members can send us original source files for a clean re-export instead.",
@@ -166,6 +166,11 @@ export const tools: Tool[] = [
         question: "Can I use this to remove a stock photo's watermark?",
         answer:
           "No. This tool requires an ownership attestation and is intended only for content you created or control. Using it on licensed stock or third-party copyrighted content violates our Acceptable Use Policy and likely the law.",
+      },
+      {
+        question: "How does the removal work?",
+        answer:
+          "You drag a box over each mark. Smooth fill runs a multi-scale diffusion inpaint that blends surrounding colour into the box — near-perfect on flat backgrounds, skies and gradients. Blur and pixelate are there for marks over detailed textures where a smeared fill would look worse than an honest censor block. Everything happens in your browser via the Canvas API.",
       },
     ],
   },
