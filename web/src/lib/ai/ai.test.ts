@@ -94,6 +94,19 @@ describe("usage accounting", () => {
     expect(sumBuckets([today.total, today.total]).requests).toBe(4);
   });
 
+  it("attributes runs to the agent template that started them", async () => {
+    const store = createMemoryStore(() => 0);
+    const date = new Date("2026-09-11T10:00:00Z");
+    await recordUsage({ slug: "agent", model: "x", inputTokens: 100, outputTokens: 50, reportedCostUsd: 0.02, ok: true, template: "launch-page" }, store, date);
+    await recordUsage({ slug: "agent", model: "x", inputTokens: 100, outputTokens: 50, reportedCostUsd: 0.03, ok: true, template: "launch-page" }, store, date);
+    await recordUsage({ slug: "agent", model: "x", inputTokens: 100, outputTokens: 50, reportedCostUsd: 0.01, ok: true, template: null }, store, date);
+    const [today] = await readUsage(1, store, date);
+    expect(today.total.requests).toBe(3);
+    expect(Object.keys(today.byTemplate)).toEqual(["launch-page"]);
+    expect(today.byTemplate["launch-page"].requests).toBe(2);
+    expect(today.byTemplate["launch-page"].costUsd).toBeCloseTo(0.05, 6);
+  });
+
   it("counts upsell impressions, clicks and dismissals per tool without touching request totals", async () => {
     const store = createMemoryStore(() => 0);
     const date = new Date("2026-09-11T10:00:00Z");

@@ -7,6 +7,7 @@ import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
+import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
 import { gateRun, SIGN_IN_REQUIRED_MESSAGE } from "@/lib/auth/session";
 
@@ -38,8 +39,11 @@ function textLength(messages: ToolChatMessage[]): number {
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json().catch(() => null)) as { tool?: unknown; messages?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { tool?: unknown; messages?: unknown; template?: unknown } | null;
   const slug = typeof body?.tool === "string" ? body.tool : "";
+  // Which agent template (if any) started this conversation, for the admin
+  // dashboard; validated against the known ids so the store can't be polluted.
+  const template = typeof body?.template === "string" && AGENT_TEMPLATES.some((t) => t.id === body.template) ? body.template : null;
   const runtime = getChatToolRuntime(slug);
   if (!runtime) {
     return NextResponse.json({ error: "Unknown tool." }, { status: 404 });
@@ -113,7 +117,10 @@ export async function POST(request: NextRequest) {
       stopWhen: isStepCount(runtime.maxSteps ?? 3),
       abortSignal: request.signal,
       providerOptions: {
-        gateway: { tags: ["launchabl", `tool:${slug}`, gate.kind === "user" ? "account" : "anon"], user: account },
+        gateway: {
+          tags: ["launchabl", `tool:${slug}`, gate.kind === "user" ? "account" : "anon", ...(template ? [`template:${template}`] : [])],
+          user: account,
+        },
       },
     });
 
@@ -139,6 +146,7 @@ export async function POST(request: NextRequest) {
         reportedCostUsd,
         durationMs: Date.now() - startedAt,
         ok,
+        template,
       });
     };
 

@@ -38,6 +38,7 @@ import { defaultQrStyle } from "@/lib/qr/style";
 import { ArtifactSessionProvider } from "@/components/tools/chat/artifact-session";
 import { Markdown } from "@/components/tools/chat/markdown";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
+import { ShareReportButton } from "@/components/tools/chat/share-report";
 import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/tools/chat/artifact-registry";
 
 /* ─────────────────────────────────────────────────────────
@@ -47,10 +48,10 @@ import { artifactLabels, artifactRenderers, type ToolPart } from "@/components/t
  * ───────────────────────────────────────────────────────── */
 
 /** Shown in the empty state so a tool is usable before the first message. */
-type StarterContext = { prefill: (text: string) => void };
+type StarterContext = { prefill: (text: string, template?: string) => void };
 
 const starterArtifacts: Record<string, (ctx: StarterContext) => ReactNode> = {
-  agent: ({ prefill }) => <AgentTemplates onPick={(template) => prefill(template.prompt)} />,
+  agent: ({ prefill }) => <AgentTemplates onPick={(template) => prefill(template.prompt, template.id)} />,
   qr: () => (
     <QrArtifact
       compact
@@ -423,13 +424,15 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
   const restoredRef = useRef(false);
+  /** Agent template that started this conversation; sent with each turn so the dashboard can attribute runs. */
+  const [template, setTemplate] = useState<string | null>(null);
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport<ToolChatMessage>({
         api: "/api/tools/chat",
-        prepareSendMessagesRequest: ({ id, messages, trigger, messageId }) => ({
-          body: { tool: slug, id, trigger, messageId, messages: trimImageHistory(messages) },
+        prepareSendMessagesRequest: ({ id, messages, trigger, messageId, body }) => ({
+          body: { ...body, tool: slug, id, trigger, messageId, messages: trimImageHistory(messages) },
         }),
       }),
     [slug],
@@ -450,7 +453,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     pinnedRef.current = true;
     const files = attachments;
     // A file with no prompt still needs a text part so the model has an instruction to act on.
-    void sendMessage({ text: trimmed || (files.length === 1 ? "Here's the file." : "Here are the files."), files });
+    void sendMessage({ text: trimmed || (files.length === 1 ? "Here's the file." : "Here are the files."), files }, { body: { template } });
     setDraft("");
     setAttachments([]);
     setAttachError(null);
@@ -460,7 +463,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   };
 
   /** Drop a template into the composer and select its first [slot] so typing replaces it. */
-  const prefill = (text: string) => {
+  const prefill = (text: string, templateId?: string) => {
+    setTemplate(templateId ?? null);
     setDraft(text.slice(0, 4_000));
     requestAnimationFrame(() => {
       const node = inputRef.current;
@@ -585,6 +589,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const reset = () => {
     stop();
     clearError();
+    setTemplate(null);
     setMessages([]);
     setCurrentConversation(slug, null);
     setDraft("");
@@ -598,6 +603,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     if (!conversation) return;
     stop();
     clearError();
+    setTemplate(null);
     pinnedRef.current = true;
     setCurrentConversation(slug, id);
     setMessages(conversation.messages);
@@ -610,6 +616,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     if (wasCurrent) {
       stop();
       clearError();
+      setTemplate(null);
       setMessages([]);
     }
   };
@@ -617,6 +624,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const clearAll = () => {
     stop();
     clearError();
+    setTemplate(null);
     clearHistory(slug);
     setMessages([]);
     setDraft("");
@@ -649,6 +657,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
         </div>
         <div className="flex items-center gap-0.5">
           <AccountChip />
+          <ShareReportButton slug={slug} messages={messages} disabled={busy} source={`report:${slug}`} />
           <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
           {messages.length > 0 && (
             <IconButton label="Start a new conversation" onClick={reset}>
@@ -723,7 +732,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
                 streaming={busy && message.id === lastAssistantId}
                 onRegenerate={() => {
                   pinnedRef.current = true;
-                  void regenerate({ messageId: message.id });
+                  void regenerate({ messageId: message.id, body: { template } });
                 }}
               />
             );
@@ -756,10 +765,11 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
             </div>
             <SignInForm
               compact
+              source={template ? `template:${template}` : `tool:${slug}`}
               onSignedIn={() => {
                 clearError();
                 pinnedRef.current = true;
-                void regenerate();
+                void regenerate({ body: { template } });
               }}
             />
           </div>
@@ -773,7 +783,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
               onClick={() => {
                 clearError();
                 pinnedRef.current = true;
-                void regenerate();
+                void regenerate({ body: { template } });
               }}
               className="inline-flex h-7 items-center gap-1 rounded-[6px] bg-surface px-2 text-[12px] font-medium text-ink shadow-card hover:bg-hover"
             >

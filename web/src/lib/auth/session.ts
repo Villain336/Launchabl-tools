@@ -22,7 +22,7 @@ const SESSION_TTL_SECONDS = 180 * 24 * 60 * 60;
 const ANON_TTL_SECONDS = 365 * 24 * 60 * 60;
 
 export type Session = { uid: string; email: string; name: string | null; iat: number };
-export type UserRecord = { uid: string; email: string; name: string | null; createdAt: string; lastSeenAt: string; signIns: number };
+export type UserRecord = { uid: string; email: string; name: string | null; createdAt: string; lastSeenAt: string; signIns: number; source?: string };
 
 const enc = new TextEncoder();
 
@@ -100,7 +100,23 @@ export async function readSession(cookies: CookieJar): Promise<Session | null> {
 
 /* ── users ───────────────────────────────────────────── */
 
-export async function upsertUser(email: string, name: string | null, store: KeyValueStore = getStore()): Promise<{ user: UserRecord; created: boolean }> {
+/**
+ * Where a sign-up came from, e.g. `template:launch`, `tool:seo-audit`,
+ * `report:agent`, `page:sign-in`. Free-form from the client, so it's
+ * normalised to a short `kind:id` token before it becomes a hash field.
+ */
+export function normalizeSignUpSource(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const match = /^([a-z]{2,16}):([a-z0-9][a-z0-9-]{0,40})$/.exec(value.trim().toLowerCase());
+  return match ? `${match[1]}:${match[2]}` : null;
+}
+
+export async function upsertUser(
+  email: string,
+  name: string | null,
+  store: KeyValueStore = getStore(),
+  source: string | null = null,
+): Promise<{ user: UserRecord; created: boolean }> {
   const normalized = normalizeEmail(email);
   const uid = await emailHash(normalized);
   const key = `user:${uid}`;
@@ -114,10 +130,12 @@ export async function upsertUser(email: string, name: string | null, store: KeyV
     await store.hincrby(`auth:${day}`, { signIns: 1 }, 400 * 24 * 60 * 60);
     return { user, created: false };
   }
-  const user: UserRecord = { uid, email: normalized, name, createdAt: now, lastSeenAt: now, signIns: 1 };
+  const user: UserRecord = { uid, email: normalized, name, createdAt: now, lastSeenAt: now, signIns: 1, source: source ?? undefined };
   await store.set(key, JSON.stringify(user));
   await store.sadd("users:all", uid);
-  await store.hincrby(`auth:${day}`, { signUps: 1, signIns: 1 }, 400 * 24 * 60 * 60);
+  const fields: Record<string, number> = { signUps: 1, signIns: 1 };
+  if (source) fields[`src:${source}`] = 1;
+  await store.hincrby(`auth:${day}`, fields, 400 * 24 * 60 * 60);
   return { user, created: true };
 }
 
@@ -126,15 +144,27 @@ export async function getUser(uid: string, store: KeyValueStore = getStore()): P
   return raw ? (JSON.parse(raw) as UserRecord) : null;
 }
 
-export async function authStats(days: number, store: KeyValueStore = getStore()): Promise<{ users: number; byDay: { date: string; signUps: number; signIns: number }[] }> {
+export type AuthStats = {
+  users: number;
+  byDay: { date: string; signUps: number; signIns: number }[];
+  /** Sign-ups in the window keyed by source token (`template:launch`, `tool:seo-audit`, …), largest first. */
+  signUpsBySource: Record<string, number>;
+};
+
+export async function authStats(days: number, store: KeyValueStore = getStore()): Promise<AuthStats> {
   const users = (await store.smembers("users:all")).length;
-  const byDay: { date: string; signUps: number; signIns: number }[] = [];
+  const byDay: AuthStats["byDay"] = [];
+  const sources: Record<string, number> = {};
   for (let i = 0; i < days; i++) {
     const date = new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10);
     const h = await store.hgetall(`auth:${date}`);
     byDay.push({ date, signUps: h.signUps ?? 0, signIns: h.signIns ?? 0 });
+    for (const [field, value] of Object.entries(h)) {
+      if (field.startsWith("src:")) sources[field.slice(4)] = (sources[field.slice(4)] ?? 0) + value;
+    }
   }
-  return { users, byDay };
+  const signUpsBySource = Object.fromEntries(Object.entries(sources).sort((a, b) => b[1] - a[1]));
+  return { users, byDay, signUpsBySource };
 }
 
 /* ── one-time codes (only when an email sender is configured) ── */

@@ -11,7 +11,18 @@ type Step = "email" | "code";
  * The server decides whether a code step is needed (only when an email
  * sender is configured), so the form just follows `step` in the response.
  */
-export function SignInForm({ onSignedIn, compact = false, reason }: { onSignedIn?: (user: SessionUser) => void; compact?: boolean; reason?: string }) {
+export function SignInForm({
+  onSignedIn,
+  compact = false,
+  reason,
+  source,
+}: {
+  onSignedIn?: (user: SessionUser) => void;
+  compact?: boolean;
+  reason?: string;
+  /** Attribution token recorded on sign-up, e.g. `template:launch` or `tool:seo-audit`. */
+  source?: string;
+}) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -29,7 +40,7 @@ export function SignInForm({ onSignedIn, compact = false, reason }: { onSignedIn
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name: name || undefined, code: step === "code" ? code : undefined }),
+        body: JSON.stringify({ email, name: name || undefined, code: step === "code" ? code : undefined, source }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; step?: Step; user?: SessionUser };
       if (!res.ok) {

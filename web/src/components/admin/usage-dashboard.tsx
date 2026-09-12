@@ -9,6 +9,7 @@ import type { GatewayCredits, UpsellBucket, UsageBucket, UsageDay } from "@/lib/
 import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
+import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 
 type UsagePayload = {
   generatedAt: string;
@@ -20,12 +21,150 @@ type UsagePayload = {
   summary: { today: UsageBucket; last7: UsageBucket; last30: UsageBucket; range: UsageBucket };
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
+  byTemplate?: Record<string, UsageBucket>;
   upsell: { today: UpsellBucket; last7: UpsellBucket; range: UpsellBucket; byTool: Record<string, UpsellBucket> };
-  accounts?: { users: number; byDay: { date: string; signUps: number; signIns: number }[] };
+  accounts?: { users: number; byDay: { date: string; signUps: number; signIns: number }[]; signUpsBySource?: Record<string, number> };
+  reports?: { created: number; views: number; byTool: Record<string, number> };
   days: UsageDay[];
 };
 
-function AccountsPanel({ accounts, days }: { accounts: NonNullable<UsagePayload["accounts"]>; days: number }) {
+const templateTitle = (id: string) => AGENT_TEMPLATES.find((t) => t.id === id)?.title ?? id;
+
+/** Human label for a sign-up source token (`template:launch-page`, `tool:seo-audit`, `report:agent`, `page:sign-in`). */
+function sourceLabel(source: string, toolLabel: (slug: string) => string): string {
+  const [kind, id] = source.split(":", 2);
+  if (kind === "template") return `Template · ${templateTitle(id)}`;
+  if (kind === "tool") return `Free-run gate · ${id === "agent" ? "Agent" : toolLabel(id)}`;
+  if (kind === "report") return `Share report · ${id === "agent" ? "Agent" : toolLabel(id)}`;
+  if (kind === "page") return `Page · /${id}`;
+  return source;
+}
+
+/**
+ * Which agent templates get run, what they cost and how many accounts they
+ * create. A template's sign-ups come from the free-run gate shown inside a
+ * conversation that started from it.
+ */
+function TemplatesPanel({ byTemplate, signUpsBySource, days }: { byTemplate: Record<string, UsageBucket>; signUpsBySource: Record<string, number>; days: number }) {
+  const rows = Object.entries(byTemplate);
+  const signUpsFor = (id: string) => signUpsBySource[`template:${id}`] ?? 0;
+  const totalRuns = rows.reduce((acc, [, b]) => acc + b.requests, 0);
+  const totalSignUps = rows.reduce((acc, [id]) => acc + signUpsFor(id), 0);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Agent templates</h2>
+          <p className="text-xs text-muted-foreground">Runs started from a &ldquo;Start from a job&rdquo; card, and the accounts those conversations created.</p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            {days} days <span className="font-medium text-foreground">{int(totalRuns)}</span> template runs
+          </span>
+          <span>
+            <span className="font-medium text-foreground">{int(totalSignUps)}</span> sign-ups
+          </span>
+        </div>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No template runs recorded yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium">Template</th>
+              <th className="px-4 py-2 text-right font-medium">Runs</th>
+              <th className="px-4 py-2 text-right font-medium">Errors</th>
+              <th className="px-4 py-2 text-right font-medium">Avg time</th>
+              <th className="px-4 py-2 text-right font-medium">Cost</th>
+              <th className="px-4 py-2 text-right font-medium">Sign-ups</th>
+              <th className="px-4 py-2 text-right font-medium">Per sign-up</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map(([id, b]) => {
+              const signUps = signUpsFor(id);
+              return (
+                <tr key={id}>
+                  <td className="px-4 py-2 text-foreground">
+                    {templateTitle(id)} <span className="font-mono text-[11px] text-muted-foreground">{id}</span>
+                  </td>
+                  <td className="px-4 py-2 text-right tabular-nums">{int(b.requests)}</td>
+                  <td className={`px-4 py-2 text-right tabular-nums ${b.errors ? "text-red-600" : ""}`}>{int(b.errors)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{b.avgDurationMs !== null ? `${(b.avgDurationMs / 1000).toFixed(1)}s` : "—"}</td>
+                  <td className="px-4 py-2 text-right tabular-nums font-medium">{usd(b.costUsd)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums font-medium">{int(signUps)}</td>
+                  <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{signUps ? usd(b.costUsd / signUps) : "—"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function SourcesTable({ sources, labelFor }: { sources: Record<string, number>; labelFor: (slug: string) => string }) {
+  const rows = Object.entries(sources);
+  if (rows.length === 0) return null;
+  const total = rows.reduce((acc, [, n]) => acc + n, 0);
+  return (
+    <table className="w-full text-sm">
+      <thead className="bg-muted/50 text-xs text-muted-foreground">
+        <tr>
+          <th className="px-4 py-2 text-left font-medium">Sign-up source</th>
+          <th className="px-4 py-2 text-right font-medium">Sign-ups</th>
+          <th className="px-4 py-2 text-right font-medium">Share</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-border">
+        {rows.map(([source, n]) => (
+          <tr key={source}>
+            <td className="px-4 py-2 text-foreground">{sourceLabel(source, labelFor)}</td>
+            <td className="px-4 py-2 text-right tabular-nums font-medium">{int(n)}</td>
+            <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{total ? `${((n / total) * 100).toFixed(0)}%` : "—"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function ReportsPanel({ reports, labelFor, days }: { reports: NonNullable<UsagePayload["reports"]>; labelFor: (slug: string) => string; days: number }) {
+  const rows = Object.entries(reports.byTool).sort((a, b) => b[1] - a[1]);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Shared reports</h2>
+          <p className="text-xs text-muted-foreground">Conversations frozen into public /r/… pages, and how often those pages were opened.</p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            {days} days <span className="font-medium text-foreground">{int(reports.created)}</span> created
+          </span>
+          <span>
+            <span className="font-medium text-foreground">{int(reports.views)}</span> views
+          </span>
+        </div>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No reports shared yet.</p>
+      ) : (
+        <ul className="flex flex-wrap gap-2 px-4 py-3 text-xs">
+          {rows.map(([slug, n]) => (
+            <li key={slug} className="rounded-md border border-border px-2 py-1 text-foreground">
+              {slug === "agent" ? "Agent" : labelFor(slug)} <span className="font-medium">{int(n)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function AccountsPanel({ accounts, days, labelFor }: { accounts: NonNullable<UsagePayload["accounts"]>; days: number; labelFor: (slug: string) => string }) {
   const sum = (n: number, key: "signUps" | "signIns") => accounts.byDay.slice(0, n).reduce((acc, d) => acc + d[key], 0);
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-white">
@@ -49,6 +188,7 @@ function AccountsPanel({ accounts, days }: { accounts: NonNullable<UsagePayload[
           </span>
         </div>
       </div>
+      <SourcesTable sources={accounts.signUpsBySource ?? {}} labelFor={labelFor} />
     </div>
   );
 }
@@ -272,7 +412,9 @@ export function UsageDashboard() {
           </div>
 
           <BucketTable title="By tool" rows={Object.entries(data.byTool)} labelFor={toolLabel} />
-          {data.accounts && <AccountsPanel accounts={data.accounts} days={days} />}
+          {data.byTemplate && <TemplatesPanel byTemplate={data.byTemplate} signUpsBySource={data.accounts?.signUpsBySource ?? {}} days={days} />}
+          {data.accounts && <AccountsPanel accounts={data.accounts} days={days} labelFor={toolLabel} />}
+          {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
           <BucketTable title="By model" rows={Object.entries(data.byModel)} labelFor={(m) => `${modelLabel(m)} · ${m}`} />
 

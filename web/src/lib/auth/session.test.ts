@@ -6,7 +6,9 @@ import {
   ANON_FREE_RUNS,
   SESSION_COOKIE,
   gateRun,
+  authStats,
   issueCode,
+  normalizeSignUpSource,
   readSession,
   sessionCookie,
   signPayload,
@@ -104,6 +106,22 @@ describe("users and codes", () => {
     expect(b.user.name).toBe("Jane");
     expect(b.user.signIns).toBe(2);
     expect(await store.smembers("users:all")).toHaveLength(1);
+  });
+
+  it("records where a sign-up came from, normalised, and reports it by source", async () => {
+    const store = createMemoryStore();
+    expect(normalizeSignUpSource("template:Launch-Page")).toBe("template:launch-page");
+    expect(normalizeSignUpSource("tool:seo-audit")).toBe("tool:seo-audit");
+    expect(normalizeSignUpSource("weird value; drop")).toBeNull();
+    expect(normalizeSignUpSource(42)).toBeNull();
+    await upsertUser("a@example.com", null, store, "template:launch-page");
+    await upsertUser("b@example.com", null, store, "template:launch-page");
+    await upsertUser("c@example.com", null, store, "tool:seo-audit");
+    await upsertUser("a@example.com", null, store, "tool:seo-audit"); // returning sign-in: not a sign-up
+    const stats = await authStats(1, store);
+    expect(stats.users).toBe(3);
+    expect(stats.byDay[0].signUps).toBe(3);
+    expect(stats.signUpsBySource).toEqual({ "template:launch-page": 2, "tool:seo-audit": 1 });
   });
 
   it("verifies a one-time code once and rejects wrong codes", async () => {

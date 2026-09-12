@@ -18,6 +18,8 @@ export type UsageEvent = {
   reportedCostUsd?: number | null;
   durationMs?: number;
   ok: boolean;
+  /** Agent template id that started the conversation, when the run came from one. */
+  template?: string | null;
 };
 
 /** USD per million tokens (input, output). Approximate list prices; used only when the gateway omits cost. */
@@ -52,6 +54,7 @@ export async function recordUsage(event: UsageEvent, store: KeyValueStore = getS
   const costUsd = event.reportedCostUsd ?? estimateCostUsd(event.model, event.inputTokens, event.outputTokens);
   const cost = toMicro(costUsd);
   const scopes = ["all", field("tool", event.slug), field("model", event.model)];
+  if (event.template) scopes.push(field("template", event.template));
   const fields: Record<string, number> = {};
   for (const scope of scopes) {
     fields[field(scope, "requests")] = 1;
@@ -117,6 +120,8 @@ export type UsageDay = {
   total: UsageBucket;
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
+  /** Runs started from an agent template, by template id. */
+  byTemplate: Record<string, UsageBucket>;
   estimatedRequests: number;
   upsell: UpsellBucket;
   upsellByTool: Record<string, UpsellBucket>;
@@ -136,6 +141,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
   const total = emptyBucket();
   const byTool: Record<string, UsageBucket> = {};
   const byModel: Record<string, UsageBucket> = {};
+  const byTemplate: Record<string, UsageBucket> = {};
   const upsell = emptyUpsell();
   const upsellByTool: Record<string, UpsellBucket> = {};
   const durations: Record<string, number> = {};
@@ -143,6 +149,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
     if (scope === "all") return total;
     if (scope.startsWith("tool:")) return (byTool[scope.slice(5)] ??= emptyBucket());
     if (scope.startsWith("model:")) return (byModel[scope.slice(6)] ??= emptyBucket());
+    if (scope.startsWith("template:")) return (byTemplate[scope.slice(9)] ??= emptyBucket());
     return null;
   };
   let estimatedRequests = 0;
@@ -175,7 +182,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
     const bucket = bucketFor(scope);
     if (bucket && bucket.requests) bucket.avgDurationMs = Math.round(sum / bucket.requests);
   }
-  return { day, total, byTool, byModel, estimatedRequests, upsell, upsellByTool };
+  return { day, total, byTool, byModel, byTemplate, estimatedRequests, upsell, upsellByTool };
 }
 
 export async function readUsage(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<UsageDay[]> {

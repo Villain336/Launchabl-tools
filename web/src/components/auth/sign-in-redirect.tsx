@@ -31,5 +31,8 @@ export function SignInRedirect({ next }: { next: string }) {
     );
   }
 
-  return <SignInForm onSignedIn={() => router.push(next)} />;
+  // Attribute the sign-up to the tool page that sent the visitor here, when there is one.
+  const fromTool = /^\/tools\/([a-z0-9-]+)/.exec(next)?.[1];
+  const source = fromTool ? `tool:${fromTool}` : next.startsWith("/agent") ? "tool:agent" : "page:sign-in";
+  return <SignInForm onSignedIn={() => router.push(next)} source={source} />;
 }
