@@ -37,7 +37,7 @@ export default function HeroBlock() {
       <div className="relative z-20 mx-auto w-full max-w-3xl px-6 py-20">
         <div className="flex flex-col items-center rounded-3xl border border-border/70 bg-background/80 px-6 py-10 text-center shadow-sm backdrop-blur-md sm:px-10">
         <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-          Free toolbox. Unlimited agency. One price.
+          Free tools. Free audit. {siteConfig.price} unlimited.
         </Badge>
 
         <h1 className="mt-6 font-heading text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
@@ -52,6 +52,15 @@ export default function HeroBlock() {
           <Button render={<Link href="/tools" />} nativeButton={false} size="lg">
             Open the toolbox
             <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            render={<Link href={siteConfig.freeAudit.href} />}
+            nativeButton={false}
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            Get a free audit
           </Button>
           <Button
             variant="outline"

@@ -1,11 +1,24 @@
 export const siteConfig = {
   name: "Launchabl",
   url: "https://launchabl.io",
-  tagline: "Unlimited marketing & design. One price. Forever.",
+  tagline: "Free website audit. Unlimited marketing & design for $1,200. Forever.",
   description:
-    "Launchabl is the marketing platform where the tools are free forever and the agency is unlimited for life — brand, website, content, and SEO, one flat price, no retainers.",
-  price: "$3,997",
+    "Launchabl is the marketing platform where the tools are free forever, every plan starts with a free website audit, and the agency is unlimited for life — brand, website, content, and SEO — for a single $1,200 flat fee, no retainers.",
+  price: "$1,200",
+  /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
+  priceNumeric: "1200",
   priceNote: "one-time · lifetime access · no monthly retainer",
+  /** The lead-in offer ahead of the paid plan — a real audit from the tool already built, not a lead-gen gimmick. */
+  freeAudit: {
+    name: "Free Website Audit",
+    price: "$0",
+    note: "no account required for your first run",
+    description:
+      "A 20+ point technical and on-page SEO audit, scored and explained, with the exact fix for every issue — see precisely what's costing you rankings and conversions before you spend a dollar.",
+    href: "/tools/website-audit-report",
+    cta: "Get your free audit",
+  },
+  guarantee: "30-day money-back guarantee if your first three requests don't land after revisions.",
 };
 
 export type NavLink = {
