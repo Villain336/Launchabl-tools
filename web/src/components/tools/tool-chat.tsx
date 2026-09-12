@@ -19,6 +19,7 @@ import { ArrowUp, Check, Copy, FileText, History, Paperclip, RefreshCw, RotateCc
 import { getChatTool } from "@/lib/ai/chat-tools";
 import { signOut, useSession } from "@/lib/auth/use-session";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { AgentTemplates } from "@/components/agent/agent-templates";
 import { ACCEPT, ATTACHMENT_LIMITS, AttachmentError, dataUrlBytes, fileToPart, formatBytes, isImageType } from "@/lib/chat/attachments";
 import { trimImageHistory } from "@/lib/chat/inline-attachments";
 import { getToolBySlug } from "@/lib/site-config";
@@ -157,7 +158,10 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */
-const starterArtifacts: Record<string, () => ReactNode> = {
+type StarterContext = { prefill: (text: string) => void };
+
+const starterArtifacts: Record<string, (ctx: StarterContext) => ReactNode> = {
+  agent: ({ prefill }) => <AgentTemplates onPick={(template) => prefill(template.prompt)} />,
   qr: () => (
     <QrArtifact
       compact
@@ -519,7 +523,7 @@ function HistoryMenu({
   );
 }
 
-export function ToolChat({ slug, className = "" }: { slug: string; className?: string }) {
+export function ToolChat({ slug, className = "", title }: { slug: string; className?: string; title?: string }) {
   const meta = getChatTool(slug);
   const [draft, setDraft] = useState("");
   const [attachments, setAttachments] = useState<FileUIPart[]>([]);
@@ -563,6 +567,22 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     setAttachError(null);
     requestAnimationFrame(() => {
       if (inputRef.current) inputRef.current.style.height = "auto";
+    });
+  };
+
+  /** Drop a template into the composer and select its first [slot] so typing replaces it. */
+  const prefill = (text: string) => {
+    setDraft(text.slice(0, 4_000));
+    requestAnimationFrame(() => {
+      const node = inputRef.current;
+      if (!node) return;
+      node.style.height = "auto";
+      node.style.height = `${Math.min(node.scrollHeight, 200)}px`;
+      node.focus();
+      const slot = node.value.indexOf("[");
+      const end = slot >= 0 ? node.value.indexOf("]", slot) : -1;
+      if (slot >= 0 && end > slot) node.setSelectionRange(slot, end + 1);
+      else node.setSelectionRange(node.value.length, node.value.length);
     });
   };
 
@@ -722,10 +742,11 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
   const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   const awaitingFirstToken = status === "submitted" || (status === "streaming" && messages[messages.length - 1]?.role === "user");
 
-  const starter = meta.starter ? starterArtifacts[meta.starter] : undefined;
+  const Starter = meta.starter ? starterArtifacts[meta.starter] : undefined;
+  const starter = Starter;
 
   return (
-    <ArtifactSessionProvider slug={slug}>
+    <ArtifactSessionProvider slug={slug} onSend={send}>
     <div
       className={`flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[14px] bg-surface shadow-card ${className}`}
       data-tool-chat={slug}
@@ -734,7 +755,7 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
       <div className="flex shrink-0 items-center justify-between border-b border-line px-3 py-2">
         <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span className="font-medium text-ink">{tool?.name ?? "Launchabl"}</span>
+          <span className="font-medium text-ink">{title ?? tool?.name ?? "Launchabl"}</span>
           <span className="hidden sm:inline">· free · first run without an account</span>
         </div>
         <div className="flex items-center gap-0.5">
@@ -751,19 +772,24 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
 
       {/* conversation */}
       <div ref={scrollRef} onScroll={onScroll} className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pt-5 pb-3 sm:px-6">
-        {messages.length === 0 && starter && (
-          <div style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>{starter()}</div>
+        {messages.length === 0 && starter && !meta.starterBelowIntro && (
+          <div style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>{Starter && <Starter prefill={prefill} />}</div>
         )}
 
         {messages.length === 0 && (
           <div className={`${starter ? "" : "my-auto"} flex flex-col items-center px-2 text-center`} style={{ animation: "fade-up 400ms cubic-bezier(0.23,1,0.32,1) both" }}>
-            {!starter && (
+            {(!starter || meta.starterBelowIntro) && (
               <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Sparkles className="h-5 w-5" />
               </div>
             )}
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-ink-2">{meta.intro}</p>
-            <div className="mt-6 grid w-full max-w-2xl gap-2 sm:grid-cols-2">
+            {Starter && meta.starterBelowIntro && (
+              <div className="mt-6 w-full max-w-3xl text-left">
+                <Starter prefill={prefill} />
+              </div>
+            )}
+            <div className={`${meta.suggestions.length ? "mt-6" : ""} grid w-full max-w-2xl gap-2 sm:grid-cols-2`}>
               {meta.suggestions.map((suggestion) => (
                 <button
                   key={suggestion}

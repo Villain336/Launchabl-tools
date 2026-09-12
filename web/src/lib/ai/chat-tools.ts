@@ -17,6 +17,8 @@ export type ChatToolMeta = {
   artifacts: string[];
   /** Key of a starter artifact rendered in the empty state, for tools that work without a prompt. */
   starter?: string;
+  /** Render the starter under the intro text instead of above it. */
+  starterBelowIntro?: boolean;
 };
 
 const metas: ChatToolMeta[] = [
@@ -386,6 +388,21 @@ const metas: ChatToolMeta[] = [
       "Event card: 'Webinar · Sep 30 · Pricing pages that convert' for Acme Analytics, light theme, split layout.",
     ],
     artifacts: ["designSocialCard", "generateImage"],
+  },
+  {
+    slug: "agent",
+    intro:
+      "Every Launchabl skill in one conversation. Describe the job — launch this page, fix our email, beat this competitor, get us clients — and I'll chain the audits, checks, copy, design and files it takes, then hand over the deliverables.",
+    placeholder: "Describe the job and paste any URLs. e.g. Launch https://example.com/pricing properly — audit, meta tags, schema, OG card, fix list.",
+    suggestions: [
+      "Audit https://vercel.com, check its security headers and certificate, and give me one prioritised fix list.",
+      "Our emails from example.com go to spam. Diagnose it and give me the exact records to publish.",
+      "Compare https://linear.app against https://asana.com and https://monday.com and tell me what they own that Linear doesn't.",
+      "Write three hero variants and an OG card for a $29/mo invoicing app for freelancers called Ledgerly.",
+    ],
+    artifacts: [],
+    starter: "agent",
+    starterBelowIntro: true,
   },
 ];
 

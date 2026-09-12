@@ -53,6 +53,8 @@ function InlineCode({ text }: { text: string }) {
 }
 
 function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff | null }) {
+  const session = useArtifactSession();
+  const inAgent = session.slug === "agent" && Boolean(session.send);
   const T = tone[statusTone[check.status]];
   const Icon = T.icon;
   return (
@@ -68,7 +70,16 @@ function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff 
             <span className="font-medium">Fix:</span> <InlineCode text={check.fix} />
           </p>
         )}
-        {handoff && check.status !== "pass" && (
+        {handoff && check.status !== "pass" && (inAgent && handoff.prompt ? (
+          <button
+            type="button"
+            onClick={() => session.send?.(handoff.prompt ?? "")}
+            className="mt-1.5 inline-flex h-6 items-center gap-1 rounded-chip bg-field px-2 text-[11.5px] font-medium text-ink-2 transition-colors duration-100 hover:bg-hover hover:text-ink"
+            title={handoff.prompt}
+          >
+            Fix this here <ArrowUpRight className="h-3 w-3" />
+          </button>
+        ) : (
           <Link
             href={handoff.href}
             className="mt-1.5 inline-flex h-6 items-center gap-1 rounded-chip bg-field px-2 text-[11.5px] font-medium text-ink-2 transition-colors duration-100 hover:bg-hover hover:text-ink"
@@ -76,7 +87,7 @@ function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff 
           >
             {handoff.prompt ? "Fix with" : "Check with"} {handoff.name} <ArrowUpRight className="h-3 w-3" />
           </Link>
-        )}
+        ))}
       </div>
     </li>
   );

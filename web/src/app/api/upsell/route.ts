@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
   const body = (await request.json().catch(() => null)) as { slug?: unknown; kind?: unknown } | null;
   const slug = typeof body?.slug === "string" ? body.slug : "";
   const kind = typeof body?.kind === "string" ? body.kind : "";
-  if (!getToolBySlug(slug) || !(UPSELL_KINDS as readonly string[]).includes(kind)) {
+  const knownSlug = slug === "agent" || Boolean(getToolBySlug(slug));
+  if (!knownSlug || !(UPSELL_KINDS as readonly string[]).includes(kind)) {
     return NextResponse.json({ error: "Bad request." }, { status: 400 });
   }
   const limit = await limiter().check(clientKey(request.headers));

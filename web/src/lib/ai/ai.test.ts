@@ -128,14 +128,16 @@ describe("usage accounting", () => {
 
 describe("chat tool registry", () => {
   it("has matching client metadata and server runtime for every chat tool", () => {
-    const metaSlugs = listChatTools().map((m) => m.slug).sort();
+    // The agent is built from the specialist runtimes, so it has client metadata but isn't in the specialist list.
+    const metaSlugs = listChatTools().map((m) => m.slug).filter((slug) => slug !== "agent").sort();
     const runtimeSlugs = listChatToolRuntimes().map((r) => r.slug).sort();
     expect(metaSlugs).toEqual(runtimeSlugs);
+    expect(getChatToolRuntime("agent")).toBeDefined();
   });
 
   it("registers every chat tool in the public tool list", () => {
     for (const meta of listChatTools()) {
-      expect(tools.find((t) => t.slug === meta.slug), meta.slug).toBeDefined();
+      if (meta.slug !== "agent") expect(tools.find((t) => t.slug === meta.slug), meta.slug).toBeDefined();
       expect(meta.suggestions.length).toBeGreaterThanOrEqual(2);
       expect(meta.intro.length).toBeGreaterThan(20);
     }

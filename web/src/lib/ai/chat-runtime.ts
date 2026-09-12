@@ -12,6 +12,7 @@ import { competitorGapRuntime, landingPageGraderRuntime, sitemapRobotsRuntime, w
 import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from "@/lib/ai/tools/marketing-kits";
 import { accessibilityRuntime, dnsEmailHealthRuntime, emailFinderRuntime, securityHeadersRuntime, sslCheckerRuntime } from "@/lib/ai/tools/infra-checks";
 import { imageGeneratorRuntime, socialCardRuntime } from "@/lib/ai/tools/image-gen";
+import { buildAgentRuntime } from "@/lib/ai/agent";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -78,12 +79,14 @@ const runtimes: ChatToolRuntime[] = [
   socialCardRuntime,
 ];
 
-const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));
+const agentRuntime = buildAgentRuntime(runtimes);
+const bySlug = new Map([...runtimes, agentRuntime].map((runtime) => [runtime.slug, runtime]));
 
 export function getChatToolRuntime(slug: string): ChatToolRuntime | undefined {
   return bySlug.get(slug);
 }
 
+/** Specialist runtimes (one per tool); the agent is built from these. */
 export function listChatToolRuntimes(): ChatToolRuntime[] {
   return runtimes;
 }
