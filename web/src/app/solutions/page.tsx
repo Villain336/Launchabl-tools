@@ -74,7 +74,7 @@ export default function SolutionsPage() {
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">
         <h3 className="text-2xl font-bold">Want to try before you commit?</h3>
         <p className="mt-2 text-primary-foreground/80">
-          Every solution above has a free tool version in our toolbox — start there, no account needed.
+          Every solution above has a free tool version in our toolbox — start there — your first run needs no account.
         </p>
         <div className="mt-6 flex justify-center gap-4">
           <LinkButton href="/tools" variant="secondary" className="bg-background text-foreground hover:bg-background/90">

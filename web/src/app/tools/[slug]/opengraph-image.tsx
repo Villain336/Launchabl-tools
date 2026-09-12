@@ -9,7 +9,7 @@ export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
 }
 
-const STATUS_LABEL = { live: "Free forever · no account", beta: "Beta · free", "coming-soon": "Coming soon" } as const;
+const STATUS_LABEL = { live: "Free forever · free account", beta: "Beta · free", "coming-soon": "Coming soon" } as const;
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

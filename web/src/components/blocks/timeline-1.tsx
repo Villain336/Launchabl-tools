@@ -16,7 +16,7 @@ const milestones: {
   {
     date: "Start here",
     title: "Use a free tool",
-    copy: "No account. No credit card. See the quality before you ever pay.",
+    copy: "First run without an account. No credit card. See the quality before you ever pay.",
     icon: (p: IconProps) => <Wrench {...p} />,
     status: "Shipped",
   },

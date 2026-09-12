@@ -6,7 +6,7 @@ export default function StatsBlock() {
   const stats = [
     { value: `${tools.length}+`, label: "tools in the toolbox" },
     { value: `${liveCount}`, label: "live and ready to use today" },
-    { value: "$0", label: "to use any tool, no account needed" },
+    { value: "$0", label: "to use any tool, forever" },
     { value: "1", label: "flat price for the unlimited agency" },
   ];
 
@@ -18,7 +18,7 @@ export default function StatsBlock() {
             Built to be used, not browsed
           </h2>
           <p className="mt-3 text-muted-foreground">
-            No account required for the tools, and no retainer once you&apos;re in.
+            A free account for the tools, and no retainer once you&apos;re in.
           </p>
         </div>
 

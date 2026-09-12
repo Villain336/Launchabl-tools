@@ -190,7 +190,7 @@ export async function readUsage(days: number, store: KeyValueStore = getStore(),
 }
 
 /* ── Daily spend cap ───────────────────────────────────────
- * Tools are free with no account, so a runaway bot could burn the gateway
+ * Tools are free and anonymous for the first run, so a runaway bot could burn the gateway
  * balance overnight. Every AI request checks today's recorded cost first.
  */
 

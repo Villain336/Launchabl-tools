@@ -16,6 +16,10 @@ export type KeyValueStore = {
   hgetall(key: string): Promise<Record<string, number>>;
   sadd(key: string, member: string, ttlSeconds?: number): Promise<void>;
   smembers(key: string): Promise<string[]>;
+  /** Plain string value with optional TTL; used for small records (sessions, codes, users). */
+  set(key: string, value: string, ttlSeconds?: number): Promise<void>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<void>;
 };
 
 type Entry<T> = { value: T; expiresAt: number | null };
@@ -24,6 +28,7 @@ export function createMemoryStore(now: () => number = Date.now): KeyValueStore {
   const counters = new Map<string, Entry<number>>();
   const hashes = new Map<string, Entry<Map<string, number>>>();
   const sets = new Map<string, Entry<Set<string>>>();
+  const strings = new Map<string, Entry<string>>();
 
   function live<T>(map: Map<string, Entry<T>>, key: string): Entry<T> | undefined {
     const entry = map.get(key);
@@ -70,6 +75,18 @@ export function createMemoryStore(now: () => number = Date.now): KeyValueStore {
     async smembers(key) {
       const entry = live(sets, key);
       return entry ? Array.from(entry.value) : [];
+    },
+    async set(key, value, ttl) {
+      strings.set(key, { value, expiresAt: expiry(ttl) });
+    },
+    async get(key) {
+      return live(strings, key)?.value ?? null;
+    },
+    async del(key) {
+      strings.delete(key);
+      counters.delete(key);
+      hashes.delete(key);
+      sets.delete(key);
     },
   };
 }
@@ -121,6 +138,16 @@ export function createRedisRestStore(url: string, token: string): KeyValueStore 
       const [members] = (await pipeline([["SMEMBERS", key]])) as [unknown[]];
       return Array.isArray(members) ? members.map(String) : [];
     },
+    async set(key, value, ttl) {
+      await pipeline([ttl ? ["SET", key, value, "EX", ttl] : ["SET", key, value]]);
+    },
+    async get(key) {
+      const [value] = await pipeline([["GET", key]]);
+      return value === null || value === undefined ? null : String(value);
+    },
+    async del(key) {
+      await pipeline([["DEL", key]]);
+    },
   };
 }
 
@@ -136,6 +163,8 @@ declare global {
 
 /** Process-wide store: Redis when configured, otherwise memory (survives HMR in dev). */
 export function getStore(): KeyValueStore {
+  // A dev HMR cycle can leave an instance built from an older module version.
+  if (globalThis.__launchablStore && typeof globalThis.__launchablStore.get !== "function") globalThis.__launchablStore = undefined;
   if (!globalThis.__launchablStore) {
     const creds = redisCredentials();
     globalThis.__launchablStore = creds ? createRedisRestStore(creds.url, creds.token) : createMemoryStore();

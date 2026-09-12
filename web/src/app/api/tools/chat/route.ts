@@ -8,6 +8,7 @@ import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
 import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
+import { gateRun, SIGN_IN_REQUIRED_MESSAGE } from "@/lib/auth/session";
 
 // Crawls, multi-site comparisons and long kits (local SEO, 90-day calendars)
 // legitimately run past a minute; the model stream keeps the connection alive.
@@ -67,6 +68,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: describeRetry(limit) }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
   }
 
+  // One free run without an account, then sign in. Counted per user message,
+  // before any model spend.
+  const gate = await gateRun(request.cookies, clientKey(request.headers));
+  const responseHeaders = new Headers();
+  for (const cookie of gate.setCookies) responseHeaders.append("Set-Cookie", cookie);
+  if (!gate.allowed) {
+    return NextResponse.json({ error: SIGN_IN_REQUIRED_MESSAGE, cause: "sign_in_required" }, { status: 401, headers: responseHeaders });
+  }
+  const account = gate.kind === "user" ? gate.session.uid : `anon:${clientKey(request.headers)}`;
+
   const spend = await checkDailySpend();
   if (!spend.ok) {
     console.warn(`[tools/chat:${slug}] daily spend cap reached: $${spend.spentUsd.toFixed(2)} of $${spend.capUsd}`);
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
       stopWhen: isStepCount(runtime.maxSteps ?? 3),
       abortSignal: request.signal,
       providerOptions: {
-        gateway: { tags: ["launchabl", `tool:${slug}`], user: clientKey(request.headers) },
+        gateway: { tags: ["launchabl", `tool:${slug}`, gate.kind === "user" ? "account" : "anon"], user: account },
       },
     });
 
@@ -131,8 +142,9 @@ export async function POST(request: NextRequest) {
       });
     };
 
+    responseHeaders.set("x-launchabl-model", model);
     return createUIMessageStreamResponse({
-      headers: { "x-launchabl-model": model },
+      headers: responseHeaders,
       stream: toUIMessageStream<typeof runtime.tools & object, ToolChatMessage>({
         stream,
         tools: runtime.tools,

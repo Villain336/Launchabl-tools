@@ -17,7 +17,7 @@ export function GET() {
     "",
     `> ${siteConfig.description}`,
     "",
-    `Launchabl has two halves. The tools are free forever with no account: chat-style assistants for SEO, performance, compliance, copy, email, structured data and design that run on the user's URL or brief and return checklists, files and previews. The agency is a one-time ${siteConfig.price} for unlimited marketing and design work for life — no retainers. Tools run as a conversation: paste a URL or describe what you need, the assistant runs the analysis or writes the deliverable, and you download it.`,
+    `Launchabl has two halves. The tools are free forever (first run without an account, then a free email sign-in): chat-style assistants for SEO, performance, compliance, copy, email, structured data and design that run on the user's URL or brief and return checklists, files and previews. The agency is a one-time ${siteConfig.price} for unlimited marketing and design work for life — no retainers. Tools run as a conversation: paste a URL or describe what you need, the assistant runs the analysis or writes the deliverable, and you download it.`,
     "",
     "## Free tools",
     "",

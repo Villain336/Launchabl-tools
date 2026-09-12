@@ -11,10 +11,14 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type FileUIPart } from "ai";
-import { ArrowUp, Check, Copy, FileText, History, Paperclip, RefreshCw, RotateCcw, Square, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowUp, Check, Copy, FileText, History, Paperclip, RefreshCw, RotateCcw, Square, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { getChatTool } from "@/lib/ai/chat-tools";
+import { signOut, useSession } from "@/lib/auth/use-session";
+import { SignInForm } from "@/components/auth/sign-in-form";
 import { ACCEPT, ATTACHMENT_LIMITS, AttachmentError, dataUrlBytes, fileToPart, formatBytes, isImageType } from "@/lib/chat/attachments";
 import { trimImageHistory } from "@/lib/chat/inline-attachments";
 import { getToolBySlug } from "@/lib/site-config";
@@ -267,16 +271,44 @@ function AttachmentChip({ part, onRemove }: { part: FileUIPart; onRemove: () => 
   );
 }
 
-function parseErrorMessage(error: Error | undefined): string | null {
+function parseError(error: Error | undefined): { message: string; cause: string | null } | null {
   if (!error) return null;
   const raw = error.message || "Something went wrong.";
   try {
-    const parsed = JSON.parse(raw) as { error?: string };
-    if (parsed && typeof parsed.error === "string") return parsed.error;
+    const parsed = JSON.parse(raw) as { error?: string; cause?: string };
+    if (parsed && typeof parsed.error === "string") {
+      return { message: parsed.error, cause: typeof parsed.cause === "string" ? parsed.cause : null };
+    }
   } catch {
     // plain text
   }
-  return raw;
+  return { message: raw, cause: null };
+}
+
+function AccountChip() {
+  const session = useSession();
+  const pathname = usePathname();
+  if (session.status !== "ready") return null;
+  if (session.user) {
+    return (
+      <div className="hidden items-center gap-1.5 pr-1 text-[12px] text-ink-3 sm:flex" data-account-chip="user">
+        <UserRound className="h-3.5 w-3.5" />
+        <span className="max-w-[160px] truncate">{session.user.name || session.user.email}</span>
+        <button type="button" onClick={() => void signOut()} className="text-ink-3 hover:text-ink">
+          Sign out
+        </button>
+      </div>
+    );
+  }
+  return (
+    <Link
+      href={`/sign-in?next=${encodeURIComponent(pathname ?? "/tools")}`}
+      className="hidden h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium text-ink-2 hover:bg-hover hover:text-ink sm:inline-flex"
+      data-account-chip="anon"
+    >
+      <UserRound className="h-3.5 w-3.5" /> Sign in
+    </Link>
+  );
 }
 
 function ToolPartView({ part, streaming }: { part: ToolPart; streaming: boolean }) {
@@ -507,7 +539,9 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     useChat<ToolChatMessage>({ transport });
 
   const busy = status === "submitted" || status === "streaming";
-  const errorMessage = parseErrorMessage(error);
+  const parsedError = parseError(error);
+  const signInRequired = parsedError?.cause === "sign_in_required";
+  const errorMessage = signInRequired ? null : parsedError?.message ?? null;
   const canSend = (draft.trim().length > 0 || attachments.length > 0) && !busy;
 
   const send = (text: string) => {
@@ -694,9 +728,10 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
         <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           <span className="font-medium text-ink">{tool?.name ?? "Launchabl"}</span>
-          <span className="hidden sm:inline">· free, no account needed</span>
+          <span className="hidden sm:inline">· free · first run without an account</span>
         </div>
         <div className="flex items-center gap-0.5">
+          <AccountChip />
           <HistoryMenu slug={slug} currentId={currentId} onOpen={openConversation} onDelete={removeConversation} onClear={clearAll} />
           {messages.length > 0 && (
             <IconButton label="Start a new conversation" onClick={reset}>
@@ -777,6 +812,34 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
         {awaitingFirstToken && (
           <div className="flex items-center gap-2">
             <Shimmer>Thinking</Shimmer>
+          </div>
+        )}
+
+        {signInRequired && (
+          <div
+            className="mx-auto w-full max-w-sm rounded-[12px] border border-line bg-field/60 p-4 sm:p-5"
+            style={{ animation: "fade-up 300ms cubic-bezier(0.23,1,0.32,1) both" }}
+            data-sign-in-card
+          >
+            <div className="mb-3 flex items-start gap-2.5">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-[14px] font-semibold text-ink">That was your free run</p>
+                <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-2">
+                  Add your email to keep going — every tool, unlimited runs, no credit card. Your request picks up right where it left off.
+                </p>
+              </div>
+            </div>
+            <SignInForm
+              compact
+              onSignedIn={() => {
+                clearError();
+                pinnedRef.current = true;
+                void regenerate();
+              }}
+            />
           </div>
         )}
 

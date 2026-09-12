@@ -31,7 +31,7 @@ export async function generateMetadata({
   const tool = getToolBySlug(slug);
   if (!tool) return {};
   const path = `/tools/${tool.slug}`;
-  const title = `${tool.name} — free, no account needed`;
+  const title = `${tool.name} — free, first run without an account`;
   return {
     title: tool.name,
     description: tool.shortDescription,

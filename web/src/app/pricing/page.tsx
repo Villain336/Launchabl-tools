@@ -24,7 +24,7 @@ const faqs = [
   {
     question: "What if I only need the free tools?",
     answer:
-      "Great — the tools in our toolbox are free to use with no account required, whether or not you ever upgrade.",
+      "Great — the tools in our toolbox are free to use with a free account (your first run needs none), whether or not you ever upgrade.",
   },
   {
     question: "Is there a guarantee?",

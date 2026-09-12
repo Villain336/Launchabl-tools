@@ -29,7 +29,7 @@ export default function Image() {
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={{ display: "flex", fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, maxWidth: 1000 }}>{siteConfig.tagline}</div>
           <div style={{ display: "flex", fontSize: 30, lineHeight: 1.35, color: "#3d3d3d", maxWidth: 980 }}>
-            {`${liveTools} free tools for SEO, performance, compliance, copy and design — no account. Plus an agency that's unlimited for life at ${siteConfig.price}, one time.`}
+            {`${liveTools} free tools for SEO, performance, compliance, copy and design — free account. Plus an agency that's unlimited for life at ${siteConfig.price}, one time.`}
           </div>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#6b6b6b" }}>

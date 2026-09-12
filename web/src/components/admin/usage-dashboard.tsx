@@ -21,8 +21,37 @@ type UsagePayload = {
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
   upsell: { today: UpsellBucket; last7: UpsellBucket; range: UpsellBucket; byTool: Record<string, UpsellBucket> };
+  accounts?: { users: number; byDay: { date: string; signUps: number; signIns: number }[] };
   days: UsageDay[];
 };
+
+function AccountsPanel({ accounts, days }: { accounts: NonNullable<UsagePayload["accounts"]>; days: number }) {
+  const sum = (n: number, key: "signUps" | "signIns") => accounts.byDay.slice(0, n).reduce((acc, d) => acc + d[key], 0);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Accounts</h2>
+          <p className="text-xs text-muted-foreground">Anonymous visitors get one free run, then sign in with an email.</p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            Total users <span className="font-medium text-foreground">{int(accounts.users)}</span>
+          </span>
+          <span>
+            Sign-ups today <span className="font-medium text-foreground">{int(sum(1, "signUps"))}</span>
+          </span>
+          <span>
+            7 days <span className="font-medium text-foreground">{int(sum(7, "signUps"))}</span>
+          </span>
+          <span>
+            {days} days <span className="font-medium text-foreground">{int(sum(days, "signUps"))}</span> sign-ups · {int(sum(days, "signIns"))} sign-ins
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const ctr = (b: UpsellBucket) => (b.views ? `${((b.clicks / b.views) * 100).toFixed(1)}%` : "—");
 
@@ -243,6 +272,7 @@ export function UsageDashboard() {
           </div>
 
           <BucketTable title="By tool" rows={Object.entries(data.byTool)} labelFor={toolLabel} />
+          {data.accounts && <AccountsPanel accounts={data.accounts} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
           <BucketTable title="By model" rows={Object.entries(data.byModel)} labelFor={(m) => `${modelLabel(m)} · ${m}`} />
 

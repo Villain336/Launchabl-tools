@@ -4,6 +4,7 @@ import { getStore, redisCredentials } from "@/lib/ai/store";
 import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
 import { modelChain } from "@/lib/ai/models";
+import { authStats } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const days = Math.min(90, Math.max(1, Number(request.nextUrl.searchParams.get("days") ?? 30) || 30));
   const store = getStore();
-  const [usage, credits] = await Promise.all([readUsage(days, store), fetchGatewayCredits()]);
+  const [usage, credits, accounts] = await Promise.all([readUsage(days, store), fetchGatewayCredits(), authStats(days, store)]);
 
   const window = (n: number) => sumBuckets(usage.slice(0, n).map((d) => d.total));
   const toolBuckets: Record<string, UsageBucket[]> = {};
@@ -72,6 +73,7 @@ export async function GET(request: NextRequest) {
     byTool,
     byModel,
     upsell,
+    accounts,
     days: usage,
   });
 }
