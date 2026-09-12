@@ -78,7 +78,7 @@ export default function ComparisonBlock() {
                 <CardTitle className="text-base font-semibold">{siteConfig.name}</CardTitle>
                 <Badge variant="default">Recommended</Badge>
               </div>
-              <CardDescription>Free tools plus a one-time unlimited plan.</CardDescription>
+              <CardDescription>Free tools, a free audit, plus a one-time unlimited plan.</CardDescription>
             </CardHeader>
             <Separator />
             <CardContent className="pt-4">

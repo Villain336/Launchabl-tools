@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Megaphone, X } from "lucide-react";
+import { siteConfig } from "@/lib/site-config";
 
 export default function AnnouncementBlock() {
   const [dismissed, setDismissed] = useState(false);
@@ -15,7 +16,7 @@ export default function AnnouncementBlock() {
         <p className="flex items-center gap-2 text-sm font-medium">
           <Megaphone className="size-4 shrink-0" aria-hidden="true" />
           <span>
-            Free tools are live — the unlimited plan is a one-time price, no retainer.{" "}
+            Free tools are live — get a free audit, then {siteConfig.price} unlimited, no retainer.{" "}
             <Button
               variant="link"
               size="sm"
