@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Check, ChevronDown, ChevronRight, FileDiff, X } from "lucide-react";
+import { AlertTriangle, Check, ChevronDown, ChevronRight, CircleAlert, FileDiff, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { diffStats, type AppliedEdit } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
@@ -87,6 +87,17 @@ export function EditReview({ review, onDecide, onOpenFile }: Props) {
                   <span className={cn("shrink-0 text-[11.5px] font-medium", decision === "accepted" ? "text-emerald-600" : "text-muted-foreground")}>{decision === "accepted" ? "Accepted" : "Rejected"}</span>
                 )}
               </div>
+              {edit.problems && edit.problems.length > 0 && (
+                <ul className="space-y-0.5 border-t border-border bg-muted/30 px-3 py-1.5 text-[11.5px]" data-ide-review-problems={edit.problems.length}>
+                  {edit.problems.map((p, i) => (
+                    <li key={i} className="flex items-start gap-1.5">
+                      {p.severity === "error" ? <CircleAlert className="mt-0.5 size-3 shrink-0 text-red-600" /> : <AlertTriangle className="mt-0.5 size-3 shrink-0 text-amber-600" />}
+                      <span className="text-foreground">{p.message}</span>
+                      {p.line !== null && <span className="font-mono text-muted-foreground">line {p.line}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {expanded && (
                 <div className="border-t border-border">
                   <DiffView path={edit.path} before={edit.before} after={edit.after} />

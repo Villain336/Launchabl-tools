@@ -2,10 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import { Code2, Columns2, Eye, X } from "lucide-react";
+import { AlertTriangle, CircleAlert, CircleCheck, Code2, Columns2, Eye, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/components/ide/preview";
 import type { Selection } from "@/components/ide/code-editor";
+import type { Problem } from "@/lib/ide/checks";
+import type { PreviewRuntimeError } from "@/lib/ide/preview";
 import { formatBytes, isDirty, isNew, languageOf, previewKind, type WorkspaceFile } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
 
@@ -24,15 +26,22 @@ type Props = {
   onClose: (path: string) => void;
   onChange: (path: string, content: string) => void;
   onSelectionChange: (selection: Selection | null) => void;
+  /** Static + runtime problems for changed files and the active file. */
+  problems: Problem[];
+  onOpen: (path: string, line?: number) => void;
+  onRuntimeError: (path: string, error: PreviewRuntimeError | null) => void;
 };
 
 type View = "code" | "preview" | "split";
 
-export function EditorPane({ files, tabs, activePath, jumpToLine, wordWrap, onActivate, onClose, onChange, onSelectionChange }: Props) {
+export function EditorPane({ files, tabs, activePath, jumpToLine, wordWrap, onActivate, onClose, onChange, onSelectionChange, problems, onOpen, onRuntimeError }: Props) {
   const [view, setView] = useState<View>("code");
+  const [showProblems, setShowProblems] = useState(false);
   const file = activePath ? files[activePath] : null;
   const previewable = file ? previewKind(file.path) !== null : false;
   const effectiveView: View = previewable ? view : "code";
+  const errors = problems.filter((p) => p.severity === "error").length;
+  const warnings = problems.length - errors;
 
   return (
     <div className="flex h-full min-h-0 flex-col" data-ide-editor-pane>
@@ -100,7 +109,7 @@ export function EditorPane({ files, tabs, activePath, jumpToLine, wordWrap, onAc
           </div>
         ) : file.binary ? (
           previewKind(activePath) ? (
-            <Preview path={activePath} files={files} />
+            <Preview path={activePath} files={files} onRuntimeError={onRuntimeError} />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-1 p-6 text-center text-[13px] text-muted-foreground">
               <p className="font-medium text-foreground">{activePath.split("/").pop()}</p>
@@ -116,15 +125,61 @@ export function EditorPane({ files, tabs, activePath, jumpToLine, wordWrap, onAc
             )}
             {effectiveView !== "code" && (
               <div className="min-h-0 min-w-0 overflow-hidden">
-                <Preview path={activePath} files={files} />
+                <Preview path={activePath} files={files} onRuntimeError={onRuntimeError} />
               </div>
             )}
           </div>
         )}
       </div>
 
+      {showProblems && (
+        <div className="max-h-[40%] shrink-0 overflow-y-auto border-t border-border bg-background" data-ide-problems>
+          <div className="flex items-center gap-2 px-3 py-1.5 text-[11.5px] text-muted-foreground">
+            <span className="font-medium text-foreground">Problems</span>
+            <span>
+              {errors} error{errors === 1 ? "" : "s"}, {warnings} warning{warnings === 1 ? "" : "s"} · changed files and the open file
+            </span>
+            <button type="button" aria-label="Close problems" onClick={() => setShowProblems(false)} className="ml-auto rounded p-0.5 hover:bg-muted hover:text-foreground">
+              <X className="size-3.5" />
+            </button>
+          </div>
+          {problems.length === 0 ? (
+            <p className="px-3 pb-3 text-[12px] text-muted-foreground">Nothing found. JSON and JavaScript syntax, HTML structure and broken local links, CSS braces, and errors thrown by the preview are checked here; TypeScript and JSX need the project&apos;s own build.</p>
+          ) : (
+            <ul className="divide-y divide-border/60">
+              {problems.map((p, i) => (
+                <li key={`${p.path}:${p.line}:${p.message}:${i}`}>
+                  <button type="button" onClick={() => onOpen(p.path, p.line ?? undefined)} className="flex w-full items-start gap-2 px-3 py-1.5 text-left text-[12px] hover:bg-muted/60" data-ide-problem={p.severity} data-source={p.source}>
+                    {p.severity === "error" ? <CircleAlert className="mt-0.5 size-3.5 shrink-0 text-red-600" /> : <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-600" />}
+                    <span className="min-w-0 flex-1">
+                      <span className="text-foreground">{p.message}</span>
+                      <span className="ml-2 font-mono text-[11px] text-muted-foreground">
+                        {p.path}
+                        {p.line !== null ? `:${p.line}` : ""}
+                        {p.source === "runtime" ? " · preview" : ""}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {file && activePath && (
         <div className="flex items-center gap-3 border-t border-border bg-muted/30 px-3 py-1 text-[11px] text-muted-foreground" data-ide-status>
+          <button
+            type="button"
+            onClick={() => setShowProblems((s) => !s)}
+            aria-pressed={showProblems}
+            title="Problems in changed files and the open file"
+            className={cn("flex shrink-0 items-center gap-1 rounded px-1 hover:bg-muted hover:text-foreground", errors > 0 ? "text-red-600" : warnings > 0 ? "text-amber-600" : "")}
+            data-ide-problem-count={problems.length}
+          >
+            {errors > 0 ? <CircleAlert className="size-3" /> : warnings > 0 ? <AlertTriangle className="size-3" /> : <CircleCheck className="size-3" />}
+            {problems.length === 0 ? "No problems" : `${problems.length} problem${problems.length === 1 ? "" : "s"}`}
+          </button>
           <span className="truncate font-mono">{activePath}</span>
           <span className="ml-auto shrink-0">{languageOf(activePath)}</span>
           <span className="shrink-0">{formatBytes(file.size)}</span>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyEdits, buildTree, createWorkspace, describeTree, diffStats, globToRegExp, isIgnoredPath, languageOf, looksBinary, makeFile, normalisePath, numberedSlice, pendingChanges, previewEdits, removeFile, searchWorkspace, stripCommonRoot } from "./workspace";
 import { importEntries } from "./import";
-import { inlineAssets } from "./preview";
+import { inlineAssets, PREVIEW_BRIDGE, PREVIEW_MESSAGE, withBridge } from "./preview";
 
 const enc = (s: string) => new TextEncoder().encode(s);
 
@@ -127,5 +127,14 @@ describe("preview asset inlining", () => {
     expect(out).toContain('src="data:image/png;base64,AAAA"');
     expect(out).toContain('href="about.html"');
     expect(out).toContain('href="https://x.com/a.css"');
+  });
+
+  it("injects the error bridge right after <head> without adding lines, so error line numbers stay true", () => {
+    const html = "<!doctype html>\n<html lang=\"en\">\n<head>\n<title>t</title>\n</head>\n<body></body>\n</html>";
+    const out = withBridge(html);
+    expect(out.split("\n").length).toBe(html.split("\n").length);
+    expect(out.indexOf(PREVIEW_BRIDGE)).toBe(out.indexOf("<head>") + "<head>".length);
+    expect(out).toContain(PREVIEW_MESSAGE);
+    expect(withBridge("<p>fragment</p>").startsWith(PREVIEW_BRIDGE)).toBe(true);
   });
 });

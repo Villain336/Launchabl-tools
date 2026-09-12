@@ -16,9 +16,10 @@ const readFileResult = z.union([
   z.object({ path: z.string(), error: z.string() }),
 ]);
 const searchFilesResult = z.object({ query: z.string(), hits: z.array(z.object({ path: z.string(), line: z.number(), text: z.string() })), truncated: z.boolean() });
+const problem = z.object({ line: z.number().nullable(), severity: z.enum(["error", "warning"]), message: z.string() });
 const proposeEditsResult = z.object({
   summary: z.string(),
-  results: z.array(z.object({ path: z.string(), kind: z.string(), ok: z.boolean(), error: z.string().optional(), added: z.number(), removed: z.number() })),
+  results: z.array(z.object({ path: z.string(), kind: z.string(), ok: z.boolean(), error: z.string().optional(), added: z.number(), removed: z.number(), problems: z.array(problem).optional() })),
   /** Always false from the tool: acceptance happens in the editor. */
   applied: z.literal(false),
 });
@@ -27,6 +28,14 @@ export type ListFilesResult = z.infer<typeof listFilesResult>;
 export type ReadFileResult = z.infer<typeof readFileResult>;
 export type SearchFilesResult = z.infer<typeof searchFilesResult>;
 export type ProposeEditsResult = z.infer<typeof proposeEditsResult>;
+const runChecksResult = z.object({
+  checked: z.array(z.string()),
+  unchecked: z.array(z.string()).describe("Files that have no browser-side checker (TypeScript, JSX, etc.)."),
+  note: z.string().nullable(),
+  problems: z.array(problem.extend({ path: z.string(), source: z.string() })),
+  runtime: z.array(problem.extend({ path: z.string() })).describe("Errors the preview iframe threw while rendering HTML pages, if any."),
+});
+export type RunChecksResult = z.infer<typeof runChecksResult>;
 
 export const codeEditorTools = {
   listFiles: tool({
@@ -54,6 +63,11 @@ export const codeEditorTools = {
       glob: z.string().max(200).nullable().describe("Optional path glob like src/**/*.ts."),
     }),
     outputSchema: searchFilesResult,
+  }),
+  runChecks: tool({
+    description: "Run the browser-side checks (JSON and JavaScript syntax, HTML structure and broken local links, CSS braces) on the given files, or on every changed file when paths is null. Also returns runtime errors the preview caught. Use after the user accepts edits, or when they ask whether something is broken.",
+    inputSchema: z.object({ paths: z.array(z.string().max(400)).max(50).nullable() }),
+    outputSchema: runChecksResult,
   }),
   proposeEdits: tool({
     outputSchema: proposeEditsResult,
@@ -87,7 +101,7 @@ export const CODE_EDITOR_INSTRUCTIONS = `You are the coding assistant inside Lau
 How to work:
 1. Orient first. If the request names a file, read it. If it doesn't, searchFiles for the symbol, text or route involved, then read the files that matter. Read before you edit — every time.
 2. Propose changes with proposeEdits, preferring patch edits with a unique find string copied exactly from what you read (no line-number prefixes). Include enough surrounding lines that the match is unique. One proposeEdits call can carry several files; group a change into one call so the user reviews it together.
-3. The result lists which edits applied cleanly. If a patch failed ("isn't in the file" or "appears N times"), re-read that region and propose again with a corrected find. Don't retry the same find.
+3. The result lists which edits applied cleanly and any problems the browser-side checks found in the proposed content (JSON/JS syntax, missing local files, HTML structure). If a patch failed ("isn't in the file" or "appears N times"), re-read that region and propose again with a corrected find. Don't retry the same find. If a check reports an error in your proposal, fix it and re-propose before telling the user it's ready.
 4. Nothing is written until the user accepts the diff in the editor. Don't claim a change is made; say it's ready to review. If they ask you to continue after accepting, re-read the file rather than assuming its contents.
 5. Explain briefly: what you changed and why, any follow-ups (tests to run, env vars to set), in two to five sentences. No headers, no bullet lists in the chat — the diffs are shown separately.
 6. Never propose edits to binary files, lockfiles or anything under node_modules. Don't add secrets to files; tell the user to use environment variables.

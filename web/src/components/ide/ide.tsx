@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Bot, Download, FolderClosed, GitCommitHorizontal, PanelLeft, Settings2, X } from "lucide-react";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,9 @@ import { Explorer } from "@/components/ide/explorer";
 import { Launcher } from "@/components/ide/launcher";
 import { SettingsDialog } from "@/components/ide/settings-dialog";
 import { useWorkspace } from "@/components/ide/use-workspace";
+import { runChecks, type Problem } from "@/lib/ide/checks";
 import { exportZip } from "@/lib/ide/import";
+import type { PreviewRuntimeError } from "@/lib/ide/preview";
 import { loadSettings, saveSettings, type IdeSettings } from "@/lib/ide/store";
 import { pendingChanges, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
@@ -109,6 +111,37 @@ export function Ide() {
 
   const pending = useMemo(() => (workspace ? pendingChanges(workspace).length : 0), [workspace]);
   const github = workspace?.source.kind === "github" ? workspace.source : null;
+
+  // Problems: static checks on changed files plus the open file (debounced so
+  // typing stays smooth), and whatever the preview iframe threw.
+  const [staticProblems, setStaticProblems] = useState<Problem[]>([]);
+  const [runtime, setRuntime] = useState<Record<string, PreviewRuntimeError[]>>({});
+  const files = workspace?.files;
+  useEffect(() => {
+    if (!workspace || !files) return;
+    const timer = setTimeout(() => {
+      const paths = new Set(pendingChanges(workspace).map((c) => c.path));
+      if (activePath) paths.add(activePath);
+      setStaticProblems(runChecks(files, [...paths]));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [workspace, files, activePath]);
+  const onRuntimeError = useCallback((path: string, error: PreviewRuntimeError | null) => {
+    setRuntime((current) => {
+      if (error === null) return current[path]?.length ? { ...current, [path]: [] } : current;
+      const list = current[path] ?? [];
+      if (list.length >= 20 || list.some((e) => e.message === error.message && e.line === error.line)) return current;
+      return { ...current, [path]: [...list, error] };
+    });
+  }, []);
+  const problems = useMemo<Problem[]>(() => {
+    const runtimeProblems: Problem[] = [];
+    for (const [path, errors] of Object.entries(runtime)) {
+      if (!files?.[path]) continue;
+      for (const e of errors) runtimeProblems.push({ path, line: e.line, severity: "error", message: e.source === "console.error" ? `console.error: ${e.message}` : e.message, source: "runtime" });
+    }
+    return [...staticProblems.filter((p) => files?.[p.path]), ...runtimeProblems];
+  }, [staticProblems, runtime, files]);
 
   if (ws.loading) {
     return (
@@ -206,6 +239,9 @@ export function Ide() {
               onClose={close}
               onChange={ws.updateFile}
               onSelectionChange={setSelection}
+              problems={problems}
+              onOpen={open}
+              onRuntimeError={onRuntimeError}
             />
           </section>
           <aside className={cn("min-h-0 border-l border-border", mobileView === "chat" ? "block" : "hidden", showAssistant ? "md:block" : "md:hidden")}>
@@ -214,6 +250,7 @@ export function Ide() {
               activePath={activePath}
               selection={selection}
               settings={settings}
+              runtimeProblems={problems.filter((p) => p.source === "runtime")}
               onAcceptEdits={onAcceptEdits}
               onOpenFile={(path) => {
                 open(path);

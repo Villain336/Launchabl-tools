@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
-import { Bot, FileSearch, FileText, FolderTree, KeyRound, RotateCcw, Sparkles } from "lucide-react";
+import { Bot, FileSearch, FileText, FolderTree, KeyRound, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
 import { Conversation, ConversationContent, ConversationEmptyState, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { PromptInput, PromptInputBody, PromptInputFooter, PromptInputSubmit, PromptInputTextarea, PromptInputTools } from "@/components/ai-elements/prompt-input";
@@ -14,21 +14,24 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/componen
 import { Button } from "@/components/ui/button";
 import { EditReview, type Review } from "@/components/ide/edit-review";
 import type { Selection } from "@/components/ide/code-editor";
-import type { CodeEditorTools, IdeMessage, ListFilesResult, ProposeEditsResult, ReadFileResult, SearchFilesResult } from "@/lib/ai/tools/code-editor";
+import type { CodeEditorTools, IdeMessage, ListFilesResult, ProposeEditsResult, ReadFileResult, RunChecksResult, SearchFilesResult } from "@/lib/ai/tools/code-editor";
+import { annotateEdits, canCheck, runChecks, UNCHECKED_NOTE, type Problem } from "@/lib/ide/checks";
 import type { IdeSettings } from "@/lib/ide/store";
-import { describeTree, diffStats, globToRegExp, languageOf, numberedSlice, previewEdits, searchWorkspace, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
+import { describeTree, diffStats, globToRegExp, languageOf, numberedSlice, pendingChanges, previewEdits, searchWorkspace, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
 
 type Props = {
   workspace: Workspace;
   activePath: string | null;
   selection: Selection | null;
   settings: IdeSettings;
+  /** Errors the preview iframe reported, so the model can see them via runChecks. */
+  runtimeProblems: Problem[];
   onAcceptEdits: (edits: AppliedEdit[]) => void;
   onOpenFile: (path: string) => void;
   onOpenSettings: () => void;
 };
 
-const SUGGESTIONS = ["Explain how this project is structured", "Find where the page title is set", "Tighten the hero headline and subhead", "Add a FAQ section with three questions", "Check the HTML for accessibility issues"];
+const SUGGESTIONS = ["Explain how this project is structured", "Find where the page title is set", "Tighten the hero headline and subhead", "Add a FAQ section with three questions", "Check my changes for problems"];
 
 function parseError(error: Error | undefined): { message: string; cause: string | null } | null {
   if (!error) return null;
@@ -82,6 +85,21 @@ function runSearchFiles(ws: Workspace, input: CodeEditorTools["searchFiles"]["in
   return { query: input.query, hits: hits.slice(0, 60), truncated: hits.length > 60 };
 }
 
+function runChecksTool(ws: Workspace, input: CodeEditorTools["runChecks"]["input"], runtime: Problem[]): RunChecksResult {
+  const requested = input.paths?.length ? input.paths : pendingChanges(ws).map((c) => c.path);
+  const existing = requested.filter((p) => ws.files[p] && !ws.files[p].binary);
+  const checked = existing.filter(canCheck);
+  const unchecked = existing.filter((p) => !canCheck(p));
+  const problems = runChecks(ws.files, checked).map((p) => ({ path: p.path, line: p.line, severity: p.severity, message: p.message, source: p.source }));
+  return {
+    checked,
+    unchecked,
+    note: unchecked.length ? UNCHECKED_NOTE : null,
+    problems,
+    runtime: runtime.map((p) => ({ path: p.path, line: p.line, severity: p.severity, message: p.message })),
+  };
+}
+
 /* ── compact tool rows ──────────────────────────────── */
 
 function toolTitle(part: Extract<IdeMessage["parts"][number], { type: `tool-${string}` }>): { icon: typeof FileText; title: string } {
@@ -100,6 +118,11 @@ function toolTitle(part: Extract<IdeMessage["parts"][number], { type: `tool-${st
       const out = part.output as ListFilesResult | undefined;
       return { icon: FolderTree, title: `Listed ${String(input.folder || "/")}${out ? ` · ${out.files.length} files` : ""}` };
     }
+    case "tool-runChecks": {
+      const out = part.output as RunChecksResult | undefined;
+      const count = out ? out.problems.length + out.runtime.length : 0;
+      return { icon: ShieldCheck, title: out ? `Checked ${out.checked.length} file${out.checked.length === 1 ? "" : "s"} · ${count === 0 ? "no problems" : `${count} problem${count === 1 ? "" : "s"}`}` : "Running checks" };
+    }
     default:
       return { icon: Sparkles, title: part.type.replace(/^tool-/, "") };
   }
@@ -109,7 +132,7 @@ function toolTitle(part: Extract<IdeMessage["parts"][number], { type: `tool-${st
  * The right-hand assistant. Tools run here against the workspace ref (never
  * stale), edits land as diffs the user accepts per file.
  */
-export function Assistant({ workspace, activePath, selection, settings, onAcceptEdits, onOpenFile, onOpenSettings }: Props) {
+export function Assistant({ workspace, activePath, selection, settings, runtimeProblems, onAcceptEdits, onOpenFile, onOpenSettings }: Props) {
   const [reviews, setReviews] = useState<Record<string, Review>>({});
 
   // useChat reads the latest transport and callbacks on every request, so a
@@ -144,14 +167,17 @@ export function Assistant({ workspace, activePath, selection, settings, onAccept
         case "searchFiles":
           addToolOutput({ tool: "searchFiles", toolCallId: toolCall.toolCallId, output: runSearchFiles(ws, toolCall.input) });
           return;
+        case "runChecks":
+          addToolOutput({ tool: "runChecks", toolCallId: toolCall.toolCallId, output: runChecksTool(ws, toolCall.input, runtimeProblems) });
+          return;
         case "proposeEdits": {
-          const results = previewEdits(ws.files, toolCall.input.edits);
+          const results = annotateEdits(ws.files, previewEdits(ws.files, toolCall.input.edits));
           const decisions: Review["decisions"] = {};
           for (const r of results) if (r.ok) decisions[r.path] = "pending";
           setReviews((prev) => ({ ...prev, [toolCall.toolCallId]: { summary: toolCall.input.summary, edits: results, decisions } }));
           const output: ProposeEditsResult = {
             summary: toolCall.input.summary,
-            results: results.map((r, i) => ({ path: r.path, kind: toolCall.input.edits[i]?.kind ?? "patch", ok: r.ok, error: r.error, ...diffStats(r.before, r.after) })),
+            results: results.map((r, i) => ({ path: r.path, kind: toolCall.input.edits[i]?.kind ?? "patch", ok: r.ok, error: r.error, ...diffStats(r.before, r.after), problems: r.problems })),
             applied: false,
           };
           addToolOutput({ tool: "proposeEdits", toolCallId: toolCall.toolCallId, output });
@@ -247,7 +273,7 @@ export function Assistant({ workspace, activePath, selection, settings, onAccept
                       </div>
                     );
                   }
-                  if (part.type === "tool-readFile" || part.type === "tool-searchFiles" || part.type === "tool-listFiles") {
+                  if (part.type === "tool-readFile" || part.type === "tool-searchFiles" || part.type === "tool-listFiles" || part.type === "tool-runChecks") {
                     const { title } = toolTitle(part);
                     return (
                       <Tool key={part.toolCallId} className="mb-0 bg-muted/20 text-[12.5px]" data-ide-tool={part.type}>

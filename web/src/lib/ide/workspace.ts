@@ -365,7 +365,8 @@ export type ProposedEdit =
   | { path: string; kind: "create"; content: string }
   | { path: string; kind: "delete" };
 
-export type AppliedEdit = { path: string; before: string | null; after: string | null; ok: boolean; error?: string };
+export type EditProblem = { line: number | null; severity: "error" | "warning"; message: string };
+export type AppliedEdit = { path: string; before: string | null; after: string | null; ok: boolean; error?: string; problems?: EditProblem[] };
 
 /** Compute the after-state of each edit without mutating the workspace. */
 export function previewEdits(files: Record<string, WorkspaceFile>, edits: ProposedEdit[]): AppliedEdit[] {
