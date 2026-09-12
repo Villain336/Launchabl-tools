@@ -3,7 +3,7 @@ import { classifyAiError, userFacingAiMessage } from "@/lib/ai/errors";
 import { modelChain, modelLabel } from "@/lib/ai/models";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
 import { createMemoryStore } from "@/lib/ai/store";
-import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUsage, sumBuckets } from "@/lib/ai/usage";
+import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUpsell, recordUsage, sumBuckets, sumUpsell } from "@/lib/ai/usage";
 import { getChatTool, listChatTools } from "@/lib/ai/chat-tools";
 import { getChatToolRuntime, listChatToolRuntimes } from "@/lib/ai/chat-runtime";
 import { tools } from "@/lib/site-config";
@@ -92,6 +92,21 @@ describe("usage accounting", () => {
     expect(today.byTool.qr.costUsd).toBeCloseTo(estimateCostUsd("anthropic/claude-sonnet-4.6", 1_000, 500), 6);
     expect(today.byModel["openai/gpt-5.4"].costUsd).toBeCloseTo(0.01, 6);
     expect(sumBuckets([today.total, today.total]).requests).toBe(4);
+  });
+
+  it("counts upsell impressions, clicks and dismissals per tool without touching request totals", async () => {
+    const store = createMemoryStore(() => 0);
+    const date = new Date("2026-09-11T10:00:00Z");
+    await recordUpsell({ slug: "website-audit-report", kind: "view" }, store, date);
+    await recordUpsell({ slug: "website-audit-report", kind: "view" }, store, date);
+    await recordUpsell({ slug: "website-audit-report", kind: "click" }, store, date);
+    await recordUpsell({ slug: "link-checker", kind: "dismiss" }, store, date);
+    const [today] = await readUsage(1, store, date);
+    expect(today.total.requests).toBe(0);
+    expect(today.upsell).toEqual({ views: 2, clicks: 1, dismissals: 1 });
+    expect(today.upsellByTool["website-audit-report"]).toEqual({ views: 2, clicks: 1, dismissals: 0 });
+    expect(today.upsellByTool["link-checker"]).toEqual({ views: 0, clicks: 0, dismissals: 1 });
+    expect(sumUpsell([today.upsell, today.upsell]).clicks).toBe(2);
   });
 
   it("enforces the daily spend cap and resets at midnight UTC", async () => {

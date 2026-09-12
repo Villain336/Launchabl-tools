@@ -69,6 +69,47 @@ export async function recordUsage(event: UsageEvent, store: KeyValueStore = getS
   }
 }
 
+/* ── Agency upsell ─────────────────────────────────────────
+ * The free tools exist to sell the agency. Reports with failures show a
+ * "want this done for you?" card; every impression, click and dismissal is
+ * counted here (per day, per tool) so the admin dashboard can show whether
+ * the offer converts and from which tool.
+ */
+
+export const UPSELL_KINDS = ["view", "click", "dismiss"] as const;
+export type UpsellKind = (typeof UPSELL_KINDS)[number];
+
+export type UpsellEvent = { slug: string; kind: UpsellKind };
+
+export type UpsellBucket = { views: number; clicks: number; dismissals: number };
+
+export async function recordUpsell(event: UpsellEvent, store: KeyValueStore = getStore(), date = new Date()): Promise<void> {
+  const day = dayKey(date);
+  const fields: Record<string, number> = {
+    [field("upsell", "all", event.kind)]: 1,
+    [field("upsell", "tool", event.slug, event.kind)]: 1,
+  };
+  try {
+    await Promise.all([store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS), store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS)]);
+  } catch (error) {
+    console.warn("[usage] failed to record upsell", error);
+  }
+}
+
+export function emptyUpsell(): UpsellBucket {
+  return { views: 0, clicks: 0, dismissals: 0 };
+}
+
+export function sumUpsell(buckets: UpsellBucket[]): UpsellBucket {
+  const out = emptyUpsell();
+  for (const b of buckets) {
+    out.views += b.views;
+    out.clicks += b.clicks;
+    out.dismissals += b.dismissals;
+  }
+  return out;
+}
+
 export type UsageBucket = { requests: number; inputTokens: number; outputTokens: number; costUsd: number; errors: number; avgDurationMs: number | null };
 
 export type UsageDay = {
@@ -77,16 +118,26 @@ export type UsageDay = {
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
   estimatedRequests: number;
+  upsell: UpsellBucket;
+  upsellByTool: Record<string, UpsellBucket>;
 };
 
 function emptyBucket(): UsageBucket {
   return { requests: 0, inputTokens: 0, outputTokens: 0, costUsd: 0, errors: 0, avgDurationMs: null };
 }
 
+function applyUpsell(bucket: UpsellBucket, metric: string, value: number) {
+  if (metric === "view") bucket.views = value;
+  else if (metric === "click") bucket.clicks = value;
+  else if (metric === "dismiss") bucket.dismissals = value;
+}
+
 export function parseDay(day: string, raw: Record<string, number>): UsageDay {
   const total = emptyBucket();
   const byTool: Record<string, UsageBucket> = {};
   const byModel: Record<string, UsageBucket> = {};
+  const upsell = emptyUpsell();
+  const upsellByTool: Record<string, UpsellBucket> = {};
   const durations: Record<string, number> = {};
   const bucketFor = (scope: string): UsageBucket | null => {
     if (scope === "all") return total;
@@ -103,6 +154,14 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
       estimatedRequests = value;
       continue;
     }
+    if (scope === "upsell:all") {
+      applyUpsell(upsell, metric, value);
+      continue;
+    }
+    if (scope.startsWith("upsell:tool:")) {
+      applyUpsell((upsellByTool[scope.slice("upsell:tool:".length)] ??= emptyUpsell()), metric, value);
+      continue;
+    }
     const bucket = bucketFor(scope);
     if (!bucket) continue;
     if (metric === "requests") bucket.requests = value;
@@ -116,7 +175,7 @@ export function parseDay(day: string, raw: Record<string, number>): UsageDay {
     const bucket = bucketFor(scope);
     if (bucket && bucket.requests) bucket.avgDurationMs = Math.round(sum / bucket.requests);
   }
-  return { day, total, byTool, byModel, estimatedRequests };
+  return { day, total, byTool, byModel, estimatedRequests, upsell, upsellByTool };
 }
 
 export async function readUsage(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<UsageDay[]> {

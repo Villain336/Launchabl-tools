@@ -5,6 +5,7 @@ import { Crown, Download, Swords } from "lucide-react";
 import type { ComparedSite, CompareMetric, CompareValue, ComparisonReport } from "@/lib/web/compare-sites";
 import { downloadBlob } from "@/lib/download";
 import { ArtifactHeader, Footnote, Pill, ScoreRing, shorten, Tabs } from "@/components/tools/chat/bits";
+import { AgencyUpsell } from "@/components/tools/chat/agency-upsell";
 
 const host = (site: ComparedSite) => {
   try {
@@ -33,6 +34,7 @@ export function ComparisonArtifact({ report }: { report: ComparisonReport }) {
   const okSites = report.sites.filter((s) => s.ok).length;
 
   return (
+    <>
     <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
       <ArtifactHeader icon={<Swords className="h-4 w-4" />} title="Competitor gap report" subtitle={`${report.sites.length} pages · ${okSites} fetched · you lead on ${report.wins.length} of ${report.metrics.length} signals`}>
         <Tabs value={view} onChange={setView} options={[{ key: "table", label: "Side by side" }, { key: "gaps", label: `Gaps (${report.gaps.length})` }]} />
@@ -160,5 +162,7 @@ export function ComparisonArtifact({ report }: { report: ComparisonReport }) {
       )}
       <Footnote icon={<Crown className="h-3 w-3" />}>Crown marks the leader per row. Same-type pages compare fairly; a homepage against a blog post doesn&apos;t.</Footnote>
     </div>
+    <AgencyUpsell issues={report.gaps.length} noun="gap" />
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { getStore, redisCredentials } from "@/lib/ai/store";
-import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, type UsageBucket } from "@/lib/ai/usage";
+import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
 import { modelChain } from "@/lib/ai/models";
 
@@ -45,6 +45,21 @@ export async function GET(request: NextRequest) {
   const byTool = aggregate(toolBuckets);
   const byModel = aggregate(modelBuckets);
 
+  const upsellByToolBuckets: Record<string, UpsellBucket[]> = {};
+  for (const day of usage) {
+    for (const [slug, bucket] of Object.entries(day.upsellByTool)) (upsellByToolBuckets[slug] ??= []).push(bucket);
+  }
+  const upsell = {
+    today: sumUpsell(usage.slice(0, 1).map((d) => d.upsell)),
+    last7: sumUpsell(usage.slice(0, 7).map((d) => d.upsell)),
+    range: sumUpsell(usage.map((d) => d.upsell)),
+    byTool: Object.fromEntries(
+      Object.entries(upsellByToolBuckets)
+        .map(([slug, buckets]) => [slug, sumUpsell(buckets)] as const)
+        .sort((a, b) => b[1].clicks - a[1].clicks || b[1].views - a[1].views),
+    ),
+  };
+
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     store: { kind: store.kind, shared: Boolean(redisCredentials()) },
@@ -56,6 +71,7 @@ export async function GET(request: NextRequest) {
     summary: { today: window(1), last7: window(7), last30: window(30), range: window(days) },
     byTool,
     byModel,
+    upsell,
     days: usage,
   });
 }

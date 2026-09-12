@@ -8,6 +8,7 @@ import type { LandingPageReport } from "@/lib/web/landing-page";
 import type { FaqSchemaDeliverable } from "@/lib/ai/tools/site-checks";
 import { downloadBlob } from "@/lib/download";
 import { CopyButton, Pill, ScoreRing, shorten, tone, type Tone } from "@/components/tools/chat/bits";
+import { AgencyUpsell } from "@/components/tools/chat/agency-upsell";
 
 const statusTone: Record<CheckStatus, Tone> = { pass: "good", warn: "warn", fail: "bad", info: "info" };
 
@@ -103,6 +104,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
   const landing = "ctas" in report ? report : null;
 
   return (
+    <>
     <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
         <span className="text-primary">{meta.icon}</span>
@@ -162,6 +164,8 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
         </button>
       )}
     </div>
+    <AgencyUpsell issues={report.summary.fail} noun="failed check" />
+    </>
   );
 }
 

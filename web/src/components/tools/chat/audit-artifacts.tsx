@@ -7,6 +7,7 @@ import type { LinkReport } from "@/lib/web/links";
 import type { PerformanceReport, Severity } from "@/lib/web/performance";
 import type { BacklinkReport, BacklinkResult } from "@/lib/web/backlinks";
 import { downloadBlob } from "@/lib/download";
+import { AgencyUpsell } from "@/components/tools/chat/agency-upsell";
 
 /* ── shared bits ─────────────────────────────────────────── */
 
@@ -24,19 +25,39 @@ function Pill({ t, children }: { t: Tone; children: ReactNode }) {
   return <span className={`inline-flex h-[20px] items-center gap-1 rounded-[5px] px-1.5 text-[11px] font-medium ${tone[t].text} ${tone[t].bg}`}>{children}</span>;
 }
 
-function Frame({ icon, title, subtitle, actions, children }: { icon: ReactNode; title: string; subtitle: ReactNode; actions?: ReactNode; children: ReactNode }) {
+function Frame({
+  icon,
+  title,
+  subtitle,
+  actions,
+  children,
+  issues = 0,
+  noun,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+  /** Problems this report found; when > 0 the agency upsell follows the card. */
+  issues?: number;
+  noun?: string;
+}) {
   return (
-    <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
-      <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
-        <span className="text-primary">{icon}</span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-ink">{title}</p>
-          <p className="truncate text-[12px] text-ink-2">{subtitle}</p>
+    <>
+      <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card">
+        <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
+          <span className="text-primary">{icon}</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-semibold text-ink">{title}</p>
+            <p className="truncate text-[12px] text-ink-2">{subtitle}</p>
+          </div>
+          {actions}
         </div>
-        {actions}
+        {children}
       </div>
-      {children}
-    </div>
+      <AgencyUpsell issues={issues} noun={noun} />
+    </>
   );
 }
 
@@ -103,6 +124,8 @@ export function CanonicalArtifact({ report }: { report: CanonicalReport }) {
       title="Canonical audit"
       subtitle={shorten(report.finalUrl, 90)}
       actions={<Pill t={verdict}>{verdictLabel}</Pill>}
+      issues={report.summary.fail}
+      noun="canonical problem"
     >
       <div className="grid gap-2 border-b border-line px-4 py-3 sm:grid-cols-3">
         <Stat label="Declared canonical" value={<span className="block truncate font-mono text-[12.5px]" title={report.effectiveCanonical ?? ""}>{report.effectiveCanonical ? shorten(report.effectiveCanonical, 40) : "none"}</span>} t={report.effectiveCanonical ? undefined : "bad"} />
@@ -161,6 +184,8 @@ export function LinksArtifact({ report }: { report: LinkReport }) {
       icon={report.totals.broken ? <Link2Off className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
       title="Link check"
       subtitle={`${shorten(report.finalUrl, 70)} · ${report.totals.checked} checked${report.totals.skipped ? ` · ${report.totals.skipped} skipped` : ""}`}
+      issues={report.totals.broken}
+      noun="broken link"
       actions={
         <>
           {replaceList && <CopyButton text={replaceList} label="Copy fixes" />}
@@ -249,6 +274,8 @@ export function PerformanceArtifact({ report }: { report: PerformanceReport }) {
       title="Page speed audit"
       subtitle={`${shorten(report.finalUrl, 70)} · static analysis, not a Lighthouse run`}
       actions={<DownloadButton text={json} filename="page-speed-audit.json" mime="application/json" label="JSON" />}
+      issues={report.findings.filter((f) => f.severity === "high" || f.severity === "medium").length}
+      noun="speed issue"
     >
       <div className="flex flex-wrap items-center gap-4 border-b border-line px-4 py-3">
         <ScoreRing score={report.score} />
@@ -320,6 +347,8 @@ export function BacklinksArtifact({ report }: { report: BacklinkReport }) {
       title="Backlink health"
       subtitle={`${report.summary.checked} referring page${report.summary.checked === 1 ? "" : "s"} checked for links to ${report.targetHost}${report.summary.skipped ? ` · ${report.summary.skipped} skipped (20 max)` : ""}`}
       actions={<DownloadButton text={backlinksToCsv(report)} filename={`backlinks-${report.targetHost}.csv`} mime="text/csv" label="CSV" />}
+      issues={report.summary.missing + report.summary.unreachable}
+      noun="lost backlink"
     >
       <div className="grid grid-cols-2 gap-2 border-b border-line px-4 py-3 sm:grid-cols-4">
         <Stat label="Live · follow" value={report.summary.live} t="good" />

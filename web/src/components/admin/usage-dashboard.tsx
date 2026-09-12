@@ -5,7 +5,7 @@ import { KeyRound, RefreshCw } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { GatewayCredits, UsageBucket, UsageDay } from "@/lib/ai/usage";
+import type { GatewayCredits, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
 import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
@@ -20,8 +20,62 @@ type UsagePayload = {
   summary: { today: UsageBucket; last7: UsageBucket; last30: UsageBucket; range: UsageBucket };
   byTool: Record<string, UsageBucket>;
   byModel: Record<string, UsageBucket>;
+  upsell: { today: UpsellBucket; last7: UpsellBucket; range: UpsellBucket; byTool: Record<string, UpsellBucket> };
   days: UsageDay[];
 };
+
+const ctr = (b: UpsellBucket) => (b.views ? `${((b.clicks / b.views) * 100).toFixed(1)}%` : "—");
+
+function UpsellPanel({ upsell, labelFor, days }: { upsell: UsagePayload["upsell"]; labelFor: (slug: string) => string; days: number }) {
+  const rows = Object.entries(upsell.byTool);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Agency upsell</h2>
+          <p className="text-xs text-muted-foreground">&ldquo;Want this done for you?&rdquo; cards shown under reports that found problems.</p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            Today <span className="font-medium text-foreground">{int(upsell.today.clicks)}</span> / {int(upsell.today.views)}
+          </span>
+          <span>
+            7 days <span className="font-medium text-foreground">{int(upsell.last7.clicks)}</span> / {int(upsell.last7.views)}
+          </span>
+          <span>
+            {days} days <span className="font-medium text-foreground">{int(upsell.range.clicks)}</span> / {int(upsell.range.views)} · CTR {ctr(upsell.range)}
+          </span>
+        </div>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No impressions recorded yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium">Tool</th>
+              <th className="px-4 py-2 text-right font-medium">Views</th>
+              <th className="px-4 py-2 text-right font-medium">Clicks</th>
+              <th className="px-4 py-2 text-right font-medium">CTR</th>
+              <th className="px-4 py-2 text-right font-medium">Dismissed</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map(([slug, b]) => (
+              <tr key={slug}>
+                <td className="px-4 py-2 text-foreground">{labelFor(slug)}</td>
+                <td className="px-4 py-2 text-right tabular-nums">{int(b.views)}</td>
+                <td className="px-4 py-2 text-right tabular-nums font-medium">{int(b.clicks)}</td>
+                <td className="px-4 py-2 text-right tabular-nums">{ctr(b)}</td>
+                <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{int(b.dismissals)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
 
 const TOKEN_KEY = "launchabl.admin.token";
 
@@ -189,6 +243,7 @@ export function UsageDashboard() {
           </div>
 
           <BucketTable title="By tool" rows={Object.entries(data.byTool)} labelFor={toolLabel} />
+          {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
           <BucketTable title="By model" rows={Object.entries(data.byModel)} labelFor={(m) => `${modelLabel(m)} · ${m}`} />
 
           <div className="overflow-hidden rounded-xl border border-border bg-white">

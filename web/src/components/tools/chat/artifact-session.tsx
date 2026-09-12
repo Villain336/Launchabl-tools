@@ -10,28 +10,32 @@ import { createContext, useContext, useMemo, useRef, type ReactNode } from "reac
  * artifact in the same chat can pick it up.
  */
 type ArtifactSession = {
+  /** Slug of the tool this conversation belongs to. */
+  slug: string;
   get<T>(key: string): T | undefined;
   set<T>(key: string, value: T | undefined): void;
 };
 
 const noop: ArtifactSession = {
+  slug: "",
   get: () => undefined,
   set: () => undefined,
 };
 
 const Context = createContext<ArtifactSession>(noop);
 
-export function ArtifactSessionProvider({ children }: { children: ReactNode }) {
+export function ArtifactSessionProvider({ slug, children }: { slug: string; children: ReactNode }) {
   const store = useRef(new Map<string, unknown>());
   const session = useMemo<ArtifactSession>(
     () => ({
+      slug,
       get: <T,>(key: string) => store.current.get(key) as T | undefined,
       set: (key, value) => {
         if (value === undefined) store.current.delete(key);
         else store.current.set(key, value);
       },
     }),
-    [],
+    [slug],
   );
   return <Context.Provider value={session}>{children}</Context.Provider>;
 }

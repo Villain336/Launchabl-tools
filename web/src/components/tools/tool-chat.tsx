@@ -650,7 +650,7 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
   const starter = meta.starter ? starterArtifacts[meta.starter] : undefined;
 
   return (
-    <ArtifactSessionProvider>
+    <ArtifactSessionProvider slug={slug}>
     <div
       className={`flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[14px] bg-surface shadow-card ${className}`}
       data-tool-chat={slug}
