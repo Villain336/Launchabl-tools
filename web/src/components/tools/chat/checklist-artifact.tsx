@@ -2,27 +2,55 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Bot, Download, FileText, Gauge, Mic, MousePointerClick, Scale, ShieldCheck } from "lucide-react";
+import { Accessibility, ArrowUpRight, Bot, Download, FileText, Gauge, Globe, Lock, Mic, MousePointerClick, Scale, ShieldCheck } from "lucide-react";
 import type { Check as ChecklistCheck, ChecklistReport, CheckStatus } from "@/lib/web/checklist";
 import type { CrawlerStatus, LlmReadabilityReport } from "@/lib/web/llm-readability";
 import type { LandingPageReport } from "@/lib/web/landing-page";
+import type { DnsEmailReport } from "@/lib/web/dns-email";
+import type { SecurityHeadersReport } from "@/lib/web/security-headers";
+import type { AccessibilityReport } from "@/lib/web/accessibility";
+import type { SslReport } from "@/lib/web/ssl";
 import type { FaqSchemaDeliverable } from "@/lib/ai/tools/site-checks";
 import { downloadBlob } from "@/lib/download";
 import { CopyButton, Pill, ScoreRing, shorten, tone, type Tone } from "@/components/tools/chat/bits";
 import { AgencyUpsell } from "@/components/tools/chat/agency-upsell";
 import { useArtifactSession } from "@/components/tools/chat/artifact-session";
+import { AccessibilityStrip, DnsEmailStrip, SecurityHeadersStrip, SslStrip } from "@/components/tools/chat/infra-artifacts";
 import { handoffFor, type Handoff } from "@/lib/chat/handoffs";
 
 const statusTone: Record<CheckStatus, Tone> = { pass: "good", warn: "warn", fail: "bad", info: "info" };
 
+export type AnyChecklistReport = ChecklistReport | LlmReadabilityReport | LandingPageReport | DnsEmailReport | SecurityHeadersReport | AccessibilityReport | SslReport;
 
-const KIND: Record<ChecklistReport["kind"], { title: string; icon: ReactNode; caveat: string }> = {
-  "voice-search": { title: "Voice search readiness", icon: <Mic className="h-4 w-4" />, caveat: "static read of the HTML" },
-  compliance: { title: "Compliance scan", icon: <Scale className="h-4 w-4" />, caveat: "technical signals, not legal advice" },
-  "llm-readability": { title: "LLM readability", icon: <Bot className="h-4 w-4" />, caveat: "page + robots.txt + llms.txt" },
-  "landing-page": { title: "Conversion grade", icon: <MousePointerClick className="h-4 w-4" />, caveat: "CRO heuristics, not a test" },
-  "website-audit": { title: "Website audit", icon: <Gauge className="h-4 w-4" />, caveat: "server-rendered HTML + headers" },
+const KIND: Record<ChecklistReport["kind"], { title: string; icon: ReactNode; caveat: string; noun: string }> = {
+  "voice-search": { title: "Voice search readiness", icon: <Mic className="h-4 w-4" />, caveat: "static read of the HTML", noun: "failed check" },
+  compliance: { title: "Compliance scan", icon: <Scale className="h-4 w-4" />, caveat: "technical signals, not legal advice", noun: "compliance gap" },
+  "llm-readability": { title: "LLM readability", icon: <Bot className="h-4 w-4" />, caveat: "page + robots.txt + llms.txt", noun: "failed check" },
+  "landing-page": { title: "Conversion grade", icon: <MousePointerClick className="h-4 w-4" />, caveat: "CRO heuristics, not a test", noun: "conversion blocker" },
+  "website-audit": { title: "Website audit", icon: <Gauge className="h-4 w-4" />, caveat: "server-rendered HTML + headers", noun: "failed check" },
+  "dns-email": { title: "Email deliverability", icon: <Globe className="h-4 w-4" />, caveat: "public DNS records", noun: "DNS problem" },
+  "security-headers": { title: "Security headers", icon: <ShieldCheck className="h-4 w-4" />, caveat: "one response, logged out", noun: "missing protection" },
+  accessibility: { title: "Accessibility scan", icon: <Accessibility className="h-4 w-4" />, caveat: "WCAG 2.2 static pass, not a conformance audit", noun: "accessibility barrier" },
+  ssl: { title: "TLS certificate", icon: <Lock className="h-4 w-4" />, caveat: "live handshake on port 443", noun: "TLS problem" },
 };
+
+/** Renders `code` spans inside check copy; everything else stays plain text. */
+function InlineCode({ text }: { text: string }) {
+  const parts = text.split(/(`[^`]+`)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("`") && part.endsWith("`") && part.length > 2 ? (
+          <code key={i} className="rounded-[4px] bg-field px-1 py-0.5 font-mono text-[11.5px] text-ink">
+            {part.slice(1, -1)}
+          </code>
+        ) : (
+          part
+        ),
+      )}
+    </>
+  );
+}
 
 function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff | null }) {
   const T = tone[statusTone[check.status]];
@@ -32,10 +60,12 @@ function CheckRow({ check, handoff }: { check: ChecklistCheck; handoff: Handoff 
       <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${T.text}`} />
       <div className="min-w-0 flex-1">
         <p className="text-[13px] font-medium text-ink">{check.title}</p>
-        <p className="mt-0.5 text-[12.5px] leading-relaxed break-words text-ink-2">{check.detail}</p>
+        <p className="mt-0.5 text-[12.5px] leading-relaxed break-words text-ink-2">
+          <InlineCode text={check.detail} />
+        </p>
         {check.fix && (
           <p className="mt-1 text-[12.5px] leading-relaxed break-words text-ink">
-            <span className="font-medium">Fix:</span> {check.fix}
+            <span className="font-medium">Fix:</span> <InlineCode text={check.fix} />
           </p>
         )}
         {handoff && check.status !== "pass" && (
@@ -99,10 +129,17 @@ function CtaStrip({ report }: { report: LandingPageReport }) {
   );
 }
 
-export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmReadabilityReport | LandingPageReport }) {
+export function ChecklistArtifact({ report }: { report: AnyChecklistReport }) {
   const [showPass, setShowPass] = useState(false);
   const { slug } = useArtifactSession();
   const meta = KIND[report.kind];
+  const hostLabel = (() => {
+    try {
+      return new URL(report.finalUrl).hostname;
+    } catch {
+      return report.kind;
+    }
+  })();
   const issues = report.checks.filter((c) => c.status !== "pass");
   const passes = report.checks.filter((c) => c.status === "pass");
   const verdict: Tone = report.summary.fail ? "bad" : report.summary.warn ? "warn" : "good";
@@ -115,6 +152,12 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
   const groups = Array.from(new Set(visible.map((c) => c.group ?? "Checks")));
   const llm = "crawlers" in report ? report : null;
   const landing = "ctas" in report ? report : null;
+  const strip =
+    report.kind === "dns-email" && "records" in report ? <DnsEmailStrip report={report} />
+    : report.kind === "security-headers" && "grade" in report ? <SecurityHeadersStrip report={report} />
+    : report.kind === "accessibility" && "stats" in report ? <AccessibilityStrip report={report} />
+    : report.kind === "ssl" && "certificate" in report ? <SslStrip report={report} />
+    : null;
 
   return (
     <>
@@ -130,7 +173,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
         <Pill t={verdict}>{verdictLabel}</Pill>
         <button
           type="button"
-          onClick={() => downloadBlob(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }), `${report.kind}-${new URL(report.finalUrl).hostname}.json`)}
+          onClick={() => downloadBlob(new Blob([JSON.stringify(report, null, 2)], { type: "application/json" }), `${report.kind}-${hostLabel}.json`)}
           className="inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium text-ink-3 transition-colors hover:bg-hover hover:text-ink"
         >
           <Download className="h-3 w-3" /> JSON
@@ -157,6 +200,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
 
       {llm && <CrawlerTable crawlers={llm.crawlers} robotsUrl={llm.robotsTxt.url} />}
       {landing && <CtaStrip report={landing} />}
+      {strip}
 
       {visible.length === 0 ? (
         <p className="px-4 py-6 text-center text-[13px] text-ink-2">Everything checked passes.</p>
@@ -177,7 +221,7 @@ export function ChecklistArtifact({ report }: { report: ChecklistReport | LlmRea
         </button>
       )}
     </div>
-    <AgencyUpsell issues={report.summary.fail} noun="failed check" />
+    <AgencyUpsell issues={report.summary.fail} noun={meta.noun} />
     </>
   );
 }

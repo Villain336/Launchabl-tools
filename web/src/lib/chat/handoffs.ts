@@ -20,6 +20,16 @@ const SITEMAP = (url: string) => `Generate a sitemap.xml and robots.txt for ${ur
 const LLM = (url: string) => `Check how AI crawlers read ${url}`;
 const LOCAL = (url: string) => `Build a local SEO kit for the business at ${url}`;
 const COMPLIANCE = (url: string) => `Scan ${url} for privacy and compliance issues`;
+const HEADERS = (url: string) => `Grade the security headers on ${url} and write the config to fix them`;
+const TLS = (url: string) => `Check the TLS certificate for ${hostOf(url)}`;
+const A11Y = (url: string) => `Check accessibility on ${url}`;
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+};
 const HEADLINE = (url: string, report: ChecklistReport) => {
   const headline = "headline" in report && typeof report.headline === "string" ? report.headline : null;
   return headline ? `Write 4 headline variants for this landing-page hero (${url}). Current: "${headline}"` : `Write 4 headline variants for the landing page at ${url}`;
@@ -41,9 +51,9 @@ const CHECK_TARGETS: Partial<Record<ChecklistReport["kind"], Record<string, Targ
     "internal-links": { slug: "broken-link-checker", prompt: LINKS },
     "dead-links": { slug: "broken-link-checker", prompt: LINKS },
     content: { slug: "llm-readability-check", prompt: LLM },
-    "security-headers": { slug: "security-headers-checker" },
-    https: { slug: "ssl-certificate-checker" },
-    alt: { slug: "accessibility-checker" },
+    "security-headers": { slug: "security-headers-checker", prompt: HEADERS },
+    https: { slug: "ssl-certificate-checker", prompt: TLS },
+    alt: { slug: "accessibility-checker", prompt: A11Y },
   },
   "landing-page": {
     headline: { slug: "ab-copy-variants", prompt: HEADLINE },
@@ -53,7 +63,7 @@ const CHECK_TARGETS: Partial<Record<ChecklistReport["kind"], Record<string, Targ
     speed: { slug: "page-speed-audit", prompt: SPEED },
     weight: { slug: "page-speed-audit", prompt: SPEED },
     privacy: { slug: "compliance-scanner", prompt: COMPLIANCE },
-    https: { slug: "ssl-certificate-checker" },
+    https: { slug: "ssl-certificate-checker", prompt: TLS },
   },
   "llm-readability": {
     "json-ld": { slug: "schema-generator", prompt: SCHEMA },
@@ -68,15 +78,22 @@ const CHECK_TARGETS: Partial<Record<ChecklistReport["kind"], Record<string, Targ
     "local-schema": { slug: "local-seo-optimizer", prompt: LOCAL },
     "howto-schema": { slug: "schema-generator", prompt: SCHEMA },
     speed: { slug: "page-speed-audit", prompt: SPEED },
-    https: { slug: "ssl-certificate-checker" },
+    https: { slug: "ssl-certificate-checker", prompt: TLS },
   },
   compliance: {
-    csp: { slug: "security-headers-checker" },
-    hsts: { slug: "security-headers-checker" },
-    framing: { slug: "security-headers-checker" },
-    "misc-headers": { slug: "security-headers-checker" },
-    https: { slug: "ssl-certificate-checker" },
-    alt: { slug: "accessibility-checker" },
+    csp: { slug: "security-headers-checker", prompt: HEADERS },
+    hsts: { slug: "security-headers-checker", prompt: HEADERS },
+    framing: { slug: "security-headers-checker", prompt: HEADERS },
+    "misc-headers": { slug: "security-headers-checker", prompt: HEADERS },
+    https: { slug: "ssl-certificate-checker", prompt: TLS },
+    alt: { slug: "accessibility-checker", prompt: A11Y },
+  },
+  "security-headers": {
+    https: { slug: "ssl-certificate-checker", prompt: TLS },
+    "http-redirect": { slug: "ssl-certificate-checker", prompt: TLS },
+  },
+  ssl: {
+    hsts: { slug: "security-headers-checker", prompt: HEADERS },
   },
 };
 

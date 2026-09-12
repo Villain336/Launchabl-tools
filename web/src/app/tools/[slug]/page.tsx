@@ -11,14 +11,9 @@ import { DomainAvailabilitySearch } from "@/components/tools/domain-availability
 import { WatermarkRemover } from "@/components/tools/watermark-remover";
 import { FileConverter } from "@/components/tools/file-converter";
 import { ComingSoonTool } from "@/components/tools/coming-soon-tool";
-import { DnsEmailHealth } from "@/components/tools/dns-email-health";
 import { BrandIdentityKit } from "@/components/tools/brand-identity-kit";
 import { AdCreativeResizer } from "@/components/tools/ad-creative-resizer";
 import { WhiteLabelReportBuilder } from "@/components/tools/white-label-report-builder";
-import { AccessibilityChecker } from "@/components/tools/accessibility-checker";
-import { SecurityHeadersChecker } from "@/components/tools/security-headers-checker";
-import { SslCertificateChecker } from "@/components/tools/ssl-certificate-checker";
-import { EmailFinder } from "@/components/tools/email-finder";
 import { BackgroundRemover } from "@/components/tools/background-remover";
 import { DemoVideoCreator } from "@/components/tools/demo-video-creator";
 import { ToolChat } from "@/components/tools/tool-chat";
@@ -100,7 +95,7 @@ const toolUi: Record<string, ReactNode> = {
   "website-audit-report": <ToolChat slug="website-audit-report" />,
   "landing-page-grader": <ToolChat slug="landing-page-grader" />,
   "competitor-gap-report": <ToolChat slug="competitor-gap-report" />,
-  "dns-email-health": <DnsEmailHealth />,
+  "dns-email-health": <ToolChat slug="dns-email-health" />,
   "brand-identity-kit": <BrandIdentityKit />,
   "ad-creative-resizer": <AdCreativeResizer />,
   "content-campaign-calendar": <ToolChat slug="content-campaign-calendar" />,
@@ -115,10 +110,10 @@ const toolUi: Record<string, ReactNode> = {
   "compliance-scanner": <ToolChat slug="compliance-scanner" />,
   "llm-readability-check": <ToolChat slug="llm-readability-check" />,
   "email-newsletter-builder": <ToolChat slug="email-newsletter-builder" />,
-  "accessibility-checker": <AccessibilityChecker />,
-  "security-headers-checker": <SecurityHeadersChecker />,
-  "ssl-certificate-checker": <SslCertificateChecker />,
-  "email-finder": <EmailFinder />,
+  "accessibility-checker": <ToolChat slug="accessibility-checker" />,
+  "security-headers-checker": <ToolChat slug="security-headers-checker" />,
+  "ssl-certificate-checker": <ToolChat slug="ssl-certificate-checker" />,
+  "email-finder": <ToolChat slug="email-finder" />,
   "background-remover": <BackgroundRemover />,
   "demo-video-creator": <DemoVideoCreator />,
   "domain-purchase": (
@@ -203,7 +198,7 @@ function AboutCopy({ slug }: { slug: string }) {
     "competitor-gap-report":
       "Most tool sites can only tell you about your own site. This one fetches up to four pages — yours and three competitors' — and puts them side by side on identical signals: audit score, content depth and structure, images and alt text, links, title and description, schema types, Open Graph, load time, page weight, scripts, third parties, security headers. It marks the leader on every row, lists where you're behind and where you lead, and surfaces the terms competitors use that your page never does — so the plan writes itself.",
     "dns-email-health":
-      "If your SPF, DKIM, or DMARC records aren't configured correctly, a real percentage of your marketing emails are silently landing in spam — invisible unless you go looking. This tool runs the actual DNS lookups a developer would run by hand and explains each result in plain language.",
+      "If SPF, DKIM or DMARC are wrong, a real share of your email lands in spam — silently — and since 2024 Gmail and Yahoo simply reject bulk mail from domains without them. This tool runs the lookups a deliverability engineer would: MX and provider, a single valid SPF with the right qualifier and a lookup count that includes nested includes, DMARC policy, percentage, reporting address and subdomain policy, DKIM across the selectors common providers use (or the one you name), plus MTA-STS, TLS-RPT and BIMI. Then it writes the exact records to publish and the safe path from p=none to p=reject.",
     "brand-identity-kit":
       "A name and a color aren't a brand kit. This tool procedurally generates a logo mark, a matching favicon, a color palette, and a suggested type pairing from your brand name, then bundles all of it into one downloadable zip — a real starter asset, not just an idea.",
     "ad-creative-resizer":
@@ -219,13 +214,13 @@ function AboutCopy({ slug }: { slug: string }) {
     "broken-link-checker":
       "A single dead link can quietly tank a landing page's conversion rate and its SEO. This scans the links on a page you provide and checks each one's live status, so you find the 404s before your customers — or Google — do.",
     "accessibility-checker":
-      "Accessibility is treated as an afterthought by most marketing sites, and it's a real legal and reputational risk, not just a nice-to-have. This runs a fast static scan for the most common, most damaging accessibility gaps — missing alt text, skipped heading levels, disabled pinch-to-zoom — and explains why each one matters.",
+      "Accessibility is a legal exposure (ADA, the European Accessibility Act, AODA) and a conversion problem: an unlabeled form field means some visitors literally can't sign up. This runs a WCAG 2.2 A/AA pass over the page's HTML — language and title, blocked zoom, heading outline and landmarks, alt text and its quality, form labels, buttons and links with no accessible name, iframes, media, tab order, removed focus outlines, duplicate ids — and lists the actual offending elements so a developer can fix them today. It's honest about what a static scan can't measure (contrast, focus order, live ARIA state) and tells you how to check those.",
     "security-headers-checker":
-      "HTTP security headers are a five-minute fix that most marketing sites simply never make. This checks whether your site sends the headers that defend against clickjacking, MIME-sniffing attacks, and script injection, and explains exactly what each missing header exposes you to.",
+      "Most header checkers count which headers exist. This one grades whether they'd actually stop anything: a Content-Security-Policy full of 'unsafe-inline' isn't protection, a 60-day HSTS isn't either. It checks HTTPS and the HTTP redirect, HSTS age and scope, CSP quality and missing directives, framing protection, MIME sniffing, Referrer-Policy value, Permissions-Policy, cross-origin isolation, cookie flags and version leaks — then writes the header configuration for your stack (Next.js, Vercel, Netlify, nginx, Apache, Express, Cloudflare) with CSP rolled out safely as report-only first.",
     "ssl-certificate-checker":
-      "An expired SSL certificate takes your entire site offline behind a scary browser warning — and it always happens at the worst time. This opens a real TLS connection to your domain, the same way a browser does, and reports the issuer, expiry date, and days remaining.",
+      "An expired or misconfigured certificate puts a full-page warning between you and every visitor, and it always happens at the worst time. This opens a real TLS connection the way a browser does and reports what a browser won't: trust and the exact reason if it fails, days to expiry with Let's Encrypt renewal context, whether the full chain is served, key type and size, which names the certificate covers (including your www or apex twin), the negotiated protocol and cipher, whether TLS 1.0/1.1 are still accepted, and whether HTTP redirects to HTTPS with HSTS.",
     "email-finder":
-      "Finding a specific person's work email usually means guessing at a pattern and hoping. This generates every common pattern for a name at a domain, ranks them by how common each convention is, and confirms the domain itself can receive mail — a real research step, not a guarantee.",
+      "Paid email finders charge per lookup for data that is mostly public. This one generates every common corporate pattern for a name, then reads the company's own homepage, contact, about and team pages to discover the pattern it actually uses and any role addresses it publishes — and confirms the domain has a mail server. Candidates are ranked by confidence with the reason shown. It never claims a mailbox exists; it gives you the best guess, the fallbacks, and a way to verify cheaply.",
     "background-remover":
       "Clean product shots and headshots usually mean a trip to Photoshop or a paid app. This runs a real image-segmentation model entirely on your device — no upload, no account, no watermark — and hands back a transparent PNG in seconds.",
     "demo-video-creator":

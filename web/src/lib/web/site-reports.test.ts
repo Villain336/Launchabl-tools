@@ -156,7 +156,10 @@ describe("website audit", () => {
     expect(meta?.slug).toBe("meta-tag-generator");
     expect(meta?.href).toContain("/tools/meta-tag-generator?q=");
     expect(decodeURIComponent(meta?.href ?? "")).toContain("https://example.com/pricing");
-    expect(handoffFor(report, "security-headers", "website-audit-report")).toMatchObject({ slug: "security-headers-checker", prompt: null, href: "/tools/security-headers-checker" });
+    const headers = handoffFor(report, "security-headers", "website-audit-report");
+    expect(headers?.slug).toBe("security-headers-checker");
+    expect(decodeURIComponent(headers?.href ?? "")).toContain("Grade the security headers on https://example.com/pricing");
+    expect(decodeURIComponent(handoffFor(report, "https", "website-audit-report")?.href ?? "")).toContain("certificate for example.com");
     expect(handoffFor(report, "lang", "website-audit-report")).toBeNull();
     expect(handoffFor(report, "description", "meta-tag-generator")).toBeNull();
   });

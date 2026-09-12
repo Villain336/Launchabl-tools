@@ -56,6 +56,8 @@ import { SitemapArtifact } from "@/components/tools/chat/sitemap-artifact";
 import { SchemaArtifact } from "@/components/tools/chat/schema-artifact";
 import { LocalSeoArtifact } from "@/components/tools/chat/local-seo-artifact";
 import { CalendarArtifact } from "@/components/tools/chat/calendar-artifact";
+import { EmailFinderArtifact } from "@/components/tools/chat/infra-artifacts";
+import type { AccessibilityToolOutput, DnsEmailToolOutput, EmailFinderToolOutput, SecurityHeadersToolOutput, SslToolOutput } from "@/lib/ai/tools/infra-checks";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -95,6 +97,11 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   deliverSchema: (part) => <SchemaArtifact data={part.output as SchemaDeliverable} />,
   deliverLocalSeoKit: (part) => <LocalSeoArtifact kit={part.output as LocalSeoKit} />,
   deliverCalendar: (part) => <CalendarArtifact cal={part.output as CalendarDeliverable} />,
+  checkDnsEmail: (part) => auditOrError(part.output as DnsEmailToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  checkSecurityHeaders: (part) => auditOrError(part.output as SecurityHeadersToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  auditAccessibility: (part) => auditOrError(part.output as AccessibilityToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  checkSsl: (part) => auditOrError(part.output as SslToolOutput, (r) => <ChecklistArtifact report={r.report} />),
+  findEmail: (part) => auditOrError(part.output as EmailFinderToolOutput, (r) => <EmailFinderArtifact result={r.result} />),
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -131,6 +138,11 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   deliverSchema: { working: "Writing and validating the schema", done: "Schema ready" },
   deliverLocalSeoKit: { working: "Building the local SEO kit", done: "Kit ready" },
   deliverCalendar: { working: "Planning the calendar", done: "Calendar ready" },
+  checkDnsEmail: { working: "Reading the domain's DNS", done: "Deliverability report ready" },
+  checkSecurityHeaders: { working: "Grading the response headers", done: "Security report ready" },
+  auditAccessibility: { working: "Scanning for WCAG barriers", done: "Accessibility report ready" },
+  checkSsl: { working: "Opening a TLS connection", done: "Certificate report ready" },
+  findEmail: { working: "Reading the company's pages and DNS", done: "Email candidates ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */

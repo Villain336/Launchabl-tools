@@ -295,6 +295,71 @@ const metas: ChatToolMeta[] = [
     ],
     artifacts: ["deliverCalendar", "fetchPage"],
   },
+  {
+    slug: "dns-email-health",
+    intro:
+      "Give me your sending domain and I'll read its DNS the way Gmail and Microsoft do — MX, SPF (including the 10-lookup budget), DMARC policy and reporting, DKIM across the selectors common providers use, MTA-STS and BIMI — then write the exact records to publish.",
+    placeholder: "Paste a domain, e.g. example.com — and your DKIM selector or sending tools if you know them",
+    suggestions: [
+      "Check email deliverability for vercel.com",
+      "Why are our emails from example.com landing in spam? We send from Google Workspace and HubSpot.",
+      "Audit example.com's DMARC and tell me how to move from p=none to reject safely",
+      "Check DKIM for example.com — our selector is selector1 (Microsoft 365)",
+    ],
+    artifacts: ["checkDnsEmail"],
+  },
+  {
+    slug: "security-headers-checker",
+    intro:
+      "Paste a URL and I'll grade its HTTP security posture — HTTPS and HSTS, Content-Security-Policy quality, framing, MIME sniffing, referrer and permissions policies, cookie flags, version leaks — then write the header config for your stack.",
+    placeholder: "Paste a page URL and, if you like, your stack (Next.js, nginx, Cloudflare, WordPress…)",
+    suggestions: [
+      "Grade the security headers on https://vercel.com",
+      "Check https://example.com and write the headers for a Next.js app on Vercel",
+      "Is our CSP any good? https://example.com — we use Google Tag Manager and Stripe",
+      "Audit https://example.com and give me the nginx config to fix it",
+    ],
+    artifacts: ["checkSecurityHeaders"],
+  },
+  {
+    slug: "accessibility-checker",
+    intro:
+      "Give me a URL and I'll run a WCAG 2.2 scan of the HTML — language, zoom, headings and landmarks, alt text and its quality, form labels, nameless buttons and links, iframes, media, focus and tab order — and list the exact elements to fix.",
+    placeholder: "Paste a page URL, e.g. https://example.com/signup",
+    suggestions: [
+      "Check accessibility on https://vercel.com",
+      "Scan https://example.com/signup — a customer said the form doesn't work with a screen reader",
+      "Audit https://example.com for WCAG 2.2 AA and tell me what a lawsuit would cite first",
+      "Which images on https://example.com/products are missing alt text?",
+    ],
+    artifacts: ["auditAccessibility"],
+  },
+  {
+    slug: "ssl-certificate-checker",
+    intro:
+      "Tell me a domain and I'll open a real TLS connection — trust and chain, expiry, key strength, which names the certificate covers, protocol and cipher, whether TLS 1.0/1.1 are still on, and whether HTTP redirects to HTTPS with HSTS.",
+    placeholder: "Paste a domain, e.g. example.com",
+    suggestions: [
+      "Check the SSL certificate for vercel.com",
+      "Is example.com's certificate about to expire? Check both example.com and www.example.com",
+      "Visitors see a certificate warning on https://example.com — what's wrong?",
+      "Audit TLS on example.com for a PCI scan — protocols and ciphers too",
+    ],
+    artifacts: ["checkSsl"],
+  },
+  {
+    slug: "email-finder",
+    intro:
+      "Give me a name and a company and I'll work out the most likely work email — from the address pattern the company actually uses on its own site, the common conventions, and whether the domain accepts mail — then help you write a message worth answering.",
+    placeholder: "e.g. Jane Doe at acme.com",
+    suggestions: [
+      "Find the work email for Guillermo Rauch at vercel.com",
+      "Likely emails for Jane Doe and Sam Lee at acme.com — we want to pitch a partnership",
+      "What email pattern does example.com use?",
+      "Find Jane Doe's email at acme.com and draft a 100-word intro about our analytics tool",
+    ],
+    artifacts: ["findEmail"],
+  },
 ];
 
 const bySlug = new Map(metas.map((meta) => [meta.slug, meta]));

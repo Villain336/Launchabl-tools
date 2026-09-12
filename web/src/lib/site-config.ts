@@ -454,7 +454,12 @@ export const tools: Tool[] = [
       {
         question: "Can this check my exact DKIM selector?",
         answer:
-          "DKIM selectors aren't discoverable via DNS alone, so this checks a list of common selectors. If your provider uses a custom one, ask your unlimited plan team to verify it directly.",
+          "Yes. DKIM selectors aren't discoverable from DNS alone, so by default it probes the ~40 selectors common providers use (google, selector1/2, k1, s1/s2…). Tell it your selector — or which tools send your mail — and it checks that record exactly.",
+      },
+      {
+        question: "Does it show inbox placement or blacklists?",
+        answer:
+          "No. It reads public DNS, which is what receivers evaluate for authentication. Placement and reputation need sending data — Google Postmaster Tools is the free source for that.",
       },
       {
         question: "Do you store my domain or results?",
@@ -813,9 +818,9 @@ export const tools: Tool[] = [
   },
   {
     slug: "email-finder",
-    name: "B2B Email Finder & Verifier",
-    shortDescription: "Guess the likely business email pattern for a person at a company, and confirm the domain accepts mail.",
-    status: "beta",
+    name: "B2B Email Finder",
+    shortDescription: "Find a person's likely work email from the pattern their company actually uses, ranked by confidence.",
+    status: "live",
     processing: "server",
     upsell: {
       headline: "A guess is a start. A real list is the job.",

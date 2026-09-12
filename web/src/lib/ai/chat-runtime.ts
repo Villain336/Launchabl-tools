@@ -10,6 +10,7 @@ import { complianceScannerRuntime, llmReadabilityRuntime, voiceSearchRuntime } f
 import { newsletterBuilderRuntime } from "@/lib/ai/tools/newsletter";
 import { competitorGapRuntime, landingPageGraderRuntime, sitemapRobotsRuntime, websiteAuditRuntime } from "@/lib/ai/tools/site-reports";
 import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from "@/lib/ai/tools/marketing-kits";
+import { accessibilityRuntime, dnsEmailHealthRuntime, emailFinderRuntime, securityHeadersRuntime, sslCheckerRuntime } from "@/lib/ai/tools/infra-checks";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -19,6 +20,22 @@ import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from 
  * Only import this from API routes — prompts should never reach the client
  * bundle.
  */
+/**
+ * Skill manifest: what a runtime's function tools cost and touch. Lets the
+ * unified agent pick skills, budget them and explain side effects, and lets
+ * the UI label browser-side skills honestly.
+ */
+export type SkillMeta = {
+  /** One line for the agent's skill catalog: what the skill does and delivers. */
+  summary: string;
+  /** free = pure computation, cheap = network reads/DNS, model = extra LLM calls, media = image/audio generation. */
+  cost: "free" | "cheap" | "model" | "media";
+  runsIn: "server" | "browser";
+  sideEffects: "none" | "network-read" | "writes";
+  /** Inputs the skill needs from the user before it can run. */
+  needs: ("url" | "domain" | "text" | "file" | "image" | "name")[];
+};
+
 export type ChatToolRuntime = {
   slug: string;
   modelKind: ModelKind;
@@ -26,6 +43,7 @@ export type ChatToolRuntime = {
   tools?: ToolSet;
   /** Upper bound on model ↔ tool round-trips per user message. */
   maxSteps?: number;
+  skill?: SkillMeta;
 };
 
 const runtimes: ChatToolRuntime[] = [
@@ -50,6 +68,11 @@ const runtimes: ChatToolRuntime[] = [
   schemaGeneratorRuntime,
   localSeoRuntime,
   contentCalendarRuntime,
+  dnsEmailHealthRuntime,
+  securityHeadersRuntime,
+  accessibilityRuntime,
+  sslCheckerRuntime,
+  emailFinderRuntime,
 ];
 
 const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));
