@@ -2,7 +2,8 @@
  * Model routing for Launchabl tools.
  *
  * Every entry is a Vercel AI Gateway slug ("provider/model"). The gateway
- * authenticates with AI_GATEWAY_API_KEY, so no per-provider keys live here.
+ * authenticates with AI_GATEWAY_API_KEY when one is set, or with the
+ * deployment's own OIDC identity on Vercel, so no per-provider keys live here.
  *
  * Chains are ordered best → cheapest. The streaming layer walks down the
  * chain when a model is unavailable (no access on the current plan, rate
@@ -71,6 +72,14 @@ export function modelLabel(slug: string): string {
     .join(" ");
 }
 
-export function hasGatewayKey(env: Record<string, string | undefined> = process.env): boolean {
-  return Boolean(env.AI_GATEWAY_API_KEY);
+/**
+ * Can this deployment reach the AI Gateway on its own account? Either an
+ * explicit key, or a Vercel deployment: there the gateway provider picks up
+ * the project's OIDC token per request (delivered as a header in functions,
+ * as VERCEL_OIDC_TOKEN in builds and `vercel dev`), so no key is needed.
+ */
+export function hasGatewayAuth(env: Record<string, string | undefined> = process.env): boolean {
+  return Boolean(env.AI_GATEWAY_API_KEY || env.VERCEL_OIDC_TOKEN || env.VERCEL === "1");
 }
+
+export const GATEWAY_UNCONFIGURED = "AI is not configured on this deployment. Set AI_GATEWAY_API_KEY, or deploy on Vercel where the project's OIDC identity is used automatically.";

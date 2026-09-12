@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { del } from "@vercel/blob";
 import { NoModelAvailableError } from "@/lib/ai/errors";
-import { hasGatewayKey } from "@/lib/ai/models";
+import { GATEWAY_UNCONFIGURED, hasGatewayAuth } from "@/lib/ai/models";
 import { clientKey, createRateLimiter, type RateLimiter } from "@/lib/ai/rate-limit";
 import { getStore } from "@/lib/ai/store";
 import { checkDailySpend, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
@@ -56,7 +56,7 @@ async function readBlob(url: string, signal: AbortSignal): Promise<{ bytes: Uint
 }
 
 export async function POST(request: NextRequest) {
-  if (!hasGatewayKey()) return NextResponse.json({ error: "AI is not configured on this deployment (missing AI_GATEWAY_API_KEY)." }, { status: 503 });
+  if (!hasGatewayAuth()) return NextResponse.json({ error: GATEWAY_UNCONFIGURED }, { status: 503 });
   const session = await readSession(request.cookies);
   const ip = clientKey(request.headers);
   const who = session?.uid ?? `anon:${ip}`;

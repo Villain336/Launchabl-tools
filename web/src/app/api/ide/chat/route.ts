@@ -3,7 +3,7 @@ import { convertToModelMessages, createGateway, createUIMessageStreamResponse, i
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { classifyAiError, NoModelAvailableError, userFacingAiMessage } from "@/lib/ai/errors";
-import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
+import { GATEWAY_UNCONFIGURED, hasGatewayAuth, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { repairToolCall } from "@/lib/ai/repair";
 import { streamWithFallback } from "@/lib/ai/stream";
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
   if (byok) {
     chain = [byokModel(byok)];
   } else {
-    if (!hasGatewayKey()) return NextResponse.json({ error: "AI is not configured on this deployment. Add your own key in Settings to use the assistant." }, { status: 503 });
+    if (!hasGatewayAuth()) return NextResponse.json({ error: `${GATEWAY_UNCONFIGURED} Or add your own key in Settings to use the assistant.` }, { status: 503 });
     // Only count a gate run on a fresh user turn, not on the tool-result round trips that follow it.
     const last = messages[messages.length - 1];
     const freshTurn = last.role === "user";

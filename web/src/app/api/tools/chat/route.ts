@@ -3,7 +3,7 @@ import { convertToModelMessages, createUIMessageStreamResponse, isStepCount, toU
 import { getChatToolRuntime } from "@/lib/ai/chat-runtime";
 import type { ToolChatMessage, ToolChatMetadata } from "@/lib/ai/chat-message";
 import { classifyAiError, NoModelAvailableError, userFacingAiMessage } from "@/lib/ai/errors";
-import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
+import { GATEWAY_UNCONFIGURED, hasGatewayAuth, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { repairToolCall } from "@/lib/ai/repair";
 import { streamWithFallback } from "@/lib/ai/stream";
@@ -63,11 +63,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!hasGatewayKey()) {
-    return NextResponse.json(
-      { error: "AI is not configured on this deployment (missing AI_GATEWAY_API_KEY)." },
-      { status: 503 },
-    );
+  if (!hasGatewayAuth()) {
+    return NextResponse.json({ error: GATEWAY_UNCONFIGURED }, { status: 503 });
   }
 
   const limit = await chatRateLimiter().check(`${slug}:${clientKey(request.headers)}`);
