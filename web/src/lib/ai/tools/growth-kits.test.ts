@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { annotatePieces, assemblePressRelease, checkPressRelease, formatDateline, pressReleaseSchema, repurposeSchema, summarizeTestPlan, testPlanSchema } from "./growth-kits";
+import { annotatePieces, assemblePressRelease, attributedQuote, checkPressRelease, formatDateline, pressReleaseSchema, repurposeSchema, summarizeTestPlan, testPlanSchema } from "./growth-kits";
 
 const release = pressReleaseSchema.parse({
   headline: "Ledgerly launches automatic payment chasing for freelancers",
@@ -26,6 +26,11 @@ describe("press release", () => {
   it("formats an AP dateline", () => {
     expect(formatDateline({ city: "Austin", region: "Texas", date: "2026-10-01" })).toBe("AUSTIN, Texas, Oct. 1, 2026");
     expect(formatDateline({ city: "London", region: null, date: "2026-03-15" })).toBe("LONDON, March 15, 2026");
+  });
+
+  it("attributes quotes AP-style", () => {
+    expect(attributedQuote({ text: "\"Chasing should be the software's job.\"", name: "Jane Doe", title: "CEO", company: "Ledgerly" })).toBe("“Chasing should be the software's job,” said Jane Doe, CEO at Ledgerly.");
+    expect(attributedQuote({ text: "Why would anyone chase invoices by hand?", name: "Sam Lee", title: "Designer", company: null })).toBe("“Why would anyone chase invoices by hand?” said Sam Lee, Designer.");
   });
 
   it("assembles markdown and plain text with quotes in position and the ### close", () => {

@@ -169,7 +169,7 @@ export function scoreSubjectLine(rawLine: string, rawPreview?: string | null): S
   /* Generic */
   const generic = countMatches(line, GENERIC_TERMS);
   if (generic.length && !/\d/.test(line)) {
-    score -= 8;
+    score -= 14;
     flags.push({ id: "generic", severity: "medium", message: `"${generic[0]}" says what the email is, not why to open it. Lead with the specific thing inside.` });
   }
 

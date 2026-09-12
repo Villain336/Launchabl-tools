@@ -260,28 +260,30 @@ export function SubjectLinesArtifact({ data }: { data: SubjectLinesDeliverable }
           const clipped = [...r.line].slice(MOBILE_VISIBLE).join("");
           return (
             <div key={r.index} className={`px-4 py-3 ${r.index === data.bestIndex ? "bg-green-tint/40" : ""}`}>
-              <button type="button" onClick={() => setOpen(isOpen ? null : r.index)} className="flex w-full items-center gap-3 text-left">
-                <ScoreRing score={r.score} size={40} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Pill t={r.index === data.bestIndex ? "good" : "muted"}>{r.label}</Pill>
-                    <span className="text-[11px] text-ink-3">
-                      {r.length} chars · {r.words} words
-                    </span>
-                    {r.traits.map((t) => (
-                      <Pill key={t} t="info">
-                        {t}
-                      </Pill>
-                    ))}
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setOpen(isOpen ? null : r.index)} aria-expanded={isOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <ScoreRing score={r.score} size={40} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Pill t={r.index === data.bestIndex ? "good" : "muted"}>{r.label}</Pill>
+                      <span className="text-[11px] text-ink-3">
+                        {r.length} chars · {r.words} words
+                      </span>
+                      {r.traits.map((t) => (
+                        <Pill key={t} t="info">
+                          {t}
+                        </Pill>
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[14px] font-semibold leading-snug text-ink">
+                      {visible}
+                      {clipped && <span className="text-ink-3 line-through decoration-ink-3/50">{clipped}</span>}
+                    </p>
+                    {r.previewText && <p className="truncate text-[12.5px] text-ink-2">{r.previewText}</p>}
                   </div>
-                  <p className="mt-1 text-[14px] font-semibold leading-snug text-ink">
-                    {visible}
-                    {clipped && <span className="text-ink-3 line-through decoration-ink-3/50">{clipped}</span>}
-                  </p>
-                  {r.previewText && <p className="truncate text-[12.5px] text-ink-2">{r.previewText}</p>}
-                </div>
+                </button>
                 <CopyButton text={r.previewText ? `${r.line}\n${r.previewText}` : r.line} />
-              </button>
+              </div>
               {isOpen && (
                 <ul className="mt-2 space-y-1 pl-[52px]">
                   {r.flags.length === 0 && <li className="text-[12px] text-green">No flags — clean as far as the checks go.</li>}
@@ -404,19 +406,21 @@ export function TestPlanArtifact({ data }: { data: TestPlanDeliverable }) {
               const isOpen = open === s.id;
               return (
                 <div key={s.id} className="px-4 py-2.5">
-                  <button type="button" onClick={() => setOpen(isOpen ? null : s.id)} className="flex w-full items-start gap-3 text-left">
-                    <span className="w-14 shrink-0 pt-[2px] font-mono text-[11px] text-ink-3">{s.id}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-medium text-ink">{s.title}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-1">
-                        <Pill t={priorityTone[s.priority] ?? "muted"}>{s.priority}</Pill>
-                        <Pill t="muted">{s.type}</Pill>
-                        <Pill t="muted">{s.area}</Pill>
-                        {s.automate && <Pill t="info">automate</Pill>}
+                  <div className="flex items-start gap-3">
+                    <button type="button" onClick={() => setOpen(isOpen ? null : s.id)} aria-expanded={isOpen} className="flex min-w-0 flex-1 items-start gap-3 text-left">
+                      <span className="w-14 shrink-0 pt-[2px] font-mono text-[11px] text-ink-3">{s.id}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-medium text-ink">{s.title}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1">
+                          <Pill t={priorityTone[s.priority] ?? "muted"}>{s.priority}</Pill>
+                          <Pill t="muted">{s.type}</Pill>
+                          <Pill t="muted">{s.area}</Pill>
+                          {s.automate && <Pill t="info">automate</Pill>}
+                        </div>
                       </div>
-                    </div>
+                    </button>
                     <CopyButton text={[`${s.id} ${s.title}`, s.preconditions ? `Preconditions: ${s.preconditions}` : "", ...s.steps.map((st, i) => `${i + 1}. ${st}`), `Expected: ${s.expected}`].filter(Boolean).join("\n")} />
-                  </button>
+                  </div>
                   {isOpen && (
                     <div className="mt-2 grid gap-3 pl-[68px] text-[12.5px] sm:grid-cols-[1fr_1fr]">
                       <div>
