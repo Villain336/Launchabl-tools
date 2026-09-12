@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Braces, CheckCircle2, CircleDashed, ExternalLink, XCircle } from "lucide-react";
 import type { SchemaDeliverable } from "@/lib/ai/tools/marketing-kits";
-import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, shorten, Tabs } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, DownloadButton, Footnote, OpenInEditorButton, Pill, shorten, Tabs } from "@/components/tools/chat/bits";
 
 export function SchemaArtifact({ data }: { data: SchemaDeliverable }) {
   const [tab, setTab] = useState<"json" | "snippet" | "checks">("json");
@@ -26,6 +26,7 @@ export function SchemaArtifact({ data }: { data: SchemaDeliverable }) {
         <Tabs value={tab} onChange={setTab} options={[{ key: "json", label: "JSON-LD" }, { key: "snippet", label: "<script>" }, { key: "checks", label: `Checks (${data.checks.length})` }]} />
         <CopyButton text={tab === "snippet" ? data.snippet : data.jsonLd} />
         <DownloadButton content={data.jsonLd} filename={`${hostname}-${(data.types[0] ?? "schema").toLowerCase()}.jsonld`} type="application/ld+json" label=".jsonld" />
+        <OpenInEditorButton title={`${data.types.length ? data.types.join(" + ") : "JSON-LD"} for ${hostname}`} from="Schema generator" files={[{ path: `${hostname}-${(data.types[0] ?? "schema").toLowerCase()}.jsonld`, content: data.jsonLd }]} />
       </ArtifactHeader>
 
       {data.warnings.length > 0 && (

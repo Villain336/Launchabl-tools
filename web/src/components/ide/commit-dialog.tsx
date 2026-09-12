@@ -81,7 +81,7 @@ export function CommitDialog({ workspace, githubToken, onOpenChange, onCommitted
 
   return (
     <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl" data-ide-commit>
+      <DialogContent className="sm:max-w-xl" data-ide-commit>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <GitCommitHorizontal className="size-4" /> Commit to {owner}/{repo}

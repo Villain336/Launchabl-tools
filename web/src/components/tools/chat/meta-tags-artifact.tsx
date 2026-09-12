@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Download, Globe, Search, Share2 } from "lucide-react";
 import type { MetaTagSet } from "@/lib/ai/tools/meta-tags";
 import CodeBlock from "@/components/primitives/CodeBlock";
+import { OpenInEditorButton } from "@/components/tools/chat/bits";
 import { downloadBlob } from "@/lib/download";
 
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -106,6 +107,7 @@ export function MetaTagsArtifact({ tags }: { tags: MetaTagSet }) {
         >
           <Download className="h-3 w-3" /> .html
         </button>
+        <OpenInEditorButton title={`Meta tags${tags.pageUrl ? ` for ${displayUrl(tags.pageUrl)}` : ""}`} from="Meta tag generator" files={[{ path: "meta-tags.html", content: html }]} />
       </div>
 
       {tab === "html" ? (

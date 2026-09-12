@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Map as MapIcon, Route } from "lucide-react";
 import type { SitemapToolOutput } from "@/lib/ai/tools/site-reports";
-import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, DownloadButton, Footnote, OpenInEditorButton, Pill, Tabs } from "@/components/tools/chat/bits";
 
 type Ok = Extract<SitemapToolOutput, { ok: true }>;
 
@@ -21,6 +21,14 @@ export function SitemapArtifact({ data }: { data: Ok }) {
         {tab !== "pages" && <CopyButton text={content} />}
         <DownloadButton content={data.files.sitemap} filename="sitemap.xml" type="application/xml" label="sitemap.xml" />
         <DownloadButton content={data.files.robots} filename="robots.txt" type="text/plain" label="robots.txt" />
+        <OpenInEditorButton
+          title={`sitemap.xml + robots.txt for ${crawl.host}`}
+          from="Sitemap generator"
+          files={[
+            { path: "sitemap.xml", content: data.files.sitemap },
+            { path: "robots.txt", content: data.files.robots },
+          ]}
+        />
       </ArtifactHeader>
 
       <div className="flex flex-wrap gap-2 border-b border-line px-4 py-2.5 text-[12px]">

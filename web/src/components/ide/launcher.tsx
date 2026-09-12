@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Clock3, FilePlus2, FolderUp, Loader2, Trash2, Upload } from "lucide-react";
+import { ArrowDown, Clock3, Code2, FilePlus2, FolderUp, Loader2, Trash2, Upload, X } from "lucide-react";
 import { IconBrandGithub as Github } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Handoff } from "@/lib/ide/handoff";
 import { importBrowserFiles, importZip, type ImportReport } from "@/lib/ide/import";
 import { deleteWorkspace, listWorkspaces, type WorkspaceSummary } from "@/lib/ide/store";
 import { createWorkspace, makeFile, type Workspace } from "@/lib/ide/workspace";
@@ -12,9 +13,12 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   githubToken: string;
+  /** Files staged by another tool's "Open in editor" button, waiting for a project. */
+  handoff?: Handoff | null;
   onOpen: (ws: Workspace) => void;
   onOpenExisting: (id: string) => void;
   onOpenSettings: () => void;
+  onDismissHandoff?: () => void;
 };
 
 const STARTER_HTML = `<!doctype html>
@@ -68,7 +72,7 @@ function describeReport(report: ImportReport): string | null {
  * The IDE's front door. Everything here produces a Workspace in the browser;
  * GitHub imports go through our proxy as one zipball request.
  */
-export function Launcher({ githubToken, onOpen, onOpenExisting, onOpenSettings }: Props) {
+export function Launcher({ githubToken, handoff, onOpen, onOpenExisting, onOpenSettings, onDismissHandoff }: Props) {
   const [recent, setRecent] = useState<WorkspaceSummary[] | null>(null);
   const [repo, setRepo] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -144,6 +148,14 @@ export function Launcher({ githubToken, onOpen, onOpenExisting, onOpenSettings }
     finish(ws);
   };
 
+  const startFromHandoff = () => {
+    if (!handoff) return;
+    const files = handoff.files.map((f) => makeFile(f.path, f.content, { original: null }));
+    // The handoff is consumed by the new project, so it shouldn't also be offered as a diff.
+    onDismissHandoff?.();
+    finish(createWorkspace(handoff.title, { kind: "blank" }, files));
+  };
+
   const remove = async (id: string) => {
     await deleteWorkspace(id);
     setRecent((list) => list?.filter((w) => w.id !== id) ?? null);
@@ -170,6 +182,34 @@ export function Launcher({ githubToken, onOpen, onOpenExisting, onOpenSettings }
           Edit a site or codebase in the browser with an assistant that reads, searches and proposes diffs you accept file by file. Files stay in this browser until you commit them to GitHub.
         </p>
       </div>
+
+      {handoff && (
+        <div className="flex flex-col gap-3 rounded-xl border border-primary/40 bg-primary/5 p-4" data-ide-handoff-card>
+          <div className="flex items-start gap-2">
+            <Code2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-medium text-foreground">{handoff.title}</p>
+              <p className="text-[12.5px] text-muted-foreground">
+                From {handoff.from} · {handoff.files.length} file{handoff.files.length === 1 ? "" : "s"}:{" "}
+                <span className="font-mono text-[12px]">{handoff.files.map((f) => f.path).join(", ")}</span>
+              </p>
+            </div>
+            {onDismissHandoff && (
+              <Button type="button" variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={onDismissHandoff} data-ide-handoff-dismiss>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={startFromHandoff} disabled={busy !== null} data-ide-handoff-new>
+              <FilePlus2 className="h-4 w-4" /> New project with these files
+            </Button>
+            <span className="inline-flex items-center gap-1 text-[12.5px] text-muted-foreground">
+              <ArrowDown className="h-3.5 w-3.5" /> or open a project below to add them to it
+            </span>
+          </div>
+        </div>
+      )}
 
       {(error || notice) && (
         <div className={cn("rounded-lg border px-3 py-2 text-[13px]", error ? "border-destructive/30 bg-destructive/5 text-destructive" : "border-border bg-muted/40 text-muted-foreground")} role={error ? "alert" : "status"}>

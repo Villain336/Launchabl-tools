@@ -11,19 +11,29 @@ import type { Selection } from "@/components/ide/code-editor";
 import { CommitDialog } from "@/components/ide/commit-dialog";
 import { EditorPane } from "@/components/ide/editor-pane";
 import { Explorer } from "@/components/ide/explorer";
+import { HandoffDialog } from "@/components/ide/handoff-dialog";
 import { Launcher } from "@/components/ide/launcher";
 import { SettingsDialog } from "@/components/ide/settings-dialog";
 import { useWorkspace } from "@/components/ide/use-workspace";
 import { runChecks, type Problem } from "@/lib/ide/checks";
+import { clearHandoff, peekHandoff, type Handoff } from "@/lib/ide/handoff";
 import { exportZip } from "@/lib/ide/import";
 import type { PreviewRuntimeError } from "@/lib/ide/preview";
 import { loadSettings, loadTabState, saveSettings, saveTabState, type IdeSettings, type TabState } from "@/lib/ide/store";
 import { pendingChanges, type AppliedEdit, type Workspace } from "@/lib/ide/workspace";
 import { cn } from "@/lib/utils";
 
-/** Land on the obvious entry file when there is one. */
+/** Files another tool staged for us, if the URL carries a handoff id. Server render has none, and shows the same loading state either way. */
+function handoffFromUrl(): Handoff | null {
+  if (typeof window === "undefined") return null;
+  return peekHandoff(new URLSearchParams(window.location.search).get("handoff"));
+}
+
+/** Land on the obvious entry file when there is one; in a tiny project, on the first text file. */
 function entryTabs(ws: Workspace | null): TabState {
-  const entry = ws ? ["index.html", "README.md", "readme.md", "src/app/page.tsx", "app/page.tsx", "src/index.ts", "index.js", "package.json"].find((p) => ws.files[p]) : undefined;
+  if (!ws) return { tabs: [], active: null };
+  const paths = Object.keys(ws.files).sort();
+  const entry = ["index.html", "README.md", "readme.md", "src/app/page.tsx", "app/page.tsx", "src/index.ts", "index.js", "package.json"].find((p) => ws.files[p]) ?? (paths.length <= 5 ? paths.find((p) => !ws.files[p].binary) : undefined);
   return entry ? { tabs: [entry], active: entry } : { tabs: [], active: null };
 }
 
@@ -38,6 +48,12 @@ export function Ide() {
   const [settings, setSettings] = useState<IdeSettings>(loadSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [commitOpen, setCommitOpen] = useState(false);
+  const [handoff, setHandoff] = useState<Handoff | null>(handoffFromUrl);
+  const finishHandoff = useCallback(() => {
+    if (handoff) clearHandoff(handoff.id);
+    setHandoff(null);
+    if (typeof window !== "undefined" && window.location.search.includes("handoff=")) window.history.replaceState(null, "", window.location.pathname);
+  }, [handoff]);
   // Open tabs are keyed by workspace id: the saved set is restored when a
   // workspace appears, and whatever the user opens afterwards is saved back.
   const [tabState, setTabState] = useState<(TabState & { id: string }) | null>(null);
@@ -184,7 +200,7 @@ export function Ide() {
             <Settings2 className="size-3.5" /> Settings
           </Button>
         </div>
-        <Launcher githubToken={settings.githubToken} onOpen={onOpenWorkspace} onOpenExisting={(id) => void onOpenExisting(id)} onOpenSettings={() => setSettingsOpen(true)} />
+        <Launcher githubToken={settings.githubToken} handoff={handoff} onOpen={onOpenWorkspace} onOpenExisting={(id) => void onOpenExisting(id)} onOpenSettings={() => setSettingsOpen(true)} onDismissHandoff={finishHandoff} />
         {settingsOpen && <SettingsDialog open settings={settings} onOpenChange={setSettingsOpen} onSave={updateSettings} />}
       </>
     );
@@ -296,6 +312,7 @@ export function Ide() {
         </div>
 
         {settingsOpen && <SettingsDialog open settings={settings} onOpenChange={setSettingsOpen} onSave={updateSettings} />}
+        {handoff && <HandoffDialog key={handoff.id} handoff={handoff} workspace={workspace} onAccept={onAcceptEdits} onDone={finishHandoff} />}
         {commitOpen && github && (
           <CommitDialog
             workspace={workspace as Workspace & { source: { kind: "github" } }}

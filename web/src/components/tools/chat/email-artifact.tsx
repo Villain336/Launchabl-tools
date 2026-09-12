@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, Download, Mail, Monitor, Smartphone } from "lucide-react";
 import type { EmailDeliverable } from "@/lib/ai/tools/newsletter";
+import { OpenInEditorButton } from "@/components/tools/chat/bits";
 import { downloadBlob } from "@/lib/download";
 
 type View = "desktop" | "mobile" | "html" | "text";
@@ -87,6 +88,14 @@ export function EmailArtifact({ email }: { email: EmailDeliverable }) {
         <ActionButton onClick={() => downloadBlob(new Blob([email.text], { type: "text/plain" }), `${slug}.txt`)}>
           <Download className="h-3 w-3" /> .txt
         </ActionButton>
+        <OpenInEditorButton
+          title={email.name}
+          from="Newsletter writer"
+          files={[
+            { path: `emails/${slug}.html`, content: email.html },
+            { path: `emails/${slug}.txt`, content: email.text },
+          ]}
+        />
       </div>
 
       <div className="grid gap-3 border-b border-line px-4 py-3 sm:grid-cols-2">

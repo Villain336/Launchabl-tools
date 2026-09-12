@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Download, FileText, RotateCcw } from "lucide-react";
 import type { DocumentDeliverable } from "@/lib/ai/tools/documents";
 import CodeBlock from "@/components/primitives/CodeBlock";
+import { OpenInEditorButton } from "@/components/tools/chat/bits";
 import { Markdown } from "@/components/tools/chat/markdown";
 import { downloadBlob } from "@/lib/download";
 
@@ -97,6 +98,7 @@ export function DocumentArtifact({ doc }: { doc: DocumentDeliverable }) {
         >
           <Download className="h-3 w-3" /> Download
         </button>
+        <OpenInEditorButton title={doc.filename} from="Document writer" files={[{ path: doc.filename, content }]} />
       </div>
 
       {tab === "preview" ? (

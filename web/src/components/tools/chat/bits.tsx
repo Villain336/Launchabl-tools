@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { AlertTriangle, Check, CheckCircle2, Copy, Download, Info, Pencil, XCircle } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, Code2, Copy, Download, Info, Pencil, XCircle } from "lucide-react";
 import { downloadBlob } from "@/lib/download";
+import { handoffUrl, stageHandoff, type HandoffFile } from "@/lib/ide/handoff";
 
 /** Shared primitives for chat artifacts so every card reads the same. */
 
@@ -111,6 +112,33 @@ export function DownloadButton({ content, filename, type, label }: { content: st
       className="inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium text-ink-3 transition-colors hover:bg-hover hover:text-ink"
     >
       <Download className="h-3 w-3" /> {label}
+    </button>
+  );
+}
+
+/**
+ * Hands the artifact's files to the code editor in a new tab, where they show
+ * up as a diff review against the open project (or seed a new one).
+ */
+export function OpenInEditorButton({ title, from, files, label = "Open in editor" }: { title: string; from: string; files: HandoffFile[]; label?: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <button
+      type="button"
+      title="Review these files in the Launchabl code editor"
+      onClick={() => {
+        const id = stageHandoff({ title, from, files });
+        if (!id) {
+          setFailed(true);
+          setTimeout(() => setFailed(false), 2000);
+          return;
+        }
+        window.open(handoffUrl(id), "_blank", "noopener");
+      }}
+      className={`inline-flex h-7 items-center gap-1 rounded-[6px] px-2 text-[12px] font-medium transition-colors hover:bg-hover ${failed ? "text-red" : "text-ink-3 hover:text-ink"}`}
+      data-open-in-editor
+    >
+      <Code2 className="h-3 w-3" /> {failed ? "Too large" : label}
     </button>
   );
 }

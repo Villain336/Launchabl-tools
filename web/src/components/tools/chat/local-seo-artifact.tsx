@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ClipboardList, MapPin } from "lucide-react";
 import type { LocalSeoKit } from "@/lib/ai/tools/marketing-kits";
-import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, DownloadButton, Footnote, OpenInEditorButton, Pill, Tabs } from "@/components/tools/chat/bits";
 
 type Tab = "profile" | "keywords" | "qa" | "reviews" | "posts" | "schema" | "checklist";
 
@@ -208,6 +208,7 @@ export function LocalSeoArtifact({ kit }: { kit: LocalSeoKit }) {
             <div className="flex items-center gap-1">
               <CopyButton text={`<script type="application/ld+json">\n${kit.jsonLd}\n</script>`} label="Copy <script>" />
               <DownloadButton content={kit.jsonLd} filename="local-business.jsonld" type="application/ld+json" label=".jsonld" />
+              <OpenInEditorButton title={`LocalBusiness JSON-LD for ${b.name}`} from="Local SEO kit" files={[{ path: "local-business.jsonld", content: kit.jsonLd }]} />
             </div>
           </div>
           <pre className="max-h-[360px] overflow-auto px-4 py-3 font-mono text-[12px] leading-relaxed text-ink">{kit.jsonLd}</pre>

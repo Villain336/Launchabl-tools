@@ -37,7 +37,7 @@ export function SettingsDialog({ open, settings, onOpenChange, onSave }: Props) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg" data-ide-settings>
+      <DialogContent className="sm:max-w-lg" data-ide-settings>
         <DialogHeader>
           <DialogTitle>Editor settings</DialogTitle>
           <DialogDescription>Keys are stored in this browser only and sent with each request straight to the provider. Launchabl never stores them.</DialogDescription>
