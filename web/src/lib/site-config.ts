@@ -223,14 +223,31 @@ export const tools: Tool[] = [
   {
     slug: "file-converter",
     name: "File Converter",
-    shortDescription: "Convert documents, spreadsheets, and presentations between common formats.",
-    status: "coming-soon",
-    processing: "server",
+    shortDescription:
+      "Convert data files (CSV, TSV, JSON, YAML, Markdown, HTML tables), re-encode images, extract audio and turn Markdown into a styled HTML page — all in your browser.",
+    status: "live",
+    processing: "client",
     upsell: {
       headline: "Batch conversions, zero limits.",
       body: "Unlimited plan members get bulk conversion with no file-count or file-size caps.",
     },
-    faq: [],
+    faq: [
+      {
+        question: "Do my files get uploaded?",
+        answer:
+          "No. Every conversion runs in your browser — data files are parsed in memory, images are re-encoded with the Canvas API and audio is decoded with the Web Audio API. Nothing is sent to a server.",
+      },
+      {
+        question: "Which formats are supported?",
+        answer:
+          "Data: CSV, TSV, JSON, NDJSON, Markdown tables, YAML and HTML tables in any direction. Images: PNG, JPEG and WebP with resizing. Audio/video: extract the audio track from an MP4, WebM, MP3 or WAV file as WAV. Text: Markdown to a standalone HTML page.",
+      },
+      {
+        question: "What about Word, Excel and PowerPoint?",
+        answer:
+          "Export to CSV, Markdown or HTML from those apps and convert here. Native .docx/.xlsx/.pptx conversion is on the roadmap.",
+      },
+    ],
   },
   {
     slug: "image-converter",

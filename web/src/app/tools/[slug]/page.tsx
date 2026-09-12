@@ -196,7 +196,7 @@ function AboutCopy({ slug }: { slug: string }) {
     "watermark-remover":
       "Sometimes you need to clean up a watermark you added yourself — an old proof stamp, a placeholder mark from an earlier draft. This tool is intentionally gated behind an ownership attestation so it can't be used to strip protection from content you don't have rights to edit.",
     "file-converter":
-      "Format conversion is one of the most common, most annoying small tasks in marketing work. The CSV/JSON conversion below runs entirely in your browser today; heavier document and media conversions are on the public roadmap and will run through server-side workers.",
+      "Format conversion is one of the most common, most annoying small tasks in marketing work — a CSV export that needs to be JSON for a developer, a Markdown table for a doc, a YAML file for a config, a PNG that should be WebP, a screen recording you only need the audio from. This tool does all of that in your browser: data files in any direction (CSV, TSV, JSON, NDJSON, Markdown, YAML, HTML), image re-encoding with resizing, audio extraction to WAV and Markdown to a styled standalone HTML page. Nothing is uploaded; native Office formats are the one thing still on the roadmap.",
     "domain-purchase":
       "Once you've found a domain you like, registering it shouldn't require leaving to compare five different registrars. This tool is designed to route directly to a registrar/reseller partner for checkout.",
     hosting:
