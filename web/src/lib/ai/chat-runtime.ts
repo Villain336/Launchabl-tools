@@ -13,6 +13,7 @@ import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from 
 import { accessibilityRuntime, dnsEmailHealthRuntime, emailFinderRuntime, securityHeadersRuntime, sslCheckerRuntime } from "@/lib/ai/tools/infra-checks";
 import { imageGeneratorRuntime, socialCardRuntime } from "@/lib/ai/tools/image-gen";
 import { contentRepurposerRuntime, personaGeneratorRuntime, pressReleaseRuntime, qaTestPlanRuntime, subjectLineCheckerRuntime, utmBuilderRuntime } from "@/lib/ai/tools/growth-kits";
+import { clipFinderRuntime, transcriberRuntime } from "@/lib/ai/tools/media";
 import { buildAgentRuntime } from "@/lib/ai/agent";
 
 /**
@@ -84,6 +85,8 @@ const runtimes: ChatToolRuntime[] = [
   pressReleaseRuntime,
   qaTestPlanRuntime,
   contentRepurposerRuntime,
+  transcriberRuntime,
+  clipFinderRuntime,
 ];
 
 const agentRuntime = buildAgentRuntime(runtimes);

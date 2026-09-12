@@ -122,6 +122,8 @@ const toolUi: Record<string, ReactNode> = {
   "press-release-generator": <ToolChat slug="press-release-generator" />,
   "qa-test-plan-generator": <ToolChat slug="qa-test-plan-generator" />,
   "content-repurposer": <ToolChat slug="content-repurposer" />,
+  transcriber: <ToolChat slug="transcriber" />,
+  "clip-finder": <ToolChat slug="clip-finder" />,
   "background-remover": <BackgroundRemover />,
   "demo-video-creator": <DemoVideoCreator />,
   "domain-purchase": (
@@ -245,6 +247,10 @@ function AboutCopy({ slug }: { slug: string }) {
       "Shipping without a plan means your customers do the testing. This turns a feature description, a spec or a live URL into a plan anyone can execute today: scenarios grouped by area with stable ids, priorities that mean something (P0 blocks release), imperative steps with specific test data, expected results you can judge pass or fail, negative and edge cases, an accessibility pass, a device and browser matrix, exit criteria and risks with mitigations. It warns when a plan has no P0s or no edge cases, filters by area and priority, and exports to CSV for your tracker or Markdown with pass/fail checkboxes.",
     "content-repurposer":
       "The article took a day; the distribution usually gets ten minutes and a pasted link. This reads the piece — from a URL or pasted text — extracts the argument, key points and quotable lines, and rewrites it natively for each channel: a LinkedIn post whose first line earns the 'see more', an X thread where every tweet stands alone, a newsletter section, an Instagram caption, a YouTube description, a spoken short-video script, quote cards. Every piece is checked against the channel's character limits and reach killers (a link in the LinkedIn body, a tweet over 280), with a suggested visual and posting time, and a copy button per piece.",
+    transcriber:
+      "Transcription services hand you a wall of text and leave the reading to you. This runs Whisper with segment timestamps, then an editor reads the entire recording — every window of a two-hour webinar, not the first ten minutes — and returns what the team actually needs: a title from the content, a summary, chapters at real topic changes, takeaways in the speaker's words, quotes checked word-for-word against the transcript (and flagged if they aren't), action items when it's a meeting, and the full transcript with [m:ss] markers. Downloads cover TXT, SRT and VTT captions and a Markdown brief. Audio is discarded after transcription.",
+    "clip-finder":
+      "Clip tools that pick 'viral moments' by keyword produce clips that start mid-sentence and end before the point. This one reads the whole transcript with timestamps and chooses like a producer: self-contained moments with a hook and a payoff, cut on sentence boundaries, sized for the platform. Every clip ships with the exact range, a hook line, a platform-native caption, the words spoken, a re-timed SRT and a lossless ffmpeg command, and the server flags anything too short, too long, overlapping or silent — so the editor can cut the set in minutes instead of scrubbing an hour of tape.",
     "background-remover":
       "Clean product shots and headshots usually mean a trip to Photoshop or a paid app. This runs a real image-segmentation model entirely on your device — no upload, no account, no watermark — and hands back a transparent PNG in seconds.",
     "demo-video-creator":

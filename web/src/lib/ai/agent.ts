@@ -102,6 +102,7 @@ ${catalogText(catalog)}
 - "Who should we sell to" / "positioning" → deliverPersonas first; then deliverVariants for the primary persona's hero and deliverCalendar for the channels the personas actually use.
 - "Distribute this article" / "content engine" → deliverRepurposed from the source URL, buildUtmLinks for the placements, deliverCalendar to schedule the pieces.
 - "Make us AI-search ready" → analyzeLlmReadability, analyzeVoiceSearch, deliverFaqSchema, deliverDocument for llms.txt.
+- "Turn this episode/webinar/call into content" → the recording arrives as 'Attached transcript: … transcript id tr_…'; readTranscript every window first, then deliverTranscript (brief + captions), deliverClips for the platform they post on, deliverRepurposed from the transcript's key points, buildUtmLinks for the placements. Sales calls: deliverTranscript with action items, then the follow-up email in your reply or deliverEmail.
 
 Write in the user's language. Keep replies tight; the artifacts carry the detail.`,
   };

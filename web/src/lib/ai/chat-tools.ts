@@ -19,6 +19,8 @@ export type ChatToolMeta = {
   starter?: string;
   /** Render the starter under the intro text instead of above it. */
   starterBelowIntro?: boolean;
+  /** Accepts audio/video attachments, transcribed on upload and referenced by id in the message. */
+  media?: boolean;
 };
 
 const metas: ChatToolMeta[] = [
@@ -468,7 +470,36 @@ const metas: ChatToolMeta[] = [
     artifacts: ["deliverRepurposed", "fetchPage"],
   },
   {
+    slug: "transcriber",
+    media: true,
+    intro:
+      "Attach a recording — podcast episode, webinar, sales call, interview, voice memo (MP3, M4A, WAV, MP4, MOV, WebM) — and I'll transcribe it with timestamps and hand back a brief: summary, chapters, takeaways, verbatim quotes, action items, plus the full transcript and SRT/VTT captions to download.",
+    placeholder: "Attach the recording with the paperclip, then say what you need — a brief, captions, meeting notes, a blog draft…",
+    suggestions: [
+      "Transcribe this and give me chapters and the five best quotes for social",
+      "Meeting notes: decisions, owners and next steps, in the order they came up",
+      "Captions for YouTube — SRT — and a description with timestamps",
+      "Summarise this call for someone who wasn't there, in under 150 words",
+    ],
+    artifacts: ["deliverTranscript", "readTranscript"],
+  },
+  {
+    slug: "clip-finder",
+    media: true,
+    intro:
+      "Attach a long recording and tell me the platform. I'll read the whole thing, find the moments that work as short clips — a surprising claim, a story with a turn, a rule worth quoting — and give you exact start/end timestamps, a hook, a caption, the words spoken, captions per clip and the ffmpeg commands to cut them.",
+    placeholder: "Attach the episode or webinar, then: e.g. 5 clips for TikTok and Reels, founder-audience, keep them under 45s",
+    suggestions: [
+      "Find the 5 most clippable moments for TikTok and Reels",
+      "Three LinkedIn clips, 30–60 seconds, aimed at marketing leads",
+      "A 30-second podcast teaser and two Shorts",
+      "What's the single best 20-second hook in here?",
+    ],
+    artifacts: ["deliverClips", "readTranscript"],
+  },
+  {
     slug: "agent",
+    media: true,
     intro:
       "Every Launchabl skill in one conversation. Describe the job — launch this page, fix our email, beat this competitor, get us clients — and I'll chain the audits, checks, copy, design and files it takes, then hand over the deliverables.",
     placeholder: "Describe the job and paste any URLs. e.g. Launch https://example.com/pricing properly — audit, meta tags, schema, OG card, fix list.",

@@ -1004,6 +1004,47 @@ export const tools: Tool[] = [
     ],
   },
   {
+    slug: "transcriber",
+    name: "Transcriber",
+    shortDescription: "Transcribe a podcast, webinar, call or voice memo with timestamps, then get a brief — summary, chapters, quotes, action items — and SRT/VTT captions.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Every episode transcribed, briefed and published — without you.",
+      body: "Unlimited plan members get their recordings turned into show notes, blog posts, newsletters and clips on a schedule, every week.",
+    },
+    faq: [
+      {
+        question: "How long can the recording be?",
+        answer:
+          "Up to 25 MB per file (about 45 minutes of MP3 at 64 kbps, longer for M4A), and 120 minutes of audio a day on a free account. Export voice at a lower bitrate for long episodes — speech transcribes just as well at 48–64 kbps.",
+      },
+      {
+        question: "Is the audio kept?",
+        answer:
+          "No. The file is transcribed and discarded; only the transcript is stored, for seven days, under an unguessable id so the conversation can refer back to it.",
+      },
+    ],
+  },
+  {
+    slug: "clip-finder",
+    name: "Clip Finder",
+    shortDescription: "Find the most clippable moments in a long recording — exact timestamps, hook, caption, spoken words, per-clip captions and ffmpeg cut commands for TikTok, Reels, Shorts, LinkedIn and X.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Finding the clips is half the job. Cutting and posting is the other half.",
+      body: "Unlimited plan members get clips cut, captioned, branded and scheduled from every recording they publish.",
+    },
+    faq: [
+      {
+        question: "Does it cut the video for me?",
+        answer:
+          "It gives you everything an editor needs: precise start and end times on sentence boundaries, the words in each clip, an SRT re-timed for the clip and a lossless ffmpeg command per clip. Paste the commands, or type the timestamps into CapCut, Descript or Premiere.",
+      },
+    ],
+  },
+  {
     slug: "background-remover",
     name: "Background Remover",
     shortDescription: "Remove the background from a photo — product shots, headshots, or social images — right in your browser.",
@@ -1044,7 +1085,7 @@ export const tools: Tool[] = [
       {
         question: "Can I trim or edit the recording afterward?",
         answer:
-          "Not yet — v1 is record-and-export only. Trimming and auto-captions (via the upcoming Transcriber tool) are on the roadmap.",
+          "Trimming isn't built in yet. For captions, drop the exported file into the Transcriber tool — it returns SRT/VTT you can attach on upload.",
       },
     ],
   },

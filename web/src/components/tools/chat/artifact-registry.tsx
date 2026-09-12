@@ -33,6 +33,8 @@ import { ImageArtifact } from "@/components/tools/chat/image-artifact";
 import { SocialCardArtifact } from "@/components/tools/chat/social-card-artifact";
 import type { PersonaDeliverable, PressReleaseDeliverable, RepurposeDeliverable, SubjectLinesDeliverable, TestPlanDeliverable, UtmDeliverable } from "@/lib/ai/tools/growth-kits";
 import { PersonasArtifact, PressReleaseArtifact, RepurposeArtifact, SubjectLinesArtifact, TestPlanArtifact, UtmArtifact } from "@/components/tools/chat/growth-artifacts";
+import { ClipsArtifact, TranscriptArtifact, TranscriptReadNote } from "@/components/tools/chat/media-artifacts";
+import type { ClipsDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 
 /**
@@ -80,6 +82,9 @@ export const artifactRenderers: Record<string, ArtifactRenderer> = {
   generateImage: (part) => <ImageArtifact data={part.output as ImageDeliverable} />,
   designSocialCard: (part) => <SocialCardArtifact data={part.output as SocialCardDeliverable} />,
   buildUtmLinks: (part) => <UtmArtifact data={part.output as UtmDeliverable} />,
+  readTranscript: (part) => <TranscriptReadNote data={part.output as TranscriptWindow} />,
+  deliverTranscript: (part) => <TranscriptArtifact data={part.output as TranscriptDeliverable} />,
+  deliverClips: (part) => <ClipsArtifact data={part.output as ClipsDeliverable} />,
   deliverPersonas: (part) => <PersonasArtifact data={part.output as PersonaDeliverable} />,
   scoreSubjectLines: (part) => <SubjectLinesArtifact data={part.output as SubjectLinesDeliverable} />,
   deliverPressRelease: (part) => <PressReleaseArtifact data={part.output as PressReleaseDeliverable} />,
@@ -129,6 +134,9 @@ export const artifactLabels: Record<string, { working: string; done: string }> =
   generateImage: { working: "Rendering the image", done: "Image ready" },
   designSocialCard: { working: "Designing the card", done: "Card ready" },
   buildUtmLinks: { working: "Building tracked links", done: "Links ready" },
+  readTranscript: { working: "Reading the transcript", done: "Transcript read" },
+  deliverTranscript: { working: "Writing the transcript brief", done: "Transcript ready" },
+  deliverClips: { working: "Cutting clips", done: "Clips ready" },
   deliverPersonas: { working: "Defining the ICP and personas", done: "Personas ready" },
   scoreSubjectLines: { working: "Scoring subject lines", done: "Scores ready" },
   deliverPressRelease: { working: "Writing and checking the release", done: "Press release ready" },

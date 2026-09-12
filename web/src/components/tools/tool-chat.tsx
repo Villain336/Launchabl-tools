@@ -15,13 +15,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, getToolName, isToolUIPart, type FileUIPart } from "ai";
-import { ArrowUp, Check, Copy, FileText, History, Paperclip, RefreshCw, RotateCcw, Square, Sparkles, Trash2, UserRound, X } from "lucide-react";
+import { ArrowUp, AudioLines, Check, Copy, FileText, History, Loader2, Paperclip, RefreshCw, RotateCcw, Square, Sparkles, Trash2, UserRound, X } from "lucide-react";
 import { getChatTool } from "@/lib/ai/chat-tools";
 import { signOut, useSession } from "@/lib/auth/use-session";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { AgentTemplates } from "@/components/agent/agent-templates";
 import { ACCEPT, ATTACHMENT_LIMITS, AttachmentError, dataUrlBytes, fileToPart, formatBytes, isImageType } from "@/lib/chat/attachments";
 import { trimImageHistory } from "@/lib/chat/inline-attachments";
+import { MediaError, transcribeFile, transcriptLine, type MediaPhase } from "@/lib/chat/media-upload";
+import { ACCEPT_MEDIA, formatTimestamp, isMediaFile, type TranscriptRef } from "@/lib/media/transcript";
 import { getToolBySlug } from "@/lib/site-config";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import {
@@ -168,6 +170,49 @@ function AttachmentChip({ part, onRemove }: { part: FileUIPart; onRemove: () => 
       >
         <X className="h-3 w-3" />
       </button>
+    </li>
+  );
+}
+
+/** A transcribed recording waiting to be sent with the next message. */
+function TranscriptChip({ transcript, onRemove }: { transcript: TranscriptRef; onRemove: () => void }) {
+  return (
+    <li className="group relative flex items-center gap-2 rounded-[8px] border border-line bg-surface py-1 pr-7 pl-1.5 text-[12px] text-ink" title={transcript.summary} data-transcript-chip>
+      <span className="flex size-7 items-center justify-center rounded-[5px] bg-primary/10 text-primary">
+        <AudioLines className="h-3.5 w-3.5" />
+      </span>
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="max-w-[180px] truncate">{transcript.name}</span>
+        <span className="text-[10.5px] text-ink-3">
+          {formatTimestamp(transcript.durationSec)} · {transcript.words.toLocaleString()} words · transcribed
+        </span>
+      </span>
+      <button
+        type="button"
+        aria-label={`Remove ${transcript.name}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove();
+        }}
+        className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </li>
+  );
+}
+
+function MediaJobChip({ name, phase }: { name: string; phase: MediaPhase }) {
+  const label = phase.phase === "uploading" ? (phase.percent !== null && phase.percent > 0 ? `Uploading ${phase.percent}%` : "Uploading") : "Transcribing";
+  return (
+    <li className="flex items-center gap-2 rounded-[8px] border border-line bg-surface py-1 pr-2.5 pl-1.5 text-[12px] text-ink" role="status" data-media-job>
+      <span className="flex size-7 items-center justify-center rounded-[5px] bg-field text-ink-3">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      </span>
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="max-w-[180px] truncate">{name}</span>
+        <span className="text-[10.5px] text-ink-3">{label}…</span>
+      </span>
     </li>
   );
 }
@@ -417,6 +462,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const meta = getChatTool(slug);
   const [draft, setDraft] = useState("");
   const [attachments, setAttachments] = useState<FileUIPart[]>([]);
+  const [transcripts, setTranscripts] = useState<TranscriptRef[]>([]);
+  const [mediaJob, setMediaJob] = useState<{ name: string; phase: MediaPhase } | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -445,17 +492,21 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
   const parsedError = parseError(error);
   const signInRequired = parsedError?.cause === "sign_in_required";
   const errorMessage = signInRequired ? null : parsedError?.message ?? null;
-  const canSend = (draft.trim().length > 0 || attachments.length > 0) && !busy;
+  const canSend = (draft.trim().length > 0 || attachments.length > 0 || transcripts.length > 0) && !busy && !mediaJob;
 
   const send = (text: string) => {
     const trimmed = text.trim();
-    if ((!trimmed && attachments.length === 0) || busy) return;
+    if ((!trimmed && attachments.length === 0 && transcripts.length === 0) || busy || mediaJob) return;
     pinnedRef.current = true;
     const files = attachments;
     // A file with no prompt still needs a text part so the model has an instruction to act on.
-    void sendMessage({ text: trimmed || (files.length === 1 ? "Here's the file." : "Here are the files."), files }, { body: { template } });
+    const fallback = transcripts.length > 0 ? "Here's the recording." : files.length === 1 ? "Here's the file." : "Here are the files.";
+    // Transcripts travel as a line of text: the id is all the tools need, and it survives history and reports.
+    const body = [trimmed || fallback, ...transcripts.map(transcriptLine)].join("\n\n");
+    void sendMessage({ text: body, files }, { body: { template } });
     setDraft("");
     setAttachments([]);
+    setTranscripts([]);
     setAttachError(null);
     requestAnimationFrame(() => {
       if (inputRef.current) inputRef.current.style.height = "auto";
@@ -479,12 +530,37 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     });
   };
 
+  /** Recordings are transcribed on the spot (one at a time) and become chips; the audio never enters the message. */
+  const addRecording = async (file: File): Promise<string | null> => {
+    setMediaJob({ name: file.name, phase: { phase: "uploading", percent: 0 } });
+    try {
+      const ref = await transcribeFile(file, slug, (phase) => setMediaJob({ name: file.name, phase }));
+      setTranscripts((current) => [...current, ref].slice(0, 3));
+      return null;
+    } catch (error) {
+      return error instanceof MediaError || error instanceof AttachmentError ? error.message : `${file.name} couldn't be transcribed.`;
+    } finally {
+      setMediaJob(null);
+    }
+  };
+
   const addFiles = async (incoming: Iterable<File>) => {
-    const files = Array.from(incoming);
-    if (files.length === 0) return;
+    const all = Array.from(incoming);
+    if (all.length === 0) return;
     setAttachError(null);
-    const room = ATTACHMENT_LIMITS.maxFiles - attachments.length;
     const errors: string[] = [];
+    const recordings = meta?.media ? all.filter((file) => isMediaFile(file.name, file.type)) : [];
+    const files = all.filter((file) => !recordings.includes(file));
+    if (recordings.length > 0) {
+      if (mediaJob) errors.push("One recording at a time — wait for the current one to finish.");
+      else {
+        const [first, ...rest] = recordings;
+        if (rest.length > 0) errors.push("Recordings are transcribed one at a time; attach the next after this one.");
+        const failure = await addRecording(first);
+        if (failure) errors.push(failure);
+      }
+    }
+    const room = ATTACHMENT_LIMITS.maxFiles - attachments.length;
     if (files.length > room) errors.push(`You can attach up to ${ATTACHMENT_LIMITS.maxFiles} files per message.`);
     const parts: FileUIPart[] = [];
     for (const file of files.slice(0, Math.max(0, room))) {
@@ -498,6 +574,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     if (errors.length > 0) setAttachError(errors.join(" "));
     inputRef.current?.focus();
   };
+
+  const accept = meta?.media ? `${ACCEPT},${ACCEPT_MEDIA}` : ACCEPT;
 
   const onPickFiles = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) void addFiles(event.target.files);
@@ -594,6 +672,7 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
     setCurrentConversation(slug, null);
     setDraft("");
     setAttachments([]);
+    setTranscripts([]);
     setAttachError(null);
     inputRef.current?.focus();
   };
@@ -810,11 +889,15 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
         >
           {dragging && (
             <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-control bg-surface/90 text-[13px] font-medium text-ink">
-              Drop images or text files
+              {meta.media ? "Drop images, text files or recordings" : "Drop images or text files"}
             </div>
           )}
-          {attachments.length > 0 && (
+          {(attachments.length > 0 || transcripts.length > 0 || mediaJob) && (
             <ul className="flex flex-wrap gap-1.5" aria-label="Attachments">
+              {transcripts.map((transcript) => (
+                <TranscriptChip key={transcript.id} transcript={transcript} onRemove={() => setTranscripts((current) => current.filter((t) => t.id !== transcript.id))} />
+              ))}
+              {mediaJob && <MediaJobChip name={mediaJob.name} phase={mediaJob.phase} />}
               {attachments.map((part, index) => (
                 <AttachmentChip
                   key={`${part.filename ?? "file"}-${index}`}
@@ -836,18 +919,18 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
             }}
             onKeyDown={onKeyDown}
             onPaste={onPaste}
-            placeholder={attachments.length > 0 ? "What should I do with this?" : meta.placeholder}
+            placeholder={attachments.length > 0 || transcripts.length > 0 ? "What should I do with this?" : meta.placeholder}
             aria-label="Message"
             className="max-h-[200px] min-h-6 w-full resize-none bg-transparent text-[14px] leading-[1.5] text-ink outline-none placeholder:text-ink-3"
           />
           <div className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
-              <input ref={fileInputRef} type="file" multiple accept={ACCEPT} onChange={onPickFiles} className="hidden" tabIndex={-1} />
+              <input ref={fileInputRef} type="file" multiple accept={accept} onChange={onPickFiles} className="hidden" tabIndex={-1} />
               <button
                 type="button"
-                aria-label="Attach images or text files"
-                title="Attach an image, screenshot, CSV or text file"
-                disabled={busy || attachments.length >= ATTACHMENT_LIMITS.maxFiles}
+                aria-label={meta.media ? "Attach files or a recording" : "Attach images or text files"}
+                title={meta.media ? "Attach an image, text file, or an audio/video recording to transcribe" : "Attach an image, screenshot, CSV or text file"}
+                disabled={busy || Boolean(mediaJob) || attachments.length >= ATTACHMENT_LIMITS.maxFiles}
                 onClick={(event) => {
                   event.stopPropagation();
                   fileInputRef.current?.click();
@@ -861,7 +944,8 @@ export function ToolChat({ slug, className = "", title }: { slug: string; classN
                   <span className="text-red">{attachError}</span>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line · </span>Paste or drop files
+                    <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line · </span>
+                    {meta.media ? "Paste or drop files · attach a recording to transcribe" : "Paste or drop files"}
                   </>
                 )}
               </span>
