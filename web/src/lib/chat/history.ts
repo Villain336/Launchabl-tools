@@ -75,12 +75,37 @@ function shrinkConversation(conversation: StoredConversation): StoredConversatio
   for (const message of messages) {
     if (size <= MAX_CONVERSATION_BYTES) break;
     message.parts = message.parts.map((part) => {
-      if (part.type !== "file" || !part.url) return part;
-      size -= part.url.length;
-      return { ...part, url: "" };
+      if (part.type === "file" && part.url) {
+        size -= part.url.length;
+        return { ...part, url: "" };
+      }
+      if (part.type.startsWith("tool-") && "output" in part && part.output && typeof part.output === "object") {
+        const before = JSON.stringify(part.output).length;
+        const stripped = stripGeneratedPixels(part.output as Record<string, unknown>);
+        if (stripped !== part.output) {
+          size -= before - JSON.stringify(stripped).length;
+          return { ...part, output: stripped };
+        }
+      }
+      return part;
     });
   }
   return { ...conversation, messages };
+}
+
+/**
+ * Generated images (image generator, social card backdrops) carry their
+ * pixels inline. When history is over budget the pixels go and the
+ * artifact shows an "ask again" placeholder with the prompt intact.
+ */
+function stripGeneratedPixels(output: Record<string, unknown>): Record<string, unknown> {
+  if (Array.isArray(output.images) && output.images.some((i) => i && typeof i === "object" && "dataUrl" in i)) {
+    return { ...output, images: [], expired: true };
+  }
+  if (output.backgroundImage && typeof output.backgroundImage === "object") {
+    return { ...output, backgroundImage: null, expired: true };
+  }
+  return output;
 }
 
 function write(slug: string, index: HistoryIndex) {

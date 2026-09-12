@@ -11,6 +11,7 @@ import { newsletterBuilderRuntime } from "@/lib/ai/tools/newsletter";
 import { competitorGapRuntime, landingPageGraderRuntime, sitemapRobotsRuntime, websiteAuditRuntime } from "@/lib/ai/tools/site-reports";
 import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from "@/lib/ai/tools/marketing-kits";
 import { accessibilityRuntime, dnsEmailHealthRuntime, emailFinderRuntime, securityHeadersRuntime, sslCheckerRuntime } from "@/lib/ai/tools/infra-checks";
+import { imageGeneratorRuntime, socialCardRuntime } from "@/lib/ai/tools/image-gen";
 
 /**
  * Server-side definition of a chat tool: the system prompt, the model tier
@@ -73,6 +74,8 @@ const runtimes: ChatToolRuntime[] = [
   accessibilityRuntime,
   sslCheckerRuntime,
   emailFinderRuntime,
+  imageGeneratorRuntime,
+  socialCardRuntime,
 ];
 
 const bySlug = new Map(runtimes.map((runtime) => [runtime.slug, runtime]));

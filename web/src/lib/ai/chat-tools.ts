@@ -360,6 +360,33 @@ const metas: ChatToolMeta[] = [
     ],
     artifacts: ["findEmail"],
   },
+  {
+    slug: "ai-image-generator",
+    intro:
+      "Tell me what the image is for and what should be in it. I'll write the art direction — style, lighting, palette, composition for the channel — and render it in the right aspect ratio. Then ask for a different style, a variation set, or another size.",
+    placeholder: "e.g. Hero image for a fintech landing page: calm, editorial, soft light, no people, 16:9",
+    suggestions: [
+      "Hero image for a landing page selling a meal-prep service to busy parents — warm, natural light, real kitchen, 16:9",
+      "Instagram ad for a matte-black insulated water bottle on a wet stone, dramatic side light, 4:5",
+      "Blog header for an article about remote-team rituals: flat illustration, Launchabl orange and cream, 3:2",
+      "App icon concept for a habit tracker: a single bold glyph, soft gradient, 1:1 — give me 3 options",
+      "Link-preview background for a webinar on SaaS pricing: abstract, dark navy, no text, 1.91:1",
+    ],
+    artifacts: ["generateImage"],
+  },
+  {
+    slug: "social-card-generator",
+    intro:
+      "Give me the page or announcement — a URL, a title, a few lines — plus your brand name and colour if you have one. I'll design the link-preview card and social versions with the text set exactly, and you can edit the copy, switch theme or layout, and download PNGs in every size.",
+    placeholder: "e.g. OG card for our guide 'Local SEO for restaurants' — brand Launchabl, orange, dark theme",
+    suggestions: [
+      "OG card for https://vercel.com/pricing",
+      "Launch card: 'Introducing Ledgerly 2.0 — invoicing that chases the money for you'. Brand Ledgerly, #2563EB, centred, with generated abstract art.",
+      "Editorial card for a blog post 'Why your DMARC policy is still p=none' by Sam Lee, Head of Deliverability. Brand: Launchabl.",
+      "Event card: 'Webinar · Sep 30 · Pricing pages that convert' for Acme Analytics, light theme, split layout.",
+    ],
+    artifacts: ["designSocialCard", "generateImage"],
+  },
 ];
 
 const bySlug = new Map(metas.map((meta) => [meta.slug, meta]));

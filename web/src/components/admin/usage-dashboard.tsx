@@ -15,7 +15,7 @@ type UsagePayload = {
   store: { kind: "memory" | "redis"; shared: boolean };
   limits: RateLimitTier[];
   dailyCapUsd: number;
-  chains: { writer: string[]; fast: string[] };
+  chains: { writer: string[]; fast: string[]; image?: string[] };
   credits: GatewayCredits;
   summary: { today: UsageBucket; last7: UsageBucket; last30: UsageBucket; range: UsageBucket };
   byTool: Record<string, UsageBucket>;

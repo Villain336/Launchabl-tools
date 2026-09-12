@@ -114,6 +114,8 @@ const toolUi: Record<string, ReactNode> = {
   "security-headers-checker": <ToolChat slug="security-headers-checker" />,
   "ssl-certificate-checker": <ToolChat slug="ssl-certificate-checker" />,
   "email-finder": <ToolChat slug="email-finder" />,
+  "ai-image-generator": <ToolChat slug="ai-image-generator" />,
+  "social-card-generator": <ToolChat slug="social-card-generator" />,
   "background-remover": <BackgroundRemover />,
   "demo-video-creator": <DemoVideoCreator />,
   "domain-purchase": (
@@ -221,6 +223,10 @@ function AboutCopy({ slug }: { slug: string }) {
       "An expired or misconfigured certificate puts a full-page warning between you and every visitor, and it always happens at the worst time. This opens a real TLS connection the way a browser does and reports what a browser won't: trust and the exact reason if it fails, days to expiry with Let's Encrypt renewal context, whether the full chain is served, key type and size, which names the certificate covers (including your www or apex twin), the negotiated protocol and cipher, whether TLS 1.0/1.1 are still accepted, and whether HTTP redirects to HTTPS with HSTS.",
     "email-finder":
       "Paid email finders charge per lookup for data that is mostly public. This one generates every common corporate pattern for a name, then reads the company's own homepage, contact, about and team pages to discover the pattern it actually uses and any role addresses it publishes — and confirms the domain has a mail server. Candidates are ranked by confidence with the reason shown. It never claims a mailbox exists; it gives you the best guess, the fallbacks, and a way to verify cheaply.",
+    "ai-image-generator":
+      "Most image tools hand you a text box and leave the prompt engineering to you. Here an art director sits in between: you describe the job — a hero for a fintech landing page, an ad for a running shoe, a header for a post about remote work — and it writes the full brief (subject, style, lighting, palette, composition for the aspect ratio) before rendering. Images come back in the ratio the channel needs, re-encoded small enough to use as-is, with WebP and PNG downloads and the prompt saved so you can iterate.",
+    "social-card-generator":
+      "The link preview is the first thing most people see of a page, and most sites ship a blurry logo or nothing. This designs the card as a real layout — headline, subtitle, badge, brand mark and domain typeset exactly, in your colours — and renders it in every size that matters: 1200×630 for og:image, 1600×900 for X, 1080×1080 for feeds, 1080×1920 for stories. Text stays editable in the card, so a fix is a keystroke, not another generation. When a backdrop would help, the image model paints one behind the type.",
     "background-remover":
       "Clean product shots and headshots usually mean a trip to Photoshop or a paid app. This runs a real image-segmentation model entirely on your device — no upload, no account, no watermark — and hands back a transparent PNG in seconds.",
     "demo-video-creator":

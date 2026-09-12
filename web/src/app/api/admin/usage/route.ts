@@ -3,7 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { getStore, redisCredentials } from "@/lib/ai/store";
 import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
-import { modelChain } from "@/lib/ai/models";
+import { imageModelChain, modelChain } from "@/lib/ai/models";
 import { authStats } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     store: { kind: store.kind, shared: Boolean(redisCredentials()) },
     limits: CHAT_LIMITS,
     dailyCapUsd: dailySpendCapUsd(),
-    chains: { writer: modelChain("writer"), fast: modelChain("fast") },
+    chains: { writer: modelChain("writer"), fast: modelChain("fast"), image: imageModelChain() },
     prices: MODEL_PRICES,
     credits,
     summary: { today: window(1), last7: window(7), last30: window(30), range: window(days) },

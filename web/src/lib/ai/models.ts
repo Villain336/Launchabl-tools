@@ -50,6 +50,18 @@ export function modelChain(kind: ModelKind, env: Record<string, string | undefin
   return Array.from(new Set(chain));
 }
 
+/**
+ * Image models, best value first. gpt-image-1-mini renders legible text
+ * (social cards, ads) at about a cent per image; the others are fallbacks
+ * when it's unavailable on the current plan.
+ */
+const DEFAULT_IMAGE_CHAIN = ["openai/gpt-image-1-mini", "bytedance/seedream-4.0", "bfl/flux-pro-1.1", "meta/muse-image-1.0"];
+
+export function imageModelChain(env: Record<string, string | undefined> = process.env): string[] {
+  const override = parseChain(env.AI_MODEL_IMAGE);
+  return Array.from(new Set(override.length > 0 ? override : DEFAULT_IMAGE_CHAIN));
+}
+
 /** Human label for a gateway slug, used in the chat footer. */
 export function modelLabel(slug: string): string {
   const [, name = slug] = slug.split("/");

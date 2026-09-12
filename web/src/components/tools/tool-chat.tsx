@@ -62,6 +62,9 @@ import { LocalSeoArtifact } from "@/components/tools/chat/local-seo-artifact";
 import { CalendarArtifact } from "@/components/tools/chat/calendar-artifact";
 import { EmailFinderArtifact } from "@/components/tools/chat/infra-artifacts";
 import type { AccessibilityToolOutput, DnsEmailToolOutput, EmailFinderToolOutput, SecurityHeadersToolOutput, SslToolOutput } from "@/lib/ai/tools/infra-checks";
+import type { ImageDeliverable, SocialCardDeliverable } from "@/lib/ai/tools/image-gen";
+import { ImageArtifact } from "@/components/tools/chat/image-artifact";
+import { SocialCardArtifact } from "@/components/tools/chat/social-card-artifact";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -106,6 +109,8 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   auditAccessibility: (part) => auditOrError(part.output as AccessibilityToolOutput, (r) => <ChecklistArtifact report={r.report} />),
   checkSsl: (part) => auditOrError(part.output as SslToolOutput, (r) => <ChecklistArtifact report={r.report} />),
   findEmail: (part) => auditOrError(part.output as EmailFinderToolOutput, (r) => <EmailFinderArtifact result={r.result} />),
+  generateImage: (part) => <ImageArtifact data={part.output as ImageDeliverable} />,
+  designSocialCard: (part) => <SocialCardArtifact data={part.output as SocialCardDeliverable} />,
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -147,6 +152,8 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   auditAccessibility: { working: "Scanning for WCAG barriers", done: "Accessibility report ready" },
   checkSsl: { working: "Opening a TLS connection", done: "Certificate report ready" },
   findEmail: { working: "Reading the company's pages and DNS", done: "Email candidates ready" },
+  generateImage: { working: "Rendering the image", done: "Image ready" },
+  designSocialCard: { working: "Designing the card", done: "Card ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */

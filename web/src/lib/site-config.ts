@@ -840,6 +840,57 @@ export const tools: Tool[] = [
     ],
   },
   {
+    slug: "ai-image-generator",
+    name: "AI Image Generator",
+    shortDescription: "Describe the visual you need — hero, ad creative, blog header, product scene, icon — and get finished images in the right aspect ratio, ready to download.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "One image is a start. A campaign is the job.",
+      body: "Unlimited plan members get full creative production: on-brand image systems, ad sets across every platform size, and a designer who fixes what the model can't.",
+    },
+    faq: [
+      {
+        question: "Which model makes the images?",
+        answer:
+          "OpenAI's gpt-image model by default, routed through our gateway with automatic fallback to other image models if it's unavailable. The assistant writes a full art-direction prompt from your brief first, which is where most of the quality comes from.",
+      },
+      {
+        question: "Can I use the images commercially?",
+        answer:
+          "Yes. Images you generate are yours to use, including commercially. Avoid asking for real people, trademarks or other companies' logos — the model refuses some of those and the rest can create legal exposure for you.",
+      },
+      {
+        question: "Where are my images stored?",
+        answer:
+          "In your browser's history for this tool only — we don't keep a copy on our servers. Download the files you want to keep; if a conversation grows large the oldest pixels are trimmed and you can regenerate from the saved prompt.",
+      },
+    ],
+  },
+  {
+    slug: "social-card-generator",
+    name: "OG & Social Card Generator",
+    shortDescription: "Turn a page or announcement into a link-preview card and social post images — exact text, brand colours, optional generated art — in every size, as PNG.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Every page deserves a preview that earns the click.",
+      body: "Unlimited plan members get a full social template system in their brand and automated og:image generation for every page of their site.",
+    },
+    faq: [
+      {
+        question: "Why not just generate the whole card with an image model?",
+        answer:
+          "Image models still misspell and misplace text. Here the card is a real vector layout — the headline, subtitle and brand are typeset exactly — and the image model is only used, optionally, for the backdrop art behind it.",
+      },
+      {
+        question: "Which size do I upload where?",
+        answer:
+          "1200×630 is the og:image for Facebook, LinkedIn, Slack and iMessage previews; 1600×900 for X's summary_large_image; 1080×1080 for Instagram feed and LinkedIn posts; 1080×1920 for stories and Reels covers. The card offers all four.",
+      },
+    ],
+  },
+  {
     slug: "background-remover",
     name: "Background Remover",
     shortDescription: "Remove the background from a photo — product shots, headshots, or social images — right in your browser.",
