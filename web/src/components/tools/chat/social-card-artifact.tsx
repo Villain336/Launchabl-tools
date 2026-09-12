@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Download, ImageOff } from "lucide-react";
+import { Check, Copy, Download, ImageOff, Package } from "lucide-react";
 import type { SocialCardDeliverable, SocialCardSpec } from "@/lib/ai/tools/image-gen";
-import { CARD_SIZES, estimateMeasure, FONT_STACK, renderSocialCardSvg, type CardSize, type Measure } from "@/lib/social-card/render";
+import { CARD_SIZES, cardSize, estimateMeasure, FONT_STACK, renderSocialCardSvg, SIZE_PACKS, type CardSize, type CardSizeKey, type Measure } from "@/lib/social-card/render";
 import { downloadBlob } from "@/lib/download";
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
@@ -67,6 +67,8 @@ export function SocialCardArtifact({ data }: { data: SocialCardDeliverable }) {
   const [layout, setLayout] = useState<SocialCardSpec["layout"]>(data.layout);
   const [busy, setBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [picked, setPicked] = useState<CardSizeKey[]>(CARD_SIZES.map((s) => s.key));
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // Canvas text measurement is only available after mount; re-render once so line breaks are exact.
@@ -88,11 +90,35 @@ export function SocialCardArtifact({ data }: { data: SocialCardDeliverable }) {
       setBusy(null);
     }
   };
-  const downloadAll = async () => {
-    for (const target of CARD_SIZES) await download(target);
+  const metaTags = () =>
+    `<meta property="og:image" content="https://${spec.brand.domain ?? "example.com"}/og/${fileSlug(spec.title)}-1200x630.png" />\n<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n<meta name="twitter:card" content="summary_large_image" />\n<meta name="twitter:image" content="https://${spec.brand.domain ?? "example.com"}/og/${fileSlug(spec.title)}-1600x900.png" />`;
+  /** One ZIP with every picked size as PNG (and the SVG source), plus the og tags — one download instead of seven. */
+  const downloadBatch = async () => {
+    if (picked.length === 0) return;
+    setBusy("batch");
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      const slug = fileSlug(spec.title);
+      const manifest: string[] = [`# ${spec.title}`, "", "| File | Size | Use |", "| --- | --- | --- |"];
+      for (const key of picked) {
+        const target = cardSize(key);
+        const markup = renderSocialCardSvg({ spec, size: target, measure, backgroundImage });
+        const name = `${slug}-${target.width}x${target.height}`;
+        zip.file(`${name}.png`, await svgToPng(markup, target.width, target.height));
+        zip.file(`svg/${name}.svg`, markup);
+        manifest.push(`| ${name}.png | ${target.width}×${target.height} | ${target.hint} |`);
+      }
+      manifest.push("", "## og:image tags", "", "```html", metaTags(), "```", "");
+      zip.file("README.md", manifest.join("\n"));
+      downloadBlob(await zip.generateAsync({ type: "blob" }), `${slug}-social-cards.zip`);
+    } finally {
+      setBusy(null);
+    }
   };
+  const togglePick = (key: CardSizeKey) => setPicked((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   const copyMeta = async () => {
-    await navigator.clipboard.writeText(`<meta property="og:image" content="https://${spec.brand.domain ?? "example.com"}/og/${fileSlug(spec.title)}-1200x630.png" />\n<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n<meta name="twitter:card" content="summary_large_image" />\n<meta name="twitter:image" content="https://${spec.brand.domain ?? "example.com"}/og/${fileSlug(spec.title)}-1600x900.png" />`);
+    await navigator.clipboard.writeText(metaTags());
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
   };
@@ -150,8 +176,8 @@ export function SocialCardArtifact({ data }: { data: SocialCardDeliverable }) {
           <button type="button" disabled={busy !== null} onClick={() => download(size)} className="inline-flex h-8 items-center gap-1.5 rounded-control bg-primary px-3 text-[12.5px] font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50">
             <Download className="h-3.5 w-3.5" /> PNG {size.width}×{size.height}
           </button>
-          <button type="button" disabled={busy !== null} onClick={downloadAll} className="inline-flex h-8 items-center gap-1.5 rounded-control px-2.5 text-[12.5px] font-medium text-ink-2 hover:bg-hover hover:text-ink disabled:opacity-50">
-            All sizes
+          <button type="button" aria-pressed={batchOpen} onClick={() => setBatchOpen((v) => !v)} className={`inline-flex h-8 items-center gap-1.5 rounded-control px-2.5 text-[12.5px] font-medium hover:bg-hover hover:text-ink ${batchOpen ? "bg-field text-ink" : "text-ink-2"}`} data-card-batch-toggle>
+            <Package className="h-3.5 w-3.5" /> Batch
           </button>
           <button type="button" onClick={copyMeta} className="inline-flex h-8 items-center gap-1.5 rounded-control px-2.5 text-[12.5px] font-medium text-ink-2 hover:bg-hover hover:text-ink">
             {copied ? <Check className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" />} og:image tags
@@ -159,6 +185,43 @@ export function SocialCardArtifact({ data }: { data: SocialCardDeliverable }) {
         </div>
         <span className="text-[11.5px] text-ink-3">{size.hint}</span>
       </div>
+
+      {batchOpen && (
+        <div className="border-t border-line bg-field/40 px-3 py-3" data-card-batch>
+          <div className="flex flex-wrap items-center gap-1 text-[11.5px] text-ink-3">
+            Pack
+            {SIZE_PACKS.map((p) => (
+              <button key={p.key} type="button" onClick={() => setPicked(p.sizes)} className={chip(p.sizes.length === picked.length && p.sizes.every((k) => picked.includes(k)))}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+            {CARD_SIZES.map((s) => (
+              <label key={s.key} className="flex cursor-pointer items-center gap-2 rounded-[8px] px-2 py-1.5 text-[12.5px] text-ink hover:bg-hover">
+                <input type="checkbox" checked={picked.includes(s.key)} onChange={() => togglePick(s.key)} className="accent-primary" />
+                <span className="font-medium">{s.label}</span>
+                <span className="font-mono text-[11px] text-ink-3">
+                  {s.width}×{s.height}
+                </span>
+                <span className="ml-auto hidden truncate text-[11px] text-ink-3 sm:inline">{s.hint.split(" · ")[0]}</span>
+              </label>
+            ))}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11.5px] text-ink-3">PNG for each size, SVG sources and a README with the og:image tags, in one ZIP.</p>
+            <button
+              type="button"
+              disabled={busy !== null || picked.length === 0}
+              onClick={downloadBatch}
+              className="inline-flex h-8 items-center gap-1.5 rounded-control bg-primary px-3 text-[12.5px] font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+              data-card-batch-download
+            >
+              <Download className="h-3.5 w-3.5" /> {busy === "batch" ? "Rendering…" : `ZIP · ${picked.length} size${picked.length === 1 ? "" : "s"}`}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

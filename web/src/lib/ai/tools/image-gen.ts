@@ -136,7 +136,7 @@ export const designSocialCardTool = tool({
   },
   toModelOutput: ({ output }) => ({
     type: "text",
-    value: `Card rendered: "${output.title}" (${output.theme}, ${output.layout}, background ${output.background.kind}${output.backgroundImage ? " with generated art" : ""}). The user sees it in OG 1200×630, square 1080×1080, X 1600×900 and story 1080×1920 with PNG downloads and editable text.`,
+    value: `Card rendered: "${output.title}" (${output.theme}, ${output.layout}, background ${output.background.kind}${output.backgroundImage ? " with generated art" : ""}). The user sees it in seven sizes (OG 1200×630, X 1600×900, square, portrait 4:5, story, YouTube thumbnail, Pinterest) with editable text, PNG downloads and a batch ZIP export.`,
   }),
 });
 

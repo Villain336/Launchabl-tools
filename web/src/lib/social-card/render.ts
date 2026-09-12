@@ -7,15 +7,28 @@ import type { SocialCardSpec } from "@/lib/ai/tools/image-gen";
  * browser, a character-width estimate in tests.
  */
 
-export type CardSizeKey = "og" | "x" | "square" | "story";
+export type CardSizeKey = "og" | "x" | "square" | "portrait" | "story" | "youtube" | "pinterest";
 export type CardSize = { key: CardSizeKey; label: string; width: number; height: number; hint: string };
 
 export const CARD_SIZES: CardSize[] = [
   { key: "og", label: "Link preview", width: 1200, height: 630, hint: "og:image · Facebook, LinkedIn, Slack, iMessage" },
   { key: "x", label: "X / Twitter", width: 1600, height: 900, hint: "twitter:image · 16:9 summary_large_image" },
   { key: "square", label: "Square", width: 1080, height: 1080, hint: "Instagram feed, LinkedIn post, Threads" },
+  { key: "portrait", label: "Portrait", width: 1080, height: 1350, hint: "4:5 · Instagram and LinkedIn feed, the most screen per post" },
   { key: "story", label: "Story", width: 1080, height: 1920, hint: "Instagram / Facebook story, TikTok, Reels cover" },
+  { key: "youtube", label: "YouTube", width: 1280, height: 720, hint: "Video thumbnail · also Substack and Medium headers" },
+  { key: "pinterest", label: "Pinterest", width: 1000, height: 1500, hint: "2:3 pin" },
 ];
+
+/** Named bundles for the batch export. */
+export const SIZE_PACKS: { key: string; label: string; sizes: CardSizeKey[] }[] = [
+  { key: "all", label: "Everything", sizes: CARD_SIZES.map((s) => s.key) },
+  { key: "link", label: "Link previews", sizes: ["og", "x"] },
+  { key: "feed", label: "Feed posts", sizes: ["square", "portrait"] },
+  { key: "vertical", label: "Vertical", sizes: ["story", "pinterest"] },
+];
+
+export const cardSize = (key: CardSizeKey): CardSize => CARD_SIZES.find((s) => s.key === key) ?? CARD_SIZES[0];
 
 export type Measure = (text: string, fontSize: number, weight: number) => number;
 
