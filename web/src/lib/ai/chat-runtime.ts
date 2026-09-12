@@ -51,6 +51,8 @@ export type ChatToolRuntime = {
   /** Per-step overrides (force a tool, restrict tools) computed from the steps so far. */
   prepareStep?: PrepareStepFunction<ToolSet>;
   skill?: SkillMeta;
+  /** Requires an active Tools Pro subscription (see lib/ai/entitlement.ts). Undefined = free. */
+  tier?: "pro";
 };
 
 const runtimes: ChatToolRuntime[] = [

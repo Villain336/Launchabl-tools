@@ -113,6 +113,63 @@ export async function recordUpsell(event: UpsellEvent, store: KeyValueStore = ge
   }
 }
 
+/* ── Tools Pro paywall (dark-launch metrics) ────────────────
+ * While a pro-tier tool isn't in PAYWALL_ENFORCED_TOOLS yet, entitlement.ts
+ * waves the request through instead of blocking it, but records the would-
+ * have-blocked event here so the admin dashboard can show how many requests
+ * a tool would actually stop before enforcement is switched on.
+ */
+
+export type PaywallKind = "shadow_blocked" | "blocked" | "trial_started";
+
+export async function recordPaywallEvent(kind: PaywallKind, slug: string, store: KeyValueStore = getStore(), date = new Date()): Promise<void> {
+  const day = dayKey(date);
+  const fields = { [field("paywall", kind, "all")]: 1, [field("paywall", kind, "tool", slug)]: 1 };
+  try {
+    await Promise.all([store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS), store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS)]);
+  } catch (error) {
+    console.warn("[usage] failed to record paywall event", error);
+  }
+}
+
+export type PaywallStats = { shadowBlocked: number; blocked: number; trialsStarted: number; byTool: Record<string, { shadowBlocked: number; blocked: number; trialsStarted: number }> };
+
+export function emptyPaywallStats(): PaywallStats {
+  return { shadowBlocked: 0, blocked: 0, trialsStarted: 0, byTool: {} };
+}
+
+function applyPaywall(raw: Record<string, number>): PaywallStats {
+  const stats = emptyPaywallStats();
+  const kindKey: Record<PaywallKind, keyof Omit<PaywallStats, "byTool">> = { shadow_blocked: "shadowBlocked", blocked: "blocked", trial_started: "trialsStarted" };
+  for (const [key, value] of Object.entries(raw)) {
+    if (!key.startsWith("paywall:")) continue;
+    const rest = key.slice("paywall:".length);
+    for (const [kind, prop] of Object.entries(kindKey) as [PaywallKind, keyof Omit<PaywallStats, "byTool">][]) {
+      if (rest === `${kind}:all`) {
+        stats[prop] += value;
+      } else if (rest.startsWith(`${kind}:tool:`)) {
+        const slug = rest.slice(`${kind}:tool:`.length);
+        const bucket = (stats.byTool[slug] ??= { shadowBlocked: 0, blocked: 0, trialsStarted: 0 });
+        bucket[prop] += value;
+      }
+    }
+  }
+  return stats;
+}
+
+export async function readPaywallStats(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<PaywallStats> {
+  const merged: Record<string, number> = {};
+  for (let i = 0; i < days; i++) {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - i);
+    const raw = await store.hgetall(`${KEY_PREFIX}:day:${dayKey(d)}`);
+    for (const [key, value] of Object.entries(raw)) {
+      if (key.startsWith("paywall:")) merged[key] = (merged[key] ?? 0) + value;
+    }
+  }
+  return applyPaywall(merged);
+}
+
 export function emptyUpsell(): UpsellBucket {
   return { views: 0, clicks: 0, dismissals: 0 };
 }

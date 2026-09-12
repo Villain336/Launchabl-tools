@@ -3,7 +3,7 @@ import { classifyAiError, userFacingAiMessage } from "@/lib/ai/errors";
 import { modelChain, modelLabel } from "@/lib/ai/models";
 import { createRateLimiter } from "@/lib/ai/rate-limit";
 import { createMemoryStore } from "@/lib/ai/store";
-import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readUsage, recordUpsell, recordTemplatePick, recordUsage, sumBuckets, sumUpsell } from "@/lib/ai/usage";
+import { checkDailySpend, dailySpendCapUsd, estimateCostUsd, readPaywallStats, readUsage, recordPaywallEvent, recordUpsell, recordTemplatePick, recordUsage, sumBuckets, sumUpsell } from "@/lib/ai/usage";
 import { getChatTool, listChatTools } from "@/lib/ai/chat-tools";
 import { getChatToolRuntime, listChatToolRuntimes } from "@/lib/ai/chat-runtime";
 import { tools } from "@/lib/site-config";
@@ -134,6 +134,25 @@ describe("usage accounting", () => {
     expect(today.upsellByTool["website-audit-report"]).toEqual({ views: 2, clicks: 1, dismissals: 0 });
     expect(today.upsellByTool["link-checker"]).toEqual({ views: 0, clicks: 0, dismissals: 1 });
     expect(sumUpsell([today.upsell, today.upsell]).clicks).toBe(2);
+  });
+
+  it("tallies paywall shadow-block, block and trial events per tool without touching request totals", async () => {
+    const store = createMemoryStore(() => 0);
+    const date = new Date("2026-09-11T10:00:00Z");
+    await recordPaywallEvent("trial_started", "ai-image-generator", store, date);
+    await recordPaywallEvent("trial_started", "ai-image-generator", store, date);
+    await recordPaywallEvent("shadow_blocked", "ai-image-generator", store, date);
+    await recordPaywallEvent("shadow_blocked", "transcriber", store, date);
+    await recordPaywallEvent("blocked", "transcriber", store, date);
+    const [today] = await readUsage(1, store, date);
+    expect(today.total.requests).toBe(0);
+
+    const stats = await readPaywallStats(1, store, date);
+    expect(stats.trialsStarted).toBe(2);
+    expect(stats.shadowBlocked).toBe(2);
+    expect(stats.blocked).toBe(1);
+    expect(stats.byTool["ai-image-generator"]).toEqual({ shadowBlocked: 1, blocked: 0, trialsStarted: 2 });
+    expect(stats.byTool["transcriber"]).toEqual({ shadowBlocked: 1, blocked: 1, trialsStarted: 0 });
   });
 
   it("enforces the daily spend cap and resets at midnight UTC", async () => {

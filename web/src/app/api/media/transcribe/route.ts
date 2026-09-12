@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { del } from "@vercel/blob";
 import { NoModelAvailableError } from "@/lib/ai/errors";
+import { checkEntitlement, NEEDS_PRO_MESSAGE } from "@/lib/ai/entitlement";
 import { GATEWAY_UNCONFIGURED, hasGatewayAuth } from "@/lib/ai/models";
 import { clientKey, createRateLimiter, type RateLimiter } from "@/lib/ai/rate-limit";
 import { getStore } from "@/lib/ai/store";
@@ -26,6 +27,15 @@ export const maxDuration = 120;
 
 const ANON_MINUTES_PER_DAY = 10;
 const DAY_SECONDS = 24 * 60 * 60;
+
+/**
+ * Pseudo-slug for entitlement's free-trial counter, deliberately separate
+ * from the "transcriber"/"clip-finder" chat-tool slugs: the real ASR cost
+ * happens here, once, no matter which chat tool ends up reading the
+ * transcript (including the unified "agent"), so it needs its own gate
+ * rather than trusting whatever slug the client sent.
+ */
+const MEDIA_ENTITLEMENT_SLUG = "media-transcribe";
 
 declare global {
   var __launchablTranscribeLimiter: RateLimiter | undefined;
@@ -81,6 +91,17 @@ export async function POST(request: NextRequest) {
       },
       { status: session ? 429 : 401 },
     );
+  }
+
+  // Tools Pro gate for the ASR call itself — anonymous visitors keep their
+  // small daily taste (capped tightly above) without needing an account;
+  // signed-in accounts get a few free trials, then need a subscription (or
+  // ride along in dark-launch until PAYWALL_ENFORCED_TOOLS says otherwise).
+  if (session) {
+    const entitlement = await checkEntitlement(MEDIA_ENTITLEMENT_SLUG, session, store, { forcePro: true });
+    if (!entitlement.allowed) {
+      return NextResponse.json({ error: NEEDS_PRO_MESSAGE, cause: "needs_pro" }, { status: 402 });
+    }
   }
 
   let bytes: Uint8Array;

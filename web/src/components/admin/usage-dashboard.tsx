@@ -5,7 +5,7 @@ import { KeyRound, RefreshCw } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { GatewayCredits, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
+import type { GatewayCredits, PaywallStats, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
 import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
@@ -27,6 +27,8 @@ type UsagePayload = {
   upsell: { today: UpsellBucket; last7: UpsellBucket; range: UpsellBucket; byTool: Record<string, UpsellBucket> };
   accounts?: { users: number; byDay: { date: string; signUps: number; signIns: number }[]; signUpsBySource?: Record<string, number> };
   reports?: { created: number; views: number; byTool: Record<string, number> };
+  billing?: { activeSubscribers: number; byInterval: Record<"month" | "year", number>; mrrUsd: number };
+  paywall?: PaywallStats;
   days: UsageDay[];
 };
 
@@ -276,6 +278,72 @@ function UpsellPanel({ upsell, labelFor, days }: { upsell: UsagePayload["upsell"
   );
 }
 
+/** Tools Pro subscriptions and the dark-launch paywall shadow metrics (see lib/ai/entitlement.ts). */
+function BillingPanel({
+  billing,
+  paywall,
+  labelFor,
+  days,
+}: {
+  billing: NonNullable<UsagePayload["billing"]>;
+  paywall: PaywallStats;
+  labelFor: (slug: string) => string;
+  days: number;
+}) {
+  const toolRows = Object.entries(paywall.byTool);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Tools Pro billing</h2>
+          <p className="text-xs text-muted-foreground">
+            Subscribers, MRR, and the paywall&rsquo;s dark-launch shadow metrics — how many requests would have been blocked if PAYWALL_ENFORCED_TOOLS included that tool already.
+          </p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            Active <span className="font-medium text-foreground">{int(billing.activeSubscribers)}</span>
+          </span>
+          <span>
+            Monthly <span className="font-medium text-foreground">{int(billing.byInterval.month)}</span>
+          </span>
+          <span>
+            Yearly <span className="font-medium text-foreground">{int(billing.byInterval.year)}</span>
+          </span>
+          <span>
+            MRR <span className="font-medium text-foreground">{usd(billing.mrrUsd)}</span>
+          </span>
+        </div>
+      </div>
+      {toolRows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No paywall activity recorded yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium">Tool</th>
+              <th className="px-4 py-2 text-right font-medium">Free trials started</th>
+              <th className="px-4 py-2 text-right font-medium">Would block (dark-launch)</th>
+              <th className="px-4 py-2 text-right font-medium">Actually blocked</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {toolRows.map(([slug, b]) => (
+              <tr key={slug}>
+                <td className="px-4 py-2 text-foreground">{slug === "media-transcribe" ? "Media transcribe (ASR call)" : labelFor(slug)}</td>
+                <td className="px-4 py-2 text-right tabular-nums">{int(b.trialsStarted)}</td>
+                <td className="px-4 py-2 text-right tabular-nums font-medium text-amber-600">{int(b.shadowBlocked)}</td>
+                <td className="px-4 py-2 text-right tabular-nums font-medium text-red-600">{int(b.blocked)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">Last {days} days.</p>
+    </div>
+  );
+}
+
 const TOKEN_KEY = "launchabl.admin.token";
 
 type FetchResult = { data: UsagePayload } | { error: string; status: number };
@@ -446,6 +514,7 @@ export function UsageDashboard() {
             <TemplatesPanel byTemplate={data.byTemplate} picks={data.templatePicks ?? {}} signUpsBySource={data.accounts?.signUpsBySource ?? {}} days={days} />
           )}
           {data.accounts && <AccountsPanel accounts={data.accounts} days={days} labelFor={toolLabel} />}
+          {data.billing && data.paywall && <BillingPanel billing={data.billing} paywall={data.paywall} labelFor={toolLabel} days={days} />}
           {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
           <EvalsPanel token={token} />

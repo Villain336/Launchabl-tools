@@ -8,6 +8,7 @@ import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { repairToolCall } from "@/lib/ai/repair";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
+import { checkEntitlement, NEEDS_PRO_MESSAGE } from "@/lib/ai/entitlement";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
 import { gateRun, SIGN_IN_REQUIRED_MESSAGE } from "@/lib/auth/session";
@@ -81,6 +82,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: SIGN_IN_REQUIRED_MESSAGE, cause: "sign_in_required" }, { status: 401, headers: responseHeaders });
   }
   const account = gate.kind === "user" ? gate.session.uid : `anon:${clientKey(request.headers)}`;
+
+  // Tools Pro: image generation, transcription and clip-finding cost real
+  // money per call. See lib/ai/entitlement.ts for the free-trial and
+  // dark-launch (PAYWALL_ENFORCED_TOOLS) behaviour.
+  const entitlement = await checkEntitlement(slug, gate.kind === "user" ? gate.session : null);
+  if (!entitlement.allowed) {
+    const message = entitlement.reason === "sign_in_required" ? SIGN_IN_REQUIRED_MESSAGE : NEEDS_PRO_MESSAGE;
+    const status = entitlement.reason === "sign_in_required" ? 401 : 402;
+    return NextResponse.json({ error: message, cause: entitlement.reason }, { status, headers: responseHeaders });
+  }
 
   // Active project (signed-in only, must be theirs): its context goes into the
   // system prompt so tools stop asking for company, site, audience and tone.
