@@ -65,9 +65,30 @@ export function readHistory(slug: string): HistoryIndex {
   return value;
 }
 
+/** Storage a single conversation may take; beyond this, attachment bytes are dropped oldest-first (the chips remain). */
+const MAX_CONVERSATION_BYTES = 900_000;
+
+function shrinkConversation(conversation: StoredConversation): StoredConversation {
+  if (JSON.stringify(conversation).length <= MAX_CONVERSATION_BYTES) return conversation;
+  const messages = conversation.messages.map((message) => ({ ...message, parts: [...message.parts] }));
+  let size = JSON.stringify({ ...conversation, messages }).length;
+  for (const message of messages) {
+    if (size <= MAX_CONVERSATION_BYTES) break;
+    message.parts = message.parts.map((part) => {
+      if (part.type !== "file" || !part.url) return part;
+      size -= part.url.length;
+      return { ...part, url: "" };
+    });
+  }
+  return { ...conversation, messages };
+}
+
 function write(slug: string, index: HistoryIndex) {
   if (!available()) return;
-  let conversations = [...index.conversations].sort((a, b) => b.updatedAt - a.updatedAt).slice(0, MAX_CONVERSATIONS);
+  let conversations = [...index.conversations]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .slice(0, MAX_CONVERSATIONS)
+    .map(shrinkConversation);
   let serialized = JSON.stringify({ current: index.current, conversations });
   while (serialized.length > MAX_BYTES && conversations.length > 1) {
     conversations = conversations.slice(0, -1);

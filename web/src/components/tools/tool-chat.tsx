@@ -1,10 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ClipboardEvent,
+  type DragEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, getToolName, isToolUIPart } from "ai";
-import { ArrowUp, Check, Copy, History, RefreshCw, RotateCcw, Square, Sparkles, Trash2 } from "lucide-react";
+import { DefaultChatTransport, getToolName, isToolUIPart, type FileUIPart } from "ai";
+import { ArrowUp, Check, Copy, FileText, History, Paperclip, RefreshCw, RotateCcw, Square, Sparkles, Trash2, X } from "lucide-react";
 import { getChatTool } from "@/lib/ai/chat-tools";
+import { ACCEPT, ATTACHMENT_LIMITS, AttachmentError, dataUrlBytes, fileToPart, formatBytes, isImageType } from "@/lib/chat/attachments";
+import { trimImageHistory } from "@/lib/chat/inline-attachments";
 import { getToolBySlug } from "@/lib/site-config";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import {
@@ -186,6 +198,61 @@ function messageText(message: ToolChatMessage): string {
     .map((part) => part.text)
     .join("\n\n")
     .trim();
+}
+
+function messageFiles(message: ToolChatMessage): FileUIPart[] {
+  return message.parts.filter((part): part is FileUIPart => part.type === "file");
+}
+
+/** Attachment as it appears in a sent user message: image thumbnail or a file chip. */
+function FileBubble({ part }: { part: FileUIPart }) {
+  const name = part.filename ?? "attachment";
+  if (isImageType(part.mediaType) && part.url) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- data URL from the user's own upload
+      <img src={part.url} alt={name} title={name} className="max-h-40 max-w-full rounded-[10px] border border-line object-contain" />
+    );
+  }
+  return (
+    <span className="inline-flex max-w-full items-center gap-1.5 rounded-[8px] border border-line bg-surface px-2 py-1 text-[12px] text-ink-2">
+      <FileText className="h-3.5 w-3.5 shrink-0 text-ink-3" />
+      <span className="truncate">{name}</span>
+      <span className="shrink-0 text-ink-3">{part.url ? formatBytes(dataUrlBytes(part.url)) : "not saved"}</span>
+    </span>
+  );
+}
+
+/** Attachment queued in the composer, with a remove control. */
+function AttachmentChip({ part, onRemove }: { part: FileUIPart; onRemove: () => void }) {
+  const name = part.filename ?? "attachment";
+  const image = isImageType(part.mediaType);
+  return (
+    <li className="group relative flex items-center gap-2 rounded-[8px] border border-line bg-surface py-1 pr-7 pl-1.5 text-[12px] text-ink" title={name}>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element -- local preview of the user's own file
+        <img src={part.url} alt="" className="size-7 rounded-[5px] object-cover" />
+      ) : (
+        <span className="flex size-7 items-center justify-center rounded-[5px] bg-field text-ink-3">
+          <FileText className="h-3.5 w-3.5" />
+        </span>
+      )}
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="max-w-[160px] truncate">{name}</span>
+        <span className="text-[10.5px] text-ink-3">{formatBytes(dataUrlBytes(part.url))}</span>
+      </span>
+      <button
+        type="button"
+        aria-label={`Remove ${name}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRemove();
+        }}
+        className="absolute top-1/2 right-1.5 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink"
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </li>
+  );
 }
 
 function parseErrorMessage(error: Error | undefined): string | null {
@@ -404,13 +471,23 @@ function HistoryMenu({
 export function ToolChat({ slug, className = "" }: { slug: string; className?: string }) {
   const meta = getChatTool(slug);
   const [draft, setDraft] = useState("");
+  const [attachments, setAttachments] = useState<FileUIPart[]>([]);
+  const [attachError, setAttachError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
   const restoredRef = useRef(false);
 
   const transport = useMemo(
-    () => new DefaultChatTransport<ToolChatMessage>({ api: "/api/tools/chat", body: () => ({ tool: slug }) }),
+    () =>
+      new DefaultChatTransport<ToolChatMessage>({
+        api: "/api/tools/chat",
+        prepareSendMessagesRequest: ({ id, messages, trigger, messageId }) => ({
+          body: { tool: slug, id, trigger, messageId, messages: trimImageHistory(messages) },
+        }),
+      }),
     [slug],
   );
 
@@ -419,17 +496,65 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
 
   const busy = status === "submitted" || status === "streaming";
   const errorMessage = parseErrorMessage(error);
-  const canSend = draft.trim().length > 0 && !busy;
+  const canSend = (draft.trim().length > 0 || attachments.length > 0) && !busy;
 
   const send = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || busy) return;
+    if ((!trimmed && attachments.length === 0) || busy) return;
     pinnedRef.current = true;
-    void sendMessage({ text: trimmed });
+    const files = attachments;
+    // A file with no prompt still needs a text part so the model has an instruction to act on.
+    void sendMessage({ text: trimmed || (files.length === 1 ? "Here's the file." : "Here are the files."), files });
     setDraft("");
+    setAttachments([]);
+    setAttachError(null);
     requestAnimationFrame(() => {
       if (inputRef.current) inputRef.current.style.height = "auto";
     });
+  };
+
+  const addFiles = async (incoming: Iterable<File>) => {
+    const files = Array.from(incoming);
+    if (files.length === 0) return;
+    setAttachError(null);
+    const room = ATTACHMENT_LIMITS.maxFiles - attachments.length;
+    const errors: string[] = [];
+    if (files.length > room) errors.push(`You can attach up to ${ATTACHMENT_LIMITS.maxFiles} files per message.`);
+    const parts: FileUIPart[] = [];
+    for (const file of files.slice(0, Math.max(0, room))) {
+      try {
+        parts.push(await fileToPart(file));
+      } catch (error) {
+        errors.push(error instanceof AttachmentError ? error.message : `${file.name} couldn't be read.`);
+      }
+    }
+    if (parts.length > 0) setAttachments((current) => [...current, ...parts].slice(0, ATTACHMENT_LIMITS.maxFiles));
+    if (errors.length > 0) setAttachError(errors.join(" "));
+    inputRef.current?.focus();
+  };
+
+  const onPickFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) void addFiles(event.target.files);
+    event.target.value = "";
+  };
+
+  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const files = Array.from(event.clipboardData?.files ?? []);
+    if (files.length === 0) return;
+    event.preventDefault();
+    void addFiles(files);
+  };
+
+  const onDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!Array.from(event.dataTransfer?.types ?? []).includes("Files")) return;
+    event.preventDefault();
+    if (!dragging) setDragging(true);
+  };
+
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragging(false);
+    if (event.dataTransfer?.files?.length) void addFiles(event.dataTransfer.files);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -479,6 +604,8 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
     setMessages([]);
     setCurrentConversation(slug, null);
     setDraft("");
+    setAttachments([]);
+    setAttachError(null);
     inputRef.current?.focus();
   };
 
@@ -577,14 +704,22 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
 
         {messages.map((message) => {
           if (message.role === "user") {
+            const files = messageFiles(message);
+            const text = messageText(message);
             return (
-              <div key={message.id} className="flex justify-end pl-10 sm:pl-24">
-                <div
-                  className="max-w-full rounded-2xl bg-field px-4 py-2.5 text-[14px] leading-[1.5] whitespace-pre-wrap text-ink"
-                  style={{ animation: "fade-up 300ms cubic-bezier(0.23,1,0.32,1) both" }}
-                >
-                  {messageText(message)}
-                </div>
+              <div key={message.id} className="flex flex-col items-end gap-1.5 pl-10 sm:pl-24" style={{ animation: "fade-up 300ms cubic-bezier(0.23,1,0.32,1) both" }}>
+                {files.length > 0 && (
+                  <div className="flex max-w-full flex-wrap justify-end gap-1.5">
+                    {files.map((part, index) => (
+                      <FileBubble key={`${message.id}-file-${index}`} part={part} />
+                    ))}
+                  </div>
+                )}
+                {text && (
+                  <div className="max-w-full rounded-2xl bg-field px-4 py-2.5 text-[14px] leading-[1.5] whitespace-pre-wrap text-ink">
+                    {text}
+                  </div>
+                )}
               </div>
             );
           }
@@ -637,8 +772,29 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
         <div
           role="presentation"
           onClick={() => inputRef.current?.focus()}
-          className="flex cursor-text flex-col gap-2 rounded-control border border-line bg-field p-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.035)] transition-[border-color,box-shadow] duration-150 focus-within:border-line-strong"
+          onDragOver={onDragOver}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          className={`relative flex cursor-text flex-col gap-2 rounded-control border bg-field p-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.035)] transition-[border-color,box-shadow] duration-150 focus-within:border-line-strong ${
+            dragging ? "border-primary" : "border-line"
+          }`}
         >
+          {dragging && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-control bg-surface/90 text-[13px] font-medium text-ink">
+              Drop images or text files
+            </div>
+          )}
+          {attachments.length > 0 && (
+            <ul className="flex flex-wrap gap-1.5" aria-label="Attachments">
+              {attachments.map((part, index) => (
+                <AttachmentChip
+                  key={`${part.filename ?? "file"}-${index}`}
+                  part={part}
+                  onRemove={() => setAttachments((current) => current.filter((_, i) => i !== index))}
+                />
+              ))}
+            </ul>
+          )}
           <textarea
             ref={inputRef}
             value={draft}
@@ -650,14 +806,37 @@ export function ToolChat({ slug, className = "" }: { slug: string; className?: s
               node.style.height = `${Math.min(node.scrollHeight, 200)}px`;
             }}
             onKeyDown={onKeyDown}
-            placeholder={meta.placeholder}
+            onPaste={onPaste}
+            placeholder={attachments.length > 0 ? "What should I do with this?" : meta.placeholder}
             aria-label="Message"
             className="max-h-[200px] min-h-6 w-full resize-none bg-transparent text-[14px] leading-[1.5] text-ink outline-none placeholder:text-ink-3"
           />
-          <div className="flex items-center justify-between">
-            <span className="text-[11.5px] text-ink-3">
-              Enter to send · Shift+Enter for a new line
-            </span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <input ref={fileInputRef} type="file" multiple accept={ACCEPT} onChange={onPickFiles} className="hidden" tabIndex={-1} />
+              <button
+                type="button"
+                aria-label="Attach images or text files"
+                title="Attach an image, screenshot, CSV or text file"
+                disabled={busy || attachments.length >= ATTACHMENT_LIMITS.maxFiles}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                className="flex size-7 shrink-0 items-center justify-center rounded-[7px] text-ink-3 transition-colors duration-100 hover:bg-hover hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                <Paperclip className="h-3.5 w-3.5" />
+              </button>
+              <span className="truncate text-[11.5px] text-ink-3">
+                {attachError ? (
+                  <span className="text-red">{attachError}</span>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line · </span>Paste or drop files
+                  </>
+                )}
+              </span>
+            </div>
             {busy ? (
               <button
                 type="button"

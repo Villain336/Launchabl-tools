@@ -7,8 +7,11 @@ import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
+import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
 
-export const maxDuration = 60;
+// Crawls, multi-site comparisons and long kits (local SEO, 90-day calendars)
+// legitimately run past a minute; the model stream keeps the connection alive.
+export const maxDuration = 300;
 
 const MAX_MESSAGES = 40;
 const MAX_TEXT_CHARS = 24_000;
@@ -70,8 +73,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: SPEND_CAP_MESSAGE, cause: "spend_cap" }, { status: 503, headers: { "Retry-After": String(spend.resetsInSeconds) } });
   }
 
+  const prepared = inlineAttachments(trimImageHistory(messages));
+  if (!prepared.ok) {
+    return NextResponse.json({ error: prepared.error }, { status: 400 });
+  }
+
   const chain = modelChain(runtime.modelKind);
-  const modelMessages = await convertToModelMessages(messages, {
+  const modelMessages = await convertToModelMessages(prepared.messages, {
     tools: runtime.tools,
     ignoreIncompleteToolCalls: true,
   });
@@ -82,7 +90,13 @@ export async function POST(request: NextRequest) {
     const { model, stream, skipped } = await streamWithFallback(chain, {
       // Models don't know the date; calendars, "next Monday", dates in schema and
       // "how old is this post" all depend on it.
-      instructions: `${runtime.instructions}\n\nToday is ${today.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })} (${today.toISOString().slice(0, 10)}).`,
+      instructions: [
+        runtime.instructions,
+        prepared.attachments > 0 ? ATTACHMENT_INSTRUCTIONS : null,
+        `Today is ${today.toLocaleDateString("en-GB", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })} (${today.toISOString().slice(0, 10)}).`,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       messages: modelMessages,
       tools: runtime.tools,
       stopWhen: isStepCount(runtime.maxSteps ?? 3),
