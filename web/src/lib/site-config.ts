@@ -627,7 +627,7 @@ export const tools: Tool[] = [
     slug: "white-label-report-builder",
     name: "White-Label Client Report Builder",
     shortDescription: "Combine audit findings, brand kit details, and competitor gaps into one polished, brandable report.",
-    status: "beta",
+    status: "live",
     processing: "client",
     upsell: {
       headline: "This is what the unlimited plan feels like, compounding.",

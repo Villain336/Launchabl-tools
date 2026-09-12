@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Download, Plus, Printer, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Download, FolderOpen, Plus, Printer, Sparkles, Trash2 } from "lucide-react";
+import { useProjects } from "@/lib/projects/use-projects";
 import { Button } from "@/components/ui/agency-button";
 import { downloadBlob } from "@/lib/download";
 import { operatorSource, sourcesFromLog } from "@/lib/deliverable";
@@ -19,6 +21,7 @@ const severityColor: Record<Finding["severity"], string> = {
 
 function buildReportHtml(opts: {
   agencyName: string;
+  logoUrl: string;
   accentColor: string;
   clientName: string;
   reportTitle: string;
@@ -57,6 +60,7 @@ function buildReportHtml(opts: {
 </head>
 <body>
   <div class="header">
+    ${opts.logoUrl ? `<img src="${escapeHtml(opts.logoUrl)}" alt="${escapeHtml(opts.agencyName || "Agency")}" style="height:36px;max-width:200px;object-fit:contain;display:block;margin-bottom:8px;" />` : ""}
     <p class="agency">${escapeHtml(opts.agencyName || "Your Agency")}</p>
     <h1>${escapeHtml(opts.reportTitle || "Marketing Report")}</h1>
     <p class="subtitle">Prepared for ${escapeHtml(opts.clientName || "Client")}</p>
@@ -76,8 +80,26 @@ function escapeHtml(s: string) {
 export function WhiteLabelReportBuilder() {
   const run = useDeliveryRunOrThrow();
   const [agencyName, setAgencyName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [accentColor, setAccentColor] = useState("#FF6600");
   const [clientName, setClientName] = useState("");
+  const projects = useProjects(true);
+  const project = projects.projects.find((p) => p.id === projects.current) ?? null;
+  const [appliedProject, setAppliedProject] = useState<string | null>(null);
+  const applyBrand = () => {
+    if (!project) return;
+    if (project.brand.agencyName) setAgencyName(project.brand.agencyName);
+    if (project.brand.primary) setAccentColor(project.brand.primary);
+    if (project.brand.logoUrl) setLogoUrl(project.brand.logoUrl);
+    if (project.company) setClientName(project.company);
+    setAppliedProject(project.id);
+  };
+  useEffect(() => {
+    // Prefill once from the active project so the report matches shared chat reports.
+    if (!project || appliedProject) return;
+    queueMicrotask(applyBrand);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]);
   const [reportTitle, setReportTitle] = useState("Marketing Audit Report");
   const [summary, setSummary] = useState("");
   const [score, setScore] = useState("");
@@ -90,6 +112,7 @@ export function WhiteLabelReportBuilder() {
   const compose = () =>
     buildReportHtml({
       agencyName,
+      logoUrl,
       accentColor,
       clientName,
       reportTitle,
@@ -141,6 +164,28 @@ export function WhiteLabelReportBuilder() {
     <AgentDock
       intake={
         <div className="space-y-5">
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm" data-wl-banner>
+            <p className="flex items-center gap-1.5 font-medium text-foreground">
+              <Sparkles className="h-4 w-4 text-primary" /> Reports from every chat tool are already white-labelled
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Run any audit or generator, press <span className="font-medium text-foreground">Share</span>, and the report page carries your project&apos;s agency name, logo and colour with no Launchabl branding. Set those once under the project menu in any chat tool; use this builder when you want to assemble a report by hand from findings you already have.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              {project ? (
+                <button type="button" onClick={applyBrand} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline" data-wl-apply>
+                  <FolderOpen className="h-3.5 w-3.5" /> Use {project.name}&apos;s brand settings
+                </button>
+              ) : (
+                <Link href="/tools/website-audit-report" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                  <FolderOpen className="h-3.5 w-3.5" /> Create a project in any chat tool
+                </Link>
+              )}
+              <Link href="/automations" className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline">
+                Schedule recurring client reports →
+              </Link>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Your agency name" value={agencyName} onChange={setAgencyName} />
             <div>
@@ -152,6 +197,7 @@ export function WhiteLabelReportBuilder() {
             <Field label="Client name" value={clientName} onChange={setClientName} />
             <Field label="Report title" value={reportTitle} onChange={setReportTitle} />
           </div>
+          <Field label="Logo URL (optional)" value={logoUrl} onChange={setLogoUrl} />
           <Field label="Executive summary" value={filledSummary} onChange={setSummary} textarea />
           <Field label="Headline score (optional, e.g. 72/100)" value={score} onChange={setScore} />
           <div>
