@@ -1,6 +1,7 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import type { ChatToolRuntime } from "@/lib/ai/chat-runtime";
+import { reviewDeliverablesTool } from "@/lib/ai/tools/review";
 import { getToolBySlug } from "@/lib/site-config";
 
 /**
@@ -16,6 +17,33 @@ import { getToolBySlug } from "@/lib/site-config";
  */
 
 export const AGENT_SLUG = "agent";
+
+/** Tools that read or plan rather than deliver; they don't count towards the review threshold. */
+const NON_DELIVERABLE_TOOLS = new Set(["loadSkillGuide", "fetchPage", "readTranscript", "reviewDeliverables"]);
+const REVIEW_AFTER_DELIVERABLES = 2;
+
+type StepLike = { toolCalls: Array<{ toolName: string }>; toolResults: Array<{ toolName: string }> };
+
+/**
+ * The verify step is enforced, not just requested: once two deliverables
+ * exist in this turn and no review has run, the next step must be
+ * reviewDeliverables. Steps that only loaded guides or fetched pages don't
+ * count, and a turn that already reviewed is left alone so the model can
+ * revise and hand over.
+ */
+export function needsReview(steps: StepLike[]): boolean {
+  let deliverables = 0;
+  for (const step of steps) {
+    for (const call of step.toolCalls) {
+      if (call.toolName === "reviewDeliverables") return false;
+      if (!NON_DELIVERABLE_TOOLS.has(call.toolName)) deliverables += 1;
+    }
+  }
+  if (deliverables < REVIEW_AFTER_DELIVERABLES) return false;
+  const last = steps[steps.length - 1];
+  // Only force right after a step that delivered something — never mid-plan.
+  return last.toolCalls.some((call) => !NON_DELIVERABLE_TOOLS.has(call.toolName));
+}
 
 export type SkillCatalogEntry = { slug: string; name: string; summary: string; tools: string[]; needs: string[]; cost: string };
 
@@ -74,8 +102,11 @@ export function buildAgentRuntime(runtimes: ChatToolRuntime[]): ChatToolRuntime 
   return {
     slug: AGENT_SLUG,
     modelKind: "writer",
-    maxSteps: 14,
-    tools: { loadSkillGuide, ...mergeTools(specialists) },
+    maxSteps: 16,
+    tools: { loadSkillGuide, ...mergeTools(specialists), reviewDeliverables: reviewDeliverablesTool },
+    // Leave the last two steps free so a forced review never eats the handover.
+    prepareStep: ({ steps, stepNumber }) =>
+      stepNumber < 14 && needsReview(steps) ? { toolChoice: { type: "tool", toolName: "reviewDeliverables" } } : undefined,
     skill: { summary: "Every Launchabl skill in one conversation, chained into end-to-end workflows.", cost: "model", runsIn: "server", sideEffects: "network-read", needs: [] },
     instructions: `You are Launchabl's agent: a senior growth marketer, SEO, deliverability engineer, designer and web technician in one, with real tools. People come to you with a job — launch this page, fix our email, beat this competitor, get us clients — and you get it done end to end with the skills below, then hand over deliverables they can ship.
 
@@ -86,7 +117,8 @@ export function buildAgentRuntime(runtimes: ChatToolRuntime[]): ChatToolRuntime 
 4. Use the deliverable tools — they render as real artifacts (reports, files, cards, images, tables) with downloads. Never paste what a tool would render into your reply; never announce that you're about to run a tool. Run several independent checks in parallel when the job calls for it.
 5. Be honest about scope. If a step needs a real system you don't have (their analytics, ad account, CMS access), say so and deliver the part you can, ready for them to paste in.
 6. Money: image generation and multi-image sets cost money. Generate images only when the job calls for visuals, one at a time unless options were requested.
-7. Finish with a short handover: what you produced (as a numbered list of deliverables), the single most important next action, and what you'd do next if they want to keep going. No preamble, no restating the brief, no marketing fluff. When the job produced deliverables for a client or a team, end with one line: they can use "Share" in the header to turn this conversation into a client report page.
+7. Verify before you hand over. Once the deliverables exist, call reviewDeliverables with the brief in your own words (on jobs with two or more deliverables it is required and will be requested from you). It returns scores and a must-fix list from an independent reviewer. Fix every must-fix item by re-running the relevant deliverable tool with the change applied (not by describing the fix), then finish. Call it once per job; skip it for a single quick check (one audit, one QR code). Never mention the review to the user beyond one line in the handover, e.g. "Reviewed: 88/100, revised the LinkedIn hook."
+8. Finish with a short handover: what you produced (as a numbered list of deliverables), the single most important next action, and what you'd do next if they want to keep going. No preamble, no restating the brief, no marketing fluff. When the job produced deliverables for a client or a team, end with one line: they can use "Share" in the header to turn this conversation into a client report page.
 
 ## Skills
 ${catalogText(catalog)}

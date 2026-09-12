@@ -1,4 +1,4 @@
-import type { ToolSet } from "ai";
+import type { PrepareStepFunction, ToolSet } from "ai";
 import type { ModelKind } from "@/lib/ai/models";
 import { abCopyVariantsRuntime } from "@/lib/ai/tools/ab-copy-variants";
 import { qrDesignerRuntime } from "@/lib/ai/tools/qr-designer";
@@ -47,6 +47,8 @@ export type ChatToolRuntime = {
   tools?: ToolSet;
   /** Upper bound on model ↔ tool round-trips per user message. */
   maxSteps?: number;
+  /** Per-step overrides (force a tool, restrict tools) computed from the steps so far. */
+  prepareStep?: PrepareStepFunction<ToolSet>;
   skill?: SkillMeta;
 };
 

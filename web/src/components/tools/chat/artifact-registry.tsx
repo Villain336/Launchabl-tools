@@ -5,6 +5,8 @@ import { getToolName } from "ai";
 import type { ToolChatMessage } from "@/lib/ai/chat-message";
 import type { VariantsDeliverable } from "@/lib/ai/tools/ab-copy-variants";
 import type { QrDesignOutput } from "@/lib/ai/tools/qr-designer";
+import type { ReviewResult } from "@/lib/ai/tools/review";
+import { ReviewArtifact } from "@/components/tools/chat/review-artifact";
 import type { MetaTagSet } from "@/lib/ai/tools/meta-tags";
 import type { DocumentDeliverable } from "@/lib/ai/tools/documents";
 import type { Dataset } from "@/lib/ai/tools/dataset-builder";
@@ -85,6 +87,7 @@ export const artifactRenderers: Record<string, ArtifactRenderer> = {
   readTranscript: (part) => <TranscriptReadNote data={part.output as TranscriptWindow} />,
   deliverTranscript: (part) => <TranscriptArtifact data={part.output as TranscriptDeliverable} />,
   deliverClips: (part) => <ClipsArtifact data={part.output as ClipsDeliverable} />,
+  reviewDeliverables: (part) => <ReviewArtifact data={part.output as ReviewResult} />,
   deliverPersonas: (part) => <PersonasArtifact data={part.output as PersonaDeliverable} />,
   scoreSubjectLines: (part) => <SubjectLinesArtifact data={part.output as SubjectLinesDeliverable} />,
   deliverPressRelease: (part) => <PressReleaseArtifact data={part.output as PressReleaseDeliverable} />,
@@ -137,6 +140,8 @@ export const artifactLabels: Record<string, { working: string; done: string }> =
   readTranscript: { working: "Reading the transcript", done: "Transcript read" },
   deliverTranscript: { working: "Writing the transcript brief", done: "Transcript ready" },
   deliverClips: { working: "Cutting clips", done: "Clips ready" },
+  reviewDeliverables: { working: "Reviewing the deliverables against the brief", done: "Quality check done" },
+  loadSkillGuide: { working: "Loading the playbook", done: "Playbook loaded" },
   deliverPersonas: { working: "Defining the ICP and personas", done: "Personas ready" },
   scoreSubjectLines: { working: "Scoring subject lines", done: "Scores ready" },
   deliverPressRelease: { working: "Writing and checking the release", done: "Press release ready" },

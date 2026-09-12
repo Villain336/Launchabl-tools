@@ -5,6 +5,7 @@ import type { ToolChatMessage, ToolChatMetadata } from "@/lib/ai/chat-message";
 import { classifyAiError, NoModelAvailableError, userFacingAiMessage } from "@/lib/ai/errors";
 import { hasGatewayKey, modelChain, modelLabel } from "@/lib/ai/models";
 import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
+import { repairToolCall } from "@/lib/ai/repair";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
@@ -122,6 +123,8 @@ export async function POST(request: NextRequest) {
       messages: modelMessages,
       tools: runtime.tools,
       stopWhen: isStepCount(runtime.maxSteps ?? 3),
+      prepareStep: runtime.prepareStep,
+      repairToolCall,
       abortSignal: request.signal,
       providerOptions: {
         gateway: {

@@ -472,10 +472,10 @@ export const repurposeSchema = z.object({
         cta: z.string().max(200).nullable(),
         hashtags: z.array(z.string().max(40)).max(8).default([]),
         visual: z.string().max(300).nullable().describe("What image/video to pair with it."),
-        bestTime: z.string().max(80).nullable(),
+        bestTime: z.string().max(120).nullable().describe("Short: a day and time window, e.g. 'Tue–Wed, 8–9 am'."),
       }),
     )
-    .min(2)
+    .min(1)
     .max(10),
   notes: z.string().max(800),
 });

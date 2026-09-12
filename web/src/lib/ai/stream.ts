@@ -5,7 +5,9 @@ import {
   type LanguageModel,
   type ModelMessage,
   type OutputInterface,
+  type PrepareStepFunction,
   type TextStreamPart,
+  type ToolCallRepairFunction,
   type ToolChoice,
   type ToolSet,
 } from "ai";
@@ -24,6 +26,8 @@ type CallOptions<TOOLS extends ToolSet> = {
   tools?: TOOLS;
   toolChoice?: ToolChoice<TOOLS>;
   stopWhen?: StreamParams<TOOLS>["stopWhen"];
+  prepareStep?: PrepareStepFunction<TOOLS>;
+  repairToolCall?: ToolCallRepairFunction<TOOLS>;
   abortSignal?: AbortSignal;
   providerOptions?: StreamParams<TOOLS>["providerOptions"];
   temperature?: number;
@@ -31,7 +35,7 @@ type CallOptions<TOOLS extends ToolSet> = {
 };
 
 type StreamOptions<TOOLS extends ToolSet> = CallOptions<TOOLS>;
-type GenerateOptions<TOOLS extends ToolSet, OUTPUT extends OutputInterface> = CallOptions<TOOLS> & {
+type GenerateOptions<TOOLS extends ToolSet, OUTPUT extends OutputInterface> = Omit<CallOptions<TOOLS>, "prepareStep" | "repairToolCall"> & {
   /** Structured output spec, e.g. `Output.object({ schema })`. */
   output?: OUTPUT;
 };

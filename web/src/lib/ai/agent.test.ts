@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildAgentRuntime, skillCatalog } from "./agent";
+import { buildAgentRuntime, needsReview, skillCatalog } from "./agent";
 import { getChatToolRuntime, listChatToolRuntimes } from "./chat-runtime";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 
@@ -42,6 +42,19 @@ describe("agent runtime", () => {
     expect(result.guide).toContain("SPF");
     const bad = (await guide!.execute!({ slug: "nope" }, options)) as { error?: string };
     expect(bad.error).toMatch(/Unknown skill/);
+  });
+
+  it("forces the review step once two deliverables exist, exactly once", () => {
+    const step = (...names: string[]) => ({ toolCalls: names.map((toolName) => ({ toolName })), toolResults: [] });
+    expect(needsReview([step("loadSkillGuide", "loadSkillGuide")])).toBe(false);
+    expect(needsReview([step("loadSkillGuide"), step("deliverHeadlines")])).toBe(false);
+    expect(needsReview([step("loadSkillGuide"), step("deliverHeadlines"), step("deliverRepurposed")])).toBe(true);
+    expect(needsReview([step("deliverHeadlines", "deliverRepurposed")])).toBe(true);
+    // Not mid-plan: the last step only fetched a page.
+    expect(needsReview([step("deliverHeadlines", "deliverRepurposed"), step("fetchPage")])).toBe(false);
+    // Already reviewed this turn.
+    expect(needsReview([step("deliverHeadlines", "deliverRepurposed"), step("reviewDeliverables"), step("deliverRepurposed")])).toBe(false);
+    expect(agent.prepareStep).toBeDefined();
   });
 
   it("ships at least ten distinct templates with fill-in slots", () => {
