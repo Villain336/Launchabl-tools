@@ -1,55 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as dns } from "dns";
+import { checkDomains, DEFAULT_TLDS, labelFromName, normaliseDomain, priceLine, registrarLinks } from "@/lib/web/domains";
 
-// Demo/architecture-reference implementation.
-//
-// Production notes: this route should call a registrar or domain-search
-// reseller API (for example a domain-availability endpoint from a registrar
-// partner) to get real-time, purchasable availability and pricing. Swap the
-// `checkDomain` implementation below for that API call — the request/response
-// shape here is designed to stay stable when you do.
-//
-// This demo uses a DNS lookup as a rough, free heuristic: if a domain
-// resolves, it's almost certainly taken; if it doesn't resolve, it *might*
-// be available, but DNS silence is not proof of availability (a registered
-// domain can have no DNS records). Never present this route's output as a
-// purchase-ready guarantee.
+export const maxDuration = 30;
 
-const TLDS = ["com", "co", "io", "net", "app", "ai"];
-
-async function checkDomain(domain: string): Promise<"taken" | "likely-available"> {
-  try {
-    await dns.resolve(domain);
-    return "taken";
-  } catch {
-    return "likely-available";
-  }
-}
-
+/**
+ * Domain availability over RDAP (registry data, the successor to WHOIS) with a
+ * DNS fallback for TLDs that don't publish it. Accepts a brand name (combined
+ * with the common TLDs) or a list of full domains.
+ */
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => null);
+  const body = (await request.json().catch(() => null)) as { name?: unknown; domains?: unknown; tlds?: unknown } | null;
   const name = typeof body?.name === "string" ? body.name.trim() : "";
+  const domains = Array.isArray(body?.domains) ? body.domains.filter((d): d is string => typeof d === "string") : [];
+  const tlds = Array.isArray(body?.tlds) ? body.tlds.filter((t): t is string => typeof t === "string" && /^[a-z.]{2,20}$/i.test(t)).map((t) => t.toLowerCase().replace(/^\./, "")) : DEFAULT_TLDS;
 
-  if (!name) {
-    return NextResponse.json({ error: "Provide a name to check." }, { status: 400 });
+  const candidates = [...domains];
+  let label = "";
+  if (name) {
+    const direct = normaliseDomain(name);
+    if (direct) candidates.push(direct);
+    else {
+      label = labelFromName(name);
+      if (!label) return NextResponse.json({ error: "That name has no usable characters for a domain." }, { status: 400 });
+      for (const tld of tlds) candidates.push(`${label}.${tld}`);
+    }
   }
+  if (!candidates.length) return NextResponse.json({ error: "Provide a name or a list of domains to check." }, { status: 400 });
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "")
-    .slice(0, 63);
-
-  if (!slug) {
-    return NextResponse.json({ error: "That name has no usable characters for a domain." }, { status: 400 });
-  }
-
-  const results = await Promise.all(
-    TLDS.map(async (tld) => ({
-      domain: `${slug}.${tld}`,
-      tld,
-      status: await checkDomain(`${slug}.${tld}`),
-    })),
-  );
-
-  return NextResponse.json({ query: name, slug, results, demo: true });
+  const results = await checkDomains(candidates.slice(0, 40));
+  return NextResponse.json({
+    query: name || null,
+    slug: label || null,
+    results: results.map((r) => ({ ...r, price: priceLine(r.tld), registrars: r.status === "available" ? registrarLinks(r.domain).slice(0, 2) : [] })),
+  });
 }
