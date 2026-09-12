@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { adminAuthorized } from "@/lib/admin/auth";
 import { getStore, redisCredentials } from "@/lib/ai/store";
 import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
@@ -9,21 +9,11 @@ import { reportStats } from "@/lib/reports/storage";
 
 export const dynamic = "force-dynamic";
 
-function authorized(request: NextRequest): boolean {
-  const expected = process.env.ADMIN_TOKEN;
-  if (!expected) return false;
-  const header = request.headers.get("authorization") ?? "";
-  const presented = header.startsWith("Bearer ") ? header.slice(7) : request.headers.get("x-admin-token") ?? "";
-  const a = Buffer.from(presented);
-  const b = Buffer.from(expected);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 export async function GET(request: NextRequest) {
   if (!process.env.ADMIN_TOKEN) {
     return NextResponse.json({ error: "Set ADMIN_TOKEN to enable the usage dashboard." }, { status: 503 });
   }
-  if (!authorized(request)) {
+  if (!adminAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

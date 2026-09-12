@@ -10,6 +10,7 @@ import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
+import { EvalsPanel } from "@/components/admin/evals-panel";
 
 type UsagePayload = {
   generatedAt: string;
@@ -447,6 +448,7 @@ export function UsageDashboard() {
           {data.accounts && <AccountsPanel accounts={data.accounts} days={days} labelFor={toolLabel} />}
           {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
+          <EvalsPanel token={token} />
           <BucketTable title="By model" rows={Object.entries(data.byModel)} labelFor={(m) => `${modelLabel(m)} · ${m}`} />
 
           <div className="overflow-hidden rounded-xl border border-border bg-white">

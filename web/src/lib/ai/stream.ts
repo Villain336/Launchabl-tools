@@ -35,7 +35,7 @@ type CallOptions<TOOLS extends ToolSet> = {
 };
 
 type StreamOptions<TOOLS extends ToolSet> = CallOptions<TOOLS>;
-type GenerateOptions<TOOLS extends ToolSet, OUTPUT extends OutputInterface> = Omit<CallOptions<TOOLS>, "prepareStep" | "repairToolCall"> & {
+type GenerateOptions<TOOLS extends ToolSet, OUTPUT extends OutputInterface> = Omit<CallOptions<TOOLS>, "repairToolCall"> & {
   /** Structured output spec, e.g. `Output.object({ schema })`. */
   output?: OUTPUT;
 };
@@ -142,10 +142,14 @@ export async function generateWithFallback<
   options: GenerateOptions<TOOLS, OUTPUT>,
 ): Promise<{ model: string; result: GenerateTextResult<TOOLS, never, OUTPUT>; skipped: ModelAttempt[] }> {
   const skipped: ModelAttempt[] = [];
+  // `prepareStep` is typed against the tool-context generic that generateText
+  // resolves per call; the value is the same function streamText accepts.
+  const { prepareStep, ...rest } = options;
+  const stepOptions = prepareStep ? { prepareStep: prepareStep as never } : {};
   for (const candidate of chain) {
     const model = slugOf(candidate);
     try {
-      const result = await generateText<TOOLS, never, OUTPUT>({ ...options, model: candidate, maxRetries: 0 });
+      const result = await generateText<TOOLS, never, OUTPUT>({ ...rest, ...stepOptions, model: candidate, maxRetries: 0 });
       return { model, result, skipped };
     } catch (error) {
       const failure = classifyAiError(error);
