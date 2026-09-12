@@ -134,6 +134,114 @@ export const deliverTranscriptTool = tool({
   }),
 });
 
+/* ── deliverPublishKit ───────────────────────────────── */
+
+export const publishKitSchema = z.object({
+  id: z.string().min(6).max(40).describe("The transcript id you read."),
+  youtube: z
+    .object({
+      title: z.string().min(8).max(100).describe("A YouTube title under 70 characters that says what the viewer gets."),
+      description: z
+        .string()
+        .min(80)
+        .max(2_500)
+        .describe("The description body: a one-line hook, then two or three short paragraphs on what's covered and who it's for, then any links to mention as placeholders like [link]. No timestamps — the chapters are appended automatically."),
+      tags: z.array(z.string().min(2).max(40)).min(3).max(12).describe("Search tags, lowercase, no #."),
+    })
+    .nullable()
+    .describe("For anything that could be published as a video or podcast episode. Null for private meetings and calls."),
+  blog: z
+    .object({
+      title: z.string().min(8).max(120),
+      markdown: z
+        .string()
+        .min(600)
+        .max(9_000)
+        .describe("A 500–900 word article in Markdown built from the recording: an intro that states the point, H2 sections following the chapters, the best quotes as blockquotes, a closing with one next step. Written prose, not a summary of a summary."),
+    })
+    .nullable()
+    .describe("A blog draft. Null for private meetings and calls, or when the user asked for something else."),
+  post: z
+    .object({
+      platform: z.enum(["linkedin", "x", "threads"]).describe("Default linkedin; x for short punchy content."),
+      text: z.string().min(40).max(3_000).describe("Ready to post: a real hook on line one, a line break after it, the insight in the speaker's terms, and a plain call to action to listen or watch."),
+    })
+    .nullable()
+    .describe("One social post announcing the recording. Null for private meetings."),
+  followUpEmail: z
+    .object({
+      subject: z.string().min(4).max(90),
+      body: z.string().min(80).max(2_500).describe("Plain-text email in the sender's voice: thanks, the decisions, the action items with owners, the next date. Greeting and sign-off as placeholders like [Name]."),
+    })
+    .nullable()
+    .describe("For meetings and sales calls with decisions or next steps; null for published content."),
+});
+
+export type PublishKitDeliverable = z.infer<typeof publishKitSchema> & {
+  name: string;
+  title: string;
+  youtubeDescriptionFull: string | null;
+  pieces: number;
+  warnings: string[];
+};
+
+const X_LIMIT = 280;
+
+export function youtubeDescription(description: string, chapters: { label: string; title: string }[], tags: string[]): string {
+  const parts = [description.trim()];
+  if (chapters.length > 0) parts.push(["Chapters", ...chapters.map((c) => `${c.label} ${c.title}`)].join("\n"));
+  if (tags.length > 0) parts.push(tags.map((t) => `#${t.replace(/^#/, "").replace(/\s+/g, "")}`).join(" "));
+  return parts.join("\n\n");
+}
+
+export function assemblePublishKit(input: z.infer<typeof publishKitSchema>, transcript: Transcript, brief: { title: string; chapters: { label: string; title: string }[] }): PublishKitDeliverable {
+  const warnings: string[] = [];
+  const pieces = [input.youtube, input.blog, input.post, input.followUpEmail].filter(Boolean).length;
+  if (pieces === 0) throw new Error("Deliver at least one piece: youtube, blog, post or followUpEmail.");
+  // YouTube chapters need the first at 0:00 and at least three entries to show in the player.
+  let chapters = brief.chapters;
+  if (input.youtube && chapters.length > 0 && chapters.length < 3) {
+    warnings.push("YouTube needs at least three chapters starting at 0:00 to show them in the player; the description lists what exists.");
+  }
+  if (input.youtube && chapters.length > 0 && chapters[0].label !== "0:00") chapters = [{ label: "0:00", title: "Intro" }, ...chapters];
+  if (input.youtube && input.youtube.title.length > 70) warnings.push("The YouTube title is over 70 characters and will be cut off in search results.");
+  if (input.post?.platform === "x" && input.post.text.length > X_LIMIT) warnings.push(`The X post is ${input.post.text.length} characters; the limit is ${X_LIMIT} unless the account is verified.`);
+  if (input.blog) {
+    const words = wordCount(input.blog.markdown);
+    if (words < 450) warnings.push(`The blog draft is short (${words} words); expand the middle sections before publishing.`);
+  }
+  return {
+    ...input,
+    name: transcript.name,
+    title: brief.title,
+    youtubeDescriptionFull: input.youtube ? youtubeDescription(input.youtube.description, chapters, input.youtube.tags) : null,
+    pieces,
+    warnings,
+  };
+}
+
+export const deliverPublishKitTool = tool({
+  description:
+    "Deliver the publish kit for a recording you have read in full and already delivered the transcript brief for: a YouTube title/description/tags (chapters appended automatically), a blog draft in Markdown, one social post, and — for meetings — a follow-up email. Set the pieces that don't fit the recording to null. Pass the same title and chapters you gave deliverTranscript. Call once.",
+  inputSchema: publishKitSchema.extend({
+    title: z.string().min(3).max(120).describe("The title you used in deliverTranscript."),
+    chapters: z.array(z.object({ start: z.number().min(0), title: z.string().min(3).max(90) })).max(30).describe("The chapters you used in deliverTranscript."),
+  }),
+  execute: async ({ title, chapters, ...input }): Promise<PublishKitDeliverable> => {
+    const transcript = await loadTranscript(input.id);
+    if (!transcript) throw new Error(NO_TRANSCRIPT(input.id));
+    const labelled = chapters
+      .map((c) => ({ start: clampTime(c.start, transcript.durationSec), title: c.title }))
+      .sort((a, b) => a.start - b.start)
+      .map((c) => ({ label: formatTimestamp(c.start), title: c.title }));
+    return assemblePublishKit(input, transcript, { title, chapters: labelled });
+  },
+  toModelOutput: ({ output }) => ({
+    type: "text",
+    value: `Delivered publish kit (${output.pieces} piece${output.pieces === 1 ? "" : "s"}: ${[output.youtube && "YouTube", output.blog && "blog", output.post && "post", output.followUpEmail && "email"].filter(Boolean).join(", ")}).${output.warnings.length ? ` Warnings: ${output.warnings.join(" ")}` : ""}`,
+  }),
+});
+
 /* ── deliverClips ────────────────────────────────────── */
 
 export const CLIP_PLATFORMS = ["tiktok", "reels", "shorts", "linkedin", "x", "podcast-teaser"] as const;
@@ -232,9 +340,10 @@ export const transcriberRuntime: ChatToolRuntime = {
   slug: "transcriber",
   modelKind: "writer",
   maxSteps: 12,
-  tools: { readTranscript: readTranscriptTool, deliverTranscript: deliverTranscriptTool },
+  tools: { readTranscript: readTranscriptTool, deliverTranscript: deliverTranscriptTool, deliverPublishKit: deliverPublishKitTool },
   skill: {
-    summary: "Transcribe an attached recording (Whisper, timestamped) and deliver a summary, chapters, takeaways, verbatim quotes, action items and TXT/SRT/VTT downloads.",
+    summary:
+      "Transcribe an attached recording (Whisper, timestamped) and deliver a summary, chapters, takeaways, verbatim quotes, action items and TXT/SRT/VTT downloads, plus a publish kit: YouTube description with chapters, blog draft, social post or meeting follow-up email.",
     cost: "media",
     runsIn: "server",
     sideEffects: "none",
@@ -247,8 +356,9 @@ ${MEDIA_INTAKE}
 How to work:
 1. Call readTranscript with the id (window 0). If windowCount is more than 1, read every window in order before writing anything — summaries built from the first ten minutes are wrong summaries.
 2. Then call deliverTranscript once. Title from the content, not the file name. Chapters every 3–8 minutes at real topic changes, first at 0 (none for recordings under 3 minutes). Takeaways in the speaker's own terms, concrete enough to act on. Quotes must be word for word from the transcript — copy them, don't tidy them. Action items only when there are actual commitments or decisions (calls, meetings); otherwise leave the list empty.
-3. If the transcript is untimed (timed: false), say so in your reply: captions will still download but timings are approximate.
-4. Reply in two or three sentences: what the recording is, the one thing worth doing with it (a clip, a follow-up email, a blog post) and that the downloads are in the card. Don't repeat the summary.
+3. Then call deliverPublishKit once with the same title and chapters. Pick the pieces by what the recording is: a podcast, webinar, talk or interview gets youtube + blog + post (followUpEmail null); a meeting or sales call gets followUpEmail (the others null) unless the user asks for a blog or post from it. If the user asked for something specific — "just captions", "a YouTube description" — deliver only that piece. The blog draft is real writing: 500–900 words in the speaker's terms, sections following the chapters, quotes only word for word. The YouTube description gets no timestamps from you; the chapters are appended in YouTube's format automatically.
+4. If the transcript is untimed (timed: false), say so in your reply: captions will still download but timings are approximate.
+5. Reply in two or three sentences: what the recording is, the one thing worth doing with it first, and that the brief, downloads and publish kit are in the cards. Don't repeat the summary.
 
 ${NO_LISTS}`,
 };

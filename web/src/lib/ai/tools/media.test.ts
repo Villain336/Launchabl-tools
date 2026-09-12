@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assembleClips, assembleTranscriptDeliverable } from "./media";
+import { assembleClips, assemblePublishKit, assembleTranscriptDeliverable, youtubeDescription } from "./media";
 import type { Transcript } from "@/lib/media/transcript";
 
 const transcript: Transcript = {
@@ -75,5 +75,34 @@ describe("clips deliverable", () => {
     expect(out.clips[2].warnings).toEqual(["Overlaps the previous clip."]);
     expect(out.clips[1].ffmpeg).toBe('ffmpeg -ss 30.00 -to 70.00 -i "Episode_12.mp3" -c copy "clip-2.mp3"');
     expect(out.warnings).toEqual([]);
+  });
+});
+
+describe("publish kit", () => {
+  const brief = { title: "Three rules for getting paid", chapters: [{ label: "0:00", title: "Intro" }, { label: "0:30", title: "Deposits" }] };
+  it("appends chapters and tags to the YouTube description in YouTube's format", () => {
+    const text = youtubeDescription("Two rules for getting paid on time.", brief.chapters, ["freelancing", "#invoicing", "small business"]);
+    expect(text).toContain("Chapters\n0:00 Intro\n0:30 Deposits");
+    expect(text.endsWith("#freelancing #invoicing #smallbusiness")).toBe(true);
+  });
+  it("counts pieces, prefixes a 0:00 chapter when missing and warns on limits", () => {
+    const out = assemblePublishKit(
+      {
+        id: transcript.id,
+        youtube: { title: "Three rules for getting paid on time, every time, from every client you ever work with", description: "x".repeat(100), tags: ["a1", "b2", "c3"] },
+        blog: null,
+        post: { platform: "x", text: "y".repeat(300) },
+        followUpEmail: null,
+      },
+      transcript,
+      { title: brief.title, chapters: [{ label: "0:30", title: "Deposits" }] },
+    );
+    expect(out.pieces).toBe(2);
+    expect(out.youtubeDescriptionFull).toContain("0:00 Intro\n0:30 Deposits");
+    expect(out.warnings.some((w) => w.includes("70 characters"))).toBe(true);
+    expect(out.warnings.some((w) => w.includes("X post"))).toBe(true);
+  });
+  it("refuses an empty kit", () => {
+    expect(() => assemblePublishKit({ id: transcript.id, youtube: null, blog: null, post: null, followUpEmail: null }, transcript, brief)).toThrow(/at least one/);
   });
 });

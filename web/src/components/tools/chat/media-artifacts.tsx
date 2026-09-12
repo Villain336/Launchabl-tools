@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, AudioLines, BookOpen, Clapperboard, Quote, Scissors } from "lucide-react";
-import type { ClipsDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
+import { AlertTriangle, AudioLines, BookOpen, Clapperboard, Megaphone, Quote, Scissors } from "lucide-react";
+import type { ClipsDeliverable, PublishKitDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
+import { Markdown } from "@/components/tools/chat/markdown";
 import { formatTimestamp, markedText, toSrt, toVtt } from "@/lib/media/transcript";
 import { AUDIO_ONLY_EXT, FRAMES, PLATFORM_FRAME, renderCommand, renderScript, type Frame } from "@/lib/media/render";
 import { ArtifactHeader, CopyButton, DownloadButton, Footnote, Pill, Tabs } from "@/components/tools/chat/bits";
@@ -155,6 +156,94 @@ export function TranscriptArtifact({ data }: { data: TranscriptDeliverable }) {
       <Footnote icon={<BookOpen className="h-3 w-3" />}>
         Transcribed with {data.model.split("/")[1]}{data.timed ? " · segment timestamps" : " · no timestamps"} · stored 7 days
       </Footnote>
+    </div>
+  );
+}
+
+/* ── Publish kit ─────────────────────────────────────── */
+
+type KitTab = "youtube" | "blog" | "post" | "email";
+
+const POST_LABEL: Record<NonNullable<PublishKitDeliverable["post"]>["platform"], string> = { linkedin: "LinkedIn post", x: "X post", threads: "Threads post" };
+
+function publishKitMarkdown(d: PublishKitDeliverable): string {
+  const lines = [`# Publish kit · ${d.title}`, ""];
+  if (d.youtube) lines.push("## YouTube", "", `**Title:** ${d.youtube.title}`, "", "```", d.youtubeDescriptionFull ?? d.youtube.description, "```", "");
+  if (d.post) lines.push(`## ${POST_LABEL[d.post.platform]}`, "", d.post.text, "");
+  if (d.followUpEmail) lines.push("## Follow-up email", "", `**Subject:** ${d.followUpEmail.subject}`, "", d.followUpEmail.body, "");
+  if (d.blog) lines.push("## Blog draft", "", `# ${d.blog.title}`, "", d.blog.markdown, "");
+  return lines.join("\n");
+}
+
+function KitBlock({ label, text, action }: { label?: string; text: string; action?: React.ReactNode }) {
+  return (
+    <div className="rounded-[10px] bg-field/60 px-3.5 py-3">
+      {label && <p className="mb-1 text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">{label}</p>}
+      <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-ink" data-kit-text>
+        {text}
+      </p>
+      {action && <div className="mt-2 flex justify-end">{action}</div>}
+    </div>
+  );
+}
+
+export function PublishKitArtifact({ data }: { data: PublishKitDeliverable }) {
+  const tabs = useMemo(() => {
+    const t: { key: KitTab; label: string }[] = [];
+    if (data.youtube) t.push({ key: "youtube", label: "YouTube" });
+    if (data.blog) t.push({ key: "blog", label: "Blog draft" });
+    if (data.post) t.push({ key: "post", label: POST_LABEL[data.post.platform].replace(" post", "") });
+    if (data.followUpEmail) t.push({ key: "email", label: "Follow-up email" });
+    return t;
+  }, [data]);
+  const [tab, setTab] = useState<KitTab>(tabs[0]?.key ?? "youtube");
+  const base = slugify(data.name);
+  const blogWords = data.blog ? data.blog.markdown.split(/\s+/).filter(Boolean).length : 0;
+  return (
+    <div className="not-prose w-full overflow-hidden rounded-card bg-surface shadow-card" data-publish-kit>
+      <ArtifactHeader icon={<Megaphone className="h-4 w-4" />} title="Publish kit" subtitle={`${data.pieces} piece${data.pieces === 1 ? "" : "s"} from “${data.title}”`}>
+        {tabs.length > 1 && <Tabs value={tab} onChange={setTab} options={tabs} />}
+        <DownloadButton content={publishKitMarkdown(data)} filename={`${base}-publish-kit.md`} type="text/markdown" label="All (MD)" />
+      </ArtifactHeader>
+
+      <div className="space-y-3 px-4 py-3">
+        {tab === "youtube" && data.youtube && (
+          <>
+            <KitBlock label={`Title · ${data.youtube.title.length}/100`} text={data.youtube.title} action={<CopyButton text={data.youtube.title} label="Copy title" />} />
+            <KitBlock
+              label="Description · chapters and tags appended"
+              text={data.youtubeDescriptionFull ?? data.youtube.description}
+              action={<CopyButton text={data.youtubeDescriptionFull ?? data.youtube.description} label="Copy description" />}
+            />
+          </>
+        )}
+        {tab === "blog" && data.blog && (
+          <div className="rounded-[10px] bg-field/60 px-4 py-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">Draft · {blogWords.toLocaleString()} words</p>
+              <div className="flex items-center gap-1">
+                <CopyButton text={`# ${data.blog.title}\n\n${data.blog.markdown}`} label="Copy Markdown" />
+                <DownloadButton content={`# ${data.blog.title}\n\n${data.blog.markdown}`} filename={`${base}-blog.md`} type="text/markdown" label="MD" />
+              </div>
+            </div>
+            <h3 className="text-[16px] font-semibold tracking-tight text-ink">{data.blog.title}</h3>
+            <div className="prose prose-sm mt-2 max-h-[460px] max-w-none overflow-y-auto text-[13px] prose-headings:text-ink prose-p:text-ink prose-p:leading-relaxed prose-h2:text-[15px] prose-blockquote:text-ink-2">
+              <Markdown text={data.blog.markdown} />
+            </div>
+          </div>
+        )}
+        {tab === "post" && data.post && (
+          <KitBlock label={`${POST_LABEL[data.post.platform]} · ${data.post.text.length.toLocaleString()} characters`} text={data.post.text} action={<CopyButton text={data.post.text} label="Copy post" />} />
+        )}
+        {tab === "email" && data.followUpEmail && (
+          <>
+            <KitBlock label="Subject" text={data.followUpEmail.subject} action={<CopyButton text={data.followUpEmail.subject} label="Copy subject" />} />
+            <KitBlock label="Body" text={data.followUpEmail.body} action={<CopyButton text={`Subject: ${data.followUpEmail.subject}\n\n${data.followUpEmail.body}`} label="Copy email" />} />
+          </>
+        )}
+        <WarningList items={data.warnings} />
+      </div>
+      <Footnote icon={<BookOpen className="h-3 w-3" />}>Every piece is built from the transcript you attached; quotes were checked against it. Read once before you publish.</Footnote>
     </div>
   );
 }

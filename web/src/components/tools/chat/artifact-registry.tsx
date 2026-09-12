@@ -35,8 +35,8 @@ import { ImageArtifact } from "@/components/tools/chat/image-artifact";
 import { SocialCardArtifact } from "@/components/tools/chat/social-card-artifact";
 import type { PersonaDeliverable, PressReleaseDeliverable, RepurposeDeliverable, SubjectLinesDeliverable, TestPlanDeliverable, UtmDeliverable } from "@/lib/ai/tools/growth-kits";
 import { PersonasArtifact, PressReleaseArtifact, RepurposeArtifact, SubjectLinesArtifact, TestPlanArtifact, UtmArtifact } from "@/components/tools/chat/growth-artifacts";
-import { ClipsArtifact, TranscriptArtifact, TranscriptReadNote } from "@/components/tools/chat/media-artifacts";
-import type { ClipsDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
+import { ClipsArtifact, PublishKitArtifact, TranscriptArtifact, TranscriptReadNote } from "@/components/tools/chat/media-artifacts";
+import type { ClipsDeliverable, PublishKitDeliverable, TranscriptDeliverable, TranscriptWindow } from "@/lib/ai/tools/media";
 import { QrArtifact } from "@/components/tools/chat/qr-artifact";
 import { DomainCheckArtifact, DomainPlanArtifact, HostingPlanArtifact, StackArtifact } from "@/components/tools/chat/launch-artifacts";
 import type { DomainCheckToolOutput, DomainPlanDeliverable, HostingPlanDeliverable, StackToolOutput } from "@/lib/ai/tools/launch-kits";
@@ -88,6 +88,7 @@ export const artifactRenderers: Record<string, ArtifactRenderer> = {
   buildUtmLinks: (part) => <UtmArtifact data={part.output as UtmDeliverable} />,
   readTranscript: (part) => <TranscriptReadNote data={part.output as TranscriptWindow} />,
   deliverTranscript: (part) => <TranscriptArtifact data={part.output as TranscriptDeliverable} />,
+  deliverPublishKit: (part) => <PublishKitArtifact data={part.output as PublishKitDeliverable} />,
   deliverClips: (part) => <ClipsArtifact data={part.output as ClipsDeliverable} />,
   reviewDeliverables: (part) => <ReviewArtifact data={part.output as ReviewResult} />,
   deliverPersonas: (part) => <PersonasArtifact data={part.output as PersonaDeliverable} />,
@@ -145,6 +146,7 @@ export const artifactLabels: Record<string, { working: string; done: string }> =
   buildUtmLinks: { working: "Building tracked links", done: "Links ready" },
   readTranscript: { working: "Reading the transcript", done: "Transcript read" },
   deliverTranscript: { working: "Writing the transcript brief", done: "Transcript ready" },
+  deliverPublishKit: { working: "Writing the publish kit", done: "Publish kit ready" },
   deliverClips: { working: "Cutting clips", done: "Clips ready" },
   reviewDeliverables: { working: "Reviewing the deliverables against the brief", done: "Quality check done" },
   loadSkillGuide: { working: "Loading the playbook", done: "Playbook loaded" },

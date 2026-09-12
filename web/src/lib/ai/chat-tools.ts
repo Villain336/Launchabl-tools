@@ -473,7 +473,7 @@ const metas: ChatToolMeta[] = [
     slug: "transcriber",
     media: true,
     intro:
-      "Attach a recording — podcast episode, webinar, sales call, interview, voice memo (MP3, M4A, WAV, MP4, MOV, WebM) — and I'll transcribe it with timestamps and hand back a brief: summary, chapters, takeaways, verbatim quotes, action items, plus the full transcript and SRT/VTT captions to download.",
+      "Attach a recording — podcast episode, webinar, sales call, interview, voice memo (MP3, M4A, WAV, MP4, MOV, WebM) — and I'll transcribe it with timestamps and hand back a brief: summary, chapters, takeaways, verbatim quotes, action items, plus the full transcript and SRT/VTT captions to download — and a publish kit: YouTube description with chapters, a blog draft, a social post, or a follow-up email for meetings.",
     placeholder: "Attach the recording with the paperclip, then say what you need — a brief, captions, meeting notes, a blog draft…",
     suggestions: [
       "Transcribe this and give me chapters and the five best quotes for social",
@@ -481,7 +481,7 @@ const metas: ChatToolMeta[] = [
       "Captions for YouTube — SRT — and a description with timestamps",
       "Summarise this call for someone who wasn't there, in under 150 words",
     ],
-    artifacts: ["deliverTranscript", "readTranscript"],
+    artifacts: ["deliverTranscript", "deliverPublishKit", "readTranscript"],
   },
   {
     slug: "clip-finder",
