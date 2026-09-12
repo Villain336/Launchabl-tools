@@ -892,6 +892,118 @@ export const tools: Tool[] = [
     ],
   },
   {
+    slug: "utm-builder",
+    name: "UTM Link Builder",
+    shortDescription: "Build a consistent set of tracked campaign links across every placement — normalised names, GA4 medium taxonomy, duplicate and fragmentation warnings, CSV export.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Tracked links are step one. Attribution is the job.",
+      body: "Unlimited plan members get their analytics set up end to end — GA4 events, conversions, dashboards — and campaigns reported on weekly.",
+    },
+    faq: [
+      {
+        question: "Why does it change my capitalisation?",
+        answer:
+          "GA4 and most analytics tools treat 'LinkedIn', 'linkedin' and 'Linkedin' as three different sources, so one campaign turns into three report rows. Lowercase-with-underscores is the convention that keeps reports clean, and the tool applies it to every value.",
+      },
+      {
+        question: "Should I UTM links inside my own site?",
+        answer: "No. Tagging internal links resets the visitor's session source to whatever the tag says and destroys attribution. Only tag links that bring people to your site from somewhere else.",
+      },
+    ],
+  },
+  {
+    slug: "persona-generator",
+    name: "ICP & Persona Generator",
+    shortDescription: "Define your ideal customer profile and buyer personas — goals, pains, triggers, objections, channels, messaging, proof — from a product description or your site.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "Personas on paper are a hypothesis. Validated positioning is the job.",
+      body: "Unlimited plan members get customer interviews, message testing and a positioning document their whole team writes from.",
+    },
+    faq: [
+      {
+        question: "Aren't AI personas just made up?",
+        answer:
+          "They're structured hypotheses, grounded in what you tell it and what your site says, built on how buying actually works at your price point. The notes list every assumption so you know exactly what to validate in your next five customer conversations — which is the point: a persona you can test beats no persona at all.",
+      },
+    ],
+  },
+  {
+    slug: "subject-line-checker",
+    name: "Subject Line Checker",
+    shortDescription: "Score email subject lines and preview text for deliverability and open-rate risk — length, shouting, trigger words, fake replies, generic phrasing — then get stronger alternatives, scored.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A better subject line lifts opens. A better program lifts revenue.",
+      body: "Unlimited plan members get their whole email program run — segments, sequences, deliverability, testing — with results reported monthly.",
+    },
+    faq: [
+      {
+        question: "Does the score predict my open rate?",
+        answer:
+          "No tool can — your audience and sender reputation matter far more. The score is a deterministic risk-and-clarity check: it catches the patterns that filters and readers reliably punish. Use it to remove obvious problems, then A/B test the top two candidates on real subscribers.",
+      },
+    ],
+  },
+  {
+    slug: "press-release-generator",
+    name: "Press Release Generator",
+    shortDescription: "Write an AP-style press release journalists can run — headline, dateline, lede, body, attributed quotes, boilerplate, media contact — with newsroom checks and Markdown/text export.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A release is written. Coverage is earned.",
+      body: "Unlimited plan members get the pitch list, the personal outreach, and the follow-up handled — not just the document.",
+    },
+    faq: [
+      {
+        question: "Will it invent quotes for real people?",
+        answer:
+          "It drafts quotes for the people you name and flags in the notes that they need approval. It won't attribute quotes to real people you didn't mention, and it won't invent customers, investors or metrics — anything unknown becomes a marked placeholder.",
+      },
+    ],
+  },
+  {
+    slug: "qa-test-plan-generator",
+    name: "QA Test Plan Generator",
+    shortDescription: "Turn a feature, release or page into a prioritised test plan — scenarios with steps, test data and expected results, negative and edge cases, accessibility, device matrix, exit criteria — as CSV or Markdown.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "A plan finds the bugs. Someone still has to fix them.",
+      body: "Unlimited plan members get their site and funnels tested before every release and the fixes shipped by the same team that built it.",
+    },
+    faq: [
+      {
+        question: "Can it run the tests?",
+        answer:
+          "Not yet — it writes the plan a person or an automation engineer executes. Ask it to turn the P0 scenarios into Playwright test outlines and you'll have a head start on automation.",
+      },
+    ],
+  },
+  {
+    slug: "content-repurposer",
+    name: "Content Repurposer",
+    shortDescription: "Turn one blog post, transcript or case study into native posts for LinkedIn, X, Instagram, YouTube, newsletter, short video and more — checked against each channel's limits.",
+    status: "live",
+    processing: "server",
+    upsell: {
+      headline: "One piece, ten posts. Every week, forever, is the job.",
+      body: "Unlimited plan members get their content engine run for them — long-form written, repurposed, scheduled and reported across every channel.",
+    },
+    faq: [
+      {
+        question: "Does it just shorten the article?",
+        answer:
+          "No — each version is rewritten in the channel's own grammar: a LinkedIn hook that shows before 'see more', a thread where every tweet stands alone, a script meant to be spoken. It keeps your facts and claims; it doesn't add statistics or examples that weren't in the source.",
+      },
+    ],
+  },
+  {
     slug: "background-remover",
     name: "Background Remover",
     shortDescription: "Remove the background from a photo — product shots, headshots, or social images — right in your browser.",

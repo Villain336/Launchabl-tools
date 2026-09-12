@@ -62,10 +62,10 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     title: "Launch announcement kit",
     outcome: "Hero copy variants, the announcement email, a social card and a hero visual — ready to schedule.",
     category: "launch",
-    skills: ["Copy variants", "Email", "Social card", "Image"],
-    minutes: 5,
+    skills: ["Copy variants", "Press release", "Email", "Subject lines", "Social card", "UTM links"],
+    minutes: 6,
     prompt:
-      "We're announcing [what you're launching] for [who it's for] on [date]. Brand: [brand name, site, colour if you have one]. Write three hero headline + subheadline variants on different angles, the announcement email to our list, and design the social card for the launch post. Then generate one hero visual to match. Keep the tone [confident / playful / technical].",
+      "We're announcing [what you're launching] for [who it's for] on [date]. Brand: [brand name, site, colour if you have one]. Write three hero headline + subheadline variants on different angles, the press release (quote from [name, title]), and the announcement email to our list with its subject line scored against alternatives. Design the social card for the launch post and build tracked links for [LinkedIn, X, newsletter, Product Hunt]. Keep the tone [confident / playful / technical].",
   },
   {
     id: "local",
@@ -82,10 +82,30 @@ export const AGENT_TEMPLATES: AgentTemplate[] = [
     title: "Cold outreach that gets replies",
     outcome: "The prospect's likely email, their company's context, and a short outreach sequence with subject-line options.",
     category: "sales",
-    skills: ["Email finder", "Page read", "Copy variants"],
+    skills: ["Email finder", "Page read", "Subject lines"],
     minutes: 3,
     prompt:
-      "I want to reach [full name], [role] at [company domain]. We sell [what you sell] and the reason they should care is [the one thing]. Find their most likely work email, read their company's site for context I can reference, then write a 3-touch outreach sequence (day 0, 3, 7) under 90 words each, with four subject-line options for the first email.",
+      "I want to reach [full name], [role] at [company domain]. We sell [what you sell] and the reason they should care is [the one thing]. Find their most likely work email, read their company's site for context I can reference, then write a 3-touch outreach sequence (day 0, 3, 7) under 90 words each, with four subject-line options for the first email scored so I know which to send.",
+  },
+  {
+    id: "positioning",
+    title: "Who to sell to, and how",
+    outcome: "Ideal customer profile, buyer personas with objections and messaging, then hero copy for the primary persona.",
+    category: "sales",
+    skills: ["ICP & personas", "Page read", "Copy variants"],
+    minutes: 4,
+    prompt:
+      "Product: [what it is, price]. Site: [URL or 'none yet']. Define our ideal customer profile and the buyer personas behind it — goals, pains, buying triggers, objections with answers, where they hang out, the words they use — plus the anti-persona to turn away. Then write three hero headline + subheadline variants aimed at the primary persona, in their vocabulary.",
+  },
+  {
+    id: "distribute",
+    title: "Distribute an article everywhere",
+    outcome: "Native posts for every channel, tracked links for each placement, and a schedule for the week.",
+    category: "content",
+    skills: ["Content repurposer", "UTM links", "Content calendar"],
+    minutes: 4,
+    prompt:
+      "Repurpose this piece: [article URL or paste the text]. Channels: [LinkedIn, X thread, newsletter, Instagram, YouTube, short video]. Rewrite it natively for each, build a tracked link for every placement (campaign: [campaign name]), and lay the pieces out on a 7-day schedule starting [date]. Voice: [ours / the author's], audience: [who].",
   },
   {
     id: "content-engine",

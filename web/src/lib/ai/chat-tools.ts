@@ -390,6 +390,84 @@ const metas: ChatToolMeta[] = [
     artifacts: ["designSocialCard", "generateImage"],
   },
   {
+    slug: "utm-builder",
+    intro:
+      "Give me the destination and the places the link will live — LinkedIn post, newsletter, Google Ads, a partner mention, a QR on print — and I'll build the full set of tracked links with one clean naming convention, flag anything that would fragment your reports, and hand you a CSV.",
+    placeholder: "e.g. https://example.com/pricing for our Q4 launch: LinkedIn, X, newsletter, Google Ads (keyword: invoicing software)",
+    suggestions: [
+      "UTM links for https://launchabl.io/tools — campaign: 2026_q4_agent_launch — LinkedIn post, X thread, newsletter, Product Hunt",
+      "Build tracked links for a Black Friday sale at https://example.com/sale across Meta ads (3 creatives), Google Ads, email, and SMS",
+      "One link per partner for https://example.com/partners: Notion, Zapier, Webflow — referral traffic",
+      "Fix these: https://example.com/?utm_source=LinkedIn&utm_medium=Social%20Media&utm_campaign=Spring Launch",
+    ],
+    artifacts: ["buildUtmLinks"],
+  },
+  {
+    slug: "persona-generator",
+    intro:
+      "Describe what you sell and roughly what it costs — or paste your site — and I'll define the ideal customer profile and the two to four buyer personas behind it: goals, pains, buying triggers, objections with answers, where they hang out, the words they use, the proof they need, and the anti-persona to say no to.",
+    placeholder: "e.g. $49/mo scheduling software for independent physiotherapy clinics, sold self-serve…",
+    suggestions: [
+      "ICP and personas for Ledgerly, a $29/mo invoicing app for freelancers that chases late payments automatically",
+      "Personas from this site: https://vercel.com",
+      "Buyer personas for a $40k/year compliance platform sold to fintech startups — who's the champion, who signs, who blocks?",
+      "Who is the ideal customer for a Portland coffee roaster's wholesale program, and who isn't?",
+    ],
+    artifacts: ["deliverPersonas", "fetchPage"],
+  },
+  {
+    slug: "subject-line-checker",
+    intro:
+      "Paste your subject lines (and preview text if you have it). I'll score each one for what filters and inboxes punish — length and mobile cut-off, shouting, trigger words, fake replies, generic phrasing, weak preview text — then write stronger alternatives and prove they score higher.",
+    placeholder: "Paste one or more subject lines, one per line — add preview text after a dash if you have it…",
+    suggestions: [
+      "Score: \"FREE trial — act now!!! Limited time offer\" and \"Our monthly newsletter\"",
+      "Check this subject and preview: \"Your invoice is overdue\" — \"Pay now to avoid late fees\"",
+      "Rewrite \"Introducing our new dashboard\" for a product-update email to 4,000 SaaS customers",
+      "Five subject lines for a re-engagement email to customers who haven't logged in for 60 days",
+    ],
+    artifacts: ["scoreSubjectLines"],
+  },
+  {
+    slug: "press-release-generator",
+    intro:
+      "Tell me the news — a launch, funding, partnership, hire, milestone — with the company, date and who's quoted, or paste the company's site. I'll write an AP-style release journalists can run: headline, dateline, lede, body, attributed quotes, boilerplate and media contact, checked against newsroom standards.",
+    placeholder: "e.g. Ledgerly launches automatic payment reminders on Oct 1, Austin TX, quote from CEO Jane Doe…",
+    suggestions: [
+      "Press release: Ledgerly launches Ledgerly 2.0 with automatic payment chasing, Oct 1 2026, Austin, Texas. CEO Jane Doe quoted. Customers: 12,000 freelancers.",
+      "Funding announcement: Acme Analytics raises $4M seed led by Example Ventures to expand into Europe. Quotes from CEO and lead investor.",
+      "Partnership release for https://vercel.com with a fictional design agency — I'll fill in names",
+      "We hired a new VP of Sales, Sam Lee, from Big Corp. Write the release for a Series A B2B startup in London.",
+    ],
+    artifacts: ["deliverPressRelease", "fetchPage"],
+  },
+  {
+    slug: "qa-test-plan-generator",
+    intro:
+      "Describe the feature, release or flow — or paste the page URL — and I'll write a test plan someone can run today: prioritised scenarios with exact steps, test data and expected results, negative and edge cases, an accessibility pass, a device matrix, exit criteria and risks. Filter by area or priority; export CSV or Markdown.",
+    placeholder: "e.g. New checkout with Stripe, promo codes and guest checkout — web, mobile Safari matters…",
+    suggestions: [
+      "Test plan for a new sign-up flow: email + password, Google OAuth, email verification, on web and mobile web",
+      "QA plan for the pricing page at https://vercel.com/pricing before a redesign ships",
+      "Regression plan for a Shopify checkout after adding promo codes and Apple Pay",
+      "Test plan for a REST API: POST /invoices with validation, auth, rate limits and idempotency",
+    ],
+    artifacts: ["deliverTestPlan", "fetchPage"],
+  },
+  {
+    slug: "content-repurposer",
+    intro:
+      "Paste a blog post, transcript or case study — or its URL — and I'll rewrite it natively for each channel: a LinkedIn post with a real hook, an X thread in tweets, a newsletter section, an Instagram caption, a YouTube description, a short-video script, quote cards. Each checked against the channel's limits, with copy buttons.",
+    placeholder: "Paste the article or a URL, and name the channels if you have preferences…",
+    suggestions: [
+      "Repurpose https://vercel.com/blog for LinkedIn, an X thread and our newsletter",
+      "Turn this case study into a LinkedIn post, 5 quote cards and a 45-second video script: [paste]",
+      "Make a week of posts (LinkedIn, X, Instagram) from our launch notes: [paste]",
+      "Repurpose this podcast transcript into a newsletter section, a YouTube description and a Reddit post with no pitch: [paste]",
+    ],
+    artifacts: ["deliverRepurposed", "fetchPage"],
+  },
+  {
     slug: "agent",
     intro:
       "Every Launchabl skill in one conversation. Describe the job — launch this page, fix our email, beat this competitor, get us clients — and I'll chain the audits, checks, copy, design and files it takes, then hand over the deliverables.",

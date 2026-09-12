@@ -66,6 +66,8 @@ import type { AccessibilityToolOutput, DnsEmailToolOutput, EmailFinderToolOutput
 import type { ImageDeliverable, SocialCardDeliverable } from "@/lib/ai/tools/image-gen";
 import { ImageArtifact } from "@/components/tools/chat/image-artifact";
 import { SocialCardArtifact } from "@/components/tools/chat/social-card-artifact";
+import type { PersonaDeliverable, PressReleaseDeliverable, RepurposeDeliverable, SubjectLinesDeliverable, TestPlanDeliverable, UtmDeliverable } from "@/lib/ai/tools/growth-kits";
+import { PersonasArtifact, PressReleaseArtifact, RepurposeArtifact, SubjectLinesArtifact, TestPlanArtifact, UtmArtifact } from "@/components/tools/chat/growth-artifacts";
 
 /* ─────────────────────────────────────────────────────────
  * TOOL CHAT — the shared LLM-style surface for chat tools.
@@ -112,6 +114,12 @@ const artifactRenderers: Record<string, ArtifactRenderer> = {
   findEmail: (part) => auditOrError(part.output as EmailFinderToolOutput, (r) => <EmailFinderArtifact result={r.result} />),
   generateImage: (part) => <ImageArtifact data={part.output as ImageDeliverable} />,
   designSocialCard: (part) => <SocialCardArtifact data={part.output as SocialCardDeliverable} />,
+  buildUtmLinks: (part) => <UtmArtifact data={part.output as UtmDeliverable} />,
+  deliverPersonas: (part) => <PersonasArtifact data={part.output as PersonaDeliverable} />,
+  scoreSubjectLines: (part) => <SubjectLinesArtifact data={part.output as SubjectLinesDeliverable} />,
+  deliverPressRelease: (part) => <PressReleaseArtifact data={part.output as PressReleaseDeliverable} />,
+  deliverTestPlan: (part) => <TestPlanArtifact data={part.output as TestPlanDeliverable} />,
+  deliverRepurposed: (part) => <RepurposeArtifact data={part.output as RepurposeDeliverable} />,
   fetchPage: (part) => {
     const result = part.output as FetchPageToolOutput;
     const url = (part.input as { url?: string } | undefined)?.url ?? "";
@@ -155,6 +163,12 @@ const artifactLabels: Record<string, { working: string; done: string }> = {
   findEmail: { working: "Reading the company's pages and DNS", done: "Email candidates ready" },
   generateImage: { working: "Rendering the image", done: "Image ready" },
   designSocialCard: { working: "Designing the card", done: "Card ready" },
+  buildUtmLinks: { working: "Building tracked links", done: "Links ready" },
+  deliverPersonas: { working: "Defining the ICP and personas", done: "Personas ready" },
+  scoreSubjectLines: { working: "Scoring subject lines", done: "Scores ready" },
+  deliverPressRelease: { working: "Writing and checking the release", done: "Press release ready" },
+  deliverTestPlan: { working: "Writing the test plan", done: "Test plan ready" },
+  deliverRepurposed: { working: "Rewriting for each channel", done: "Pieces ready" },
 };
 
 /** Shown in the empty state so a tool is usable before the first message. */

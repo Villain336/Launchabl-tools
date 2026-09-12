@@ -12,6 +12,7 @@ import { competitorGapRuntime, landingPageGraderRuntime, sitemapRobotsRuntime, w
 import { contentCalendarRuntime, localSeoRuntime, schemaGeneratorRuntime } from "@/lib/ai/tools/marketing-kits";
 import { accessibilityRuntime, dnsEmailHealthRuntime, emailFinderRuntime, securityHeadersRuntime, sslCheckerRuntime } from "@/lib/ai/tools/infra-checks";
 import { imageGeneratorRuntime, socialCardRuntime } from "@/lib/ai/tools/image-gen";
+import { contentRepurposerRuntime, personaGeneratorRuntime, pressReleaseRuntime, qaTestPlanRuntime, subjectLineCheckerRuntime, utmBuilderRuntime } from "@/lib/ai/tools/growth-kits";
 import { buildAgentRuntime } from "@/lib/ai/agent";
 
 /**
@@ -77,6 +78,12 @@ const runtimes: ChatToolRuntime[] = [
   emailFinderRuntime,
   imageGeneratorRuntime,
   socialCardRuntime,
+  utmBuilderRuntime,
+  personaGeneratorRuntime,
+  subjectLineCheckerRuntime,
+  pressReleaseRuntime,
+  qaTestPlanRuntime,
+  contentRepurposerRuntime,
 ];
 
 const agentRuntime = buildAgentRuntime(runtimes);

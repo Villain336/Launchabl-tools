@@ -116,6 +116,12 @@ const toolUi: Record<string, ReactNode> = {
   "email-finder": <ToolChat slug="email-finder" />,
   "ai-image-generator": <ToolChat slug="ai-image-generator" />,
   "social-card-generator": <ToolChat slug="social-card-generator" />,
+  "utm-builder": <ToolChat slug="utm-builder" />,
+  "persona-generator": <ToolChat slug="persona-generator" />,
+  "subject-line-checker": <ToolChat slug="subject-line-checker" />,
+  "press-release-generator": <ToolChat slug="press-release-generator" />,
+  "qa-test-plan-generator": <ToolChat slug="qa-test-plan-generator" />,
+  "content-repurposer": <ToolChat slug="content-repurposer" />,
   "background-remover": <BackgroundRemover />,
   "demo-video-creator": <DemoVideoCreator />,
   "domain-purchase": (
@@ -227,6 +233,18 @@ function AboutCopy({ slug }: { slug: string }) {
       "Most image tools hand you a text box and leave the prompt engineering to you. Here an art director sits in between: you describe the job — a hero for a fintech landing page, an ad for a running shoe, a header for a post about remote work — and it writes the full brief (subject, style, lighting, palette, composition for the aspect ratio) before rendering. Images come back in the ratio the channel needs, re-encoded small enough to use as-is, with WebP and PNG downloads and the prompt saved so you can iterate.",
     "social-card-generator":
       "The link preview is the first thing most people see of a page, and most sites ship a blurry logo or nothing. This designs the card as a real layout — headline, subtitle, badge, brand mark and domain typeset exactly, in your colours — and renders it in every size that matters: 1200×630 for og:image, 1600×900 for X, 1080×1080 for feeds, 1080×1920 for stories. Text stays editable in the card, so a fix is a keystroke, not another generation. When a backdrop would help, the image model paints one behind the type.",
+    "utm-builder":
+      "Most UTM builders tag one link at a time and let you type whatever you like — which is how one campaign becomes 'LinkedIn', 'linkedin' and 'Linkedin' in the report. This one builds the whole set for a campaign at once from the placements you describe, normalises every value to the convention analytics teams enforce (lowercase, underscores, the GA4 medium taxonomy), preserves the query string your destination already has, replaces stale tags, flags duplicates and non-standard mediums that GA4 would file under Unassigned, and gives you a CSV for the shared sheet.",
+    "persona-generator":
+      "Most persona templates produce a stock photo and a list of hobbies. This one starts with the ideal customer profile — observable firmographics, qualifiers and disqualifiers a salesperson could check — then builds the personas the way buying actually happens at your price point: a self-serve tool has a user who is the buyer; an enterprise platform has a champion, a decision-maker and a budget-holder. Every persona carries the pains in their own words, real buying triggers, objections with honest answers, the channels they trust, the vocabulary to use and avoid, the proof that convinces them, and a success metric. An anti-persona tells you who to turn away, and the notes list what to validate in your next customer interviews.",
+    "subject-line-checker":
+      "Open rates live or die in about 41 characters on a phone. This scores subject lines deterministically — length and mobile cut-off, word count, all-caps and punctuation runs, emoji, the trigger vocabulary filters and readers have learned to distrust, fake RE:/FWD:, generic phrasing, and whether the preview text extends the promise or repeats it — and shows exactly where the inbox truncates each line. Then the assistant writes alternatives on different mechanisms (benefit, question, curiosity, specific number, personalisation) and scores them too, so you leave with two candidates worth testing rather than a synonym of what you had.",
+    "press-release-generator":
+      "Journalists delete releases that bury the news, hype the product, and quote executives who are 'excited to announce'. This writes to the standard they expect: a factual headline under 100 characters, a dateline, a lede that answers who, what, when, where and why in three sentences, body paragraphs in descending importance, one to three quotes with a point of view, an About boilerplate, a media contact and the closing ###. The server assembles Markdown and plain text, counts words, and runs newsroom checks — headline length and tone, word count, lede clarity, quote substance, placeholders — before you send it.",
+    "qa-test-plan-generator":
+      "Shipping without a plan means your customers do the testing. This turns a feature description, a spec or a live URL into a plan anyone can execute today: scenarios grouped by area with stable ids, priorities that mean something (P0 blocks release), imperative steps with specific test data, expected results you can judge pass or fail, negative and edge cases, an accessibility pass, a device and browser matrix, exit criteria and risks with mitigations. It warns when a plan has no P0s or no edge cases, filters by area and priority, and exports to CSV for your tracker or Markdown with pass/fail checkboxes.",
+    "content-repurposer":
+      "The article took a day; the distribution usually gets ten minutes and a pasted link. This reads the piece — from a URL or pasted text — extracts the argument, key points and quotable lines, and rewrites it natively for each channel: a LinkedIn post whose first line earns the 'see more', an X thread where every tweet stands alone, a newsletter section, an Instagram caption, a YouTube description, a spoken short-video script, quote cards. Every piece is checked against the channel's character limits and reach killers (a link in the LinkedIn body, a tweet over 280), with a suggested visual and posting time, and a copy button per piece.",
     "background-remover":
       "Clean product shots and headshots usually mean a trip to Photoshop or a paid app. This runs a real image-segmentation model entirely on your device — no upload, no account, no watermark — and hands back a transparent PNG in seconds.",
     "demo-video-creator":

@@ -93,12 +93,14 @@ ${catalogText(catalog)}
 
 ## Workflow patterns you should recognise
 - "Launch this page" → auditWebsite, gradeLandingPage, deliverMetaTags, deliverSchema, designSocialCard; then a fix-first list.
-- "Fix our email" / "emails go to spam" → checkDnsEmail first, then exact records to publish and the p=none → p=reject path; subject-line and email drafts only if asked.
+- "Fix our email" / "emails go to spam" → checkDnsEmail first, then exact records to publish and the p=none → p=reject path; scoreSubjectLines and deliverEmail only if content is part of the problem or they ask.
 - "Beat competitor X" → compareSites (gap report), then deliverCalendar or copy variants aimed at the gaps found.
-- "Is my site healthy/secure" → auditWebsite, checkSecurityHeaders, checkSsl, auditAccessibility, checkLinks in parallel; one prioritised list across all of them.
+- "Is my site healthy/secure" → auditWebsite, checkSecurityHeaders, checkSsl, auditAccessibility, checkLinks in parallel; one prioritised list across all of them. Before a release, add deliverTestPlan for the flows that matter.
 - "Get more local customers" → deliverLocalSeoKit, deliverSchema (LocalBusiness), designQr for the review link.
-- "Announce X" → deliverVariants for the hero, deliverEmail for the announcement, designSocialCard, generateImage if a hero visual is wanted.
-- "Reach person Y at company Z" → findEmail, then a short outreach draft in your reply (or deliverEmail if they want a full email).
+- "Announce X" → deliverVariants for the hero, deliverPressRelease if press is a channel, deliverEmail for the announcement (scoreSubjectLines on its subject), designSocialCard, buildUtmLinks for every placement, generateImage if a hero visual is wanted.
+- "Reach person Y at company Z" → findEmail, then the outreach sequence in your reply with scoreSubjectLines on the first-touch subjects (or deliverEmail if they want a full email).
+- "Who should we sell to" / "positioning" → deliverPersonas first; then deliverVariants for the primary persona's hero and deliverCalendar for the channels the personas actually use.
+- "Distribute this article" / "content engine" → deliverRepurposed from the source URL, buildUtmLinks for the placements, deliverCalendar to schedule the pieces.
 - "Make us AI-search ready" → analyzeLlmReadability, analyzeVoiceSearch, deliverFaqSchema, deliverDocument for llms.txt.
 
 Write in the user's language. Keep replies tight; the artifacts carry the detail.`,

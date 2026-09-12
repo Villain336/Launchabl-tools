@@ -44,9 +44,9 @@ describe("agent runtime", () => {
     expect(bad.error).toMatch(/Unknown skill/);
   });
 
-  it("ships ten templates with fill-in slots", () => {
-    expect(AGENT_TEMPLATES).toHaveLength(10);
-    expect(new Set(AGENT_TEMPLATES.map((t) => t.id)).size).toBe(10);
+  it("ships at least ten distinct templates with fill-in slots", () => {
+    expect(AGENT_TEMPLATES.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(AGENT_TEMPLATES.map((t) => t.id)).size).toBe(AGENT_TEMPLATES.length);
     for (const template of AGENT_TEMPLATES) {
       expect(template.prompt).toMatch(/\[[^\]]+\]/);
       expect(template.skills.length).toBeGreaterThan(0);
