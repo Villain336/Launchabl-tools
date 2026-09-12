@@ -4,10 +4,17 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 import { CardSpotlight } from "@/components/ui/card-spotlight";
+import { siteConfig } from "@/lib/site-config";
+
+const title = "Solutions";
+const description = `Everything included in the Launchabl unlimited marketing & design plan — start with a free website audit, then ${siteConfig.price} unlocks it all for life.`;
 
 export const metadata: Metadata = {
-  title: "Solutions",
-  description: "Everything included in the Launchabl unlimited marketing & design plan.",
+  title,
+  description,
+  alternates: { canonical: "/solutions" },
+  openGraph: { type: "website", url: "/solutions", title, description },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 const solutions = [
@@ -43,13 +50,50 @@ const solutions = [
   },
 ];
 
+/** Schema.org data so search engines and AI answer engines can enumerate what the unlimited plan covers. */
+function solutionsJsonLd() {
+  const url = `${siteConfig.url}/solutions`;
+  const graph: Record<string, unknown>[] = [
+    {
+      "@type": "Service",
+      "@id": `${url}#service`,
+      name: `${siteConfig.name} unlimited marketing & design plan`,
+      description,
+      url,
+      provider: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Solutions included in the unlimited plan",
+        itemListElement: solutions.map((solution, index) => ({
+          "@type": "Offer",
+          position: index + 1,
+          itemOffered: {
+            "@type": "Service",
+            name: solution.name,
+            description: solution.summary,
+          },
+        })),
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: siteConfig.name, item: siteConfig.url },
+        { "@type": "ListItem", position: 2, name: "Solutions", item: url },
+      ],
+    },
+  ];
+  return { "@context": "https://schema.org", "@graph": graph };
+}
+
 export default function SolutionsPage() {
   return (
     <Container className="py-16 sm:py-24">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(solutionsJsonLd()) }} />
       <SectionHeading
         eyebrow="Solutions"
         title="Everything the unlimited plan covers"
-        description="One flat price, one active request at a time, unlimited requests over the life of your plan. No hourly billing, no scope negotiations."
+        description={`Start with a free website audit. Then one flat price of ${siteConfig.price}, one active request at a time, unlimited requests over the life of your plan. No hourly billing, no scope negotiations.`}
       />
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,9 +118,12 @@ export default function SolutionsPage() {
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">
         <h3 className="text-2xl font-bold">Want to try before you commit?</h3>
         <p className="mt-2 text-primary-foreground/80">
-          Every solution above has a free tool version in our toolbox — start there — your first run needs no account.
+          Every solution above has a free tool version in our toolbox — start with a free website audit, no account required.
         </p>
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-6 flex flex-wrap justify-center gap-4">
+          <LinkButton href={siteConfig.freeAudit.href} variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            {siteConfig.freeAudit.cta}
+          </LinkButton>
           <LinkButton href="/tools" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Explore free tools
           </LinkButton>
