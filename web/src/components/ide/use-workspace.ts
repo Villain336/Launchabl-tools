@@ -99,15 +99,16 @@ export function useWorkspace() {
 
   const acceptEdits = useCallback((accepted: AppliedEdit[]) => setWorkspace((ws) => (ws ? applyEdits(ws, accepted) : ws)), [setWorkspace]);
 
-  /** Mark everything as committed: current content becomes the baseline. */
+  /** Mark files as committed: current content becomes the baseline. All files when `paths` is omitted. */
   const markClean = useCallback(
-    (sha: string | null, ref?: string) =>
+    (sha: string | null, ref?: string, paths?: string[]) =>
       setWorkspace((ws) => {
         if (!ws) return ws;
+        const only = paths ? new Set(paths) : null;
         const files: Record<string, WorkspaceFile> = {};
-        for (const [path, file] of Object.entries(ws.files)) files[path] = { ...file, original: file.content };
+        for (const [path, file] of Object.entries(ws.files)) files[path] = only && !only.has(path) ? file : { ...file, original: file.content };
         const source = ws.source.kind === "github" ? { ...ws.source, sha: sha ?? ws.source.sha, ref: ref ?? ws.source.ref } : ws.source;
-        return touch({ ...ws, files, source, tombstones: [] });
+        return touch({ ...ws, files, source, tombstones: only ? (ws.tombstones ?? []).filter((p) => !only.has(p)) : [] });
       }),
     [setWorkspace],
   );

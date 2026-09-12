@@ -8,6 +8,26 @@ import { z } from "zod";
  * diff and the user accepts or rejects per file.
  */
 
+/* ── results the client sends back ─────────────────── */
+
+const listFilesResult = z.object({ folder: z.string(), files: z.array(z.object({ path: z.string(), size: z.number(), binary: z.boolean() })), truncated: z.boolean() });
+const readFileResult = z.union([
+  z.object({ path: z.string(), language: z.string(), lines: z.number(), start: z.number(), end: z.number(), text: z.string() }),
+  z.object({ path: z.string(), error: z.string() }),
+]);
+const searchFilesResult = z.object({ query: z.string(), hits: z.array(z.object({ path: z.string(), line: z.number(), text: z.string() })), truncated: z.boolean() });
+const proposeEditsResult = z.object({
+  summary: z.string(),
+  results: z.array(z.object({ path: z.string(), kind: z.string(), ok: z.boolean(), error: z.string().optional(), added: z.number(), removed: z.number() })),
+  /** Always false from the tool: acceptance happens in the editor. */
+  applied: z.literal(false),
+});
+
+export type ListFilesResult = z.infer<typeof listFilesResult>;
+export type ReadFileResult = z.infer<typeof readFileResult>;
+export type SearchFilesResult = z.infer<typeof searchFilesResult>;
+export type ProposeEditsResult = z.infer<typeof proposeEditsResult>;
+
 export const codeEditorTools = {
   listFiles: tool({
     description: "List files under a folder of the workspace (recursive), with sizes. Use when the tree in the system prompt was truncated or to explore a folder.",
@@ -15,6 +35,7 @@ export const codeEditorTools = {
       folder: z.string().max(400).default("").describe("Folder path, '' for the root."),
       glob: z.string().max(200).nullable().describe("Optional glob like **/*.tsx to filter."),
     }),
+    outputSchema: listFilesResult,
   }),
   readFile: tool({
     description: "Read a text file, numbered lines. Long files come back in 400-line slices; ask for the next range. Always read a file before editing it.",
@@ -23,6 +44,7 @@ export const codeEditorTools = {
       startLine: z.number().int().min(1).default(1),
       endLine: z.number().int().min(1).nullable().describe("Inclusive; null for up to 400 lines from startLine."),
     }),
+    outputSchema: readFileResult,
   }),
   searchFiles: tool({
     description: "Search file contents (case-insensitive, regex optional) across the workspace; returns path:line:text hits, capped at 60. Use it to find where something is defined or used before reading.",
@@ -31,8 +53,10 @@ export const codeEditorTools = {
       regex: z.boolean().default(false),
       glob: z.string().max(200).nullable().describe("Optional path glob like src/**/*.ts."),
     }),
+    outputSchema: searchFilesResult,
   }),
   proposeEdits: tool({
+    outputSchema: proposeEditsResult,
     description:
       "Propose file changes. The editor shows each as a diff; the user accepts or rejects per file — nothing is written until they do. Prefer `patch` with a unique `find` string copied verbatim from readFile (whitespace and indentation included, without the line-number prefix); use `replace` only for small files or rewrites, `create` for new files, `delete` to remove. The result tells you which patches applied cleanly; fix and re-propose any that didn't.",
     inputSchema: z.object({
@@ -57,18 +81,6 @@ export type CodeEditorTools = InferUITools<typeof codeEditorTools>;
 export type IdeMessageMetadata = { model?: string; modelLabel?: string; totalUsage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number } };
 
 export type IdeMessage = UIMessage<IdeMessageMetadata, never, CodeEditorTools>;
-
-/* ── results the client sends back ─────────────────── */
-
-export type ListFilesResult = { folder: string; files: { path: string; size: number; binary: boolean }[]; truncated: boolean };
-export type ReadFileResult = { path: string; language: string; lines: number; start: number; end: number; text: string } | { path: string; error: string };
-export type SearchFilesResult = { query: string; hits: { path: string; line: number; text: string }[]; truncated: boolean };
-export type ProposeEditsResult = {
-  summary: string;
-  results: { path: string; kind: string; ok: boolean; error?: string; added: number; removed: number }[];
-  /** Always false from the tool: acceptance happens in the editor. */
-  applied: false;
-};
 
 export const CODE_EDITOR_INSTRUCTIONS = `You are the coding assistant inside Launchabl's editor. The user has a project open in their browser; you see its file list below and can read, search and propose changes to it. You are working with a web developer or a marketer editing their own site: be precise, keep changes small and idiomatic to the codebase, and never invent files or APIs you haven't seen.
 
