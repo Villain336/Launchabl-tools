@@ -7,7 +7,8 @@ import type { SecurityHeadersReport } from "@/lib/web/security-headers";
 import type { AccessibilityReport } from "@/lib/web/accessibility";
 import type { SslReport } from "@/lib/web/ssl";
 import type { EmailFinderResult } from "@/lib/web/email-finder";
-import { ArtifactHeader, CopyButton, Footnote, Pill, shorten, type Tone } from "@/components/tools/chat/bits";
+import { ArtifactHeader, CopyButton, Footnote, Pill, Tabs, shorten, type Tone } from "@/components/tools/chat/bits";
+import { DNS_HOSTS, formatRecords, type DnsHostId, type RecommendedRecord } from "@/lib/web/dns-format";
 
 /* ── Strips rendered inside ChecklistArtifact for the infra report kinds ── */
 
@@ -45,6 +46,39 @@ function RawBlock({ label, rows }: { label: string; rows: { name: string; value:
   );
 }
 
+function RecordsToPublish({ records, domain }: { records: RecommendedRecord[]; domain: string }) {
+  const [host, setHost] = useState<DnsHostId>("cloudflare");
+  if (!records.length) return null;
+  const text = formatRecords(records, domain, host);
+  return (
+    <div className="border-b border-line px-4 py-3" data-dns-recommended>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[10.5px] font-medium tracking-wide text-ink-3 uppercase">
+          Records to publish · {records.length}
+        </p>
+        <div className="flex items-center gap-1">
+          <Tabs value={host} onChange={setHost} options={DNS_HOSTS.map((h) => ({ key: h.id, label: h.label }))} />
+          <CopyButton text={text} label="Copy all" />
+        </div>
+      </div>
+      <ul className="mt-2 space-y-2">
+        {records.map((r, i) => (
+          <li key={i} className="rounded-control bg-field px-3 py-2">
+            <div className="flex items-start gap-2">
+              <code className="min-w-0 flex-1 font-mono text-[11.5px] break-all text-ink">
+                <span className="text-ink-3">{r.host === "@" ? domain : `${r.host}.${domain}`}</span> <span className="text-ink-3">{r.type}</span> {r.value}
+              </code>
+              <CopyButton text={r.value} />
+            </div>
+            <p className="mt-1 text-[11.5px] text-ink-2">{r.why}</p>
+          </li>
+        ))}
+      </ul>
+      <pre className="mt-2 max-h-48 overflow-auto rounded-control border border-line bg-surface px-3 py-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-ink-2">{text}</pre>
+    </div>
+  );
+}
+
 export function DnsEmailStrip({ report }: { report: DnsEmailReport }) {
   const f = report.facts;
   const rows = [
@@ -64,6 +98,7 @@ export function DnsEmailStrip({ report }: { report: DnsEmailReport }) {
         <Fact label="DMARC" value={f.dmarcPolicy ? `p=${f.dmarcPolicy}${f.dmarcReporting ? " · reports" : ""}` : "Missing"} t={f.dmarcPolicy === "reject" || f.dmarcPolicy === "quarantine" ? "good" : f.dmarcPolicy === "none" ? "warn" : "bad"} />
         <Fact label="DKIM" value={f.dkimSelectors ? String(f.dkimSelectors) : "Not found"} t={f.dkimSelectors ? "good" : "warn"} />
       </div>
+      <RecordsToPublish records={report.recommended ?? []} domain={report.domain} />
       <RawBlock label="DNS records found" rows={rows} />
     </>
   );

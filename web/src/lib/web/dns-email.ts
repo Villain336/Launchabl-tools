@@ -1,6 +1,7 @@
 import { promises as dnsPromises } from "node:dns";
 import { finalizeChecklist, type Check, type ChecklistReport } from "@/lib/web/checklist";
 import { FetchPageError } from "@/lib/web/fetch-page";
+import type { RecommendedRecord } from "@/lib/web/dns-format";
 
 /**
  * Email deliverability from DNS alone: MX, SPF (syntax, qualifier, lookup
@@ -21,6 +22,8 @@ export type DnsEmailReport = ChecklistReport & {
     tlsRpt: string | null;
     bimi: string | null;
   };
+  /** Records to publish now, derived from what's missing or weak — the paste-ready fix list. */
+  recommended: RecommendedRecord[];
 };
 
 const DKIM_SELECTORS = [
@@ -275,7 +278,57 @@ export async function checkDnsEmail(rawDomain: string, options: { dkimSelector?:
     kind: "dns-email",
     domain,
     records: { mx, spf, dmarc, dkim, mtaSts, tlsRpt, bimi },
+    recommended: recommendedRecords({ domain, provider, spf: spf ?? null, spfAnalysis: spfAnalysis ?? null, dmarc, dmarcTags, dkimFound: dkim.length > 0, spfCount: spfRecords.length, dmarcCount: dmarcRecords.length }),
   };
+}
+
+/** The records a deliverability engineer would hand over to fix what the checks found. Pure; exported for tests. */
+export function recommendedRecords(input: {
+  domain: string;
+  provider: string | null;
+  spf: string | null;
+  spfAnalysis: SpfAnalysis | null;
+  dmarc: string | null;
+  dmarcTags: Record<string, string>;
+  dkimFound: boolean;
+  spfCount: number;
+  dmarcCount: number;
+}): RecommendedRecord[] {
+  const { domain, provider } = input;
+  const out: RecommendedRecord[] = [];
+  const include = provider ? spfIncludeFor(provider) : "<your-provider>";
+  if (!input.spf || input.spfCount > 1) {
+    out.push({ host: "@", type: "TXT", value: `v=spf1 include:${include} -all`, why: input.spfCount > 1 ? "Replace the duplicate SPF records with this single one, merging every include." : "Authorises your mail provider to send as this domain. Add one include per extra sending service." });
+  } else if (input.spfAnalysis) {
+    const a = input.spfAnalysis;
+    if (a.allowsAll || a.qualifier === "+" || a.qualifier === "?") {
+      out.push({ host: "@", type: "TXT", value: input.spf.replace(/\s[+?~-]?all\s*$/i, " -all").replace(/\s\+all/gi, " -all"), why: "Your SPF ends in a qualifier that lets anyone pass; -all (or ~all) closes it." });
+    } else if (a.overBudget) {
+      out.push({ host: "@", type: "TXT", value: `v=spf1 include:${include} -all`, why: `SPF exceeds the 10-lookup limit (${a.lookups}). Rebuild it with only the includes you still use, or flatten with an SPF management service.` });
+    }
+  }
+  const policy = (input.dmarcTags.p ?? "").toLowerCase();
+  if (!input.dmarc || input.dmarcCount > 1 || !["none", "quarantine", "reject"].includes(policy)) {
+    out.push({ host: "_dmarc", type: "TXT", value: `v=DMARC1; p=none; rua=mailto:dmarc@${domain}; fo=1`, why: input.dmarcCount > 1 ? "Delete the duplicates and keep this single DMARC record." : "Starts DMARC in monitoring mode and sends you aggregate reports. Move to p=quarantine then p=reject once every legitimate sender passes." });
+  } else if (policy === "none") {
+    const rua = input.dmarcTags.rua ?? `mailto:dmarc@${domain}`;
+    out.push({ host: "_dmarc", type: "TXT", value: `v=DMARC1; p=quarantine; pct=25; rua=${rua}; fo=1`, why: "Next step from monitoring: quarantine a quarter of failing mail while you watch the reports, then raise pct to 100 and move to p=reject." });
+  } else if (!input.dmarcTags.rua) {
+    out.push({ host: "_dmarc", type: "TXT", value: `${input.dmarc.replace(/;\s*$/, "")}; rua=mailto:dmarc@${domain}`, why: "Adds aggregate reporting so you can see who sends as your domain." });
+  } else if ((input.dmarcTags.sp ?? policy).toLowerCase() === "none" && policy !== "none") {
+    out.push({ host: "_dmarc", type: "TXT", value: input.dmarc.replace(/;\s*sp=none/i, "; sp=reject"), why: "Closes the subdomain loophole (sp=none) so billing.yourdomain.com can't be spoofed either." });
+  }
+  if (!input.dkimFound && provider) {
+    const hint: Record<string, string> = {
+      "Google Workspace": "google._domainkey → Admin console → Apps → Google Workspace → Gmail → Authenticate email → Generate new record (2048-bit).",
+      "Microsoft 365": "selector1._domainkey and selector2._domainkey → CNAME to selector1-<domain-with-dashes>._domainkey.<tenant>.onmicrosoft.com; enable in Defender → Email authentication → DKIM.",
+      "Zoho Mail": "zmail._domainkey (or your chosen selector) → Zoho Mail Admin → Email Authentication → DKIM.",
+      "Proton Mail": "protonmail._domainkey, protonmail2, protonmail3 → CNAMEs shown in Proton settings → Domain names.",
+      Fastmail: "fm1/fm2/fm3._domainkey → CNAMEs to fm1.<domain>.dkim.fmhosted.com etc., shown in Fastmail Settings → Domains.",
+    };
+    if (hint[provider]) out.push({ host: "<selector>._domainkey", type: "TXT", value: "<the key your provider shows you>", why: `DKIM for ${provider}: ${hint[provider]}` });
+  }
+  return out;
 }
 
 function spfIncludeFor(provider: string): string {
