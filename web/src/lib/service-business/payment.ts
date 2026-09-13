@@ -1,7 +1,7 @@
 /**
  * Job payments — the OS system of record for money collected on a job.
- * Stripe Checkout for a specific job invoice is a later slice; this records
- * cash/check/card/other so the dashboard and job history stay honest now.
+ * Cash/check/card/other recorded here; Stripe Checkout for a homeowner
+ * invoice writes the same row from the webhook (`kind: job_invoice`).
  */
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { logAuditEvent } from "@/lib/audit/log";
@@ -26,6 +26,7 @@ export type JobPayment = {
   method: PaymentMethod;
   status: PaymentStatus;
   note: string;
+  stripeSessionId: string | null;
   createdAt: string;
 };
 
@@ -34,7 +35,9 @@ const paymentIndexKey = (orgId: string) => `jobpay:${orgId}:all`;
 
 export async function getPayment(orgId: string, id: string, store: KeyValueStore = getStore()): Promise<JobPayment | null> {
   const raw = await store.get(paymentKey(orgId, id));
-  return raw ? (JSON.parse(raw) as JobPayment) : null;
+  if (!raw) return null;
+  const payment = JSON.parse(raw) as JobPayment;
+  return { ...payment, stripeSessionId: payment.stripeSessionId ?? null };
 }
 
 export async function listPayments(orgId: string, store: KeyValueStore = getStore()): Promise<JobPayment[]> {
@@ -51,7 +54,7 @@ export async function listPayments(orgId: string, store: KeyValueStore = getStor
 export async function recordPayment(
   orgId: string,
   actingUid: string,
-  input: { jobId?: string; amountCents?: number; method?: PaymentMethod; status?: PaymentStatus; note?: string },
+  input: { jobId?: string; amountCents?: number; method?: PaymentMethod; status?: PaymentStatus; note?: string; stripeSessionId?: string | null },
   store: KeyValueStore = getStore(),
 ): Promise<JobPayment | DomainError> {
   const permissionError = await requireOrgRole(orgId, actingUid, ["owner", "admin", "member"], store);
@@ -70,6 +73,7 @@ export async function recordPayment(
     method: isPaymentMethod(input.method) ? input.method : "other",
     status: isPaymentStatus(input.status) ? input.status : "paid",
     note: cleanText(input.note, 400),
+    stripeSessionId: input.stripeSessionId ? cleanText(input.stripeSessionId, 80) : null,
     createdAt: new Date().toISOString(),
   };
   await store.set(paymentKey(orgId, payment.id), JSON.stringify(payment), RECORD_TTL);

@@ -15,7 +15,13 @@
  */
 import { getDb } from "@/lib/db/client";
 
-export type LedgerKind = "checkout_completed" | "credit_pack_granted" | "subscription_created" | "subscription_updated" | "subscription_deleted";
+export type LedgerKind =
+  | "checkout_completed"
+  | "credit_pack_granted"
+  | "job_invoice_paid"
+  | "subscription_created"
+  | "subscription_updated"
+  | "subscription_deleted";
 
 export type LedgerEntry = {
   /** The Stripe event id this row was recorded from — the de-duplication key. */

@@ -48,6 +48,7 @@ export function OpsWorkspace() {
   const [estAmount, setEstAmount] = useState("");
   const [payJob, setPayJob] = useState("");
   const [payAmount, setPayAmount] = useState("");
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
 
   function applySnapshot(snapshot: Snapshot) {
     setDashboard(snapshot.dashboard);
@@ -98,6 +99,22 @@ export function OpsWorkspace() {
     }
   }
 
+  async function sendInvoice() {
+    const jobId = payJob || jobs[0]?.id;
+    const amountCents = Math.round(Number(payAmount) * 100);
+    setInvoiceBusy(true);
+    const res = await fetch("/api/service-business/payments/checkout", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jobId, amountCents }),
+    });
+    const data = (await res.json()) as { error?: string; url?: string };
+    setInvoiceBusy(false);
+    if (!res.ok || !data.url) setError(data.error ?? "Could not start Stripe Checkout.");
+    else window.location.href = data.url;
+  }
+
   async function addPayment() {
     const jobId = payJob || jobs[0]?.id;
     const amountCents = Math.round(Number(payAmount) * 100);
@@ -138,7 +155,10 @@ export function OpsWorkspace() {
             <CardHeader>
               <CardTitle>Open jobs</CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{dashboard.jobs.open}</CardContent>
+            <CardContent>
+              <p className="text-2xl font-bold">{dashboard.jobs.open}</p>
+              <p className="text-xs text-muted-foreground">{dashboard.jobs.upcoming} on the book this week</p>
+            </CardContent>
           </Card>
           <Card>
             <CardHeader>
@@ -158,6 +178,22 @@ export function OpsWorkspace() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {dashboard && (dashboard.warrantiesDue > 0 || dashboard.lowStock > 0) && (
+        <p className="text-sm text-muted-foreground">
+          {dashboard.warrantiesDue > 0 && (
+            <Link href="/os/warranty" className="underline">
+              {dashboard.warrantiesDue} warranty {dashboard.warrantiesDue === 1 ? "is" : "are"} due soon
+            </Link>
+          )}
+          {dashboard.warrantiesDue > 0 && dashboard.lowStock > 0 && " · "}
+          {dashboard.lowStock > 0 && (
+            <Link href="/os/inventory" className="underline">
+              {dashboard.lowStock} inventory {dashboard.lowStock === 1 ? "item is" : "items are"} low
+            </Link>
+          )}
+        </p>
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -235,9 +271,14 @@ export function OpsWorkspace() {
               ))}
             </select>
             <Input value={payAmount} onChange={(e) => setPayAmount(e.target.value)} placeholder="Amount (USD)" />
-            <Button type="button" onClick={() => void addPayment()}>Record paid</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" onClick={() => void addPayment()}>Record paid</Button>
+              <Button type="button" variant="outline" disabled={invoiceBusy} onClick={() => void sendInvoice()}>
+                {invoiceBusy ? "Opening Stripe…" : "Send Stripe invoice"}
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Stripe Checkout for a job invoice is next. This is the ledger the dashboard uses today — cash, check, or card collected on site.
+              Record cash/check/card collected on site, or send a Stripe Checkout link. Both land on the same ledger.
             </p>
             <Link href="/crm" className="block text-sm underline">Open CRM</Link>
           </CardContent>
