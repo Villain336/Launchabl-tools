@@ -1,17 +1,21 @@
 import type Stripe from "stripe";
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { getUser, getUserByStripeCustomerId, setUserBilling, type SubscriptionStatus } from "@/lib/auth/session";
+import { grantCreditPack } from "@/lib/billing/credits";
+import { isCreditPackId } from "@/lib/billing/plan-display";
 
 /**
  * Pure event → store-update mapping, separated from the route so it's
  * testable without constructing signed webhook payloads.
  *
- * Idempotency is a plain KV existence check (not a Redis SET NX), so it's
- * not airtight under a race between two near-simultaneous retries of the
- * same event — acceptable here because every handled event is an upsert of
- * the same subscription fields, not a one-shot side effect (no email sent,
- * nothing charged twice). A strict compare-and-set would need a store
- * primitive this KeyValueStore doesn't expose yet.
+ * Idempotency at the event level (below) is a plain KV existence check, not
+ * a Redis SET NX, so it's not airtight under a race between two
+ * near-simultaneous retries of the same event — acceptable for subscription
+ * fields, since every handled event there is an upsert, not a one-shot side
+ * effect. Granting credit packs is a one-shot side effect (double-delivery
+ * would double-credit an account), so that path additionally guards on an
+ * atomic `store.setNx` keyed by the checkout session id — see the
+ * `checkout.session.completed` / `mode === "payment"` branch below.
  */
 const PROCESSED_TTL_SECONDS = 3 * 24 * 60 * 60;
 
@@ -65,8 +69,35 @@ export async function applyStripeEvent(event: Stripe.Event, store: KeyValueStore
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.mode !== "subscription" || !session.customer || !session.subscription) return;
+      if (!session.customer) return;
       const customerId = typeof session.customer === "string" ? session.customer : session.customer.id;
+
+      if (session.mode === "payment") {
+        // Credit pack: the price/quantity live in Stripe, but the pack id is
+        // ours (set at checkout creation) — that's what maps back to a
+        // credits amount without another Stripe round trip.
+        const pack = session.metadata?.pack;
+        if (!isCreditPackId(pack)) return;
+        const uid = await resolveUid(customerId, session.metadata?.uid ?? session.client_reference_id, store);
+        if (!uid) {
+          console.warn(`[billing/webhook] credit pack checkout ${session.id} has no matching account (customer ${customerId})`);
+          return;
+        }
+        // Granting credits is a one-shot debit-the-purse action, not an
+        // idempotent upsert like the subscription fields below — the
+        // event-id check above closes most of the double-delivery window
+        // but isn't atomic (see the module docstring), so a real-money path
+        // like this one gets its own atomic guard, keyed by checkout
+        // session rather than event id in case Stripe ever emits more than
+        // one event for the same session.
+        const granted = await store.setNx(`stripe:creditgrant:${session.id}`, uid, PROCESSED_TTL_SECONDS);
+        if (!granted) return;
+        await setUserBilling(uid, { stripeCustomerId: customerId }, store);
+        await grantCreditPack(uid, pack, store);
+        return;
+      }
+
+      if (session.mode !== "subscription" || !session.subscription) return;
       const uid = await resolveUid(customerId, session.metadata?.uid ?? session.client_reference_id, store);
       if (uid) await setUserBilling(uid, { stripeCustomerId: customerId }, store);
       // The subscription's own created/updated event carries status and period end; nothing else to do here.

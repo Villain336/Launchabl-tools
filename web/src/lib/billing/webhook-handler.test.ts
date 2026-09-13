@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type Stripe from "stripe";
 import { createMemoryStore } from "@/lib/ai/store";
 import { getUser, hasProAccess, setUserBilling, upsertUser } from "@/lib/auth/session";
+import { getCreditBalance } from "@/lib/billing/credits";
+import { readCreditStats } from "@/lib/ai/usage";
 import { alreadyProcessed, applyStripeEvent, markProcessed } from "./webhook-handler";
 
 function subscriptionEvent(
@@ -100,12 +102,64 @@ describe("applyStripeEvent", () => {
     await expect(applyStripeEvent(subscriptionEvent("customer.subscription.created", { customer: "cus_unknown", metadata: {} }), store)).resolves.toBeUndefined();
   });
 
-  it("ignores non-subscription checkout sessions", async () => {
+  it("ignores payment-mode checkout sessions that aren't a credit-pack purchase", async () => {
     const store = createMemoryStore();
     const { user } = await upsertUser("d@example.com", null, store);
     await applyStripeEvent(checkoutCompletedEvent({ mode: "payment", metadata: { uid: user.uid } }), store);
     const updated = await getUser(user.uid, store);
     expect(updated?.stripeCustomerId).toBeUndefined();
+  });
+});
+
+describe("applyStripeEvent — credit pack purchases", () => {
+  it("grants the pack's credits and links the customer id on a credit-pack checkout", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("credits-buyer@example.com", null, store);
+    await applyStripeEvent(
+      checkoutCompletedEvent({ id: "cs_credits_1", mode: "payment", subscription: null, metadata: { uid: user.uid, pack: "starter" } }),
+      store,
+    );
+
+    const updated = await getUser(user.uid, store);
+    expect(updated?.stripeCustomerId).toBe("cus_123");
+    expect(await getCreditBalance(user.uid, store)).toBe(20);
+
+    const stats = await readCreditStats(1, store);
+    expect(stats.packsSold).toBe(1);
+    expect(stats.creditsPurchased).toBe(20);
+  });
+
+  it("ignores an unknown pack id", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("credits-unknown@example.com", null, store);
+    await applyStripeEvent(
+      checkoutCompletedEvent({ id: "cs_credits_2", mode: "payment", subscription: null, metadata: { uid: user.uid, pack: "not-a-real-pack" } }),
+      store,
+    );
+    expect(await getCreditBalance(user.uid, store)).toBe(0);
+  });
+
+  it("does nothing (and doesn't throw) for an unmatched customer", async () => {
+    const store = createMemoryStore();
+    await expect(
+      applyStripeEvent(checkoutCompletedEvent({ id: "cs_credits_3", mode: "payment", subscription: null, customer: "cus_unknown", metadata: { pack: "starter" } }), store),
+    ).resolves.toBeUndefined();
+  });
+
+  it("only grants once even if the same checkout session's event is delivered twice", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("credits-dupe@example.com", null, store);
+    const session = { id: "cs_credits_4", mode: "payment" as const, subscription: null, metadata: { uid: user.uid, pack: "starter" } };
+
+    // Two separate events (distinct event ids) for the same checkout session id — the
+    // event-id idempotency check in the route wouldn't catch this, so applyStripeEvent's
+    // own setNx guard (keyed by session id) has to.
+    await applyStripeEvent(checkoutCompletedEvent(session), store);
+    await applyStripeEvent(checkoutCompletedEvent(session), store);
+
+    expect(await getCreditBalance(user.uid, store)).toBe(20);
+    const stats = await readCreditStats(1, store);
+    expect(stats.packsSold).toBe(1);
   });
 });
 
