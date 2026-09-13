@@ -29,6 +29,8 @@ export type NavLink = {
 export const primaryNav: NavLink[] = [
   { label: "Agent", href: "/agent" },
   { label: "Tools", href: "/tools" },
+  { label: "OS", href: "/os" },
+  { label: "Agency", href: "/agency" },
   { label: "Solutions", href: "/solutions" },
   { label: "Case Studies", href: "/case-studies" },
   { label: "Pricing", href: "/pricing" },

@@ -7,6 +7,8 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/agent", priority: 0.9, changeFrequency: "weekly" },
   { path: "/ide", priority: 0.8, changeFrequency: "weekly" },
   { path: "/tools", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/os", priority: 0.8, changeFrequency: "weekly" },
+  { path: "/agency", priority: 0.8, changeFrequency: "weekly" },
   { path: "/pricing", priority: 0.8, changeFrequency: "monthly" },
   { path: "/solutions", priority: 0.7, changeFrequency: "monthly" },
   { path: "/case-studies", priority: 0.6, changeFrequency: "monthly" },
