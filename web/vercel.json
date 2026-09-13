@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/schedules",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/os-automations",
+      "schedule": "15 * * * *"
     }
   ]
 }

@@ -17,10 +17,10 @@ export default async function Home() {
         <Container>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">North Carolina directory</p>
           <h1 className="mt-3 max-w-3xl font-heading text-4xl font-bold tracking-tight sm:text-6xl">
-            Find a local service business. Or run one from here.
+            Need it done? We ping every available crew. Or book the one you already want.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Licensed lawn care, HVAC, cleaning, plumbing, and more — starting with three NC businesses we already work with. Request a quote on their page. Contractors get a customizable storefront and an OS for the jobs that follow.
+            Pick a trade and a city — first crew to claim it sends a quote and you pay in one place. Or open a specific page and take a weekday slot. Starting with three NC businesses we already work with.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/nc/greensboro" size="lg">
@@ -31,6 +31,9 @@ export default async function Home() {
             </LinkButton>
             <LinkButton href="/agency" variant="secondary" size="lg">
               Agency
+            </LinkButton>
+            <LinkButton href="/how-it-works" variant="secondary" size="lg">
+              How it works
             </LinkButton>
           </div>
         </Container>
@@ -79,9 +82,9 @@ export default async function Home() {
 
       <section className="border-t border-border bg-primary py-16 text-primary-foreground">
         <Container className="flex flex-col items-center text-center">
-          <h2 className="font-heading text-3xl font-bold">Contractors: get listed, or let us run it</h2>
+          <h2 className="font-heading text-3xl font-bold">Contractors: the ping and the booking link</h2>
           <p className="mt-3 max-w-2xl text-primary-foreground/80">
-            Self-serve OS for jobs, estimates, and your public page. Agency Launch is {siteConfig.price} to get set up. Managed Growth keeps the marketing going.
+            City-wide jobs hit Telegram or email — first claim owns the quote. Your /b link is still what you text after a call. The OS is where you claim, quote, and get paid. Agency Launch is {siteConfig.price} if you want us to stand that up.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <LinkButton href="/os" variant="secondary" className="bg-background text-foreground hover:bg-background/90">

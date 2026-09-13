@@ -794,10 +794,13 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 - **[x] `ServiceBusinessProfile.engagementType`** (§26) — `"self-serve" | "managed"`, defaults to self-serve, settable only via the platform-admin-gated `setEngagementType`/`POST /api/admin/service-business/engagement`, never by the org itself. `/crm` shows a "Managed by Launchabl" badge and note when set.
 - **[x] `/os` and `/agency` pages** (§26.7) — the two dedicated pages of the target site architecture, linked from primary nav and each other, added to the sitemap. `/os` splits features into live vs. coming-soon honestly (§22.2's lesson applied to a feature list, not just a case study); `/agency` presents Launch + Managed Growth with a real contact path.
 - **[x] `Lead` + monthly allotment** (`src/lib/service-business/lead.ts`) — consumer quote request, period-scoped counter per tier (`listing` 5 / `os` 25 / `os-plus` 80 / `managed` 200). Extra leads in a period are **held**, not downgraded — same quality, not delivered until allotment resets or the tier changes.
-- **[x] `Job`, `Estimate`, `JobPayment`** — convert a lead into a customer+job, line-item estimates, record payment (cash/check/card/other). Stripe Checkout for a job invoice is the next payment slice; the dashboard already totals recorded payments.
+- **[x] `Job`, `Estimate`, `JobPayment`** — convert a lead into a customer+job, line-item estimates, record payment (cash/check/card/other). Stripe Checkout for a homeowner invoice writes the same `JobPayment` row (`metadata.kind = job_invoice`, at-most-once via `stripe:jobpay:{sessionId}`).
 - **[x] Customizable storefronts** (`src/lib/service-business/storefront.ts`, `/os/storefront`) — Shopify-style theme (`classic` / `bold` / `workshop`), accent color, logo, cover, about, services, gallery, hours, CTA, section toggles, live preview. Public URL `/nc/[city]/[trade]/[slug]` plus short `/b/[slug]`.
 - **[x] Marketplace landing pages + directory homepage** — `/`, `/nc`, `/nc/[city]`, `/nc/[city]/[trade]`, founding listings. Directory starts with three businesses the founder already knows: **Atlas Lot Care** (real) plus two founding-partner slots that rename in the storefront editor (no invented reviews).
-- **[x] Revenue dashboard** — `/os/dashboard` (leads, jobs, estimates, allotment, cash collected).
+- **[x] Revenue dashboard** — `/os/dashboard` (leads, jobs, estimates, allotment, cash collected, warranties due, low stock).
+- **[x] Smart job scheduling** — `Job.durationMinutes` / `driveMinutes` / `address`, overlap detection per assignee, `/os/schedule`.
+- **[x] `WarrantyRecord` + `InventoryItem`** — coverage dates and due-soon list; SKU/qty/reorder/cost with consume-that-won't-go-negative. `/os/warranty`, `/os/inventory`.
+- **[x] OS automations + alerts** — org-scoped rules (`lead_followup`, `review_request`, `job_reminder`, `warranty_reminder`) on `/os/automations`, hourly cron `/api/cron/os-automations`. Distinct from `/automations` (SEO report schedules). Telegram Bot API + Resend email; iMessage is not a public API.
 
 ---
 
@@ -858,6 +861,231 @@ This is the part worth being deliberate about rather than running the agency and
 The decided identity: **the brand presents primarily as a directory/marketplace**, not as a horizontal "tools + agency" site. Dedicated pages exist for the other two legs, with calls-to-action for both surfaced on the marketplace landing page itself:
 
 - **Homepage → the marketplace/directory.** Shipped. The homepage is the NC directory, seeded with the three founding listings, with CTAs for the OS and the agency along the page. `/os` and `/agency` stay dedicated pages.
-- **`/os` — shipped this round.** A dedicated page for the self-serve OS, honestly split into what's live (`Customer`, `KnowledgeNote`, org/team accounts) vs. coming soon (scheduling, estimates, automations, warranty, inventory, Telegram/iMessage, payments, dashboard) using the same `ToolStatusBadge` component the tools directory already uses — no overclaiming.
+- **`/os` — shipped this round.** A dedicated page for the self-serve OS, honestly split into what's live vs. still later (AI-drafted estimates as a real agent workflow, iMessage as a Messages provider). Scheduling, automations, warranty, inventory, Telegram/email alerts, payments, and the dashboard are live.
 - **`/agency` — shipped this round.** A dedicated page for Launch + Managed Growth, scoped to the eight launch trades, with a real contact path (not a fake form) and an explicit note that agency clients get OS access included and can self-serve at any time.
 - Both are linked from primary nav now (`OS`, `Agency`) and cross-link each other, ahead of the homepage rebuild — CTAs "along the landing page" become real once the homepage itself is directory-first.
+
+---
+
+## 27. Brutally honest: CRMs, field-service software, and Angi-class directories
+
+§18–§22 asked whether a horizontal AI-tool suite is a company. §23–§24 narrowed to home services. §25–§26 named the actual product: marketplace + OS + agency, NC-first. This section is the competitive picture for *that* product, against the three buyers we actually lose deals to — generic CRMs, service-business / field-service platforms, and consumer directories (Angi’s List / Angi, Thumbtack, Nextdoor). It is not a feature-gap list to close. It is a decision about which gaps are the business and which gaps are a trap.
+
+### 27.1 The one-line verdict
+
+We are not a unicorn today, and we will not become one by matching ServiceTitan’s dispatch board or Angi’s review graph. Those categories already have winners. The only shape that is both **defensible** and **scalable** is the one incumbents do not sell as a bundle: **exclusive demand in a bounded geography + public proof that can only exist because the job ran through the OS + an agency that seeds real supply this week.** Everything we add should reinforce that triangle. Everything that dilutes it (shared leads, invented stars, paid directory placement, a national empty map, FSM feature-parity) is how this becomes a worse Jobber or a smaller Angi.
+
+### 27.2 Three competitor classes, named
+
+These are not the same buyer or the same budget line. Treating “CRM vs Angi vs Jobber” as one comparison is how a pitch slides into mush.
+
+**1. Generic CRMs (HubSpot, Salesforce, generic “pipeline” tools).**
+A CRM is a system of record for *conversations and deals*. A lawn or HVAC company does not have a deal stage problem; they have a who-is-on-the-truck, did-the-job-finish, and where-does-the-next-lead-come-from problem. HubSpot will beat us on email sequences, attribution, and enterprise reporting for as long as it exists. That is fine. We should never pretend the OS is a HubSpot replacement. The honest CRM slice we own is **narrow and vertical**: one customer record tied to leads, jobs, estimates, warranties, and invoices for an NC trade. Switching cost here is the job history, not the marketing automation. If we start adding generic pipeline stages, lead scoring, and email-drip builders, we are competing where HubSpot has twenty years of surface area and we have none.
+
+**2. Service-business / field-service companies (Jobber, Housecall Pro, ServiceTitan, Workiz, FieldPulse, plus AI-native Feldy / FieldCamp / Roooster).**
+This is the real software competitor for the OS leg. They already own scheduling, quoting, invoicing, and (at the high end) dispatch and telephony.
+
+- Jobber’s published 2026 ladder starts at **$39/mo** (Core, 1 user) and runs to **$599/mo** (Plus, 30 users). Housecall Pro starts around **$69–$79/mo** and tops out near **$499+/mo**. ServiceTitan is quote-only and commonly **$300–$500 per technician per month**, plus **$5k–$25k** implementation. A 10-tech shop’s year-one all-in is on the order of **~$3.3k** on Jobber/HCP versus **~$55k–$90k** on ServiceTitan ([Field Service Software Pricing Index (2026) — Bigger Wrench](https://biggerwrench.com/field-service-software-pricing/); [Best FSM Software (April 2026) — Field Service Guide](https://fieldserviceguide.com/best-field-service-management-software/)).
+- Concentration is ugly if the plan is “beat them at FSM.” One 2025 HVAC breakdown puts Housecall Pro, ServiceTitan, and Thryv at **92%** of HVAC shops that already bought FSM software ([HVAC market breakdown — Orbital](https://www.withorbital.com/blog/hvac-market-breakdown-2025/smb-sales-hiring)). Treat that as directional (vendor-adjacent, not an SEC filing) — the point holds either way: the shops that want a full job-book already have one.
+- The AI-native wave named in §23.3 (Feldy, FieldCamp, Roooster) is still **software sold to contractors who already have leads**. None of them run a consumer marketplace. That remains the opening.
+
+**What we lose to them today, honestly:** mobile tech app, live dispatch, native VoIP / call tracking, pricebook depth, QuickBooks-class accounting, financing (Wisetack et al.), and years of review-request muscle. A five-tech shop comparing feature lists will pick Housecall Pro. We should not try to win that spreadsheet.
+
+**What we have that they do not sell:** a consumer-facing directory that can put an exclusive quote on their phone, and an agency that will stand up the listing for them. Jobber does not generate the homeowner. Angi does not run the job. That split is the product.
+
+**3. Directories (Angi / Angie’s List, Thumbtack, Nextdoor, Google Business Profile).**
+This is the real marketplace competitor. Scale is not close:
+
+- Angi reported **$238.2M** Q1 2026 revenue (−3% YoY) and **$248.0M** Q2 (−11% YoY); H1 2026 revenue was **$486.2M**. Q1 Network Revenue fell **56%** after “homeowner choice” in January 2025. The Q1 10-Q says consumers used Angi businesses for about **16 million projects** in the twelve months ended March 31, 2026, with about **105,000** average monthly active U.S. Pros ([Angi Q1 2026 earnings release](https://ir.angi.com/static-files/06de6d6b-b28c-4f42-8963-b69c58c0f817); [Angi Q1 2026 10-Q](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000044/angi-20260331.htm); [Angi Q2 2026 earnings release](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000077/q22026earningsrelease.htm)).
+- Angi still *sells the same homeowner more than once*. The current Angi Pro agreement says a Lead is “frequently… sent to several other Approved Pros,” and Angi Help says a project request is matched with **no more than five** pros ([Angi Pro Agreement](https://angiads.pactsafe.io/versions/69ea6d277b5696271a549a02.pdf); [Angi Opportunities and Leads FAQ](https://intercom.help/angi/en/articles/6221483-opportunities-and-leads-frequently-asked-questions)).
+- That model has a regulatory scar. The FTC charged HomeAdvisor (d/b/a Angi Leads) in March 2022 with deceptive lead marketing — quality, source, match-to-trade/geo, and conversion-rate claims it could not substantiate — and finalized a consent order in April 2023 requiring up to **$7.2M** in redress ([FTC March 2022 complaint announcement](https://www.ftc.gov/news-events/news/press-releases/2022/03/ftc-charges-homeadvisor-inc-cheating-businesses-including-small-businesses-seeking-leads-home); [FTC April 2023 final order](https://www.ftc.gov/news-events/news/press-releases/2023/04/ftc-approves-final-order-against-homeadvisor-inc-deceptively-marketing-its-leads-home-improvement)).
+- Thumbtack is a contact auction: the homeowner is shown a list and the pro pays per contact. Nextdoor is a neighborhood graph plus ads, not a dedicated exclusive-lead marketplace. Google Business Profile is the default “directory” every contractor already has — we will not out-rank Google by pretending to be Google.
+
+**What we lose to them today, honestly:** liquidity (we have three founding listings; they have six figures of pros), review volume, brand, national SEO, and the habit of “just Angi it.” Empty city×trade pages are the product telling the truth. Inventing contractors to fill them would repeat §22.2 at marketplace scale.
+
+**What we can win, if we keep the product law:** one request → one listing. No silent assignment to `listings[0]` on a city page. No paid rank. Reviews that cannot exist without a completed job in the OS. That is the opposite of Angi’s shared-lead + star-theater machine, and it is the thing their 2025 “homeowner choice” retreat accidentally admitted was the wound.
+
+### 27.3 How we compare, without the pitch
+
+| Dimension | HubSpot-class CRM | Jobber / HCP / ServiceTitan | Angi / Thumbtack | Launchabl today |
+|---|---|---|---|---|
+| Who the buyer is | Marketer / sales org | Contractor (software budget) | Contractor (lead budget) + homeowner | Same two sides, one NC account |
+| Generates exclusive demand | No | No | No — shared / auctioned | **Yes, if we keep `Lead.exclusive`** |
+| Runs the job book | Pipeline, not trucks | **Yes, deeply** | Thin or none | Thin OS — enough for the loop, not ST |
+| Public proof of *completed* work | No | Private to the shop | Stars, often unbundled from a job | **OS-verified, or empty** |
+| Paid directory placement | N/A | N/A | Core monetization | **Forbidden** — tiers buy volume, not rank |
+| Agency that seeds supply | Services arm, generic | Rarely | Ads / sales, not ops setup | **Launch $1,200 + Managed $497** (§26) |
+| Geography | Everywhere | Everywhere | National | **NC on purpose** |
+| Scale of proof | Millions of seats | Category winners | $486M H1 / 16M projects | Three listings, one real named client |
+
+Read that table as a warning, not a to-do list. The empty cells on our row are not “sprint backlog.” The filled cells on theirs are why cloning them is a death march.
+
+### 27.4 What is actually missing (ranked by whether it is the business)
+
+**Missing and it *is* the business — do these, in this order:**
+
+1. **Liquidity in a handful of NC city×trade cells.** Greensboro lawn, Raleigh HVAC, Triad parking-lot. Density is the marketplace. SEO pages without contractors are honest and also worthless to a homeowner. The agency exists to fill those cells with real names (§26.3), not to write more landing-page copy.
+2. **Completed-job volume that can be shown.** The review graph will lose to Angi for years. The substitute is a count of jobs that actually closed in the OS, plus reviews that required a `reviewToken` minted only on `completed`. Empty is allowed. Fake 4.8 is not.
+3. **A reason a contractor cannot casually leave.** Not a contractual lock-in — a *public* one: the verified-work badge and job-tied reviews live on the listing because the work ran here. Leave, and that public record does not come with you. That is the switching cost that also helps the homeowner.
+4. **Real case studies past Atlas Lot Care.** §22.2 still applies. Agency clients are the only honest factory for them.
+
+**Missing and it is *not* the business — do not build these to “catch up”:**
+
+- Full dispatch, capacity planning, membership/pricebook, native VoIP, tech GPS. ServiceTitan already won that buyer.
+- Star widgets, imported Google reviews, “seeded” testimonials, or any public rating that is not attached to a completed job.
+- A shared-lead or “broadcast to three pros” mode to juice GMV. That is Angi. It also walks back toward the FTC fact pattern we should be the opposite of.
+- Paid “featured” slots on `/nc/[city]/[trade]`. Tiers already buy allotment (§25.7). Selling rank would make the directory a worse Yellow Pages and kill the verified-work sort.
+- National expansion before a city×trade is actually dense. An empty map of America is vanity SEO.
+- Horizontal CRM features (sequences, lead scoring, territories) aimed at beating HubSpot.
+- Tool #52.
+
+### 27.5 The unicorn / moat / scale test
+
+A unicorn here is not “the AI Jobber.” It is **the default exclusive way an NC homeowner hires a trade, and the default OS that trade runs because that is where the work and the proof already live.** Defensibility and scale have to be the same mechanism, or the moat is a sales team.
+
+**Moat that compounds (keep, reinforce, measure):**
+
+1. **Exclusive lead as a type, not a slogan.** `Lead.exclusive` is always `true`. `submitLead` accepts one `listingSlug`. The marketplace POST returns `{ exclusive: true }`. City×trade pages do not own a quote form. A homeowner can still walk to another storefront and send a *second* request — we are not locking people — but *we* never fan one request to a list. Angi’s contract does. That difference is the brand.
+2. **Reviews require a completed job.** No token, no review. Token is minted only when status becomes `completed`. One review per job. Automation copy carries `/review/{token}`. This is how §22.2 never recurs at directory scale.
+3. **Directory rank = verified work, never money.** `listDirectory` sorts by `proof.completedJobs`, then name. Founding-partner slots are a bootstrap, not a forever #1. This is the opposite of Angi lead-guidance-by-review-count and the opposite of paid placement.
+4. **Agency as the cold-start, not a side hustle.** Launch + Managed Growth turn cash this week into listings and case studies. That is the only scalable answer to “how do you get the first ten real contractors in Greensboro lawn.”
+5. **NC density before geography.** Repeat the city playbook (agency seed → exclusive demand → OS jobs → public proof → SEO) in the next NC city only after the first cell is real. That is how a state becomes a moat instead of a thin national directory.
+
+**Scale that does *not* require a 200-person sales org:**
+
+- Programmatic `/nc/[city]/[trade]` pages already exist; they get valuable when the listings on them are real.
+- Subscriptions buy *volume* of the same exclusive lead, not a worse lead. Held leads are overflow, not junk (§25.3).
+- The OS loop (lead → customer → job → invoice → review) is software. Each completed job is a public asset. That is a flywheel a shared-lead marketplace cannot copy without giving up their take-rate.
+- We will still lose on mobile/dispatch forever for 25-truck shops. Let ServiceTitan have them. The $49 OS is for the shop Angi burned and Jobber overcharged for software that does not bring the phone.
+
+**What would make this *not* a unicorn, even if it grows:**
+
+- Becoming a lead reseller with a thin OS skin.
+- Becoming an FSM clone with a thin directory skin.
+- Raising on “51 tools” or “AI for contractors” after §22 already killed that story.
+
+### 27.6 What this round shipped to make the laws real
+
+- **`Lead.exclusive: true`** on every write; `getLead` re-asserts it so older rows cannot drift. Marketplace API returns `exclusive: true`.
+- **City×trade pages no longer POST a quote to `listings[0]`.** The form lives on the storefront. Copy says so.
+- **`CustomerReview` + `/review/[token]` + `POST /api/marketplace/reviews`.** `submitJobReview` requires a completed job’s token. Jobs mint `reviewToken` only on `completed`.
+- **`listing.proof`** — `{ completedJobs, reviews }` — on every public listing. Empty is rendered as empty. Listing cards show a completed-job badge only when the count is > 0.
+- **Directory sort by completed jobs.** No paid-placement field exists.
+- **`/how-it-works`** — public, indexed, linked from nav, footer, homepage, and city×trade pages. Says we are smaller than Angi and thinner than ServiceTitan on purpose.
+- **Tests** in `moat.test.ts`: exclusive lead, reject review without a completed-job token, complete → token → review → proof counts, verified-work rank beats a founding listing with zero jobs.
+
+### 27.7 What this document will not pretend
+
+We have not beaten Angi, Jobber, or HubSpot at anything that shows up in their board decks. We have a product law and a three-listing directory. The work that makes the law valuable is agency sales into NC trades and completed jobs in the OS — not another strategy section, and not another FSM module.
+
+**Sources:**
+- [Field Service Software Pricing Index (2026) — Bigger Wrench](https://biggerwrench.com/field-service-software-pricing/)
+- [Best Field Service Management Software (April 2026) — Field Service Guide](https://fieldserviceguide.com/best-field-service-management-software/)
+- [HVAC market breakdown 2025 — Orbital](https://www.withorbital.com/blog/hvac-market-breakdown-2025/smb-sales-hiring)
+- [Angi Q1 2026 earnings release (IR PDF)](https://ir.angi.com/static-files/06de6d6b-b28c-4f42-8963-b69c58c0f817) (May 2026)
+- [Angi Q1 2026 Form 10-Q](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000044/angi-20260331.htm)
+- [Angi Q2 2026 earnings release](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000077/q22026earningsrelease.htm) (Aug 2026)
+- [Angi Pro Agreement (PactSafe)](https://angiads.pactsafe.io/versions/69ea6d277b5696271a549a02.pdf)
+- [Opportunities and Leads: Frequently Asked Questions — Angi Help](https://intercom.help/angi/en/articles/6221483-opportunities-and-leads-frequently-asked-questions)
+- [FTC charges HomeAdvisor with cheating businesses seeking leads](https://www.ftc.gov/news-events/news/press-releases/2022/03/ftc-charges-homeadvisor-inc-cheating-businesses-including-small-businesses-seeking-leads-home) (Mar 2022)
+- [FTC approves final order against HomeAdvisor](https://www.ftc.gov/news-events/news/press-releases/2023/04/ftc-approves-final-order-against-homeadvisor-inc-deceptively-marketing-its-leads-home-improvement) (Apr 2023)
+
+---
+
+## 28. They don't care — what locals will actually use
+
+§27 named exclusive leads, job-tied reviews, and verified-work rank as the moat. The founder was right to call that weak. Those are **constraints** (how we refuse to become Angi). They are not a reason a Greensboro homeowner or a two-truck HVAC shop opens this. Nobody hires a plumber because the lead is exclusive. Nobody switches off a notebook because reviews require a `reviewToken`.
+
+This section replaces "what's unique" with "what they already do, and where we can sit in that path."
+
+### 28.1 Homeowners do not adopt platforms
+
+They adopt a person who will show up. The default path is Google, a Facebook group, a neighbor, or the contractor they already have. Housecall Pro's own 2025 homeowner survey (1,000+ U.S. homeowners) is the honest demand signal, and it is not about directories:
+
+- **80%** say online booking influences who they hire; **80%** also say a professional website matters ([Housecall Pro 2025 Customer Service Report](https://www.housecallpro.com/resources/home-service-customer-service-report-trends-statistics/)).
+- Industry write-ups of the same research: **62%** prefer booking home services online vs calling, and **78%** of those want to do it outside business hours; Jobber-cited research: **68%** want estimated pricing before they book ([Home Services Online Self-Service Booking 2026 Guide](https://ustechautomations.com/resources/blog/home-services-online-self-service-booking-how-to-2026)).
+
+Treat vendor-sponsored numbers as directional, not scripture. The behavior is still obvious: a quote form is a hope someone calls back. A Saturday 9:00 slot is a decision. We were selling the hope.
+
+They will never "use Launchabl." They will use **Atlas's booking link** the way they already use a Housecall Pro pay link without knowing the brand. The contractor is the distribution. If we ask the homeowner to join a new directory brand, we lose to Google every time.
+
+### 28.2 Contractors do not adopt philosophy
+
+They adopt something that makes the phone ring or gets them paid faster. A shop already on Jobber/Housecall Pro will not migrate for exclusive NC leads from a three-listing directory — switching cost is weeks of data and training ([FSM migration guides put small-shop cutovers in the 2–6 week range](https://www.fieldproxy.ai/resources/blog/fsm-migration-guide-switch-field-service-software)). Do not waste the next quarter trying to rip Jobber out of a 10-truck shop.
+
+The actual OS buyer is the shop still on **paper, Google Calendar, and a Facebook page**: one owner, 2–8 jobs a day, invoices from a Word doc. They do not want a CRM. They want "the customer picked Saturday and I saw it on my phone." That is also the agency buyer: $1,200 for a page they can text, not for "marketplace supply."
+
+### 28.3 The adoption loop that is not weak
+
+1. **The public page is a calendar, not a brochure.** Weekday slots from the real job book. Starting price if they published one — never invented. A booked slot creates a lead that **cannot be held** (allotment holds are for quote requests; a Saturday on the book is work).
+2. **`/b/{slug}` is what the contractor distributes.** Text after a call. Google Business Profile. Truck QR. Invoice. Neighborhood Facebook post *as the business*, not as Launchabl. This is how HCP/Jobber actually get consumer usage.
+3. **Agency sells that loop, not "join our directory."** Launch = booking page live on Google + the OS behind it. Managed Growth = keep the page fed. Atlas Lot Care should be the first real send of the booking link to existing customers — one named client, no invented case study.
+4. **SEO pages exist so the booking page is findable**, not so we can lecture about Angi. `/nc/greensboro/lawn-care` should say "pick a time," not "we don't sell you five ways."
+
+Exclusive delivery and job-tied reviews stay. They are how we don't rot. They are not the homepage.
+
+### 28.4 What this round shipped
+
+- Public weekday booking against the real calendar (`booking.ts`, `/api/marketplace/bookings`). Overlaps and a slot lock prevent double-booking.
+- Storefronts show **next opening** and **starting price** when those exist; empty stays empty.
+- Booked slots always deliver (`mustDeliver`) — we do not tell a homeowner they're booked and then hold the lead.
+- `/`, `/os`, `/agency`, `/how-it-works`, and city×trade copy lead with the booking loop.
+
+### 28.5 Still missing, and it is not more software
+
+- Atlas (and the next two founding partners) actually texting `/b/{slug}` to real customers.
+- A starting price on services that have one — the contractor types it; we do not invent "$45 mows."
+- Google Business Profile and Facebook as the place the link lives. That is agency labor, not a feature.
+- SMS to the homeowner ("you're on the book Saturday 9am"). Email/Telegram to the shop exists; the customer confirmation is still thin.
+- We will still lose after-hours emergency calls to whoever answers the phone. Booking is for scheduled work. Say that out loud.
+
+**Sources:**
+- [Housecall Pro 2025 Home Service Customer Service Report](https://www.housecallpro.com/resources/home-service-customer-service-report-trends-statistics/)
+- [Housecall Pro 2025 report PDF](https://www.housecallpro.com/wp-content/uploads/2025/12/120425-Customer-Service-Report.pdf)
+- [Home Services Online Self-Service Booking: 2026 Guide](https://ustechautomations.com/resources/blog/home-services-online-self-service-booking-how-to-2026)
+- [Online Booking: What the Data Says — Runchey](https://www.runcheywebsites.com/blog/online-booking-for-contractors)
+- [FSM Migration Guide — FieldProxy](https://www.fieldproxy.ai/resources/blog/fsm-migration-guide-switch-field-service-software)
+
+---
+
+## 29. DoorDash-style dispatch — ping the trade, first claim owns it
+
+§28 shipped the OpenTable path: pick a specific crew and take a weekday slot. The founder then named the other loop locals already understand from DoorDash / Postmates: pick the **job**, not the vendor. We ping every available member in that city×trade. First one to claim it does the quote and the payment in one place.
+
+That is not Angi. Angi **sells the same contact to several pros**. DoorDash **pings many, first accept owns fulfillment**. After claim the job is exclusive (`exclusiveAfterClaim: true`). We do not charge per ping.
+
+### 29.1 Two consumer paths, both stay
+
+1. **Dispatch (this section).** `/nc/{city}/{trade}` — “get this done.” Open offer, 2-hour window, first claim creates the lead + customer + job on that org. Homeowner stays on `/request/{id}` for quote and Stripe Checkout.
+2. **Direct book (§28).** `/b/{slug}` or the storefront — “I want this crew.” Calendar slot, `mustDeliver`, no race.
+
+A homeowner who already has a name should not be forced through a blast. A homeowner who just needs a Saturday mow should not have to interview three listings.
+
+### 29.2 What “available” means today
+
+`listAvailableCrews` only pings **published, org-backed** listings in that city×trade with `acceptingOffers !== false`. Founding listings (Atlas + the two placeholders) have `orgId: null`. They **cannot be pinged or claim**. That is honest, not a bug: there is no OS inbox to receive the job.
+
+Cold start: a city×trade that only has founding rows can still create an offer. `pingedCount` will be **0**. The request sits until it expires. We will not invent a crew to take it.
+
+### 29.3 Phone notifications, said honestly
+
+Contractors asked for the ping on their phone and the full quote + transaction in one place.
+
+- **One place** is shipped: claim → dollar quote → homeowner pays the same request URL.
+- **Phone** today is Telegram and email (`sendOrgAlert`). iMessage is not a public API. Carrier SMS (Twilio) is not built. Do not put “we text every contractor’s cell” on the homepage until that exists. `/os/offers` is the inbox either way.
+
+### 29.4 What this round shipped
+
+- `offer.ts`: open → claimed → quoted → paid, 2-hour FCFS window, `setNx` claim lock.
+- Public `POST /api/marketplace/offers`, `/request/{id}`, city×trade `DispatchForm`.
+- Contractor `/os/offers` (claim + quote) and storefront `acceptingOffers`.
+- Stripe Checkout on the offer; webhook `metadata.offerId` marks it paid.
+- Tests: two Raleigh plumbing orgs both pinged; first claim wins; founding-only city pings 0; expired cannot claim.
+
+### 29.5 Still missing
+
+- SMS to the contractor’s cell. Telegram/email is what we can actually send.
+- Founding partners claiming dispatch jobs — they need an org + published storefront first.
+- After-hours emergency. A 2-hour board is for scheduled work, same limit as booking.
+- We will still lose to whoever answers the phone on a burst pipe. Say that out loud.
+

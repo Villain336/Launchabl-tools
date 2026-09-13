@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { OsSubnav } from "@/components/service-business/os-subnav";
 import { StorefrontEditor } from "@/components/marketplace/storefront-editor";
 
 export const metadata: Metadata = {
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default function StorefrontEditorPage() {
   return (
     <Container className="py-12 sm:py-16">
+      <OsSubnav current="/os/storefront" />
       <SectionHeading
         eyebrow="OS"
         title="Customize the public page"

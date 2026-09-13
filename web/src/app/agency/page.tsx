@@ -7,7 +7,7 @@ import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { siteConfig } from "@/lib/site-config";
 
 const title = "Agency";
-const description = "Done-for-you setup and ongoing marketing for NC home & local-service businesses — brand, marketplace profile, local SEO, and growth, handled by a real team.";
+const description = "We stand up a booking page locals will actually use — on Google, on your truck, in a text — and keep the jobs coming."
 
 export const metadata: Metadata = {
   title,
@@ -24,7 +24,7 @@ const packages = [
     summary: "We build your brand, site, and marketplace profile, and lay the local SEO foundation — done once, built to last.",
     deliverables: [
       "Brand & logo (if you need one)",
-      "A real website, hosted",
+      "A real website with weekday booking on the live calendar",
       "Your marketplace profile, live and search-indexed",
       "Local SEO & Google Business Profile foundation — schema, service-area pages, listings",
     ],
@@ -47,8 +47,8 @@ export default function AgencyPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="Agency"
-        title={`Don't have time to run it yourself? We will.`}
-        description="For NC lawn care, HVAC, cleaning, pressure washing, parking-lot & paving, plumbing, electrical, and painting businesses — a real team, using the same platform, does the setup and the ongoing marketing work for you."
+        title="We put a booking link where your customers already are"
+        description="Google, Facebook, the truck, the invoice. Locals will not download our app. They will tap your link. Launch builds that page. Managed Growth keeps it fed."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">

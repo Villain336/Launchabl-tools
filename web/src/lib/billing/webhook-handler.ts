@@ -4,6 +4,8 @@ import { getUser, getUserByStripeCustomerId, setUserBilling, type SubscriptionSt
 import { grantCreditPack } from "@/lib/billing/credits";
 import { recordLedgerEntry } from "@/lib/billing/ledger";
 import { isCreditPackId } from "@/lib/billing/plan-display";
+import { getJob } from "@/lib/service-business/job";
+import { recordPayment } from "@/lib/service-business/payment";
 
 /**
  * Pure event → store-update mapping, separated from the route so it's
@@ -83,10 +85,56 @@ async function applySubscription(subscription: Stripe.Subscription, eventId: str
   });
 }
 
+async function applyJobInvoicePayment(session: Stripe.Checkout.Session, eventId: string, store: KeyValueStore): Promise<void> {
+  const orgId = session.metadata?.orgId;
+  const jobId = session.metadata?.jobId;
+  const uid = session.metadata?.uid;
+  const amountCents = Number(session.metadata?.amountCents) || session.amount_total || 0;
+  if (!orgId || !jobId || !uid || amountCents <= 0) {
+    console.warn(`[billing/webhook] job invoice checkout ${session.id} is missing org/job/uid/amount`);
+    return;
+  }
+  if (!(await getJob(orgId, jobId, store))) {
+    console.warn(`[billing/webhook] job invoice checkout ${session.id} references missing job ${jobId}`);
+    return;
+  }
+  const claimed = await store.setNx(`stripe:jobpay:${session.id}`, jobId, PROCESSED_TTL_SECONDS);
+  if (!claimed) return;
+  const payment = await recordPayment(
+    orgId,
+    uid,
+    { jobId, amountCents, method: "card", status: "paid", note: `Stripe invoice ${session.id}`, stripeSessionId: session.id },
+    store,
+  );
+  if ("error" in payment) {
+    console.warn(`[billing/webhook] job invoice ${session.id} did not record: ${payment.error}`);
+    return;
+  }
+  await recordLedgerEntry({
+    stripeEventId: eventId,
+    uid,
+    kind: "job_invoice_paid",
+    amountCents,
+    currency: session.currency ?? "usd",
+    status: "paid",
+    raw: { sessionId: session.id, orgId, jobId, paymentId: payment.id },
+  });
+  if (session.metadata?.offerId) {
+    const { markOfferPaid } = await import("@/lib/service-business/offer");
+    await markOfferPaid(session.metadata.offerId, store);
+  }
+}
+
 export async function applyStripeEvent(event: Stripe.Event, store: KeyValueStore = getStore()): Promise<void> {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      if (session.mode === "payment" && session.metadata?.kind === "job_invoice") {
+        await applyJobInvoicePayment(session, event.id, store);
+        return;
+      }
+
       if (!session.customer) return;
       const customerId = typeof session.customer === "string" ? session.customer : session.customer.id;
 
