@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const packages = [
   {
     name: "Launch",
-    tagline: "One-time setup fee",
+    tagline: "$1,200 one-time",
     summary: "We build your brand, site, and marketplace profile, and lay the local SEO foundation — done once, built to last.",
     deliverables: [
       "Brand & logo (if you need one)",
@@ -31,7 +31,7 @@ const packages = [
   },
   {
     name: "Managed Growth",
-    tagline: "Monthly retainer",
+    tagline: "$497 / month",
     summary: "We keep running your local SEO, content, and reviews every month, so your marketplace profile and rankings keep improving without you touching a tool.",
     deliverables: [
       "Ongoing local SEO & Google Business Profile management",
@@ -74,7 +74,7 @@ export default function AgencyPage() {
       </div>
 
       <p className="mt-8 text-sm text-muted-foreground">
-        Pricing is set per business based on trade and service area — reach out below for a quote. Every managed client also gets a{" "}
+        Launch is $1,200. Managed Growth starts at $497/month. Multi-location or unusual trades get a custom quote. Every managed client also gets a{" "}
         <a href="/os" className="underline">
           self-serve OS
         </a>{" "}

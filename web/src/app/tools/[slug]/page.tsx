@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { ToolPageLayout } from "@/components/tools/tool-page-layout";
 import { getToolBySlug, siteConfig, tools, type Tool } from "@/lib/site-config";
+import { toolCatalog } from "@/lib/marketplace/catalog";
 import { MetadataRemover } from "@/components/tools/metadata-remover";
 import { ImageConverter } from "@/components/tools/image-converter";
 import { WatermarkGenerator } from "@/components/tools/watermark-generator";
@@ -38,7 +39,7 @@ export async function generateMetadata({
     alternates: { canonical: path },
     openGraph: { type: "website", url: path, title, description: tool.shortDescription },
     twitter: { card: "summary_large_image", title, description: tool.shortDescription },
-    robots: tool.status === "coming-soon" ? { index: false, follow: true } : undefined,
+    robots: tool.status === "coming-soon" || toolCatalog(tool.slug) !== "public" ? { index: false, follow: true } : undefined,
   };
 }
 

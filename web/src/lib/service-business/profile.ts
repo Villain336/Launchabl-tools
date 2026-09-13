@@ -13,6 +13,7 @@ import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { getUser, type OrgRole } from "@/lib/auth/session";
 import { getOrg } from "@/lib/orgs/org";
 import { logAuditEvent } from "@/lib/audit/log";
+import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
  * Launch trade taxonomy for the NC marketplace + OS (§25.7, decided) —
@@ -76,6 +77,8 @@ export type ServiceBusinessProfile = {
    * eligible for cross-account reuse.
    */
   allowKnowledgeSharing: boolean;
+  /** Marketplace lead-volume tier (§25.7 Q1). Defaults from engagement type when missing on older records. */
+  leadTier: LeadTierId;
   createdAt: string;
   updatedAt: string;
 };
@@ -91,6 +94,7 @@ export type ServiceBusinessProfileInput = {
   gbpUrl?: string | null;
   websiteUrl?: string | null;
   allowKnowledgeSharing?: boolean;
+  leadTier?: LeadTierId;
 };
 
 export const PROFILE_LIMITS = { serviceArea: 20, addressMax: 200, phoneMax: 40, slugMax: 80 } as const;
@@ -100,6 +104,14 @@ export type ProfileError = { error: string };
 
 const profileKey = (orgId: string) => `svcprofile:${orgId}`;
 const slugIndexKey = (slug: string) => `svcprofile:slug:${slug}`;
+const allProfilesKey = () => "svcprofile:all";
+
+export function normaliseProfile(raw: ServiceBusinessProfile): ServiceBusinessProfile {
+  return {
+    ...raw,
+    leadTier: isLeadTierId(raw.leadTier) ? raw.leadTier : raw.engagementType === "managed" ? "managed" : "listing",
+  };
+}
 
 export const isSlug = (value: string) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value) && value.length >= 3 && value.length <= PROFILE_LIMITS.slugMax;
 
@@ -153,7 +165,18 @@ async function requireOrgRole(orgId: string, actingUid: string, allowedRoles: Or
 
 export async function getServiceBusinessProfile(orgId: string, store: KeyValueStore = getStore()): Promise<ServiceBusinessProfile | null> {
   const raw = await store.get(profileKey(orgId));
-  return raw ? (JSON.parse(raw) as ServiceBusinessProfile) : null;
+  return raw ? normaliseProfile(JSON.parse(raw) as ServiceBusinessProfile) : null;
+}
+
+export async function listServiceBusinessProfiles(store: KeyValueStore = getStore()): Promise<ServiceBusinessProfile[]> {
+  const ids = await store.smembers(allProfilesKey());
+  const profiles: ServiceBusinessProfile[] = [];
+  for (const orgId of ids) {
+    const profile = await getServiceBusinessProfile(orgId, store);
+    if (profile) profiles.push(profile);
+    else await store.srem(allProfilesKey(), orgId);
+  }
+  return profiles.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 async function uniqueSlug(base: string, store: KeyValueStore): Promise<string> {
@@ -197,11 +220,13 @@ export async function createServiceBusinessProfile(
     websiteUrl: cleanUrl(input.websiteUrl),
     allowKnowledgeSharing: Boolean(input.allowKnowledgeSharing),
     engagementType: "self-serve",
+    leadTier: isLeadTierId(input.leadTier) ? input.leadTier : "listing",
     createdAt: now,
     updatedAt: now,
   };
   await store.set(profileKey(orgId), JSON.stringify(profile), PROFILE_TTL);
   await store.set(slugIndexKey(slug), orgId, PROFILE_TTL);
+  await store.sadd(allProfilesKey(), orgId, PROFILE_TTL);
   await logAuditEvent({ orgId, actorUid: actingUid, action: "svcprofile.created", target: orgId, detail: { slug, trades: profile.trades } }, store);
   return profile;
 }
@@ -229,6 +254,7 @@ export async function updateServiceBusinessProfile(
     gbpUrl: input.gbpUrl !== undefined ? cleanUrl(input.gbpUrl) : existing.gbpUrl,
     websiteUrl: input.websiteUrl !== undefined ? cleanUrl(input.websiteUrl) : existing.websiteUrl,
     allowKnowledgeSharing: input.allowKnowledgeSharing !== undefined ? Boolean(input.allowKnowledgeSharing) : existing.allowKnowledgeSharing,
+    leadTier: input.leadTier !== undefined && isLeadTierId(input.leadTier) ? input.leadTier : existing.leadTier,
     updatedAt: new Date().toISOString(),
   };
   const consentChanged = updated.allowKnowledgeSharing !== existing.allowKnowledgeSharing;
@@ -261,7 +287,12 @@ export async function setEngagementType(
   if (!existing) return { error: "This org hasn't set up a service-business profile yet." };
   if (existing.engagementType === engagementType) return existing;
 
-  const updated: ServiceBusinessProfile = { ...existing, engagementType, updatedAt: new Date().toISOString() };
+  const updated: ServiceBusinessProfile = {
+    ...existing,
+    engagementType,
+    leadTier: engagementType === "managed" ? "managed" : existing.leadTier === "managed" ? "os" : existing.leadTier,
+    updatedAt: new Date().toISOString(),
+  };
   await store.set(profileKey(orgId), JSON.stringify(updated), PROFILE_TTL);
   await logAuditEvent({ orgId, actorUid: actorLabel, action: "svcprofile.engagement_changed", target: orgId, detail: { engagementType } }, store);
   return updated;

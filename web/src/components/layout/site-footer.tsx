@@ -8,15 +8,16 @@ const columns = [
   {
     heading: "Product",
     links: [
+      { label: "Directory", href: "/nc" },
+      { label: "OS", href: "/os" },
+      { label: "Agency", href: "/agency" },
       { label: "Tools", href: "/tools" },
-      { label: "Solutions", href: "/solutions" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Roadmap", href: "/roadmap" },
     ],
   },
   {
     heading: "Popular tools",
-    links: ["qr-code-generator", "meta-tag-generator", "ab-copy-variants", "agent-skill-generator"]
+    links: ["website-audit-report", "local-seo-optimizer", "schema-generator", "page-speed-audit"]
       .map((slug) => tools.find((tool) => tool.slug === slug))
       .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool))
       .map((tool) => ({ label: tool.name, href: `/tools/${tool.slug}` })),
@@ -38,14 +39,13 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-5xl px-6">
         <div className="flex flex-col items-center gap-5 border-b border-border py-12 text-center">
           <h2 className="font-heading text-2xl font-bold tracking-tight text-balance sm:text-3xl">
-            Ready to stop paying a retainer?
+            Get listed in North Carolina
           </h2>
           <p className="max-w-md text-sm text-pretty text-muted-foreground">
-            Start with a free tool. When you&apos;re ready, {siteConfig.price} once unlocks unlimited
-            marketing and design requests.
+            A public storefront, leads from the directory, and an OS for the jobs that follow. Agency Launch is still {siteConfig.price} to get set up.
           </p>
-          <Button render={<Link href="/pricing" />} nativeButton={false} size="lg">
-            Get unlimited
+          <Button render={<Link href="/os" />} nativeButton={false} size="lg">
+            Open the OS
             <ChevronRight data-icon="inline-end" aria-hidden="true" />
           </Button>
         </div>

@@ -1,12 +1,13 @@
 import { ImageResponse } from "next/og";
-import { siteConfig, tools } from "@/lib/site-config";
+import { siteConfig } from "@/lib/site-config";
+import { publicTools } from "@/lib/marketplace/catalog";
 
 export const alt = `${siteConfig.name} — ${siteConfig.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function Image() {
-  const liveTools = tools.filter((t) => t.status === "live").length;
+  const liveTools = publicTools().filter((t) => t.status === "live").length;
   return new ImageResponse(
     (
       <div

@@ -24,16 +24,19 @@ export const metadata: Metadata = {
  */
 const features: { name: string; summary: string; status: "live" | "beta" | "coming-soon" }[] = [
   { name: "Unified customer profiles", summary: "Every customer, their contact info, job history, and notes in one place — not scattered across texts and spreadsheets.", status: "live" },
+  { name: "Customizable storefront", summary: "Your public listing is a theme you control — colors, services, photos, quote form — like Shopify, for a trade.", status: "live" },
+  { name: "Marketplace leads", summary: "Quote requests from your directory page land in the OS and count against your monthly allotment.", status: "live" },
+  { name: "Jobs", summary: "Turn a lead into a job on the book, assigned to someone on the team.", status: "live" },
+  { name: "Digital estimates", summary: "Line-item estimates tied to a customer and job, ready to send.", status: "live" },
+  { name: "Payment collection", summary: "Record what you collected on a job. Stripe Checkout for invoices is next.", status: "live" },
+  { name: "Revenue dashboard", summary: "Leads, open jobs, pipeline, and cash collected this month.", status: "live" },
   { name: "Knowledge notes & AI agents", summary: "Your agent learns from every job and quote it helps with, and remembers it next time.", status: "live" },
   { name: "Staff & team accounts", summary: "Invite your crew with their own sign-in and the right permissions — every change logged.", status: "live" },
   { name: "Smart job scheduling", summary: "A calendar that accounts for drive time, crew availability, and job length.", status: "coming-soon" },
-  { name: "Near-perfect digital estimates", summary: "AI-drafted estimates from a job description, ready for your review before they go out.", status: "coming-soon" },
   { name: "Automations", summary: "Follow-up texts, review requests, and reminders that fire themselves.", status: "coming-soon" },
   { name: "Warranty & maintenance tracking", summary: "Know exactly what's still under warranty and when a maintenance visit is due.", status: "coming-soon" },
   { name: "Inventory management", summary: "What's on hand, what's low, what a job actually used.", status: "coming-soon" },
   { name: "Telegram/iMessage alerts", summary: "Run the business from your phone between jobs, not from a laptop at night.", status: "coming-soon" },
-  { name: "Payment collection", summary: "Send an invoice, get paid, without a separate tool.", status: "coming-soon" },
-  { name: "Revenue dashboard", summary: "What's actually driving revenue this month, at a glance.", status: "coming-soon" },
 ];
 
 export default function OsPage() {
@@ -68,8 +71,11 @@ export default function OsPage() {
           <LinkButton href="/team" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Create your team
           </LinkButton>
-          <LinkButton href="/crm" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
-            Open the CRM
+          <LinkButton href="/os/dashboard" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            Open the dashboard
+          </LinkButton>
+          <LinkButton href="/os/storefront" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            Customize your page
           </LinkButton>
           <LinkButton href="/agency" className="bg-background text-foreground hover:bg-background/90">
             Rather have {siteConfig.name} run it for you?

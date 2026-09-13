@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { clsx } from "clsx";
-import { tools, type ToolStatus } from "@/lib/site-config";
+import { type ToolStatus } from "@/lib/site-config";
+import { publicTools } from "@/lib/marketplace/catalog";
 import { ToolCard } from "@/components/tools/tool-card";
 import { Input } from "@/components/ui/input";
 
@@ -24,7 +25,7 @@ export function ToolsExplorer() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return tools
+    return publicTools()
       .filter((tool) => {
         const matchesStatus = status === "all" || tool.status === status;
         const matchesQuery =
@@ -37,7 +38,7 @@ export function ToolsExplorer() {
   }, [query, status]);
 
   const available = statusFilters.filter(
-    (f) => f.value === "all" || tools.some((tool) => tool.status === f.value),
+    (f) => f.value === "all" || publicTools().some((tool) => tool.status === f.value),
   );
 
   return (
