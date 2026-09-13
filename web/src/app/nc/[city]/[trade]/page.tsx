@@ -7,6 +7,10 @@ import { DispatchForm } from "@/components/marketplace/dispatch-form";
 import { getCity, NC_CITIES, isTradeSlug } from "@/lib/marketplace/cities";
 import { listDirectoryFiltered } from "@/lib/marketplace/listing";
 import { TRADE_LABELS, TRADES, tradeMarketplacePitch } from "@/lib/service-business/profile";
+import { tradeSeasonNote } from "@/lib/service-business/seasonality";
+
+/** Seasonal copy is month-scoped; rebuild or ISR at least daily so January does not advertise Saturday cuts. */
+export const revalidate = 86400;
 
 export function generateStaticParams() {
   return NC_CITIES.flatMap((city) => TRADES.map((trade) => ({ city: city.slug, trade })));
@@ -39,6 +43,7 @@ export default async function TradeCityPage({ params }: { params: Promise<{ city
         title={`${TRADE_LABELS[trade]} in ${record.name}`}
         description={tradeMarketplacePitch(trade, record.name)}
       />
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{tradeSeasonNote(trade)}</p>
       <div className="mt-10 max-w-xl">
         <DispatchForm
           city={record.slug}

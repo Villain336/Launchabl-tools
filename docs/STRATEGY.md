@@ -1171,6 +1171,8 @@ Phase the money so it matches reality:
 
 Do not ship (3) as code until (1) and (2) have real numbers. A take-rate switch with no volume is a scarecrow.
 
+**Official numbers, seasonal calendar, and spend cap are in §35.** `lib/service-business/profit-model.ts` is the code that may not drift from that section.
+
 ### 30.5 What “build properly” means (ordered)
 
 Software that is worth writing, in this order, and nothing else until the previous line has a user:
@@ -1461,4 +1463,109 @@ This is how we absorb drivers the food apps cannot pay, without becoming a food 
 - [Hoffman Parts & Warehouse — Greensboro](https://www.hoffman-hoffman.com/parts-and-warehouse/)
 - [AIR Carolinas parts](https://www.air-carolinas.com/parts)
 - [Mordor — US healthcare last-mile delivery](https://www.mordorintelligence.com/industry-reports/united-states-healthcare-parcel-last-mile-delivery-market)
+
+---
+
+## 35. Official profit model — seasonal requests, seasonal cash, one spend cap
+
+§30 named the legs. §33.5 said lawn dies after Halloween. This section is the **official** model so we do not staff January as if June mows still pay Twilio.
+
+Two books, every month:
+
+| Book | What moves | What we keep |
+|---|---|---|
+| **Requests** (homeowner / shop pings) | Follows Piedmont season. Lawn ~100 in June, ~8 in January. Cleaning stays ~90. HVAC has two membership windows (Mar–May AC, Sep–Nov heat). Pest shifts from outdoor to rodents; it does not freeze. | Almost nothing until density gates. Then **5% of paid dispatch only**. |
+| **Revenue we can live on** | Inverse of how busy the *crew* is. Launch closes when operators have time (Oct–Feb). Managed is flat. OS sticks if the shop has a year-round book. | **Launch $1,200 + Managed $497/mo** is the floor. Forever, including July. |
+
+Do not add those two columns together and call it “marketplace profit.” A dead lawn board in January is not a failed company if three Managed retainers are paying.
+
+### 35.1 Piedmont request calendar (index 100 = that trade’s own peak)
+
+Encoded in `lib/service-business/seasonality.ts`. City×trade pages show the current-month note so we do not advertise Saturday cuts in January.
+
+| Trade | Winter (Dec–Feb) | Shoulder (Mar–Apr, Oct–Nov) | Peak (May–Sep) | What that does to *our* cash |
+|---|---|---|---|---|
+| Lawn | Dormant. Leaf leftover only. GSO first freeze **Oct 31** (§33.5). | First cuts / last cuts + overseed + leaf. | Weekly route. Closest DoorDash habit. | Dispatch GMV exists ~Mar–Nov. **$0 take assumed Dec–Feb.** Sell Launch in the quiet. |
+| Cleaning | Still the modal monthly book. | Spring-clean bump. | Steady. | The winter *request* proof. Year-round OS. |
+| HVAC | Heat repair, not tune-up volume. | **The money:** spring AC plan, fall heat plan ([NC HVAC timing](https://www.airtechnc.com/blog/hvac-maintenance-guide-2026); [Charlotte seasonal guide](https://www.callkodiakhvac.com/learning-center/maintenance/charlotte-hvac-seasonal-tips)). | AC no-cool overflow. Do not staff 2 a.m. as the product. | Fat Launch checks. Two membership campaigns per year. |
+| Pest | Indoor / rodents ([Terminix Triad calendar](https://www.terminix-triad.com/about/nc-pest-calendar/)). Quarterly plans still bill. | Outdoor ramps up. | Mosquito / general pest. | Retainer-shaped. Does not need summer. |
+| Junk | Slow households. | Spring cleanouts. | August college turnovers. | Cash if a PM is on the book. Not a winter consumer engine. |
+| Courier | Shops still move parts. | Flat. | Flat + holiday freight. | Winter *supply* exists. Hunt a shop, not a homepage. |
+| Roadside / tow | Batteries + holiday travel. | Quieter. | Memorial / July 4 / Thanksgiving / Christmas spikes. | World volume ≠ our volume. AAA owns households. |
+| Pressure wash / painting / parking-lot | Off. | Pollen / sealcoat windows. | Exterior season. | Do not put take-rate or ad spend on these in January. |
+
+Cleaning + HVAC + pest are the **year-round request mix**. Lawn is a **seasonal GMV spike**. Courier is a **year-round B2B side door**. Everything else is listed.
+
+### 35.2 Official cash stack (do not reorder)
+
+Code: `lib/service-business/profit-model.ts`. Prices come from `LEAD_TIERS` / `AGENCY_PACKAGES`. If a page and this file disagree, the file is wrong.
+
+**Floor — must cover the month before we talk GMV**
+
+| Line | Price | When it counts |
+|---|---|---|
+| Launch | **$1,200** one-time | Closed this month. Best sold Oct–Feb when crews have time. |
+| Managed Growth | **$497**/month | Every month they stay. Human SEO/reviews. **The winter floor.** |
+
+**Growth — after a board is real**
+
+| Line | Price | Gate |
+|---|---|---|
+| OS | **$49**/mo | Claiming requires `os` or `managed` once **3 crews** are on that city×trade. |
+| OS Plus | **$149**/mo | Same gate, more lead allotment. |
+
+**Bonus — never the plan**
+
+| Line | Price | Gate |
+|---|---|---|
+| Dispatch take | **5%** of the quote | **3 claiming crews** *and* **20 paid dispatch jobs that month** on that board. Stripe ~2.9% is the processor, not our margin. |
+| Calendar booking on `/b/{slug}` | **0%** | Always. That is how we steal the route. |
+| Ping / shared lead | **$0** | Forbidden (§27, §29). |
+
+A $55 mow at 5% is **$2.75** (`dispatchTakeUsd`). Eighty of those is **$220**. Three Managed is **$1,491**. Ten Managed is **$4,970**. The company is the retainer line. The take is a bonus on first dates.
+
+### 35.3 The spend cap (how we stay profitable)
+
+```
+this month's ads + Twilio + founder cash out  ≤  Managed MRR  +  Launch closed this month
+```
+
+`monthlySpendCapUsd({ managedCount, launchesClosedThisMonth })`.
+
+OS MRR and dispatch take are **not** in the cap. January will not have lawn take. A Facebook test that assumes June volume is how directories die.
+
+Worked floors (same numbers as §30.2, now law):
+
+| State | Cash in | Meaning |
+|---|---|---|
+| 0 Managed, 0 Launch | **$0 spend cap** | Do not buy ads. Sell Launch. |
+| 2 Launch, 0 Managed | **$2,400** this month only | One-time. Do not hire as if it repeats. |
+| 3 Managed | **$1,491**/mo | Micro-business. Winter-survivable. |
+| 10 Managed | **$4,970**/mo | A company. Still $0 take-rate required. |
+| 3 Managed + 20 paid $55 mows @ 5% | $1,491 + $55 | Nice. Not a reason to raise ad spend. |
+
+### 35.4 Seasonal operating rules
+
+1. **Never staff burn on lawn GMV after first freeze.** Dec–Feb dispatch take from lawn is modeled as **$0**.
+2. **Never promise a lawn Launch Saturday volume in October.** Sell leaf, overseed, and March. Churn is a profitability event.
+3. **Prove winter density on cleaning** (and HVAC/pest memberships). That is the board we can show in January.
+4. **Sell Launch in the crew’s off-season.** Lawn operators in November have time. HVAC shops in March/September have a reason. Do not only sell when they are drowning.
+5. **Two year-round trades with claiming crews before we depend on any take-rate.** Lawn alone is a seasonal business we do not own yet.
+6. **Do not ship the 5% switch** until a real month has 20 paid dispatch jobs. A take-rate with no volume is a scarecrow (§30.4).
+7. **Tools Pro / credit packs** remain a separate, small line. They do not fund Twilio for Greensboro lawn.
+
+### 35.5 What this round shipped
+
+- `seasonality.ts` — Piedmont request indexes + current-month note on `/nc/[city]/[trade]`.
+- `profit-model.ts` — prices, gates, spend cap, winter floor. Tests refuse take-rate before 3 crews / 20 jobs, and refuse a spend cap on hope.
+
+If we want to change a price, change `pricing.ts` and this section in the same commit.
+
+**Sources:**
+- [NC State Extension — freeze dates (KGSO Oct 31)](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)
+- [NC State Extension — tall fescue calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [Air Tech NC — HVAC service timing 2026](https://www.airtechnc.com/blog/hvac-maintenance-guide-2026)
+- [Kodiak — Charlotte HVAC seasonal guide](https://www.callkodiakhvac.com/learning-center/maintenance/charlotte-hvac-seasonal-tips)
+- [Terminix Triad — NC pest calendar](https://www.terminix-triad.com/about/nc-pest-calendar/)
+- [GreenPal vendor handbook (5% + Stripe)](https://www.yourgreenpal.com/vendor-handbook/getting-started-and-completing-work)
 
