@@ -18,15 +18,20 @@ import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 /**
  * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31–§34) —
  * the original five (§24) plus plumbing, electrical, painting, junk-removal
- * (§31), roadside + towing (§32), pest-control (§33), and courier / cargo-van
- * (§34). Keep roadside, towing, and courier separate: a jump pack is not a
- * wrecker, and a cargo van is not a burrito bag.
+ * (§31), roadside + towing (§32), pest-control (§33), courier / cargo-van
+ * (§34), and the first three no-platform asks (§37): appliance repair,
+ * mobile detailing, and gutters/windows/dryer vents. Keep roadside, towing,
+ * and courier separate: a jump pack is not a wrecker, and a cargo van is
+ * not a burrito bag.
  */
 export const TRADES = [
   "lawn-care",
   "hvac",
   "cleaning",
   "pest-control",
+  "appliance-repair",
+  "mobile-detailing",
+  "gutter-cleaning",
   "junk-removal",
   "courier",
   "roadside-assistance",
@@ -44,6 +49,9 @@ export const TRADE_LABELS: Record<Trade, string> = {
   hvac: "HVAC",
   cleaning: "Cleaning",
   "pest-control": "Pest control",
+  "appliance-repair": "Appliance repair",
+  "mobile-detailing": "Mobile detailing & wash",
+  "gutter-cleaning": "Gutters, windows & dryer vents",
   "junk-removal": "Junk removal & haul-away",
   courier: "Courier & cargo van",
   "roadside-assistance": "Roadside assistance",
@@ -69,6 +77,9 @@ export const TRADE_REPEAT = {
   cleaning: "weekly",
   hvac: "membership",
   "pest-control": "membership",
+  "appliance-repair": "on-demand-repeat",
+  "mobile-detailing": "weekly",
+  "gutter-cleaning": "seasonal",
   "junk-removal": "on-demand-repeat",
   courier: "dispatch-native",
   "roadside-assistance": "dispatch-native",
@@ -89,8 +100,20 @@ export const TRADE_REPEAT = {
 export const REPEAT_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
-/** Public chips: remaining-season lineup first, then junk and vans, then trucks, painting last. */
-export const FEATURED_NAV_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care", "junk-removal", "courier", "roadside-assistance", "towing"] as const;
+/** Public chips: remaining-season lineup, then the first three no-platform asks (§37), then junk and trucks. */
+export const FEATURED_NAV_TRADES = [
+  "cleaning",
+  "hvac",
+  "pest-control",
+  "lawn-care",
+  "appliance-repair",
+  "mobile-detailing",
+  "gutter-cleaning",
+  "junk-removal",
+  "courier",
+  "roadside-assistance",
+  "towing",
+] as const;
 
 export function tradesForPublicNav(): Trade[] {
   const lead = new Set<string>(FEATURED_NAV_TRADES);
@@ -103,14 +126,23 @@ export const isTrade = (value: unknown): value is Trade => typeof value === "str
 export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
   switch (TRADE_REPEAT[trade]) {
     case "weekly":
+      if (trade === "mobile-detailing") {
+        return `Need the car washed at the house? We ping available vans in ${cityName}. First claim owns the slot. The money is the monthly wash plan — book the next one on their page.`;
+      }
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. The money for that crew is the weekly route — book them next time on their page.`;
     case "membership":
       return trade === "pest-control"
         ? `Need it done now? We ping available crews in ${cityName}; first claim owns the job. Pest shops live on the quarterly plan, not one wasp nest — book the route on their calendar.`
         : `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
     case "on-demand-repeat":
+      if (trade === "appliance-repair") {
+        return `Washer dead, fridge warm — we ping every available tech in ${cityName}. First claim owns the job. There is no DoorDash for this. Book the one who showed up the next time something else dies.`;
+      }
       return `Ping every available crew in ${cityName}. First claim owns the haul. If you run properties, put the crew you liked on the book so the next turnover is not another blast.`;
     case "seasonal":
+      if (trade === "gutter-cleaning") {
+        return `Gutters, windows, dryer vents — we ping available crews in ${cityName}. First claim owns the job. Leaf season is the rush; book the spring pass on their calendar.`;
+      }
       return `Tell us the job. We ping every available crew in ${cityName}. First claim quotes and gets paid here. Or pick a specific crew and book their calendar.`;
     case "project":
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar.`;

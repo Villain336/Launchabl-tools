@@ -1698,13 +1698,13 @@ Ranked by (frequent ask) × (no platform) × (we can Build / book / later ping):
 
 - **Marketplace density** is still cleaning → HVAC → pest → lawn (§33.5). A liquid Greensboro cleaning board is how we survive January.
 - **Agency outbound** adds appliance, detailing, and hood/grease-trap operators **now**. They have year-round or restaurant-night work. They do not need Saturday mows to pay $1,200 / $99 / $497.
-- **Do not add** `appliance-repair`, `mobile-detailing`, `gutter-cleaning`, `window-cleaning`, `kitchen-hood`, `small-engine`, or `generator` to `TRADES` this round. Empty city pages are still a lie (§30.3, §36.3). They live in `AGENCY_VERTICAL_GROUPS` (`open-demand`).
-- If an appliance or detailing crew writes the check, they get Build + `/b` + Network when they want pings. The public chip appears when a real org is published — not before.
+- The founder asked to **put the first three on the public list.** `appliance-repair`, `mobile-detailing`, and `gutter-cleaning` (gutters + windows + dryer vents) are in `TRADES` and public nav. Pressure wash was already listed. Empty boards stay honest — no invented crews (§22.2).
+- Still **not** in `TRADES`: `window-cleaning` as its own slug (bundled under gutter-cleaning), `kitchen-hood`, `small-engine`, `generator`, dentist / medspa / vet.
 
 ### 37.6 What this round shipped
 
 - Third agency vertical group: **No-platform demand**.
-- Tests: the group exists; those slugs are not in `TRADES`.
+- First three no-platform asks are public trades. Hoods and small engines stay agency-only.
 
 **Sources:**
 - [LeadHall — service demand 13 Aug 2026](https://leadhall.com/blog/service-demand-report-2026-08-13)

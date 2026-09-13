@@ -29,4 +29,11 @@ describe("Piedmont seasonality", () => {
     expect(isOffSeason("courier", 1)).toBe(false);
     expect(isOffSeason("painting", 1)).toBe(true);
   });
+
+  it("keeps appliance repair year-round and treats January gutters as off-peak", () => {
+    expect(isOffSeason("appliance-repair", 1)).toBe(false);
+    expect(tradeSeasonNote("appliance-repair", 1)).toMatch(/year-round/i);
+    expect(isOffSeason("gutter-cleaning", 1)).toBe(true);
+    expect(requestIndex("gutter-cleaning", 10)).toBe(100);
+  });
 });

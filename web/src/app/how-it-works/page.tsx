@@ -52,7 +52,7 @@ export default function HowItWorksPage() {
         <article className="rounded-3xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold">Build and run — Network is a seat, not a ping fee</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            We build the business ($1,200) and can run the front door ($497/month). Staying on the DoorDash board is $99/month — or included in Run. Free listings cannot claim. We hunt trades people still request on Nextdoor that have no established platform — appliance repair, mobile detailing, kitchen hoods — without inventing empty city pages. Medspas, dentists, and vets get booking and reviews. We do not replace their clinical software.
+            We build the business ($1,200) and can run the front door ($497/month). Staying on the DoorDash board is $99/month — or included in Run. Free listings cannot claim. Appliance repair, mobile detailing, and gutters/windows are on the directory. Empty boards stay empty — we do not invent crews. Kitchen hoods stay agency-first. Medspas, dentists, and vets get booking and reviews. We do not replace their clinical software.
           </p>
         </article>
       </div>

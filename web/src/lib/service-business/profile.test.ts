@@ -14,17 +14,23 @@ async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
 describe("service business profile", () => {
   it("leads public nav with the remaining-season lineup (cleaning, HVAC, pest, lawn), then junk and trucks (§33.5)", () => {
     expect(TRADES).toContain("pest-control");
+    expect(TRADES).toContain("appliance-repair");
+    expect(TRADES).toContain("mobile-detailing");
+    expect(TRADES).toContain("gutter-cleaning");
     expect(TRADES).toContain("junk-removal");
     expect(TRADES).toContain("courier");
     expect(TRADES).toContain("roadside-assistance");
     expect(TRADES).toContain("towing");
     expect(TRADES.indexOf("roadside-assistance")).not.toBe(TRADES.indexOf("towing"));
     expect(tradesForPublicNav()[0]).toBe("cleaning");
-    expect(tradesForPublicNav().slice(0, 8)).toEqual([
+    expect(tradesForPublicNav().slice(0, 11)).toEqual([
       "cleaning",
       "hvac",
       "pest-control",
       "lawn-care",
+      "appliance-repair",
+      "mobile-detailing",
+      "gutter-cleaning",
       "junk-removal",
       "courier",
       "roadside-assistance",
@@ -33,6 +39,9 @@ describe("service business profile", () => {
     expect(tradesForPublicNav().at(-1)).toBe("painting");
     expect(tradeMarketplacePitch("hvac", "Raleigh")).toMatch(/maintenance plan/i);
     expect(tradeMarketplacePitch("pest-control", "Greensboro")).toMatch(/quarterly plan/i);
+    expect(tradeMarketplacePitch("appliance-repair", "Greensboro")).toMatch(/no DoorDash/i);
+    expect(tradeMarketplacePitch("mobile-detailing", "Raleigh")).toMatch(/wash plan/i);
+    expect(tradeMarketplacePitch("gutter-cleaning", "Greensboro")).toMatch(/dryer vents/i);
     expect(tradeMarketplacePitch("junk-removal", "Greensboro")).toMatch(/properties/i);
     expect(tradeMarketplacePitch("courier", "Greensboro")).toMatch(/parts counters/i);
     expect(tradeMarketplacePitch("roadside-assistance", "Charlotte")).toMatch(/rarely/i);

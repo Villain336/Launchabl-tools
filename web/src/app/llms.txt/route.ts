@@ -15,7 +15,7 @@ export function GET() {
     "",
     `> ${siteConfig.description}`,
     "",
-    "Launchabl is a build-and-run agency with a client and customer network. Home services use DoorDash-style dispatch. We also hunt frequent asks that have no established platform (appliance repair, mobile detailing, kitchen hoods) — those are agency-first, not empty city pages. Medspas, dentists, and vets get booking and local demand, not a clinical chart. Build is $1,200. Network is $99/month. Run is $497/month and includes Network.",
+    "Launchabl is a build-and-run agency with a client and customer network. Home services use DoorDash-style dispatch. Appliance repair, mobile detailing, and gutters/windows are on the NC directory (empty boards stay empty). Kitchen hoods stay agency-first. Medspas, dentists, and vets get booking and local demand, not a clinical chart. Build is $1,200. Network is $99/month. Run is $497/month and includes Network.",
     "",
     "## Directory",
     "",

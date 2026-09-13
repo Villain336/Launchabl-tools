@@ -99,7 +99,7 @@ export default function AgencyPage() {
 
       <p className="mt-8 text-sm text-muted-foreground">
         Build is ${AGENCY_PACKAGES.launch.price.toLocaleString()}. Network is ${AGENCY_PACKAGES.network.price}/month to stay on the board — we do not charge per ping. Run is $
-        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. Appliance, detailing, and hood work is agency-first until a real crew is live — we do not invent empty city pages. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
+        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. Appliance, detailing, and gutters are on the directory — empty boards stay empty until a real crew sits. Kitchen hoods stay agency-first. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
       </p>
 
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">

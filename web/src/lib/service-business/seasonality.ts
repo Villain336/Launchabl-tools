@@ -24,6 +24,9 @@ export const REQUEST_INDEX: Record<Trade, readonly [number, number, number, numb
   cleaning: [90, 90, 95, 90, 88, 85, 85, 90, 90, 90, 88, 75],
   hvac: [70, 68, 90, 95, 100, 100, 100, 95, 85, 95, 95, 75],
   "pest-control": [75, 72, 80, 90, 95, 100, 100, 95, 90, 90, 85, 78],
+  "appliance-repair": [85, 80, 75, 70, 70, 75, 80, 75, 70, 75, 80, 88],
+  "mobile-detailing": [40, 45, 80, 95, 100, 95, 90, 85, 80, 70, 45, 35],
+  "gutter-cleaning": [20, 25, 70, 85, 50, 30, 25, 30, 80, 100, 70, 25],
   "junk-removal": [55, 55, 70, 85, 75, 70, 70, 90, 80, 70, 60, 50],
   courier: [80, 80, 82, 82, 82, 80, 78, 80, 82, 85, 90, 88],
   "roadside-assistance": [70, 65, 55, 55, 80, 60, 85, 60, 55, 55, 80, 85],
@@ -63,6 +66,16 @@ export function tradeSeasonNote(trade: Trade, month: Month = calendarMonth()): s
   }
   if (trade === "pest-control" && (month >= 10 || month <= 2)) {
     return "Outdoor routes slow; rodents move inside. Quarterly plans do not freeze.";
+  }
+  if (trade === "appliance-repair") {
+    return "Washers and fridges die year-round. This board does not freeze with the grass.";
+  }
+  if (trade === "mobile-detailing" && (month >= 11 || month <= 2)) {
+    return "Wash memberships slow in the Piedmont winter. The page is for the spring book, not this week's van.";
+  }
+  if (trade === "gutter-cleaning") {
+    if (month === 10 || month === 11) return "Leaf season. Gutters and dryer vents are the job; windows if the pollen wait is over.";
+    if (month >= 3 && month <= 4) return "Spring gutter and window pass after pollen. Book it; do not wait for October overflow.";
   }
   if (trade === "courier") {
     return "Shops and parts counters, not food bags. Volume holds in winter when lawn does not.";
