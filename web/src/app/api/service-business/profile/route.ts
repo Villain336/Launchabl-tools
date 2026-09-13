@@ -31,6 +31,7 @@ function readInput(body: unknown): ServiceBusinessProfileInput {
     gbpUrl: b.gbpUrl === null || typeof b.gbpUrl === "string" ? (b.gbpUrl as string | null) : undefined,
     websiteUrl: b.websiteUrl === null || typeof b.websiteUrl === "string" ? (b.websiteUrl as string | null) : undefined,
     allowKnowledgeSharing: typeof b.allowKnowledgeSharing === "boolean" ? b.allowKnowledgeSharing : undefined,
+    leadTier: typeof b.leadTier === "string" ? (b.leadTier as ServiceBusinessProfileInput["leadTier"]) : undefined,
   };
 }
 

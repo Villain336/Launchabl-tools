@@ -1,9 +1,9 @@
 export const siteConfig = {
   name: "Launchabl",
   url: "https://launchabl.io",
-  tagline: "Free website audit. Unlimited marketing & design for $1,200. Forever.",
+  tagline: "NC directory for home & local services. OS and agency on the same platform.",
   description:
-    "Launchabl is the marketing platform where the tools are free forever, every plan starts with a free website audit, and the agency is unlimited for life — brand, website, content, and SEO — for a single $1,200 flat fee, no retainers.",
+    "Find licensed lawn care, HVAC, cleaning, plumbing, and more across North Carolina — or run your service business on the Launchabl OS. Agency Launch is $1,200 to get set up; Managed Growth is $497/month.",
   price: "$1,200",
   /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
   priceNumeric: "1200",
@@ -27,12 +27,10 @@ export type NavLink = {
 };
 
 export const primaryNav: NavLink[] = [
-  { label: "Agent", href: "/agent" },
-  { label: "Tools", href: "/tools" },
+  { label: "Directory", href: "/nc" },
   { label: "OS", href: "/os" },
   { label: "Agency", href: "/agency" },
-  { label: "Solutions", href: "/solutions" },
-  { label: "Case Studies", href: "/case-studies" },
+  { label: "Tools", href: "/tools" },
   { label: "Pricing", href: "/pricing" },
   { label: "About", href: "/about" },
 ];

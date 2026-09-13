@@ -18,6 +18,14 @@ export default function TeamPage() {
         <a href="/crm" className="underline">
           manage your customers in the CRM
         </a>
+        ,{" "}
+        <a href="/os/storefront" className="underline">
+          customize your public page
+        </a>
+        , or{" "}
+        <a href="/os/dashboard" className="underline">
+          open the dashboard
+        </a>
         .
       </p>
       <div className="mt-8 max-w-lg">

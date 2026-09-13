@@ -1,10 +1,11 @@
 import { Separator } from "@/components/ui/separator";
-import { tools } from "@/lib/site-config";
+import { publicTools } from "@/lib/marketplace/catalog";
 
 export default function StatsBlock() {
-  const liveCount = tools.filter((t) => t.status === "live").length;
+  const catalog = publicTools();
+  const liveCount = catalog.filter((t) => t.status === "live").length;
   const stats = [
-    { value: `${tools.length}+`, label: "tools in the toolbox" },
+    { value: `${catalog.length}`, label: "public SEO tools" },
     { value: `${liveCount}`, label: "live and ready to use today" },
     { value: "$0", label: "to use any tool, forever" },
     { value: "1", label: "flat price for the unlimited agency" },

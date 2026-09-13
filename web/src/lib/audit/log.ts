@@ -35,7 +35,16 @@ export type AuditAction =
   | "customer.created"
   | "customer.updated"
   | "customer.archived"
-  | "knowledge.note_saved";
+  | "knowledge.note_saved"
+  | "storefront.updated"
+  | "listing.updated"
+  | "lead.created"
+  | "lead.updated"
+  | "job.created"
+  | "job.updated"
+  | "estimate.created"
+  | "estimate.updated"
+  | "payment.recorded";
 
 export type AuditEvent = {
   /** Null/omitted for actions not scoped to an org (e.g. an admin-dashboard view). */

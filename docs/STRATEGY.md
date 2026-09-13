@@ -725,7 +725,7 @@ Two distinct products in one account, not a horizontal tool suite with a vertica
 
 ### 25.2 What happens to the current product — tool-by-tool disposition
 
-The founder asked for tools to be removed or restructured to fit this mission. Proposed disposition for all ~50 current tools (`site-config.ts`), grouped by what happens to each — **flagged for confirmation in this section's open questions, not yet deleted from the codebase**, because acting on a full cut list before the founder confirms it is the kind of unilateral, hard-to-reverse call this document has repeatedly argued against making without sign-off:
+The founder asked for tools to be removed or restructured to fit this mission. Disposition for all ~50 current tools (`site-config.ts`), grouped by what happens to each — **executed**: cut tools leave the public `/tools` explorer, sitemap, and `llms.txt` (`lib/marketplace/catalog.ts`) but the code stays so the agency can still use the bigger suite. Routes remain reachable; retired/OS-only tools are `noindex`.
 
 **Keep public, repositioned as the contractor-acquisition SEO engine** (each already ranks for its own technical-SEO keyword; the funnel becomes "get this fixed for free → see what your listing/site could look like on the OS" instead of "buy the agency plan"): `website-audit-report`, `landing-page-grader`, `competitor-gap-report`, `page-speed-audit`, `broken-link-checker`, `canonical-tag-detector`, `backlink-health-check`, `voice-search-optimizer`, `llm-readability-check`, `security-headers-checker`, `ssl-certificate-checker`, `accessibility-checker`, `dns-email-health`, `compliance-scanner`, `meta-tag-generator`, `sitemap-robots-generator`, `schema-generator`, `local-seo-optimizer`.
 
@@ -782,7 +782,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
 2. **Launch trade categories — decided.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), **plus plumbing, electrical, and painting**, added at this decision point. `TRADES` in `src/lib/service-business/profile.ts` reflects all eight.
-3. **The tool cut list (§25.2) — under review, not yet executed.** The founder asked to see the full itemized list before anything is removed. §25.2's grouping *is* that itemized list (all ~50 current tool slugs, bucketed keep/repurpose/cut) — nothing has been deleted from the codebase pending explicit sign-off on it.
+3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
 ### 25.8 What's scaffolded so far
@@ -793,8 +793,11 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 - **[x] The CRM surface** — `/api/service-business/{profile,customers,customers/[id],knowledge}` routes and a `/crm` page (`components/service-business/crm-manager.tsx`): trades + knowledge-sharing consent, customer list/add/archive, and a knowledge-notes panel (manual save now; the repurposed `markdown-file-generator` chat tool, `lib/ai/tools/documents.ts`, produces the Markdown a contractor then saves here — same "generate in chat, save explicitly" pattern already used for reports/schedules elsewhere in this codebase). Linked from `/team`.
 - **[x] `ServiceBusinessProfile.engagementType`** (§26) — `"self-serve" | "managed"`, defaults to self-serve, settable only via the platform-admin-gated `setEngagementType`/`POST /api/admin/service-business/engagement`, never by the org itself. `/crm` shows a "Managed by Launchabl" badge and note when set.
 - **[x] `/os` and `/agency` pages** (§26.7) — the two dedicated pages of the target site architecture, linked from primary nav and each other, added to the sitemap. `/os` splits features into live vs. coming-soon honestly (§22.2's lesson applied to a feature list, not just a case study); `/agency` presents Launch + Managed Growth with a real contact path.
-- **[ ] `Lead`, `Job`, `Estimate`, the lead-allotment counter, the marketplace landing-page template, and the revenue dashboard** — the rest of Phase 3.0 (§25.6), not yet built.
-- **[ ] The directory/marketplace-first homepage** (§26.7) — deferred until the above exists to show.
+- **[x] `Lead` + monthly allotment** (`src/lib/service-business/lead.ts`) — consumer quote request, period-scoped counter per tier (`listing` 5 / `os` 25 / `os-plus` 80 / `managed` 200). Extra leads in a period are **held**, not downgraded — same quality, not delivered until allotment resets or the tier changes.
+- **[x] `Job`, `Estimate`, `JobPayment`** — convert a lead into a customer+job, line-item estimates, record payment (cash/check/card/other). Stripe Checkout for a job invoice is the next payment slice; the dashboard already totals recorded payments.
+- **[x] Customizable storefronts** (`src/lib/service-business/storefront.ts`, `/os/storefront`) — Shopify-style theme (`classic` / `bold` / `workshop`), accent color, logo, cover, about, services, gallery, hours, CTA, section toggles, live preview. Public URL `/nc/[city]/[trade]/[slug]` plus short `/b/[slug]`.
+- **[x] Marketplace landing pages + directory homepage** — `/`, `/nc`, `/nc/[city]`, `/nc/[city]/[trade]`, founding listings. Directory starts with three businesses the founder already knows: **Atlas Lot Care** (real) plus two founding-partner slots that rename in the storefront editor (no invented reviews).
+- **[x] Revenue dashboard** — `/os/dashboard` (leads, jobs, estimates, allotment, cash collected).
 
 ---
 
@@ -845,7 +848,7 @@ This is the part worth being deliberate about rather than running the agency and
 
 ### 26.6 Founder decisions
 
-1. **Managed-tier structure — decided.** Both: a one-time "Launch" setup fee (the $1,200-lifetime descendant) plus an ongoing "Managed Growth" monthly retainer, as proposed in §26.4.
+1. **Managed-tier structure — decided, prices published.** Launch is **$1,200** one-time (the lifetime-plan descendant). Managed Growth starts at **$497/month**. Multi-location or unusual trades still get a custom quote on top of that floor. OS lead-volume tiers published alongside: listing (free, 5 leads), OS ($49/mo, 25), OS Plus ($149/mo, 80), Managed (200 leads, included in the retainer).
 2. **Who delivers it — decided.** The agency runs like a real agency, not "the self-serve tools operated by an employee instead of the client." It uses a bigger suite of tools and resources than the self-serve OS exposes, delivered by people. The platform's software is explicitly both a revenue engine (subscriptions, retainers) and a lead engine (the free-tools funnel and the marketplace itself feed the agency's own sales pipeline, not only self-serve signups).
 3. **Public positioning — decided, with a specific target structure (§26.7).** Not "rewrite everything now" — a specific site architecture to build toward: the brand presents primarily as the marketplace/directory, with dedicated pages for the OS and the agency, and CTAs for both placed along the marketplace landing page.
 4. **Sourcing — decided.** The next agency clients are deliberately sourced as NC home/local-service contractors in the eight launch trades, specifically to seed the marketplace (§26.3) — not the agency's existing broader clientele.
@@ -854,7 +857,7 @@ This is the part worth being deliberate about rather than running the agency and
 
 The decided identity: **the brand presents primarily as a directory/marketplace**, not as a horizontal "tools + agency" site. Dedicated pages exist for the other two legs, with calls-to-action for both surfaced on the marketplace landing page itself:
 
-- **Homepage → the marketplace/directory.** Deferred, not built yet — it needs real marketplace substance (`Lead`/`Job`/`Estimate`, the `/nc/[city]/[trade]` landing-page template, §25.6 Phase 3.0/3.3) before a directory-first homepage would be showing something real instead of an empty shell. Rebuilding it prematurely would repeat §22.2's mistake at the homepage level instead of the case-studies level.
+- **Homepage → the marketplace/directory.** Shipped. The homepage is the NC directory, seeded with the three founding listings, with CTAs for the OS and the agency along the page. `/os` and `/agency` stay dedicated pages.
 - **`/os` — shipped this round.** A dedicated page for the self-serve OS, honestly split into what's live (`Customer`, `KnowledgeNote`, org/team accounts) vs. coming soon (scheduling, estimates, automations, warranty, inventory, Telegram/iMessage, payments, dashboard) using the same `ToolStatusBadge` component the tools directory already uses — no overclaiming.
 - **`/agency` — shipped this round.** A dedicated page for Launch + Managed Growth, scoped to the eight launch trades, with a real contact path (not a fake form) and an explicit note that agency clients get OS access included and can self-serve at any time.
 - Both are linked from primary nav now (`OS`, `Agency`) and cross-link each other, ahead of the homepage rebuild — CTAs "along the landing page" become real once the homepage itself is directory-first.

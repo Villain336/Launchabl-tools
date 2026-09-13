@@ -6,18 +6,18 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { ToolsExplorer } from "@/components/tools/tools-explorer";
 
 export const metadata: Metadata = {
-  title: "Free Marketing Tools",
+  title: "Free SEO tools for NC service businesses",
   description:
-    "QR codes, meta tags, datasets, agent skills, watermarks, schema markup, brand, domain, and copy tools — free to use — your first run needs no account.",
+    "Website audits, local SEO, schema, speed, and listing checks — free to use. The public toolbox is the SEO engine for the NC contractor directory.",
 };
 
 export default function ToolsPage() {
   return (
     <Container className="py-12 sm:py-16">
       <SectionHeading
-        eyebrow="The toolbox"
-        title="Free tools. Describe what you need, get a real result."
-        description="Your first run needs no account; after that a free email sign-in unlocks unlimited runs. Every tool tells you exactly how your data is handled, and every result is something you can download, copy, or embed straight away."
+        eyebrow="SEO tools"
+        title="Free checks that feed the directory."
+        description="The public toolbox is the acquisition engine for NC contractors — audits, local SEO, schema, speed. Your first run needs no account. Cut utility tools are no longer listed here."
       />
       <div className="mt-8 grid gap-3 sm:grid-cols-2" data-workspaces>
         {WORKSPACES.map((item) => (

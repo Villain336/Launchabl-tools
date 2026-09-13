@@ -6,6 +6,7 @@ import { CreditPacksSection } from "@/components/blocks/credit-packs-section";
 import FeaturesBlock from "@/components/blocks/features-3";
 import ComparisonBlock from "@/components/blocks/comparison-2";
 import FaqsBlock from "@/components/blocks/faqs-1";
+import { MarketplacePricing } from "@/components/blocks/marketplace-pricing";
 
 const title = `Pricing — Free Audit, Then ${siteConfig.price} Unlimited`;
 const description = `Start with a free 20+ point website audit, no account required. When you're ready, ${siteConfig.price} one time unlocks unlimited marketing and design requests for life. No retainer, no monthly fee.`;
@@ -111,6 +112,7 @@ export default function PricingPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd()) }} />
+      <MarketplacePricing />
       <PricingBlock />
       <ToolsProPricing />
       <CreditPacksSection />
