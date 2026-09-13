@@ -5,6 +5,8 @@ import { defaultStorefront, getOrgStorefront, getSeedStorefront, saveSeedStorefr
 import { cleanText, RECORD_TTL } from "@/lib/service-business/shared";
 import { citySlug, getCity, isNcCitySlug, isTradeSlug, matchCitySlug } from "./cities";
 import { FOUNDING_LISTINGS, getFoundingListing, type FoundingListing } from "./founding";
+import { listJobs } from "@/lib/service-business/job";
+import { EMPTY_PROOF, listReviewsForListing, type ListingProof } from "@/lib/service-business/review";
 
 export type FoundingMeta = { name?: string; phone?: string; address?: string };
 
@@ -30,7 +32,15 @@ export type PublicListing = {
   gbpUrl: string | null;
   placeholder: boolean;
   storefront: Storefront;
+  proof: ListingProof;
 };
+
+/** Product law (§27): rank by OS-verified completed work, never by paid placement. */
+export function compareListingsByVerifiedWork(a: PublicListing, b: PublicListing): number {
+  const byJobs = b.proof.completedJobs - a.proof.completedJobs;
+  if (byJobs !== 0) return byJobs;
+  return a.name.localeCompare(b.name);
+}
 
 export function listingPath(listing: Pick<PublicListing, "cities" | "trades" | "slug">, city?: string, trade?: string): string {
   const citySlugValue = city && listing.cities.includes(city) ? city : listing.cities[0] ?? "greensboro";
@@ -50,7 +60,7 @@ function citiesFromProfile(profile: ServiceBusinessProfile): string[] {
 async function listingFromFounding(seed: FoundingListing, store: KeyValueStore): Promise<PublicListing> {
   const [overlay, meta] = await Promise.all([getSeedStorefront(seed.slug, store), getFoundingMeta(seed.slug, store)]);
   const name = cleanText(meta.name, 80) || seed.name;
-  return {
+  const listing: PublicListing = {
     slug: seed.slug,
     name,
     orgId: null,
@@ -65,7 +75,9 @@ async function listingFromFounding(seed: FoundingListing, store: KeyValueStore):
     gbpUrl: seed.gbpUrl,
     placeholder: seed.placeholder && !meta.name,
     storefront: overlay ?? seed.storefront,
+    proof: EMPTY_PROOF,
   };
+  return withProof(listing, store);
 }
 
 async function listingFromProfile(profile: ServiceBusinessProfile, store: KeyValueStore): Promise<PublicListing | null> {
@@ -75,7 +87,7 @@ async function listingFromProfile(profile: ServiceBusinessProfile, store: KeyVal
   if (!storefront.published) return null;
   const cities = citiesFromProfile(profile);
   if (profile.trades.length === 0 || cities.length === 0) return null;
-  return {
+  const listing: PublicListing = {
     slug: profile.slug,
     name: org.name,
     orgId: profile.orgId,
@@ -90,7 +102,16 @@ async function listingFromProfile(profile: ServiceBusinessProfile, store: KeyVal
     gbpUrl: profile.gbpUrl,
     placeholder: false,
     storefront,
+    proof: EMPTY_PROOF,
   };
+  return withProof(listing, store);
+}
+
+async function withProof(listing: PublicListing, store: KeyValueStore): Promise<PublicListing> {
+  const reviews = await listReviewsForListing(listing.slug, store);
+  if (!listing.orgId) return { ...listing, proof: { completedJobs: 0, reviews } };
+  const jobs = await listJobs(listing.orgId, store);
+  return { ...listing, proof: { completedJobs: jobs.filter((job) => job.status === "completed").length, reviews } };
 }
 
 export async function listDirectory(store: KeyValueStore = getStore()): Promise<PublicListing[]> {
@@ -103,7 +124,7 @@ export async function listDirectory(store: KeyValueStore = getStore()): Promise<
     const listing = await listingFromProfile(profile, store);
     if (listing) fromOrgs.push(listing);
   }
-  return [...founding.filter((l) => l.storefront.published), ...fromOrgs];
+  return [...founding.filter((l) => l.storefront.published), ...fromOrgs].sort(compareListingsByVerifiedWork);
 }
 
 export async function listDirectoryFiltered(opts: { city?: string; trade?: string }, store: KeyValueStore = getStore()): Promise<PublicListing[]> {

@@ -27,6 +27,8 @@ export type Job = {
   address: string;
   notes: string;
   estimateId: string | null;
+  /** Public review link for this job — minted only when the job is completed. */
+  reviewToken: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -52,6 +54,29 @@ export type JobWindow = { start: Date; end: Date };
 
 const jobKey = (orgId: string, id: string) => `job:${orgId}:${id}`;
 const jobIndexKey = (orgId: string) => `job:${orgId}:all`;
+const reviewTokenKey = (token: string) => `jobreview:${token}`;
+
+type ReviewTokenPointer = { orgId: string; jobId: string };
+
+async function writeReviewToken(token: string, orgId: string, jobId: string, store: KeyValueStore): Promise<void> {
+  const pointer: ReviewTokenPointer = { orgId, jobId };
+  await store.set(reviewTokenKey(token), JSON.stringify(pointer), RECORD_TTL);
+}
+
+export async function getJobByReviewToken(token: string, store: KeyValueStore = getStore()): Promise<Job | null> {
+  const raw = await store.get(reviewTokenKey(token));
+  if (!raw) return null;
+  let pointer: ReviewTokenPointer | null = null;
+  try {
+    pointer = JSON.parse(raw) as ReviewTokenPointer;
+  } catch {
+    return null;
+  }
+  if (!pointer?.orgId || !pointer.jobId) return null;
+  const job = await getJob(pointer.orgId, pointer.jobId, store);
+  if (!job || job.reviewToken !== token || job.status !== "completed") return null;
+  return job;
+}
 
 export function normalizeJob(job: Job): Job {
   return {
@@ -59,6 +84,7 @@ export function normalizeJob(job: Job): Job {
     durationMinutes: typeof job.durationMinutes === "number" && job.durationMinutes > 0 ? job.durationMinutes : 60,
     driveMinutes: typeof job.driveMinutes === "number" && job.driveMinutes >= 0 ? job.driveMinutes : 0,
     address: typeof job.address === "string" ? job.address : "",
+    reviewToken: typeof job.reviewToken === "string" && job.reviewToken ? job.reviewToken : null,
   };
 }
 
@@ -147,6 +173,7 @@ export async function createJob(orgId: string, actingUid: string, input: JobInpu
     address: cleanText(input.address, 200),
     notes: cleanText(input.notes, 2000),
     estimateId: input.estimateId ?? null,
+    reviewToken: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -155,6 +182,10 @@ export async function createJob(orgId: string, actingUid: string, input: JobInpu
     if (conflicts.length) {
       return { error: `That crew member is already booked (${conflicts[0].title}).` };
     }
+  }
+  if (job.status === "completed") {
+    job.reviewToken = newId("rvwtok");
+    await writeReviewToken(job.reviewToken, orgId, job.id, store);
   }
   await store.set(jobKey(orgId, job.id), JSON.stringify(job), RECORD_TTL);
   await store.sadd(jobIndexKey(orgId), job.id, RECORD_TTL);
@@ -184,8 +215,13 @@ export async function updateJob(orgId: string, actingUid: string, id: string, in
     address: input.address !== undefined ? cleanText(input.address, 200) : existing.address,
     notes: input.notes !== undefined ? cleanText(input.notes, 2000) : existing.notes,
     estimateId: input.estimateId !== undefined ? input.estimateId : existing.estimateId,
+    reviewToken: existing.reviewToken,
     updatedAt: new Date().toISOString(),
   };
+  if (updated.status === "completed" && !updated.reviewToken) {
+    updated.reviewToken = newId("rvwtok");
+    await writeReviewToken(updated.reviewToken, orgId, id, store);
+  }
   if (!input.allowOverlap) {
     const conflicts = await findScheduleConflicts(orgId, updated, store);
     if (conflicts.length) {

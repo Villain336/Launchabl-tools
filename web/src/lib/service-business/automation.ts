@@ -5,6 +5,7 @@
  */
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { logAuditEvent } from "@/lib/audit/log";
+import { siteConfig } from "@/lib/site-config";
 import { canDeliver, sendOrgAlert, type AlertDeps, type AlertSendResult } from "./alerts";
 import { resolveAlertSettings } from "./alerts";
 import { listJobs } from "./job";
@@ -142,12 +143,18 @@ async function candidatesFor(rule: AutomationRule, now: Date, store: KeyValueSto
     const jobs = await listJobs(rule.orgId, store);
     return jobs
       .filter((job) => job.status === "completed" && hoursBetween(job.updatedAt, now) >= rule.delayHours)
-      .map((job) => ({
-        entityId: job.id,
-        entityType: "job" as const,
-        title: `Ask for a review — ${job.title}`,
-        body: `${job.title} was completed. Send the customer a review request.`,
-      }));
+      .map((job) => {
+        const origin = process.env.NEXT_PUBLIC_SITE_URL ?? siteConfig.url;
+        const link = job.reviewToken ? `${origin}/review/${job.reviewToken}` : null;
+        return {
+          entityId: job.id,
+          entityType: "job" as const,
+          title: `Ask for a review — ${job.title}`,
+          body: link
+            ? `${job.title} was completed. Send this private review link — it only works because the job is done: ${link}`
+            : `${job.title} was completed. Mark it completed in the OS to mint a review link. We do not invent stars.`,
+        };
+      });
   }
   if (rule.kind === "job_reminder") {
     const jobs = await listJobs(rule.orgId, store);

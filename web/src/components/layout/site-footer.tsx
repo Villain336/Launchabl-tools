@@ -13,6 +13,7 @@ const columns = [
       { label: "Agency", href: "/agency" },
       { label: "Tools", href: "/tools" },
       { label: "Pricing", href: "/pricing" },
+      { label: "How it works", href: "/how-it-works" },
     ],
   },
   {

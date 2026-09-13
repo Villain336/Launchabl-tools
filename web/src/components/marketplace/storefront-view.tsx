@@ -45,6 +45,7 @@ export function StorefrontView({
           </div>
           {storefront.tagline && <p className={`mt-4 max-w-2xl text-lg ${muted}`}>{storefront.tagline}</p>}
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium">
+            <span className={`rounded-full border px-3 py-1 ${panel}`}>Exclusive quotes</span>
             {listing.licensed && <span className={`rounded-full border px-3 py-1 ${panel}`}>Licensed</span>}
             {listing.insured && <span className={`rounded-full border px-3 py-1 ${panel}`}>Insured</span>}
             {listing.bonded && <span className={`rounded-full border px-3 py-1 ${panel}`}>Bonded</span>}
@@ -86,6 +87,28 @@ export function StorefrontView({
               </div>
             </div>
           )}
+          <div>
+            <h2 className="text-xl font-semibold">Verified work</h2>
+            <p className={`mt-2 text-sm ${muted}`}>
+              {listing.proof.completedJobs > 0
+                ? `${listing.proof.completedJobs} completed job${listing.proof.completedJobs === 1 ? "" : "s"} recorded in the OS.`
+                : "No completed jobs recorded on this listing yet. We do not invent star ratings to fill the gap."}
+            </p>
+            {listing.proof.reviews.length > 0 ? (
+              <ul className="mt-4 space-y-3">
+                {listing.proof.reviews.map((review) => (
+                  <li key={review.id} className={`rounded-2xl border p-4 ${panel}`}>
+                    <p className="text-sm font-medium">
+                      {review.authorName} · {review.rating}/5
+                    </p>
+                    {review.body && <p className={`mt-1 text-sm ${muted}`}>{review.body}</p>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={`mt-2 text-xs ${muted}`}>Reviews only appear after a completed job. Homeowners leave them from a private link — not from a public star widget.</p>
+            )}
+          </div>
           {storefront.showHours && storefront.hours && (
             <div>
               <h2 className="text-xl font-semibold">Hours</h2>
@@ -97,7 +120,15 @@ export function StorefrontView({
         {storefront.showLeadForm && (
           <aside className="lg:sticky lg:top-28 lg:self-start">
             <h2 className="mb-3 text-xl font-semibold">{storefront.ctaLabel}</h2>
-            <LeadForm listingSlug={listing.slug} city={city} trade={trade} sourcePath={sourcePath} ctaLabel={storefront.ctaLabel} accent={storefront.accent} />
+            <LeadForm
+              listingSlug={listing.slug}
+              contractorName={listing.name}
+              city={city}
+              trade={trade}
+              sourcePath={sourcePath}
+              ctaLabel={storefront.ctaLabel}
+              accent={storefront.accent}
+            />
           </aside>
         )}
       </section>

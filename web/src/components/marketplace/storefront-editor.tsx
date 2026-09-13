@@ -23,7 +23,23 @@ function fromListing(listing: PublicListing): EditorState {
 
 function asListing(slug: string, state: EditorState, cities: string[], trades: PublicListing["trades"]): PublicListing {
   const { name, phone, address, ...storefront } = state;
-  return { slug, name, orgId: null, trades, cities, phone, address, licensed: false, insured: false, bonded: false, websiteUrl: null, gbpUrl: null, placeholder: false, storefront };
+  return {
+    slug,
+    name,
+    orgId: null,
+    trades,
+    cities,
+    phone,
+    address,
+    licensed: false,
+    insured: false,
+    bonded: false,
+    websiteUrl: null,
+    gbpUrl: null,
+    placeholder: false,
+    storefront,
+    proof: { completedJobs: 0, reviews: [] },
+  };
 }
 
 export function StorefrontEditor() {

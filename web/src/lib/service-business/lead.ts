@@ -33,6 +33,11 @@ export type Lead = {
   status: LeadStatus;
   held: boolean;
   customerId: string | null;
+  /**
+   * Product law: a quote request is delivered to one listing only.
+   * Angi/Thumbtack sell the same homeowner to several pros; we do not.
+   */
+  exclusive: true;
   createdAt: string;
   updatedAt: string;
 };
@@ -56,9 +61,14 @@ const orgIndexKey = (orgId: string) => `lead:${orgId}:all`;
 const listingIndexKey = (slug: string) => `lead:listing:${slug}`;
 const allotmentKey = (orgId: string, period: string) => `leadallot:${orgId}:${period}`;
 
+/** Product law: exclusivity is not optional and cannot drift on old rows. */
+export function normalizeLead(lead: Lead): Lead {
+  return { ...lead, exclusive: true };
+}
+
 export async function getLead(id: string, store: KeyValueStore = getStore()): Promise<Lead | null> {
   const raw = await store.get(leadKey(id));
-  return raw ? (JSON.parse(raw) as Lead) : null;
+  return raw ? normalizeLead(JSON.parse(raw) as Lead) : null;
 }
 
 async function listByIndex(indexKey: string, store: KeyValueStore): Promise<Lead[]> {
@@ -134,6 +144,7 @@ export async function submitLead(input: SubmitLeadArgs, store: KeyValueStore = g
     status: held ? "held" : "new",
     held,
     customerId: null,
+    exclusive: true,
     createdAt: now,
     updatedAt: now,
   };
@@ -160,6 +171,7 @@ export async function updateLead(
   if (!existing || existing.orgId !== orgId) return { error: "Lead not found." };
   const updated: Lead = {
     ...existing,
+    exclusive: true,
     status: input.status !== undefined && isLeadStatus(input.status) ? input.status : existing.status,
     customerId: input.customerId !== undefined ? input.customerId : existing.customerId,
     updatedAt: new Date().toISOString(),

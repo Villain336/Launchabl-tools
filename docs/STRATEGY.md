@@ -864,3 +864,129 @@ The decided identity: **the brand presents primarily as a directory/marketplace*
 - **`/os` — shipped this round.** A dedicated page for the self-serve OS, honestly split into what's live vs. still later (AI-drafted estimates as a real agent workflow, iMessage as a Messages provider). Scheduling, automations, warranty, inventory, Telegram/email alerts, payments, and the dashboard are live.
 - **`/agency` — shipped this round.** A dedicated page for Launch + Managed Growth, scoped to the eight launch trades, with a real contact path (not a fake form) and an explicit note that agency clients get OS access included and can self-serve at any time.
 - Both are linked from primary nav now (`OS`, `Agency`) and cross-link each other, ahead of the homepage rebuild — CTAs "along the landing page" become real once the homepage itself is directory-first.
+
+---
+
+## 27. Brutally honest: CRMs, field-service software, and Angi-class directories
+
+§18–§22 asked whether a horizontal AI-tool suite is a company. §23–§24 narrowed to home services. §25–§26 named the actual product: marketplace + OS + agency, NC-first. This section is the competitive picture for *that* product, against the three buyers we actually lose deals to — generic CRMs, service-business / field-service platforms, and consumer directories (Angi’s List / Angi, Thumbtack, Nextdoor). It is not a feature-gap list to close. It is a decision about which gaps are the business and which gaps are a trap.
+
+### 27.1 The one-line verdict
+
+We are not a unicorn today, and we will not become one by matching ServiceTitan’s dispatch board or Angi’s review graph. Those categories already have winners. The only shape that is both **defensible** and **scalable** is the one incumbents do not sell as a bundle: **exclusive demand in a bounded geography + public proof that can only exist because the job ran through the OS + an agency that seeds real supply this week.** Everything we add should reinforce that triangle. Everything that dilutes it (shared leads, invented stars, paid directory placement, a national empty map, FSM feature-parity) is how this becomes a worse Jobber or a smaller Angi.
+
+### 27.2 Three competitor classes, named
+
+These are not the same buyer or the same budget line. Treating “CRM vs Angi vs Jobber” as one comparison is how a pitch slides into mush.
+
+**1. Generic CRMs (HubSpot, Salesforce, generic “pipeline” tools).**
+A CRM is a system of record for *conversations and deals*. A lawn or HVAC company does not have a deal stage problem; they have a who-is-on-the-truck, did-the-job-finish, and where-does-the-next-lead-come-from problem. HubSpot will beat us on email sequences, attribution, and enterprise reporting for as long as it exists. That is fine. We should never pretend the OS is a HubSpot replacement. The honest CRM slice we own is **narrow and vertical**: one customer record tied to leads, jobs, estimates, warranties, and invoices for an NC trade. Switching cost here is the job history, not the marketing automation. If we start adding generic pipeline stages, lead scoring, and email-drip builders, we are competing where HubSpot has twenty years of surface area and we have none.
+
+**2. Service-business / field-service companies (Jobber, Housecall Pro, ServiceTitan, Workiz, FieldPulse, plus AI-native Feldy / FieldCamp / Roooster).**
+This is the real software competitor for the OS leg. They already own scheduling, quoting, invoicing, and (at the high end) dispatch and telephony.
+
+- Jobber’s published 2026 ladder starts at **$39/mo** (Core, 1 user) and runs to **$599/mo** (Plus, 30 users). Housecall Pro starts around **$69–$79/mo** and tops out near **$499+/mo**. ServiceTitan is quote-only and commonly **$300–$500 per technician per month**, plus **$5k–$25k** implementation. A 10-tech shop’s year-one all-in is on the order of **~$3.3k** on Jobber/HCP versus **~$55k–$90k** on ServiceTitan ([Field Service Software Pricing Index (2026) — Bigger Wrench](https://biggerwrench.com/field-service-software-pricing/); [Best FSM Software (April 2026) — Field Service Guide](https://fieldserviceguide.com/best-field-service-management-software/)).
+- Concentration is ugly if the plan is “beat them at FSM.” One 2025 HVAC breakdown puts Housecall Pro, ServiceTitan, and Thryv at **92%** of HVAC shops that already bought FSM software ([HVAC market breakdown — Orbital](https://www.withorbital.com/blog/hvac-market-breakdown-2025/smb-sales-hiring)). Treat that as directional (vendor-adjacent, not an SEC filing) — the point holds either way: the shops that want a full job-book already have one.
+- The AI-native wave named in §23.3 (Feldy, FieldCamp, Roooster) is still **software sold to contractors who already have leads**. None of them run a consumer marketplace. That remains the opening.
+
+**What we lose to them today, honestly:** mobile tech app, live dispatch, native VoIP / call tracking, pricebook depth, QuickBooks-class accounting, financing (Wisetack et al.), and years of review-request muscle. A five-tech shop comparing feature lists will pick Housecall Pro. We should not try to win that spreadsheet.
+
+**What we have that they do not sell:** a consumer-facing directory that can put an exclusive quote on their phone, and an agency that will stand up the listing for them. Jobber does not generate the homeowner. Angi does not run the job. That split is the product.
+
+**3. Directories (Angi / Angie’s List, Thumbtack, Nextdoor, Google Business Profile).**
+This is the real marketplace competitor. Scale is not close:
+
+- Angi reported **$238.2M** Q1 2026 revenue (−3% YoY) and **$248.0M** Q2 (−11% YoY); H1 2026 revenue was **$486.2M**. Q1 Network Revenue fell **56%** after “homeowner choice” in January 2025. The Q1 10-Q says consumers used Angi businesses for about **16 million projects** in the twelve months ended March 31, 2026, with about **105,000** average monthly active U.S. Pros ([Angi Q1 2026 earnings release](https://ir.angi.com/static-files/06de6d6b-b28c-4f42-8963-b69c58c0f817); [Angi Q1 2026 10-Q](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000044/angi-20260331.htm); [Angi Q2 2026 earnings release](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000077/q22026earningsrelease.htm)).
+- Angi still *sells the same homeowner more than once*. The current Angi Pro agreement says a Lead is “frequently… sent to several other Approved Pros,” and Angi Help says a project request is matched with **no more than five** pros ([Angi Pro Agreement](https://angiads.pactsafe.io/versions/69ea6d277b5696271a549a02.pdf); [Angi Opportunities and Leads FAQ](https://intercom.help/angi/en/articles/6221483-opportunities-and-leads-frequently-asked-questions)).
+- That model has a regulatory scar. The FTC charged HomeAdvisor (d/b/a Angi Leads) in March 2022 with deceptive lead marketing — quality, source, match-to-trade/geo, and conversion-rate claims it could not substantiate — and finalized a consent order in April 2023 requiring up to **$7.2M** in redress ([FTC March 2022 complaint announcement](https://www.ftc.gov/news-events/news/press-releases/2022/03/ftc-charges-homeadvisor-inc-cheating-businesses-including-small-businesses-seeking-leads-home); [FTC April 2023 final order](https://www.ftc.gov/news-events/news/press-releases/2023/04/ftc-approves-final-order-against-homeadvisor-inc-deceptively-marketing-its-leads-home-improvement)).
+- Thumbtack is a contact auction: the homeowner is shown a list and the pro pays per contact. Nextdoor is a neighborhood graph plus ads, not a dedicated exclusive-lead marketplace. Google Business Profile is the default “directory” every contractor already has — we will not out-rank Google by pretending to be Google.
+
+**What we lose to them today, honestly:** liquidity (we have three founding listings; they have six figures of pros), review volume, brand, national SEO, and the habit of “just Angi it.” Empty city×trade pages are the product telling the truth. Inventing contractors to fill them would repeat §22.2 at marketplace scale.
+
+**What we can win, if we keep the product law:** one request → one listing. No silent assignment to `listings[0]` on a city page. No paid rank. Reviews that cannot exist without a completed job in the OS. That is the opposite of Angi’s shared-lead + star-theater machine, and it is the thing their 2025 “homeowner choice” retreat accidentally admitted was the wound.
+
+### 27.3 How we compare, without the pitch
+
+| Dimension | HubSpot-class CRM | Jobber / HCP / ServiceTitan | Angi / Thumbtack | Launchabl today |
+|---|---|---|---|---|
+| Who the buyer is | Marketer / sales org | Contractor (software budget) | Contractor (lead budget) + homeowner | Same two sides, one NC account |
+| Generates exclusive demand | No | No | No — shared / auctioned | **Yes, if we keep `Lead.exclusive`** |
+| Runs the job book | Pipeline, not trucks | **Yes, deeply** | Thin or none | Thin OS — enough for the loop, not ST |
+| Public proof of *completed* work | No | Private to the shop | Stars, often unbundled from a job | **OS-verified, or empty** |
+| Paid directory placement | N/A | N/A | Core monetization | **Forbidden** — tiers buy volume, not rank |
+| Agency that seeds supply | Services arm, generic | Rarely | Ads / sales, not ops setup | **Launch $1,200 + Managed $497** (§26) |
+| Geography | Everywhere | Everywhere | National | **NC on purpose** |
+| Scale of proof | Millions of seats | Category winners | $486M H1 / 16M projects | Three listings, one real named client |
+
+Read that table as a warning, not a to-do list. The empty cells on our row are not “sprint backlog.” The filled cells on theirs are why cloning them is a death march.
+
+### 27.4 What is actually missing (ranked by whether it is the business)
+
+**Missing and it *is* the business — do these, in this order:**
+
+1. **Liquidity in a handful of NC city×trade cells.** Greensboro lawn, Raleigh HVAC, Triad parking-lot. Density is the marketplace. SEO pages without contractors are honest and also worthless to a homeowner. The agency exists to fill those cells with real names (§26.3), not to write more landing-page copy.
+2. **Completed-job volume that can be shown.** The review graph will lose to Angi for years. The substitute is a count of jobs that actually closed in the OS, plus reviews that required a `reviewToken` minted only on `completed`. Empty is allowed. Fake 4.8 is not.
+3. **A reason a contractor cannot casually leave.** Not a contractual lock-in — a *public* one: the verified-work badge and job-tied reviews live on the listing because the work ran here. Leave, and that public record does not come with you. That is the switching cost that also helps the homeowner.
+4. **Real case studies past Atlas Lot Care.** §22.2 still applies. Agency clients are the only honest factory for them.
+
+**Missing and it is *not* the business — do not build these to “catch up”:**
+
+- Full dispatch, capacity planning, membership/pricebook, native VoIP, tech GPS. ServiceTitan already won that buyer.
+- Star widgets, imported Google reviews, “seeded” testimonials, or any public rating that is not attached to a completed job.
+- A shared-lead or “broadcast to three pros” mode to juice GMV. That is Angi. It also walks back toward the FTC fact pattern we should be the opposite of.
+- Paid “featured” slots on `/nc/[city]/[trade]`. Tiers already buy allotment (§25.7). Selling rank would make the directory a worse Yellow Pages and kill the verified-work sort.
+- National expansion before a city×trade is actually dense. An empty map of America is vanity SEO.
+- Horizontal CRM features (sequences, lead scoring, territories) aimed at beating HubSpot.
+- Tool #52.
+
+### 27.5 The unicorn / moat / scale test
+
+A unicorn here is not “the AI Jobber.” It is **the default exclusive way an NC homeowner hires a trade, and the default OS that trade runs because that is where the work and the proof already live.** Defensibility and scale have to be the same mechanism, or the moat is a sales team.
+
+**Moat that compounds (keep, reinforce, measure):**
+
+1. **Exclusive lead as a type, not a slogan.** `Lead.exclusive` is always `true`. `submitLead` accepts one `listingSlug`. The marketplace POST returns `{ exclusive: true }`. City×trade pages do not own a quote form. A homeowner can still walk to another storefront and send a *second* request — we are not locking people — but *we* never fan one request to a list. Angi’s contract does. That difference is the brand.
+2. **Reviews require a completed job.** No token, no review. Token is minted only when status becomes `completed`. One review per job. Automation copy carries `/review/{token}`. This is how §22.2 never recurs at directory scale.
+3. **Directory rank = verified work, never money.** `listDirectory` sorts by `proof.completedJobs`, then name. Founding-partner slots are a bootstrap, not a forever #1. This is the opposite of Angi lead-guidance-by-review-count and the opposite of paid placement.
+4. **Agency as the cold-start, not a side hustle.** Launch + Managed Growth turn cash this week into listings and case studies. That is the only scalable answer to “how do you get the first ten real contractors in Greensboro lawn.”
+5. **NC density before geography.** Repeat the city playbook (agency seed → exclusive demand → OS jobs → public proof → SEO) in the next NC city only after the first cell is real. That is how a state becomes a moat instead of a thin national directory.
+
+**Scale that does *not* require a 200-person sales org:**
+
+- Programmatic `/nc/[city]/[trade]` pages already exist; they get valuable when the listings on them are real.
+- Subscriptions buy *volume* of the same exclusive lead, not a worse lead. Held leads are overflow, not junk (§25.3).
+- The OS loop (lead → customer → job → invoice → review) is software. Each completed job is a public asset. That is a flywheel a shared-lead marketplace cannot copy without giving up their take-rate.
+- We will still lose on mobile/dispatch forever for 25-truck shops. Let ServiceTitan have them. The $49 OS is for the shop Angi burned and Jobber overcharged for software that does not bring the phone.
+
+**What would make this *not* a unicorn, even if it grows:**
+
+- Becoming a lead reseller with a thin OS skin.
+- Becoming an FSM clone with a thin directory skin.
+- Raising on “51 tools” or “AI for contractors” after §22 already killed that story.
+
+### 27.6 What this round shipped to make the laws real
+
+- **`Lead.exclusive: true`** on every write; `getLead` re-asserts it so older rows cannot drift. Marketplace API returns `exclusive: true`.
+- **City×trade pages no longer POST a quote to `listings[0]`.** The form lives on the storefront. Copy says so.
+- **`CustomerReview` + `/review/[token]` + `POST /api/marketplace/reviews`.** `submitJobReview` requires a completed job’s token. Jobs mint `reviewToken` only on `completed`.
+- **`listing.proof`** — `{ completedJobs, reviews }` — on every public listing. Empty is rendered as empty. Listing cards show a completed-job badge only when the count is > 0.
+- **Directory sort by completed jobs.** No paid-placement field exists.
+- **`/how-it-works`** — public, indexed, linked from nav, footer, homepage, and city×trade pages. Says we are smaller than Angi and thinner than ServiceTitan on purpose.
+- **Tests** in `moat.test.ts`: exclusive lead, reject review without a completed-job token, complete → token → review → proof counts, verified-work rank beats a founding listing with zero jobs.
+
+### 27.7 What this document will not pretend
+
+We have not beaten Angi, Jobber, or HubSpot at anything that shows up in their board decks. We have a product law and a three-listing directory. The work that makes the law valuable is agency sales into NC trades and completed jobs in the OS — not another strategy section, and not another FSM module.
+
+**Sources:**
+- [Field Service Software Pricing Index (2026) — Bigger Wrench](https://biggerwrench.com/field-service-software-pricing/)
+- [Best Field Service Management Software (April 2026) — Field Service Guide](https://fieldserviceguide.com/best-field-service-management-software/)
+- [HVAC market breakdown 2025 — Orbital](https://www.withorbital.com/blog/hvac-market-breakdown-2025/smb-sales-hiring)
+- [Angi Q1 2026 earnings release (IR PDF)](https://ir.angi.com/static-files/06de6d6b-b28c-4f42-8963-b69c58c0f817) (May 2026)
+- [Angi Q1 2026 Form 10-Q](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000044/angi-20260331.htm)
+- [Angi Q2 2026 earnings release](https://www.sec.gov/Archives/edgar/data/1705110/000170511026000077/q22026earningsrelease.htm) (Aug 2026)
+- [Angi Pro Agreement (PactSafe)](https://angiads.pactsafe.io/versions/69ea6d277b5696271a549a02.pdf)
+- [Opportunities and Leads: Frequently Asked Questions — Angi Help](https://intercom.help/angi/en/articles/6221483-opportunities-and-leads-frequently-asked-questions)
+- [FTC charges HomeAdvisor with cheating businesses seeking leads](https://www.ftc.gov/news-events/news/press-releases/2022/03/ftc-charges-homeadvisor-inc-cheating-businesses-including-small-businesses-seeking-leads-home) (Mar 2022)
+- [FTC approves final order against HomeAdvisor](https://www.ftc.gov/news-events/news/press-releases/2023/04/ftc-approves-final-order-against-homeadvisor-inc-deceptively-marketing-its-leads-home-improvement) (Apr 2023)
+

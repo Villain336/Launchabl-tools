@@ -20,7 +20,7 @@ export default async function Home() {
             Find a local service business. Or run one from here.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Licensed lawn care, HVAC, cleaning, plumbing, and more — starting with three NC businesses we already work with. Request a quote on their page. Contractors get a customizable storefront and an OS for the jobs that follow.
+            Licensed lawn care, HVAC, cleaning, plumbing, and more — starting with three NC businesses we already work with. A quote request on their page goes to them only. We do not sell the same homeowner to a list of companies.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/nc/greensboro" size="lg">
@@ -31,6 +31,9 @@ export default async function Home() {
             </LinkButton>
             <LinkButton href="/agency" variant="secondary" size="lg">
               Agency
+            </LinkButton>
+            <LinkButton href="/how-it-works" variant="secondary" size="lg">
+              How it works
             </LinkButton>
           </div>
         </Container>

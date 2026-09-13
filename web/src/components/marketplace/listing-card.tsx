@@ -25,6 +25,9 @@ export function ListingCard({ listing, city, trade }: { listing: PublicListing; 
         {listing.licensed && <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">Licensed</span>}
         {listing.insured && <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">Insured</span>}
         {listing.bonded && <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">Bonded</span>}
+        {listing.proof.completedJobs > 0 && (
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">{listing.proof.completedJobs} jobs completed</span>
+        )}
       </div>
     </Link>
   );

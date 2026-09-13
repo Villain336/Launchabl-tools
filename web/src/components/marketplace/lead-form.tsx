@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function LeadForm({
   listingSlug,
+  contractorName,
   city,
   trade,
   sourcePath,
@@ -14,6 +15,7 @@ export function LeadForm({
   accent,
 }: {
   listingSlug: string;
+  contractorName?: string;
   city: string;
   trade: string;
   sourcePath: string;
@@ -50,7 +52,7 @@ export function LeadForm({
   if (done) {
     return (
       <p className="rounded-xl border border-border bg-card p-4 text-sm text-foreground">
-        Request sent. They&rsquo;ll follow up from the details you left — no account needed on your side.
+        Request sent to {contractorName || "this contractor"} only. We do not sell it to anyone else. They&rsquo;ll follow up from the details you left.
       </p>
     );
   }
@@ -70,6 +72,9 @@ export function LeadForm({
         <option value="soon">This week</option>
         <option value="asap">ASAP</option>
       </select>
+      <p className="text-xs text-muted-foreground">
+        Exclusive: this goes only to {contractorName || "this contractor"}. We do not auction the same request to other companies the way Angi or Thumbtack do.
+      </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={busy} className="w-full" style={accent ? { backgroundColor: accent, color: "#fff" } : undefined}>
         {busy ? "Sending…" : ctaLabel}
