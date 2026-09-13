@@ -27,7 +27,12 @@ export type AuditAction =
   | "org.member_removed"
   | "org.member_left"
   | "admin.usage_viewed"
-  | "admin.audit_viewed";
+  | "admin.audit_viewed"
+  | "svcprofile.created"
+  | "svcprofile.updated"
+  | "customer.created"
+  | "customer.updated"
+  | "customer.archived";
 
 export type AuditEvent = {
   /** Null/omitted for actions not scoped to an org (e.g. an admin-dashboard view). */

@@ -707,3 +707,83 @@ Per §23.3/§23.4's evidence: the vertical is real and fundable (Feldy, FieldCam
 ### 24.3 What this explicitly does not mean
 
 This is not a rebuild and not a rebrand yet. The 50+ horizontal tools, the agency-subscription model, and the existing positioning stay as-is while this work lands — §23.5 was explicit that this is additive depth on the existing engine, not a rip-and-replace. Tool #52 and a second vertical are still off the table until the usage-instrumentation panel (24.2.1) shows this one is actually working.
+
+**Superseded by §25.** The founder has since gone further than this section's "additive depth, no rebuild" recommendation — see §25 for the actual current direction (a two-sided marketplace + operations OS, not a horizontal tool suite with a vertical overlay). §24's shipped work (usage instrumentation, the home-services vertical overlay) isn't wasted — §25.4 maps exactly how each piece carries forward — but §24.3's "stays as-is" framing no longer describes the plan.
+
+---
+
+## 25. Pivot: Service Business OS + Marketplace (NC-first)
+
+### 25.1 The model, stated precisely
+
+Two distinct products in one account, not a horizontal tool suite with a vertical skin:
+
+- **The Marketplace** — a lead engine for contractors and home/local-service businesses. Consumer-facing, SEO- and content-driven, **North Carolina-first** because there's no direct competitor running this specific combination in that market yet. Growth is explicit and singular: the more exposure and keywords this ranks for, the more leads it generates, the more contractors it's worth having on the platform, the more listings/reviews/content it has, the more it ranks for — a standard two-sided-marketplace SEO flywheel, and the primary thing worth investing in over almost everything else right now.
+- **The OS** — a vertical operations product for the contractors the marketplace feeds, sold as the reason to stay once a lead converts. Explicit feature list from the founder: smart job scheduling, AI agents, unified customer profiles, near-perfect digital estimates, automations, warranty/maintenance tracking, staff assignments/teams, inventory management, Telegram/iMessage integration for on-the-go alerts, payment collection, and a performance/revenue dashboard.
+
+**Why this is a materially different bet than §23–§24's recommendation, and why it's a reasonable one anyway:** §23.3 rejected a full field-service-management pivot because Feldy/FieldCamp/Roooster are already funded, live, and purpose-built for exactly that. That evidence still stands — but none of those three run a *marketplace* (they sell software to contractors who already have their own leads); Thumbtack/Angi/Nextdoor run the marketplace side but have thin, generic OS tooling and no NC-specific density play. Bundling both, and deliberately starting in one state instead of nationally, is a real, evidence-supported wedge the earlier analysis didn't fully evaluate because the founder hadn't specified it yet. This is a bigger, harder build than §23.5's "narrow one vertical, don't rebuild" — that's a legitimate call for the founder to make, and it's made now.
+
+### 25.2 What happens to the current product — tool-by-tool disposition
+
+The founder asked for tools to be removed or restructured to fit this mission. Proposed disposition for all ~50 current tools (`site-config.ts`), grouped by what happens to each — **flagged for confirmation in this section's open questions, not yet deleted from the codebase**, because acting on a full cut list before the founder confirms it is the kind of unilateral, hard-to-reverse call this document has repeatedly argued against making without sign-off:
+
+**Keep public, repositioned as the contractor-acquisition SEO engine** (each already ranks for its own technical-SEO keyword; the funnel becomes "get this fixed for free → see what your listing/site could look like on the OS" instead of "buy the agency plan"): `website-audit-report`, `landing-page-grader`, `competitor-gap-report`, `page-speed-audit`, `broken-link-checker`, `canonical-tag-detector`, `backlink-health-check`, `voice-search-optimizer`, `llm-readability-check`, `security-headers-checker`, `ssl-certificate-checker`, `accessibility-checker`, `dns-email-health`, `compliance-scanner`, `meta-tag-generator`, `sitemap-robots-generator`, `schema-generator`, `local-seo-optimizer`.
+
+**Repurpose into in-app OS features** (stop being standalone public chat tools; become part of the contractor product): `schema-generator` + `local-seo-optimizer` industrialize into the marketplace's own programmatic SEO engine (§25.5) and the contractor-profile setup flow; `brand-creator`, `brand-identity-kit`, `domain-availability`, `domain-purchase`, `hosting` become the "get a site and profile" onboarding path for a contractor who doesn't have one; `social-card-generator`, `ai-image-generator`, `qr-code-generator` become in-OS marketing utilities (before/after job posts, a review-request QR code on invoices/work trucks); `utm-builder` becomes internal marketplace campaign tracking.
+
+**Cut** (no clear path to either side of the new model): `ab-copy-variants`, `watermark-generator`, `watermark-remover`, `metadata-remover`, `file-converter`, `image-converter`, `markdown-file-generator`, `agent-skill-generator`, `dataset-builder`, `ad-creative-resizer`, `content-campaign-calendar`, `white-label-report-builder`, `email-newsletter-builder`, `email-finder`, `persona-generator`, `subject-line-checker`, `press-release-generator`, `qa-test-plan-generator`, `content-repurposer`, `transcriber`, `clip-finder`, `background-remover`, `demo-video-creator`.
+
+That's roughly 18 kept, 10 repurposed, 22 cut. The 50+-tools horizontal positioning (§18.3's own "don't lead with tool count" warning, and §22.5's "50+ tools is now a red flag, not a strength") goes away entirely under this model — the marketplace and the OS are the product; the SEO tools that remain public are lead-gen surface area for the marketplace, not the product itself.
+
+### 25.3 Core new data model
+
+None of this exists yet. `Org`/`OrgRecord` (§20 Phase 1) is the right primitive to build on rather than replace — a `ServiceBusinessProfile` extends it 1:1 (keeps the auth/billing/team primitive uncontaminated by domain-specific fields):
+
+- **`ServiceBusinessProfile`** — `orgId` (1:1 with the existing Org), trades served (lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving, etc. — reusing §24's vertical list as the starting trade taxonomy), NC service area (cities/counties), address, phone, license/insurance/bonding status, GBP profile link, public marketplace-listing slug.
+- **`Lead`** — consumer inquiry from a marketplace landing page: category, city, contact info, job description, urgency, source (which page/keyword), matched `ServiceBusinessProfile` (or unmatched/pool), status (new/contacted/quoted/won/lost), and however the monetization model prices it (§25.7 Q1).
+- **`Customer`** — the unified customer profile inside one contractor's OS: contact info, address(es), linked jobs, notes, tags, source (marketplace lead vs. referral vs. direct).
+- **`Job`** — scheduled work: customer, assigned staff, service type, status, linked estimate/invoice, warranty expiry.
+- **`Estimate`** — line items, total, status, and whether it was AI-drafted (ties directly into the "AI agents" and "near-perfect digital estimates" features as one workflow, not two).
+- **Staff assignment** reuses the existing `OrgMember`/role system (§20) rather than a new primitive — a staff member is an org member with jobs assigned to them.
+- **`InventoryItem`** — name, SKU, quantity on hand, reorder threshold, cost.
+- **`WarrantyRecord`** — linked to a job/customer, coverage description, start/end dates, reminder schedule.
+- **`Payment`** extends the existing Postgres billing ledger (§20 Phase 1) rather than a new system — a job payment is a ledger entry with a `jobId`.
+
+### 25.4 Reuse map — what's already built maps directly, nothing here is wasted
+
+| Existing system | Becomes |
+|---|---|
+| `agent.ts` + `loadSkillGuide` + the skills/runtime engine (§18.2.4, hardened further in §23.4) | The "AI agents" feature itself — draft estimates, follow up on leads, answer customer questions, staffed per contractor account |
+| Org/team accounts, roles, invites (§20 Phase 1) | Staff assignments/teams, directly |
+| Postgres billing ledger + audit log (§20 Phase 1) | Payment collection's system of record + an ops activity log for the OS |
+| `Project.vertical` + the home-services category guide (§24) | The trade taxonomy and category knowledge seeding `ServiceBusinessProfile.trades` and every AI-agent interaction for that business |
+| `local-seo-optimizer` + `schema-generator` (§18.2.5/§24) | The knowledge base the marketplace's own programmatic SEO templates (§25.5) and contractor-onboarding flow are built from |
+| KV store conventions, Neon Postgres, admin dashboard patterns (§19–§20) | Every new entity above follows the same storage and instrumentation conventions rather than inventing new ones |
+
+Nothing shipped in §20/§22–§24 was wasted effort — this is the vertical-depth and orchestration-hardening bet (§23.5) taken to its logical, larger conclusion rather than a discarded direction.
+
+### 25.5 The marketplace's growth engine (SEO), concretely
+
+- **Programmatic category × city pages** — `/nc/[city]/[trade]` (e.g. `/nc/greensboro/lawn-care`), each a real landing page (not a thin doorway page — local content, the vetted contractors serving that city/trade, a lead-capture form) plus `LocalBusiness`/`Service` schema. This is `local-seo-optimizer`'s and `schema-generator`'s own output, industrialized into a template rendered at scale across every NC city × trade combination instead of generated one-off in a chat tool.
+- **Contractor profile pages** as the second SEO surface — every contractor who joins gets a public, schema-marked, indexed profile page (name, service area, reviews, trades) whether or not they've received a lead yet. This is the reason to join before the marketplace has liquidity: a free, real, ranking web page, which is a materially better cold-outreach pitch than "a directory listing" is elsewhere.
+- **Review-authenticity requirement, called out explicitly given §22.2:** any review or case study surfaced on either a category page or a contractor profile must be real, sourced, and attributed — the fabricated-case-study mistake fixed in §22.2 must not recur at marketplace scale, where it would be both a bigger legal exposure and a bigger credibility risk.
+
+### 25.6 Phased build roadmap
+
+1. **Phase 3.0 — the core loop.** `ServiceBusinessProfile` + `Customer` + `Job` + `Estimate` + payment collection (extending the existing ledger) + one working marketplace landing-page template + a lead-intake form + a minimal performance/revenue dashboard. Nothing else ships until a lead can flow from a marketplace page into a contractor's OS and become a paid job end to end.
+2. **Phase 3.1 — the differentiated OS layer.** AI agents (estimate drafting, lead follow-up, customer Q&A — direct reuse of `agent.ts`), smart job scheduling, staff assignment (direct reuse of org/roles).
+3. **Phase 3.2 — retention and operational depth.** Warranty/maintenance tracking, inventory management, Telegram/iMessage alerts.
+4. **Phase 3.3 — marketplace scale-out.** Programmatic SEO pages across all NC cities × trades, lead-routing/matching logic once there's enough contractor density per category to route intelligently instead of just listing everyone.
+
+Building all eleven OS features and full statewide SEO coverage simultaneously isn't realistic; the ordering above is built around "does the core loop work end to end" before "how many features does the OS have," because a working loop with three features beats eleven features nobody's used yet — the same lesson §22.1 already drew from this project's own five-day-old history.
+
+### 25.7 Open questions — the founder's call, not resolved unilaterally in code
+
+1. **Marketplace monetization.** Pay-per-lead, a commission on completed job value, leads bundled free into the OS subscription, or a hybrid? This materially changes the `Lead`/`Payment` schema (§25.3) and is asked directly alongside this section.
+2. **Launch trade categories.** Default assumption carried forward from §24: lawn care, HVAC, cleaning, pressure washing/exterior, and parking-lot/paving — the trades already reflected in the home-services vertical work. Confirm, narrow further, or broaden to "all home services" from day one.
+3. **The tool cut list (§25.2).** Confirm the proposed keep/repurpose/cut disposition, or flag specific exceptions, before anything is actually removed from the codebase.
+4. **The existing consumer-facing funnel and Tools Pro subscription.** Wind down now, or keep running in parallel during the Phase 3.0 build so there's no revenue/traffic gap while the marketplace ramps up in NC?
+
+### 25.8 What's scaffolded so far
+
+Tracked here as this phase's work lands, following §20/§24's convention of marking status inline rather than in a separate changelog.
