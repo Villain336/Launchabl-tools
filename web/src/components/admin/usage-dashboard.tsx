@@ -5,7 +5,7 @@ import { KeyRound, RefreshCw } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { CreditStats, GatewayCredits, PaywallStats, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
+import type { ContextReuseStats, CreditStats, GatewayCredits, PaywallStats, ToolBreadthStats, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
 import { CREDIT_PACKS } from "@/lib/billing/plan-display";
 import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
@@ -32,6 +32,7 @@ type UsagePayload = {
   billing?: { activeSubscribers: number; byInterval: Record<"month" | "year", number>; mrrUsd: number };
   paywall?: PaywallStats;
   creditPacks?: CreditStats;
+  moat?: { toolBreadth: ToolBreadthStats; contextReuse: ContextReuseStats };
   days: UsageDay[];
 };
 
@@ -45,6 +46,59 @@ function sourceLabel(source: string, toolLabel: (slug: string) => string): strin
   if (kind === "report") return `Share report · ${id === "agent" ? "Agent" : toolLabel(id)}`;
   if (kind === "page") return `Page · /${id}`;
   return source;
+}
+
+/**
+ * STRATEGY.md §18.2.1 named "distinct tools used per account" and "% of runs
+ * that reused saved project context" the single biggest lever behind the
+ * whole connective-tissue/Brand Vault moat thesis — and §22.1/§23.1 flagged
+ * that neither was measured anywhere. This panel is that measurement: if
+ * `multiToolRate` and `reuseRate` stay near zero as usage grows, the moat
+ * thesis isn't holding and that's a signal to act on, not paper over.
+ */
+function MoatPanel({ toolBreadth, contextReuse }: { toolBreadth: ToolBreadthStats; contextReuse: ContextReuseStats }) {
+  const pct = (n: number) => `${Math.round(n * 100)}%`;
+  const histogram = toolBreadth.distinctToolsHistogram;
+  const maxBucket = Math.max(1, ...Object.values(histogram));
+  return (
+    <div className="overflow-hidden rounded-xl border border-primary/30 bg-white">
+      <div className="border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold text-foreground">Moat metrics — is the connective-tissue thesis real?</h2>
+        <p className="text-xs text-muted-foreground">
+          STRATEGY.md §18.2.1 / §23.5: the whole moat argument rests on accounts using more than one tool and reusing saved project context. This is that measured, not asserted.
+        </p>
+      </div>
+      <div className="grid gap-4 p-4 sm:grid-cols-2">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">Accounts with ≥1 run, ever</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">{int(toolBreadth.accountsWithUsage)}</p>
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
+            Used 2+ distinct tools: <span className="font-semibold text-foreground">{pct(toolBreadth.multiToolRate)}</span> · avg{" "}
+            {toolBreadth.avgDistinctTools.toFixed(1)} tools/account
+          </p>
+          <div className="mt-3 space-y-1">
+            {(Object.entries(histogram) as [keyof ToolBreadthStats["distinctToolsHistogram"], number][]).map(([bucket, count]) => (
+              <div key={bucket} className="flex items-center gap-2 text-xs">
+                <span className="w-10 shrink-0 text-muted-foreground">{bucket}</span>
+                <div className="h-2 flex-1 rounded-full bg-muted">
+                  <div className="h-2 rounded-full bg-primary" style={{ width: `${(count / maxBucket) * 100}%` }} />
+                </div>
+                <span className="w-8 shrink-0 text-right tabular-nums text-foreground">{count}</span>
+              </div>
+            ))}
+          </div>
+          {toolBreadth.sampled && <p className="mt-2 text-xs text-amber-600">Sampled — account base exceeds the scan limit.</p>}
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">Project (Brand Vault) context reuse, signed-in runs</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">{pct(contextReuse.reuseRate)}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {int(contextReuse.withProject)} runs with saved context vs. {int(contextReuse.withoutProject)} without, over the selected window.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -563,6 +617,8 @@ export function UsageDashboard() {
               note={data.store.shared ? "Shared across instances" : "Per instance — attach Upstash/Vercel KV for production"}
             />
           </div>
+
+          {data.moat && <MoatPanel toolBreadth={data.moat.toolBreadth} contextReuse={data.moat.contextReuse} />}
 
           <BucketTable title="By tool" rows={Object.entries(data.byTool)} labelFor={toolLabel} />
           {data.byTemplate && (

@@ -173,6 +173,8 @@ export async function POST(request: NextRequest) {
         durationMs: Date.now() - startedAt,
         ok,
         template,
+        uid: gate.kind === "user" ? gate.session.uid : null,
+        hasProjectContext: Boolean(project),
       });
     };
 
