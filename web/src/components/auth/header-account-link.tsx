@@ -24,6 +24,11 @@ export function HeaderAccountLink({ className = "" }: { className?: string }) {
           <UserRound className="size-4" aria-hidden="true" />
           <span className="max-w-[140px] truncate">{session.user.name || session.user.email}</span>
         </Link>
+        {session.isPro && (
+          <span className="rounded-[4px] bg-primary/10 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary" data-pro-badge="true">
+            Pro
+          </span>
+        )}
         <button type="button" onClick={() => void signOut()} className="hover:text-foreground">
           Sign out
         </button>
