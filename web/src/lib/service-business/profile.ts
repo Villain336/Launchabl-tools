@@ -50,6 +50,16 @@ export type ServiceBusinessProfile = {
   bonded: boolean;
   gbpUrl: string | null;
   websiteUrl: string | null;
+  /**
+   * Explicit contractor consent to let their saved knowledge notes
+   * (`lib/service-business/knowledge.ts`) feed the cross-account learning
+   * pool that improves every account's AI agents (§18.2.2's outcome-data
+   * flywheel, §25.2's repurposing of `markdown-file-generator`). Defaults
+   * to `false` — knowledge notes are always saved privately to the org
+   * regardless of this flag; this only controls whether they're also
+   * eligible for cross-account reuse.
+   */
+  allowKnowledgeSharing: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -64,6 +74,7 @@ export type ServiceBusinessProfileInput = {
   bonded?: boolean;
   gbpUrl?: string | null;
   websiteUrl?: string | null;
+  allowKnowledgeSharing?: boolean;
 };
 
 export const PROFILE_LIMITS = { serviceArea: 20, addressMax: 200, phoneMax: 40, slugMax: 80 } as const;
@@ -168,6 +179,7 @@ export async function createServiceBusinessProfile(
     bonded: Boolean(input.bonded),
     gbpUrl: cleanUrl(input.gbpUrl),
     websiteUrl: cleanUrl(input.websiteUrl),
+    allowKnowledgeSharing: Boolean(input.allowKnowledgeSharing),
     createdAt: now,
     updatedAt: now,
   };
@@ -199,10 +211,18 @@ export async function updateServiceBusinessProfile(
     bonded: input.bonded !== undefined ? Boolean(input.bonded) : existing.bonded,
     gbpUrl: input.gbpUrl !== undefined ? cleanUrl(input.gbpUrl) : existing.gbpUrl,
     websiteUrl: input.websiteUrl !== undefined ? cleanUrl(input.websiteUrl) : existing.websiteUrl,
+    allowKnowledgeSharing: input.allowKnowledgeSharing !== undefined ? Boolean(input.allowKnowledgeSharing) : existing.allowKnowledgeSharing,
     updatedAt: new Date().toISOString(),
   };
+  const consentChanged = updated.allowKnowledgeSharing !== existing.allowKnowledgeSharing;
   await store.set(profileKey(orgId), JSON.stringify(updated), PROFILE_TTL);
   await logAuditEvent({ orgId, actorUid: actingUid, action: "svcprofile.updated", target: orgId, detail: { trades: updated.trades } }, store);
+  if (consentChanged) {
+    await logAuditEvent(
+      { orgId, actorUid: actingUid, action: "svcprofile.knowledge_consent_changed", target: orgId, detail: { allowKnowledgeSharing: updated.allowKnowledgeSharing } },
+      store,
+    );
+  }
   return updated;
 }
 

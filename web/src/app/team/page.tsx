@@ -14,6 +14,10 @@ export default function TeamPage() {
         <a href="/security" className="underline">
           audit log
         </a>
+        . Once your team is set up,{" "}
+        <a href="/crm" className="underline">
+          manage your customers in the CRM
+        </a>
         .
       </p>
       <div className="mt-8 max-w-lg">

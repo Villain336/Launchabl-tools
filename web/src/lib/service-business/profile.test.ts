@@ -82,6 +82,21 @@ describe("service business profile", () => {
     expect(await getServiceBusinessProfileBySlug("no-such-slug", store)).toBeNull();
   });
 
+  it("defaults knowledge-sharing consent to false and audit-logs a distinct event when it changes", async () => {
+    const { store, owner, org } = await seedOrg();
+    const created = await createServiceBusinessProfile(org.id, owner.uid, {}, store);
+    if ("error" in created) throw new Error(created.error);
+    expect(created.allowKnowledgeSharing).toBe(false);
+
+    const unchanged = await updateServiceBusinessProfile(org.id, owner.uid, { phone: "555-0100" }, store);
+    if ("error" in unchanged) throw new Error(unchanged.error);
+    expect(unchanged.allowKnowledgeSharing).toBe(false);
+
+    const consented = await updateServiceBusinessProfile(org.id, owner.uid, { allowKnowledgeSharing: true }, store);
+    if ("error" in consented) throw new Error(consented.error);
+    expect(consented.allowKnowledgeSharing).toBe(true);
+  });
+
   it("returns an error when updating a profile that doesn't exist yet", async () => {
     const { store, owner, org } = await seedOrg();
     const result = await updateServiceBusinessProfile(org.id, owner.uid, { phone: "555-0100" }, store);

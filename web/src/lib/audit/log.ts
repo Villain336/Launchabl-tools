@@ -30,9 +30,11 @@ export type AuditAction =
   | "admin.audit_viewed"
   | "svcprofile.created"
   | "svcprofile.updated"
+  | "svcprofile.knowledge_consent_changed"
   | "customer.created"
   | "customer.updated"
-  | "customer.archived";
+  | "customer.archived"
+  | "knowledge.note_saved";
 
 export type AuditEvent = {
   /** Null/omitted for actions not scoped to an org (e.g. an admin-dashboard view). */
