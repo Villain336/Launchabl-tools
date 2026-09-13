@@ -38,6 +38,9 @@ export type Lead = {
    * Angi/Thumbtack sell the same homeowner to several pros; we do not.
    */
   exclusive: true;
+  scheduledFor: string | null;
+  serviceName: string;
+  address: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -52,6 +55,9 @@ export type LeadInput = {
   description?: string;
   urgency?: LeadUrgency;
   sourcePath?: string;
+  scheduledFor?: string | null;
+  serviceName?: string;
+  address?: string;
 };
 
 export const LEAD_LIMITS = { nameMax: 120, phoneMax: 40, emailMax: 200, descriptionMax: 2000, cityMax: 80 } as const;
@@ -63,7 +69,13 @@ const allotmentKey = (orgId: string, period: string) => `leadallot:${orgId}:${pe
 
 /** Product law: exclusivity is not optional and cannot drift on old rows. */
 export function normalizeLead(lead: Lead): Lead {
-  return { ...lead, exclusive: true };
+  return {
+    ...lead,
+    exclusive: true,
+    scheduledFor: typeof lead.scheduledFor === "string" && lead.scheduledFor ? lead.scheduledFor : null,
+    serviceName: typeof lead.serviceName === "string" ? lead.serviceName : "",
+    address: typeof lead.address === "string" ? lead.address : "",
+  };
 }
 
 export async function getLead(id: string, store: KeyValueStore = getStore()): Promise<Lead | null> {
@@ -105,6 +117,8 @@ export async function readAllotment(
 export type SubmitLeadArgs = LeadInput & {
   orgId?: string | null;
   leadTier?: LeadTierId;
+  /** Booked calendar slots always land — allotment holds apply to quote requests, not jobs. */
+  mustDeliver?: boolean;
 };
 
 export async function submitLead(input: SubmitLeadArgs, store: KeyValueStore = getStore()): Promise<Lead | DomainError> {
@@ -122,10 +136,13 @@ export async function submitLead(input: SubmitLeadArgs, store: KeyValueStore = g
 
   const orgId = input.orgId ?? null;
   let held = false;
-  if (orgId) {
+  if (orgId && !input.mustDeliver) {
     const allotment = await readAllotment(orgId, input.leadTier ?? "listing", store);
     if (allotment.remaining <= 0) held = true;
     else await store.incr(allotmentKey(orgId, allotment.period), RECORD_TTL);
+  } else if (orgId && input.mustDeliver) {
+    const allotment = await readAllotment(orgId, input.leadTier ?? "listing", store);
+    if (allotment.remaining > 0) await store.incr(allotmentKey(orgId, allotment.period), RECORD_TTL);
   }
 
   const now = new Date().toISOString();
@@ -145,6 +162,9 @@ export async function submitLead(input: SubmitLeadArgs, store: KeyValueStore = g
     held,
     customerId: null,
     exclusive: true,
+    scheduledFor: input.scheduledFor ? cleanText(input.scheduledFor, 40) : null,
+    serviceName: cleanText(input.serviceName, 80),
+    address: cleanText(input.address, 200),
     createdAt: now,
     updatedAt: now,
   };

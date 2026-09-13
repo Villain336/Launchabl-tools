@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 
 const title = "How this works";
-const description = "Quote requests go to one contractor. Reviews only exist after completed work. We do not invent stars or sell the same homeowner five ways.";
+const description = "Pick a weekday time on the contractor's page. It lands on their job book. Quote piles and shared leads are the old way.";
 
 export const metadata: Metadata = {
   title,
@@ -19,15 +19,15 @@ export default function HowItWorksPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="Trust"
-        title="What we will not copy from Angi, Jobber, or a generic CRM"
-        description="The directory is small on purpose. The OS is thinner than ServiceTitan. The only things we will not compromise are exclusive leads and reviews that require a real job."
+        title="Why a local would actually use this"
+        description="Nobody opens an app because leads are exclusive. They open it to grab Saturday at 9, see a starting price, and know the crew has them on the book."
       />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
         <article className="rounded-3xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold">Exclusive quote requests</h2>
+          <h2 className="text-lg font-semibold">Book a time, don&rsquo;t join a platform</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Angi&rsquo;s own pro agreement says a lead is frequently sent to several other approved pros. Thumbtack shows a list and charges when a homeowner contacts more than one. Here, the form on a storefront goes to that listing only. City pages do not silently assign you to whoever is first in the grid.
+            Homeowners already have Google and a neighbor. They will not &ldquo;switch to Launchabl.&rdquo; They will tap a booking link the contractor texts them, or a weekday slot on a storefront that already showed up in search. The contractor is the distribution. The page is a calendar, not a brand.
           </p>
         </article>
         <article className="rounded-3xl border border-border bg-card p-6">

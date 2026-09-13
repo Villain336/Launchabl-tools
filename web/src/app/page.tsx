@@ -17,10 +17,10 @@ export default async function Home() {
         <Container>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">North Carolina directory</p>
           <h1 className="mt-3 max-w-3xl font-heading text-4xl font-bold tracking-tight sm:text-6xl">
-            Find a local service business. Or run one from here.
+            Book a local crew this week. Or run the book from your phone.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Licensed lawn care, HVAC, cleaning, plumbing, and more — starting with three NC businesses we already work with. A quote request on their page goes to them only. We do not sell the same homeowner to a list of companies.
+            Pick a weekday time and a starting price on the contractor&rsquo;s page. It lands on their job book — not a pile of &ldquo;we&rsquo;ll call you back.&rdquo; Starting with three NC businesses we already work with.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/nc/greensboro" size="lg">
@@ -82,9 +82,9 @@ export default async function Home() {
 
       <section className="border-t border-border bg-primary py-16 text-primary-foreground">
         <Container className="flex flex-col items-center text-center">
-          <h2 className="font-heading text-3xl font-bold">Contractors: get listed, or let us run it</h2>
+          <h2 className="font-heading text-3xl font-bold">Contractors: your booking link is the product</h2>
           <p className="mt-3 max-w-2xl text-primary-foreground/80">
-            Self-serve OS for jobs, estimates, and your public page. Agency Launch is {siteConfig.price} to get set up. Managed Growth keeps the marketing going.
+            Text it after a phone call. Put it on Google. A Saturday slot hits your phone. The OS is what you run after they book. Agency Launch is {siteConfig.price} if you want us to stand that up.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <LinkButton href="/os" variant="secondary" className="bg-background text-foreground hover:bg-background/90">

@@ -7,7 +7,7 @@ import { ToolStatusBadge } from "@/components/ui/agency-badge";
 import { siteConfig } from "@/lib/site-config";
 
 const title = "The OS";
-const description = "Run your NC service business from one place — customers, jobs, estimates, staff, and the leads coming in from the marketplace, with AI agents helping along the way.";
+const description = "Customers pick a weekday time on your page. It lands on your job book. You run the work from your phone — not another CRM speech."
 
 export const metadata: Metadata = {
   title,
@@ -24,8 +24,9 @@ export const metadata: Metadata = {
  */
 const features: { name: string; summary: string; status: "live" | "beta" | "coming-soon" }[] = [
   { name: "Unified customer profiles", summary: "Every customer, their contact info, job history, and notes in one place — not scattered across texts and spreadsheets.", status: "live" },
-  { name: "Customizable storefront", summary: "Your public listing is a theme you control — colors, services, photos, quote form — like Shopify, for a trade.", status: "live" },
-  { name: "Marketplace leads", summary: "Quote requests from your directory page land in the OS and count against your monthly allotment.", status: "live" },
+  { name: "Public booking", summary: "Customers pick an open weekday slot on your page. It becomes a job on the calendar, not a quote you have to chase.", status: "live" },
+  { name: "Customizable storefront", summary: "Your public listing is a theme you control — colors, services, photos, booking — like Shopify, for a trade.", status: "live" },
+  { name: "Marketplace leads", summary: "Quote requests still work for messy jobs. Booked slots always land — we do not hold a Saturday because your allotment ran out.", status: "live" },
   { name: "Jobs", summary: "Turn a lead into a job on the book, assigned to someone on the team.", status: "live" },
   { name: "Digital estimates", summary: "Line-item estimates tied to a customer and job, ready to send.", status: "live" },
   { name: "Payment collection", summary: "Record cash/check/card on a job, or send a Stripe Checkout invoice. Same ledger either way.", status: "live" },
@@ -44,8 +45,8 @@ export default function OsPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="The OS"
-        title="One place to run your service business"
-        description="Built for the trades already on the NC marketplace — lawn care, HVAC, cleaning, pressure washing, parking-lot & paving, plumbing, electrical, and painting. Self-serve: you run it, we build it."
+        title="Your public page is a booking link"
+        description="Text /b/your-name after a call. Put it on Google. When someone grabs Saturday, it is on the book — customer, time, address. The rest of the OS is what you use after that. Built for NC lawn, HVAC, cleaning, plumbing, and the other launch trades."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

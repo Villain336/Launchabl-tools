@@ -32,6 +32,12 @@ export type Storefront = {
   showGallery: boolean;
   showServices: boolean;
   published: boolean;
+  /** Public calendar booking — the reason a homeowner uses the page (§28). */
+  bookingEnabled: boolean;
+  bookingStartHour: number;
+  bookingEndHour: number;
+  slotMinutes: number;
+  bookingDriveMinutes: number;
   updatedAt: string;
 };
 
@@ -52,6 +58,11 @@ export type StorefrontInput = Partial<{
   showGallery: boolean;
   showServices: boolean;
   published: boolean;
+  bookingEnabled: boolean;
+  bookingStartHour: number;
+  bookingEndHour: number;
+  slotMinutes: number;
+  bookingDriveMinutes: number;
 }>;
 
 export const STOREFRONT_LIMITS = {
@@ -84,8 +95,29 @@ export function defaultStorefront(overrides: Partial<Storefront> = {}): Storefro
     showGallery: true,
     showServices: true,
     published: true,
+    bookingEnabled: true,
+    bookingStartHour: 8,
+    bookingEndHour: 17,
+    slotMinutes: 60,
+    bookingDriveMinutes: 20,
     updatedAt: new Date().toISOString(),
     ...overrides,
+  };
+}
+
+function clampHour(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 23 ? value : fallback;
+}
+
+export function normalizeStorefront(storefront: Storefront): Storefront {
+  return {
+    ...defaultStorefront(),
+    ...storefront,
+    bookingEnabled: storefront.bookingEnabled !== false,
+    bookingStartHour: clampHour(storefront.bookingStartHour, 8),
+    bookingEndHour: clampHour(storefront.bookingEndHour, 17),
+    slotMinutes: typeof storefront.slotMinutes === "number" && storefront.slotMinutes > 0 ? storefront.slotMinutes : 60,
+    bookingDriveMinutes: typeof storefront.bookingDriveMinutes === "number" && storefront.bookingDriveMinutes >= 0 ? storefront.bookingDriveMinutes : 20,
   };
 }
 
@@ -143,6 +175,11 @@ export function applyStorefrontInput(base: Storefront, input: StorefrontInput): 
     showGallery: input.showGallery !== undefined ? Boolean(input.showGallery) : base.showGallery,
     showServices: input.showServices !== undefined ? Boolean(input.showServices) : base.showServices,
     published: input.published !== undefined ? Boolean(input.published) : base.published,
+    bookingEnabled: input.bookingEnabled !== undefined ? Boolean(input.bookingEnabled) : base.bookingEnabled,
+    bookingStartHour: input.bookingStartHour !== undefined ? clampHour(input.bookingStartHour, base.bookingStartHour) : base.bookingStartHour,
+    bookingEndHour: input.bookingEndHour !== undefined ? clampHour(input.bookingEndHour, base.bookingEndHour) : base.bookingEndHour,
+    slotMinutes: input.slotMinutes !== undefined && input.slotMinutes > 0 ? input.slotMinutes : base.slotMinutes,
+    bookingDriveMinutes: input.bookingDriveMinutes !== undefined && input.bookingDriveMinutes >= 0 ? input.bookingDriveMinutes : base.bookingDriveMinutes,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -152,12 +189,12 @@ const seedKey = (slug: string) => `storefront:seed:${slug}`;
 
 export async function getOrgStorefront(orgId: string, store: KeyValueStore = getStore()): Promise<Storefront | null> {
   const raw = await store.get(orgKey(orgId));
-  return raw ? (JSON.parse(raw) as Storefront) : null;
+  return raw ? normalizeStorefront(JSON.parse(raw) as Storefront) : null;
 }
 
 export async function getSeedStorefront(slug: string, store: KeyValueStore = getStore()): Promise<Storefront | null> {
   const raw = await store.get(seedKey(slug));
-  return raw ? (JSON.parse(raw) as Storefront) : null;
+  return raw ? normalizeStorefront(JSON.parse(raw) as Storefront) : null;
 }
 
 export async function saveOrgStorefront(

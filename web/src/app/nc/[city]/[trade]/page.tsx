@@ -33,7 +33,7 @@ export default async function TradeCityPage({ params }: { params: Promise<{ city
       <SectionHeading
         eyebrow={`${record.name}, NC`}
         title={`${TRADE_LABELS[trade]} in ${record.name}`}
-        description="Open a storefront to send a quote request. Each request goes to that contractor only — we do not sell the same homeowner to a list of companies."
+        description="Open a page to pick a weekday time. You leave with a slot, not a hope that someone calls you back."
       />
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
         {listings.length === 0 && (

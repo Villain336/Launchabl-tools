@@ -1,6 +1,7 @@
 import { cityLabel, type PublicListing } from "@/lib/marketplace/listing";
 import { isTradeSlug } from "@/lib/marketplace/cities";
 import { TRADE_LABELS } from "@/lib/service-business/profile";
+import { BookingForm } from "./booking-form";
 import { LeadForm } from "./lead-form";
 
 export function StorefrontView({
@@ -45,7 +46,8 @@ export function StorefrontView({
           </div>
           {storefront.tagline && <p className={`mt-4 max-w-2xl text-lg ${muted}`}>{storefront.tagline}</p>}
           <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium">
-            <span className={`rounded-full border px-3 py-1 ${panel}`}>Exclusive quotes</span>
+            {listing.nextSlot && <span className={`rounded-full border px-3 py-1 ${panel}`}>Next: {listing.nextSlot.label}</span>}
+            {listing.startingPrice && <span className={`rounded-full border px-3 py-1 ${panel}`}>From {listing.startingPrice}</span>}
             {listing.licensed && <span className={`rounded-full border px-3 py-1 ${panel}`}>Licensed</span>}
             {listing.insured && <span className={`rounded-full border px-3 py-1 ${panel}`}>Insured</span>}
             {listing.bonded && <span className={`rounded-full border px-3 py-1 ${panel}`}>Bonded</span>}
@@ -117,18 +119,37 @@ export function StorefrontView({
             </div>
           )}
         </div>
-        {storefront.showLeadForm && (
-          <aside className="lg:sticky lg:top-28 lg:self-start">
-            <h2 className="mb-3 text-xl font-semibold">{storefront.ctaLabel}</h2>
-            <LeadForm
-              listingSlug={listing.slug}
-              contractorName={listing.name}
-              city={city}
-              trade={trade}
-              sourcePath={sourcePath}
-              ctaLabel={storefront.ctaLabel}
-              accent={storefront.accent}
-            />
+        {(storefront.bookingEnabled !== false || storefront.showLeadForm) && (
+          <aside className="lg:sticky lg:top-28 lg:self-start space-y-6">
+            {storefront.bookingEnabled !== false && (
+              <div>
+                <h2 className="mb-3 text-xl font-semibold">Book a time</h2>
+                <BookingForm
+                  listingSlug={listing.slug}
+                  contractorName={listing.name}
+                  city={city}
+                  trade={trade}
+                  sourcePath={sourcePath}
+                  services={storefront.services.map((service) => ({ name: service.name, priceFrom: service.priceFrom }))}
+                  startingPrice={listing.startingPrice}
+                  accent={storefront.accent}
+                />
+              </div>
+            )}
+            {storefront.showLeadForm && (
+              <div>
+                <h2 className="mb-3 text-xl font-semibold">{storefront.bookingEnabled !== false ? "Or ask for a quote" : storefront.ctaLabel}</h2>
+                <LeadForm
+                  listingSlug={listing.slug}
+                  contractorName={listing.name}
+                  city={city}
+                  trade={trade}
+                  sourcePath={sourcePath}
+                  ctaLabel={storefront.ctaLabel}
+                  accent={storefront.accent}
+                />
+              </div>
+            )}
           </aside>
         )}
       </section>
