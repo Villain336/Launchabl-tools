@@ -20,6 +20,14 @@ export type UsageEvent = {
   ok: boolean;
   /** Agent template id that started the conversation, when the run came from one. */
   template?: string | null;
+  /**
+   * Signed-in account id, when the run wasn't anonymous. Not set for anon
+   * runs. Powers the "distinct tools used per account" moat metric
+   * (STRATEGY.md §18.2.1 / §23.5) — see `readAccountToolBreadth`.
+   */
+  uid?: string | null;
+  /** Whether a saved project's Brand Vault context was attached to this run. Only meaningful when `uid` is set. */
+  hasProjectContext?: boolean;
 };
 
 /** USD per million tokens (input, output). Approximate list prices; used only when the gateway omits cost. */
@@ -65,11 +73,107 @@ export async function recordUsage(event: UsageEvent, store: KeyValueStore = getS
     if (event.durationMs) fields[field(scope, "duration")] = Math.round(event.durationMs);
   }
   if (event.reportedCostUsd == null) fields[field("all", "estimated")] = 1;
+  // Only signed-in runs can have (or lack) saved project context — anonymous
+  // traffic never has a project, so mixing it in would dilute the reuse rate.
+  if (event.uid) fields[field("context", event.hasProjectContext ? "project" : "noproject", "requests")] = 1;
+  const writes: Promise<unknown>[] = [
+    store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS),
+    store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS),
+  ];
+  if (event.uid) {
+    writes.push(store.sadd(`${KEY_PREFIX}:user:${event.uid}:tools`, event.slug, RETENTION_SECONDS));
+    writes.push(store.sadd(`${KEY_PREFIX}:users`, event.uid, RETENTION_SECONDS));
+  }
   try {
-    await Promise.all([store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS), store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS)]);
+    await Promise.all(writes);
   } catch (error) {
     console.warn("[usage] failed to record", error);
   }
+}
+
+/* ── Moat metrics (STRATEGY.md §18.2.1 / §23.5) ─────────────
+ * §18 named "distinct tools used per account" and "% of runs that reused
+ * saved project context" as the single biggest lever behind the whole
+ * connective-tissue/Brand Vault thesis — and §22.1/§23.1 flagged that
+ * neither was actually measured anywhere. These two readers are that
+ * measurement: an account that only ever uses one tool is a "used for a
+ * month and tossed" account; an account whose tool count grows and that
+ * keeps reusing its saved project context is the moat, if it exists at all.
+ */
+
+export type ToolBreadthStats = {
+  /** Accounts that have run at least one tool, ever (capped by `limit`). */
+  accountsWithUsage: number;
+  /** True if `accountsWithUsage` was capped by `limit` rather than exhaustive. */
+  sampled: boolean;
+  /** Bucketed count of accounts by how many distinct tool slugs they've ever run. */
+  distinctToolsHistogram: { "1": number; "2-3": number; "4-9": number; "10+": number };
+  /** Mean distinct tools run, across accounts with at least one run. */
+  avgDistinctTools: number;
+  /** Share of accounts with usage that have used 2 or more distinct tools — the direct read on whether the connective-tissue thesis is real. */
+  multiToolRate: number;
+};
+
+export function emptyToolBreadthStats(): ToolBreadthStats {
+  return { accountsWithUsage: 0, sampled: false, distinctToolsHistogram: { "1": 0, "2-3": 0, "4-9": 0, "10+": 0 }, avgDistinctTools: 0, multiToolRate: 0 };
+}
+
+/**
+ * Scans the (uncapped, all-time) index of accounts that have ever run a
+ * tool, and for each one counts distinct tool slugs via the per-account set
+ * written in `recordUsage`. At current usage volumes a full scan is cheap;
+ * `limit` exists so this can't become an unbounded admin-dashboard query if
+ * the account base grows before this gets replaced with a cheaper rollup.
+ */
+export async function readAccountToolBreadth(store: KeyValueStore = getStore(), limit = 5000): Promise<ToolBreadthStats> {
+  try {
+    const uids = await store.smembers(`${KEY_PREFIX}:users`);
+    const sample = uids.slice(0, limit);
+    const counts = await Promise.all(sample.map(async (uid) => (await store.smembers(`${KEY_PREFIX}:user:${uid}:tools`)).length));
+    const stats = emptyToolBreadthStats();
+    stats.sampled = uids.length > limit;
+    let totalTools = 0;
+    let multi = 0;
+    let withUsage = 0;
+    for (const count of counts) {
+      if (count <= 0) continue;
+      withUsage++;
+      totalTools += count;
+      if (count >= 2) multi++;
+      if (count === 1) stats.distinctToolsHistogram["1"]++;
+      else if (count <= 3) stats.distinctToolsHistogram["2-3"]++;
+      else if (count <= 9) stats.distinctToolsHistogram["4-9"]++;
+      else stats.distinctToolsHistogram["10+"]++;
+    }
+    stats.accountsWithUsage = withUsage;
+    stats.avgDistinctTools = withUsage ? totalTools / withUsage : 0;
+    stats.multiToolRate = withUsage ? multi / withUsage : 0;
+    return stats;
+  } catch (error) {
+    console.warn("[usage] failed to read account tool breadth", error);
+    return emptyToolBreadthStats();
+  }
+}
+
+export type ContextReuseStats = { withProject: number; withoutProject: number; reuseRate: number };
+
+export function emptyContextReuseStats(): ContextReuseStats {
+  return { withProject: 0, withoutProject: 0, reuseRate: 0 };
+}
+
+/** Share of signed-in runs (over `days`) that had a saved project's Brand Vault context attached. */
+export async function readContextReuseStats(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<ContextReuseStats> {
+  const stats = emptyContextReuseStats();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - i);
+    const raw = await store.hgetall(`${KEY_PREFIX}:day:${dayKey(d)}`);
+    stats.withProject += raw["context:project:requests"] ?? 0;
+    stats.withoutProject += raw["context:noproject:requests"] ?? 0;
+  }
+  const total = stats.withProject + stats.withoutProject;
+  stats.reuseRate = total ? stats.withProject / total : 0;
+  return stats;
 }
 
 /**

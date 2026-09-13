@@ -27,7 +27,7 @@ const columns = [
       { label: "About", href: "/about" },
       { label: "Case Studies", href: "/case-studies" },
       { label: "Blog", href: "/blog" },
-      { label: "Privacy", href: "/legal/privacy" },
+      { label: "Security", href: "/security" },
     ],
   },
 ];
@@ -91,6 +91,12 @@ export function SiteFooter() {
             </Link>
             <Link href="/legal/acceptable-use" className="hover:text-foreground">
               Acceptable use
+            </Link>
+            <Link href="/legal/subprocessors" className="hover:text-foreground">
+              Subprocessors
+            </Link>
+            <Link href="/legal/dpa" className="hover:text-foreground">
+              DPA
             </Link>
           </div>
         </div>

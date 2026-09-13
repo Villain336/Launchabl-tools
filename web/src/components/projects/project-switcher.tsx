@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, FolderOpen, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useSession } from "@/lib/auth/use-session";
-import type { Project, ProjectInput } from "@/lib/projects/project";
+import { VERTICAL_LABELS, VERTICALS, type Project, type ProjectInput, type Vertical } from "@/lib/projects/project";
 import { removeProject, saveProject, selectProject, useProjects } from "@/lib/projects/use-projects";
 
 /**
@@ -26,6 +26,7 @@ function ProjectForm({ project, onClose }: { project: Project | null; onClose: (
     offers: project?.offers ?? "",
     competitors: project?.competitors ?? [],
     notes: project?.notes ?? "",
+    vertical: project?.vertical ?? null,
     brand: {
       primary: project?.brand.primary ?? null,
       logoUrl: project?.brand.logoUrl ?? null,
@@ -91,6 +92,22 @@ function ProjectForm({ project, onClose }: { project: Project | null; onClose: (
           <div>
             <label className={label} htmlFor="pf-tone">Voice and tone</label>
             <input id="pf-tone" className={`${field} mt-1`} value={draft.tone ?? ""} onChange={(e) => set("tone", e.target.value)} placeholder="Plain, confident, no hype" />
+          </div>
+          <div>
+            <label className={label} htmlFor="pf-vertical">Industry (optional)</label>
+            <select
+              id="pf-vertical"
+              className={`${field} mt-1`}
+              value={draft.vertical ?? ""}
+              onChange={(e) => setDraft((d) => ({ ...d, vertical: (e.target.value || null) as Vertical | null }))}
+            >
+              <option value="">Generic — no industry-specific guidance</option>
+              {VERTICALS.map((v) => (
+                <option key={v} value={v}>
+                  {VERTICAL_LABELS[v]}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="sm:col-span-2">
             <label className={label} htmlFor="pf-audience">Audience</label>

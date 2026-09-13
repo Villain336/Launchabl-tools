@@ -35,6 +35,11 @@ export function CaseStudyCard({ study }: { study: CaseStudy }) {
                 {study.client}
               </Link>
               <p className="mt-0.5 text-xs text-muted-foreground">{study.industry}</p>
+              {study.illustrative && (
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-amber-600">
+                  Illustrative example
+                </p>
+              )}
             </div>
             {tool && (
               <p className="max-w-[8rem] text-right text-[10px] uppercase tracking-wide text-primary">

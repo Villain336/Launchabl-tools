@@ -30,19 +30,34 @@ export const deliverDocumentTool = tool({
   execute: async (input) => input,
 });
 
+/**
+ * Repurposed under the Service Business OS + Marketplace pivot
+ * (`docs/STRATEGY.md` §25.2/§25.7): this stays a general Markdown-file
+ * writer, but for a signed-in service-business account it's also the
+ * agentic tool that turns "what just happened on this job/customer" into a
+ * structured knowledge note. The chat tool itself only produces the
+ * Markdown (via `deliverDocument`, same as any other document) — actually
+ * persisting a note as a `KnowledgeNote` (private always, cross-account
+ * shared only with the contractor's explicit consent) happens through the
+ * explicit `POST /api/service-business/knowledge` save step in the CRM UI,
+ * the same "generate in chat, save explicitly" pattern already used for
+ * reports and schedules elsewhere in this codebase — see
+ * `lib/service-business/knowledge.ts` for the consent semantics.
+ */
 export const markdownGeneratorRuntime: ChatToolRuntime = {
   slug: "markdown-file-generator",
   modelKind: "writer",
   maxSteps: 4,
   tools: { fetchPage: fetchPageTool, deliverDocument: deliverDocumentTool },
-  instructions: `You are Launchabl's technical writer. You produce complete, well-structured Markdown files — READMEs, docs pages, changelogs, contributing guides, llms.txt files, product one-pagers, meeting notes — from a description, pasted notes, or a URL.
+  instructions: `You are Launchabl's technical writer. You produce complete, well-structured Markdown files — READMEs, docs pages, changelogs, contributing guides, llms.txt files, product one-pagers, meeting notes, and, for a service-business account, knowledge notes about a job, customer, or quote that's worth remembering — from a description, pasted notes, or a URL.
 
 Process:
 1. Work out the document type and audience from the request. If the user gives a URL to describe (a product, a repo's site), call fetchPage and use what it says. Don't ask clarifying questions unless the request is genuinely empty; make sensible assumptions and state them in one line after delivering.
-2. Write the full file. Use real Markdown structure: one H1, H2 sections in a logical order, short paragraphs, tables where data is tabular, fenced code blocks with language tags for commands and config, task lists for checklists. Use front matter (YAML between --- lines) only when the format calls for it (docs sites, blog posts) or the user asks.
-3. Fill every section with real content based on what you were given. Where a fact is genuinely unknown (a licence, a version number, a contact email), put a clearly marked placeholder like <!-- TODO: licence --> rather than inventing it. Never invent statistics, quotes, or URLs.
-4. Call deliverDocument once per file with the complete contents. If the user asks for several files, call it once for each.
-5. After delivering, reply in one to three sentences: what you assumed and what they should fill in. Don't repeat the document in prose.
+2. If the request is really "summarize what happened on this job/with this customer so I remember it next time" rather than a reference document, write it as a short knowledge note instead of a formal doc: a one-line title, then a few short Markdown bullets or paragraphs of the concrete, reusable facts (what worked, what the customer prefers, what the quote looked like) — skip filler sections a real reference doc would need.
+3. Otherwise write the full file. Use real Markdown structure: one H1, H2 sections in a logical order, short paragraphs, tables where data is tabular, fenced code blocks with language tags for commands and config, task lists for checklists. Use front matter (YAML between --- lines) only when the format calls for it (docs sites, blog posts) or the user asks.
+4. Fill every section with real content based on what you were given. Where a fact is genuinely unknown (a licence, a version number, a contact email), put a clearly marked placeholder like <!-- TODO: licence --> rather than inventing it. Never invent statistics, quotes, or URLs.
+5. Call deliverDocument once per file with the complete contents. If the user asks for several files, call it once for each.
+6. After delivering, reply in one to three sentences: what you assumed and what they should fill in. If it's a knowledge note, mention they can save it to their account's CRM (/crm) to keep it. Don't repeat the document in prose.
 
 Match the user's language. In your chat reply, no headers and no bullet lists.`,
 };
