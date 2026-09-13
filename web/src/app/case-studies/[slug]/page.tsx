@@ -43,7 +43,12 @@ export default async function CaseStudyPage({
       </Link>
 
       <div className="mt-6 max-w-2xl">
-        {tool && <Badge tone="info">Started with {tool.name}</Badge>}
+        <div className="flex flex-wrap items-center gap-2">
+          {tool && <Badge tone="info">Started with {tool.name}</Badge>}
+          {study.illustrative && (
+            <Badge tone="warning">Illustrative example — not a real customer</Badge>
+          )}
+        </div>
         <h1 className="mt-3 text-3xl font-bold text-foreground sm:text-4xl">{study.client}</h1>
         <p className="mt-1 text-sm uppercase tracking-wide text-muted-foreground">{study.industry}</p>
         <p className="mt-6 text-lg text-muted-foreground">{study.summary}</p>

@@ -9,6 +9,13 @@ export type CaseStudy = {
   quote: { text: string; author: string };
   image?: string;
   url?: string;
+  /**
+   * True if this is a hypothetical/composite example rather than a real,
+   * named customer. Must be true unless there is a real customer behind the
+   * name, quote, and metric — never present an invented result as a real
+   * testimonial. Every UI that renders a CaseStudy must surface this flag.
+   */
+  illustrative: boolean;
 };
 
 export const caseStudies: CaseStudy[] = [
@@ -26,32 +33,35 @@ export const caseStudies: CaseStudy[] = [
       text: "The site is the product: a clear offer, a local service story, and a path to a quote — built so a Greensboro lot-care company can send one URL instead of a PDF.",
       author: "Launchabl, on the Atlas Lot Care launch",
     },
+    illustrative: false,
   },
   {
     slug: "riverside-roasters",
-    client: "Riverside Roasters",
+    client: "Riverside Roasters (hypothetical example)",
     industry: "Coffee & CPG",
     summary:
-      "A local coffee roaster needed a brand, a site, and a launch campaign before their new roastery opened — all within one flat price.",
-    metric: { label: "Pre-orders in launch week", value: "412" },
+      "A composite, hypothetical example — not a real customer — showing how a local coffee roaster could use a free brand-name tool to kick off a full brand + site + launch campaign on the unlimited plan.",
+    metric: { label: "Illustrative target", value: "412 pre-orders" },
     tool: "brand-creator",
     quote: {
       text: "We used the Brand Creator tool to test names for free, then rolled straight into the unlimited plan for the full identity and site. Launch week outsold our projections by 3x.",
-      author: "Maya Chen, Founder",
+      author: "Illustrative example — not a real customer",
     },
+    illustrative: true,
   },
   {
     slug: "northstar-legal",
-    client: "Northstar Legal Group",
+    client: "Northstar Legal Group (hypothetical example)",
     industry: "Professional services",
     summary:
-      "A regional law firm's site had zero structured data and inconsistent metadata across hundreds of scanned documents shared with clients.",
-    metric: { label: "Organic traffic in 4 months", value: "+164%" },
+      "A composite, hypothetical example — not a real customer — showing how a firm with inconsistent metadata across hundreds of documents could use the free schema-generator tool as an entry point into a full technical SEO pass.",
+    metric: { label: "Illustrative target", value: "+164% organic traffic" },
     tool: "schema-generator",
     quote: {
       text: "The schema generator caught gaps we didn't know existed. The full technical SEO pass on the unlimited plan is what actually moved the needle.",
-      author: "David Okafor, Managing Partner",
+      author: "Illustrative example — not a real customer",
     },
+    illustrative: true,
   },
 ];
 
