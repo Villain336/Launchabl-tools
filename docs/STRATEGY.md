@@ -740,7 +740,7 @@ That's roughly 18 kept, 10 repurposed, 22 cut. The 50+-tools horizontal position
 None of this exists yet. `Org`/`OrgRecord` (§20 Phase 1) is the right primitive to build on rather than replace — a `ServiceBusinessProfile` extends it 1:1 (keeps the auth/billing/team primitive uncontaminated by domain-specific fields):
 
 - **`ServiceBusinessProfile`** — `orgId` (1:1 with the existing Org), trades served (lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving, etc. — reusing §24's vertical list as the starting trade taxonomy), NC service area (cities/counties), address, phone, license/insurance/bonding status, GBP profile link, public marketplace-listing slug.
-- **`Lead`** — consumer inquiry from a marketplace landing page: category, city, contact info, job description, urgency, source (which page/keyword), matched `ServiceBusinessProfile` (or unmatched/pool), status (new/contacted/quoted/won/lost), and however the monetization model prices it (§25.7 Q1).
+- **`Lead`** — consumer inquiry from a marketplace landing page: category, city, contact info, job description, urgency, source (which page/keyword), matched `ServiceBusinessProfile` (or unmatched/pool), status (new/contacted/quoted/won/lost). **Monetization, decided (§25.7 Q1):** subscription-tiered lead volume, not per-lead or commission pricing — a `Lead` carries no price field; instead each `ServiceBusinessProfile`'s subscription tier sets a monthly lead allotment, and delivered leads count against that period's allotment (needs a period-scoped counter next to the tier, same shape as the existing credits/ledger counters in §20 Phase 1). Lead quality must stay consistent across every tier — higher tiers buy more leads, never better ones — which rules out any design that quietly routes worse leads to lower tiers.
 - **`Customer`** — the unified customer profile inside one contractor's OS: contact info, address(es), linked jobs, notes, tags, source (marketplace lead vs. referral vs. direct).
 - **`Job`** — scheduled work: customer, assigned staff, service type, status, linked estimate/invoice, warranty expiry.
 - **`Estimate`** — line items, total, status, and whether it was AI-drafted (ties directly into the "AI agents" and "near-perfect digital estimates" features as one workflow, not two).
@@ -777,13 +777,15 @@ Nothing shipped in §20/§22–§24 was wasted effort — this is the vertical-d
 
 Building all eleven OS features and full statewide SEO coverage simultaneously isn't realistic; the ordering above is built around "does the core loop work end to end" before "how many features does the OS have," because a working loop with three features beats eleven features nobody's used yet — the same lesson §22.1 already drew from this project's own five-day-old history.
 
-### 25.7 Open questions — the founder's call, not resolved unilaterally in code
+### 25.7 Founder decisions
 
-1. **Marketplace monetization.** Pay-per-lead, a commission on completed job value, leads bundled free into the OS subscription, or a hybrid? This materially changes the `Lead`/`Payment` schema (§25.3) and is asked directly alongside this section.
-2. **Launch trade categories.** Default assumption carried forward from §24: lawn care, HVAC, cleaning, pressure washing/exterior, and parking-lot/paving — the trades already reflected in the home-services vertical work. Confirm, narrow further, or broaden to "all home services" from day one.
-3. **The tool cut list (§25.2).** Confirm the proposed keep/repurpose/cut disposition, or flag specific exceptions, before anything is actually removed from the codebase.
-4. **The existing consumer-facing funnel and Tools Pro subscription.** Wind down now, or keep running in parallel during the Phase 3.0 build so there's no revenue/traffic gap while the marketplace ramps up in NC?
+1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
+2. **Launch trade categories — decided.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), **plus plumbing, electrical, and painting**, added at this decision point. `TRADES` in `src/lib/service-business/profile.ts` reflects all eight.
+3. **The tool cut list (§25.2) — under review, not yet executed.** The founder asked to see the full itemized list before anything is removed. §25.2's grouping *is* that itemized list (all ~50 current tool slugs, bucketed keep/repurpose/cut) — nothing has been deleted from the codebase pending explicit sign-off on it.
+4. **The existing consumer-facing funnel and Tools Pro subscription — decided.** Runs as-is, in parallel, untouched, through the Phase 3.0 build. No redirect, no wind-down, no new-signup changes until the marketplace has real NC contractor density.
 
 ### 25.8 What's scaffolded so far
 
-Tracked here as this phase's work lands, following §20/§24's convention of marking status inline rather than in a separate changelog.
+- **[x] `ServiceBusinessProfile`** (`src/lib/service-business/profile.ts`) — one per `Org`, the eight-trade taxonomy above, NC service-area list, licensing/insurance/bonding flags, a collision-safe public marketplace slug (`getServiceBusinessProfileBySlug` — the lookup `/nc/[city]/[trade]/[slug]` pages in §25.5 will use), owner/admin-gated writes, audit-logged.
+- **[x] `Customer`** (`src/lib/service-business/customer.ts`) — the unified customer profile inside a contractor's OS, org-scoped CRUD with archiving, sourced (`marketplace-lead`/`referral`/`direct`/`import`), audit-logged.
+- **[ ] `Lead`, `Job`, `Estimate`, the lead-allotment counter, the marketplace landing-page template, and the dashboard** — the rest of Phase 3.0 (§25.6), not yet built.

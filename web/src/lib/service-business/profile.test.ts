@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMemoryStore } from "@/lib/ai/store";
 import { setUserOrg, upsertUser } from "@/lib/auth/session";
 import { createOrg } from "@/lib/orgs/org";
-import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, updateServiceBusinessProfile } from "./profile";
+import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, TRADES, updateServiceBusinessProfile } from "./profile";
 
 async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
   const { user } = await upsertUser("owner@example.com", "Owner", store);
@@ -12,18 +12,28 @@ async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
 }
 
 describe("service business profile", () => {
+  it("launches with the eight decided NC trade categories (STRATEGY.md §25.7 Q2)", () => {
+    expect(TRADES).toEqual(["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot", "plumbing", "electrical", "painting"]);
+  });
+
+
   it("creates a profile with a slugified name, and is idempotent on a second create call", async () => {
     const { store, owner, org } = await seedOrg();
-    const profile = await createServiceBusinessProfile(org.id, owner.uid, { trades: ["lawn-care", "not-a-trade" as never], serviceArea: ["Raleigh", "Raleigh", "Durham"] }, store);
+    const profile = await createServiceBusinessProfile(
+      org.id,
+      owner.uid,
+      { trades: ["lawn-care", "plumbing", "not-a-trade" as never], serviceArea: ["Raleigh", "Raleigh", "Durham"] },
+      store,
+    );
     if ("error" in profile) throw new Error(profile.error);
     expect(profile.slug).toBe("carolina-lawn-co");
-    expect(profile.trades).toEqual(["lawn-care"]);
+    expect(profile.trades).toEqual(["lawn-care", "plumbing"]);
     expect(profile.serviceArea).toEqual(["Raleigh", "Durham"]);
 
     const again = await createServiceBusinessProfile(org.id, owner.uid, { trades: ["hvac"] }, store);
     if ("error" in again) throw new Error(again.error);
     expect(again.slug).toBe(profile.slug); // unchanged — create is idempotent, not an overwrite
-    expect(again.trades).toEqual(["lawn-care"]);
+    expect(again.trades).toEqual(["lawn-care", "plumbing"]);
   });
 
   it("disambiguates slugs across orgs with the same name", async () => {

@@ -15,12 +15,12 @@ import { getOrg } from "@/lib/orgs/org";
 import { logAuditEvent } from "@/lib/audit/log";
 
 /**
- * Starting trade taxonomy — carried forward from the home-services vertical
- * overlay (§24) rather than invented fresh, since that's the category
- * knowledge already built into `local-seo-optimizer` and `Project.vertical`.
- * Confirm/expand per §25.7 Q2 before treating this as final.
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, decided) —
+ * the home-services vertical overlay's original five (§24) plus plumbing,
+ * electrical, and painting, added by the founder at launch-category
+ * confirmation time.
  */
-export const TRADES = ["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot"] as const;
+export const TRADES = ["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot", "plumbing", "electrical", "painting"] as const;
 export type Trade = (typeof TRADES)[number];
 
 export const TRADE_LABELS: Record<Trade, string> = {
@@ -29,6 +29,9 @@ export const TRADE_LABELS: Record<Trade, string> = {
   cleaning: "Cleaning",
   "pressure-washing": "Pressure washing & exterior",
   "parking-lot": "Parking lot & exterior paving",
+  plumbing: "Plumbing",
+  electrical: "Electrical",
+  painting: "Painting",
 };
 
 export const isTrade = (value: unknown): value is Trade => typeof value === "string" && (TRADES as readonly string[]).includes(value);
