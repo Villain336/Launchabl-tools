@@ -1,7 +1,9 @@
+import type { ToolSet } from "ai";
 import { getChatToolRuntime } from "@/lib/ai/chat-runtime";
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
+import { designSocialCardTool, generateImageTool } from "@/lib/ai/tools/image-gen";
 import { recordPaywallEvent } from "@/lib/ai/usage";
-import { getUser, hasProAccess, type Session } from "@/lib/auth/session";
+import { getUser, hasProAccess, SIGN_IN_REQUIRED_MESSAGE, type Session } from "@/lib/auth/session";
 import { spendCredit } from "@/lib/billing/credits";
 
 /**
@@ -68,16 +70,10 @@ async function trialRunsUsed(uid: string, slug: string, store: KeyValueStore): P
  * Use it for capabilities that cost money at a point in the pipeline the
  * chat-tool slug doesn't own — /api/media/transcribe runs the real ASR call
  * before any chat tool sees the result, and the request can arrive tagged
- * with a slug (e.g. "agent") that isn't itself marked tier:"pro".
- *
- * Known gap: the unified "agent" tool and "social-card-generator" merge in
- * the standalone `generateImage` function tool from the image generator
- * runtime (chat-runtime.ts's mergeTools), so a request tagged with either of
- * those slugs can still reach image generation without this check ever
- * seeing slug "ai-image-generator". Harmless during dark-launch (nothing is
- * blocked yet); before adding "ai-image-generator" to
- * PAYWALL_ENFORCED_TOOLS, also strip `generateImage` from those two
- * runtimes' merged tool set for accounts without Pro.
+ * with a slug (e.g. "agent") that isn't itself marked tier:"pro". The same
+ * reason is why `guardMergedImageGeneration` below exists: the unified
+ * "agent" tool and "social-card-generator" both reach real image generation
+ * through tools that aren't tagged "ai-image-generator" either.
  */
 export async function checkEntitlement(
   slug: string,
@@ -112,3 +108,75 @@ export async function checkEntitlement(
 
 export const NEEDS_PRO_MESSAGE =
   "You've used your free tries of this tool. Subscribe to Tools Pro for unlimited use, or buy a credit pack to keep going a few runs at a time.";
+
+/**
+ * Two runtimes reach real image generation without ever being checked
+ * under slug "ai-image-generator":
+ *
+ *   - The unified "agent" tool merges in every specialist's function tools
+ *     (chat-runtime.ts / agent.ts's mergeTools), including the standalone
+ *     `generateImage` tool from the image generator runtime.
+ *   - "social-card-generator" ships its own `generateImage` tool for the
+ *     same reason, and its own `designSocialCard` tool additionally calls
+ *     the underlying image model directly when `background.kind ===
+ *     "generated"`.
+ *
+ * Both are harmless while `ai-image-generator` is only ever dark-launched
+ * or unenforced (nothing blocks yet either way), but must be closed before
+ * enforcing it for real — otherwise anyone can route around the paywall by
+ * asking the agent (or the card designer) to make an image instead of
+ * using the image generator tool directly.
+ *
+ * This wraps the exact shared tool instances (by reference, so it never
+ * touches an unrelated same-named tool) with a lazy, per-request-memoised
+ * check against slug "ai-image-generator" — run at most once per request,
+ * the moment (if ever) the model actually tries to generate an image, so a
+ * conversation that never touches image generation never spends a trial
+ * run or records a shadow-block for it. `designSocialCard` is only guarded
+ * when the input actually asks for a generated background; the free
+ * gradient/mesh path is untouched.
+ */
+export function guardMergedImageGeneration(
+  slug: string,
+  tools: ToolSet | undefined,
+  session: Session | null,
+  store: KeyValueStore = getStore(),
+  env: Record<string, string | undefined> = process.env,
+): ToolSet | undefined {
+  if (!tools || slug === "ai-image-generator") return tools;
+
+  let decision: EntitlementDecision | null = null;
+  const ensureEntitled = async (): Promise<void> => {
+    decision ??= await checkEntitlement("ai-image-generator", session, store, { forcePro: true, env });
+    if (!decision.allowed) {
+      throw new Error(decision.reason === "sign_in_required" ? SIGN_IN_REQUIRED_MESSAGE : NEEDS_PRO_MESSAGE);
+    }
+  };
+
+  const guarded: ToolSet = { ...tools };
+  let changed = false;
+
+  if (tools.generateImage === generateImageTool) {
+    changed = true;
+    guarded.generateImage = {
+      ...generateImageTool,
+      execute: async (input, options) => {
+        await ensureEntitled();
+        return generateImageTool.execute!(input, options);
+      },
+    };
+  }
+
+  if (tools.designSocialCard === designSocialCardTool) {
+    changed = true;
+    guarded.designSocialCard = {
+      ...designSocialCardTool,
+      execute: async (input, options) => {
+        if (input.background.kind === "generated") await ensureEntitled();
+        return designSocialCardTool.execute!(input, options);
+      },
+    };
+  }
+
+  return changed ? guarded : tools;
+}

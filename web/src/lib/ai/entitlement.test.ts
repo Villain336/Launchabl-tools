@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createMemoryStore } from "@/lib/ai/store";
+import { designSocialCardTool, generateImageTool } from "@/lib/ai/tools/image-gen";
 import { setUserBilling, upsertUser, type Session } from "@/lib/auth/session";
 import { getCreditBalance, grantCredits } from "@/lib/billing/credits";
-import { checkEntitlement, isProTool, PRO_TRIAL_RUNS } from "./entitlement";
+import { checkEntitlement, guardMergedImageGeneration, isProTool, PRO_TRIAL_RUNS } from "./entitlement";
 
 const PRO_SLUG = "ai-image-generator";
 const FREE_SLUG = "qr-code-generator";
@@ -143,5 +144,101 @@ describe("checkEntitlement", () => {
     }
     const blocked = await checkEntitlement(pseudoSlug, session, store, { forcePro: true, env: { PAYWALL_ENFORCED_TOOLS: "*" } });
     expect(blocked).toEqual({ allowed: false, reason: "needs_pro" });
+  });
+});
+
+describe("guardMergedImageGeneration", () => {
+  const mergedTools = { generateImage: generateImageTool, designSocialCard: designSocialCardTool };
+
+  it("leaves the tool set untouched for a direct ai-image-generator request", () => {
+    const store = createMemoryStore();
+    const result = guardMergedImageGeneration("ai-image-generator", mergedTools, null, store);
+    expect(result).toBe(mergedTools);
+  });
+
+  it("passes through undefined tools and tool sets without generateImage/designSocialCard", () => {
+    const store = createMemoryStore();
+    expect(guardMergedImageGeneration("agent", undefined, null, store)).toBeUndefined();
+    // Same tool object under a different key doesn't match the reference check by name.
+    const renamed = { notGenerateImage: generateImageTool };
+    expect(guardMergedImageGeneration("agent", renamed, null, store)).toBe(renamed);
+  });
+
+  it("blocks a merged generateImage call for an anonymous account without ever running the real tool", async () => {
+    const store = createMemoryStore();
+    const spy = vi.spyOn(generateImageTool, "execute");
+    const tools = guardMergedImageGeneration("agent", mergedTools, null, store);
+    expect(tools).not.toBe(mergedTools);
+
+    await expect(tools!.generateImage.execute!({ prompt: "a red fox", aspect: "1:1", count: 1 }, { toolCallId: "t1", messages: [] } as never)).rejects.toThrow(
+      /free account/i,
+    );
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("checks entitlement once per guarded tool set (one request), and consumes the trial the same way a direct request would", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("agent-image@example.com", null, store);
+    const session: Session = { uid: user.uid, email: user.email, name: null, iat: Date.now() };
+    const env = { PAYWALL_ENFORCED_TOOLS: "*" };
+
+    // Each simulated request builds its own guarded tool set, same as the real route does per HTTP request.
+    for (let i = 0; i < PRO_TRIAL_RUNS; i++) {
+      const tools = guardMergedImageGeneration("agent", mergedTools, session, store, env);
+      const spy = vi.spyOn(generateImageTool, "execute").mockResolvedValue({ id: "x", prompt: "p", aspect: "1:1", model: "m", images: [], costUsd: 0 });
+      await tools!.generateImage.execute!({ prompt: "p", aspect: "1:1", count: 1 }, { toolCallId: `t${i}`, messages: [] } as never);
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
+    }
+
+    // Trial spent and enforced with no credits — the wrapper throws before the real tool ever runs.
+    const tools = guardMergedImageGeneration("agent", mergedTools, session, store, env);
+    const spy = vi.spyOn(generateImageTool, "execute");
+    await expect(tools!.generateImage.execute!({ prompt: "p", aspect: "1:1", count: 1 }, { toolCallId: "tN", messages: [] } as never)).rejects.toThrow(
+      /tools pro/i,
+    );
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("reuses a single entitlement check across several generateImage calls within the same guarded tool set", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("agent-image-reuse@example.com", null, store);
+    const session: Session = { uid: user.uid, email: user.email, name: null, iat: Date.now() };
+    const tools = guardMergedImageGeneration("agent", mergedTools, session, store); // dark-launch env
+
+    const spy = vi.spyOn(generateImageTool, "execute").mockResolvedValue({ id: "x", prompt: "p", aspect: "1:1", model: "m", images: [], costUsd: 0 });
+    await tools!.generateImage.execute!({ prompt: "a", aspect: "1:1", count: 1 }, { toolCallId: "t1", messages: [] } as never);
+    await tools!.generateImage.execute!({ prompt: "b", aspect: "1:1", count: 1 }, { toolCallId: "t2", messages: [] } as never);
+    expect(spy).toHaveBeenCalledTimes(2);
+    // Only the first call should have consumed a trial run — verified by exactly one trial slot remaining.
+    expect(await checkEntitlement("ai-image-generator", session, store, { env: {} })).toEqual({ allowed: true, wouldBlock: false });
+    expect(await checkEntitlement("ai-image-generator", session, store, { env: {} })).toEqual({ allowed: true, wouldBlock: true });
+    spy.mockRestore();
+  });
+
+  it("only guards designSocialCard's generated-background path — the free gradient/mesh path is untouched", async () => {
+    const store = createMemoryStore();
+    const tools = guardMergedImageGeneration("social-card-generator", mergedTools, null, store);
+    const spy = vi.spyOn(designSocialCardTool, "execute");
+
+    const gradientSpec = {
+      title: "Launch day",
+      brand: { name: "Launchabl", accent: "#FF6600" as const },
+      theme: "dark" as const,
+      layout: "left" as const,
+      background: { kind: "gradient" as const },
+    };
+    spy.mockResolvedValue({ ...gradientSpec, id: "c1", backgroundImage: null, backgroundModel: null, costUsd: 0 });
+    await tools!.designSocialCard.execute!(gradientSpec, { toolCallId: "t1", messages: [] } as never);
+    expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+
+    const generatedSpec = { ...gradientSpec, background: { kind: "generated" as const, prompt: "abstract shapes" } };
+    const spy2 = vi.spyOn(designSocialCardTool, "execute");
+    await expect(tools!.designSocialCard.execute!(generatedSpec, { toolCallId: "t2", messages: [] } as never)).rejects.toThrow(/free account/i);
+    expect(spy2).not.toHaveBeenCalled();
+    spy2.mockRestore();
   });
 });
