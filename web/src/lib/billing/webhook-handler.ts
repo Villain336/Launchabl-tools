@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { getUser, getUserByStripeCustomerId, setUserBilling, type SubscriptionStatus } from "@/lib/auth/session";
 import { grantCreditPack } from "@/lib/billing/credits";
+import { recordLedgerEntry } from "@/lib/billing/ledger";
 import { isCreditPackId } from "@/lib/billing/plan-display";
 
 /**
@@ -16,6 +17,12 @@ import { isCreditPackId } from "@/lib/billing/plan-display";
  * would double-credit an account), so that path additionally guards on an
  * atomic `store.setNx` keyed by the checkout session id — see the
  * `checkout.session.completed` / `mode === "payment"` branch below.
+ *
+ * Every branch also dual-writes a row to the Postgres billing ledger
+ * (`lib/billing/ledger.ts`, §19.4/§20) alongside its KV write — additive,
+ * best-effort, and never able to fail this handler (the ledger module
+ * swallows its own errors). KV remains the only thing entitlement checks
+ * read; the ledger exists purely for financial reconciliation/audit.
  */
 const PROCESSED_TTL_SECONDS = 3 * 24 * 60 * 60;
 
@@ -55,14 +62,25 @@ async function resolveUid(customerId: string, metadataUid: string | null | undef
   return byCustomer?.uid ?? null;
 }
 
-async function applySubscription(subscription: Stripe.Subscription, store: KeyValueStore): Promise<void> {
+async function applySubscription(subscription: Stripe.Subscription, eventId: string, kind: "subscription_created" | "subscription_updated" | "subscription_deleted", store: KeyValueStore): Promise<void> {
   const customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
   const uid = await resolveUid(customerId, subscription.metadata?.uid, store);
   if (!uid) {
     console.warn(`[billing/webhook] subscription ${subscription.id} has no matching account (customer ${customerId})`);
     return;
   }
-  await setUserBilling(uid, { stripeCustomerId: customerId, ...subscriptionFields(subscription) }, store);
+  const fields = subscriptionFields(subscription);
+  await setUserBilling(uid, { stripeCustomerId: customerId, ...fields }, store);
+  const item = subscription.items.data[0];
+  await recordLedgerEntry({
+    stripeEventId: eventId,
+    uid,
+    kind,
+    amountCents: item?.price.unit_amount ?? null,
+    currency: item?.price.currency ?? null,
+    status: fields.subscriptionStatus,
+    raw: { subscriptionId: subscription.id, customerId, priceId: item?.price.id, interval: fields.planInterval },
+  });
 }
 
 export async function applyStripeEvent(event: Stripe.Event, store: KeyValueStore = getStore()): Promise<void> {
@@ -94,19 +112,44 @@ export async function applyStripeEvent(event: Stripe.Event, store: KeyValueStore
         if (!granted) return;
         await setUserBilling(uid, { stripeCustomerId: customerId }, store);
         await grantCreditPack(uid, pack, store);
+        await recordLedgerEntry({
+          stripeEventId: event.id,
+          uid,
+          kind: "credit_pack_granted",
+          amountCents: session.amount_total ?? null,
+          currency: session.currency ?? null,
+          status: "completed",
+          raw: { sessionId: session.id, pack, customerId },
+        });
         return;
       }
 
       if (session.mode !== "subscription" || !session.subscription) return;
       const uid = await resolveUid(customerId, session.metadata?.uid ?? session.client_reference_id, store);
-      if (uid) await setUserBilling(uid, { stripeCustomerId: customerId }, store);
+      if (uid) {
+        await setUserBilling(uid, { stripeCustomerId: customerId }, store);
+        const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+        await recordLedgerEntry({
+          stripeEventId: event.id,
+          uid,
+          kind: "checkout_completed",
+          amountCents: session.amount_total ?? null,
+          currency: session.currency ?? null,
+          status: session.status ?? null,
+          raw: { sessionId: session.id, subscriptionId, customerId },
+        });
+      }
       // The subscription's own created/updated event carries status and period end; nothing else to do here.
       return;
     }
     case "customer.subscription.created":
+      await applySubscription(event.data.object as Stripe.Subscription, event.id, "subscription_created", store);
+      return;
     case "customer.subscription.updated":
+      await applySubscription(event.data.object as Stripe.Subscription, event.id, "subscription_updated", store);
+      return;
     case "customer.subscription.deleted": {
-      await applySubscription(event.data.object as Stripe.Subscription, store);
+      await applySubscription(event.data.object as Stripe.Subscription, event.id, "subscription_deleted", store);
       return;
     }
     default:
