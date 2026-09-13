@@ -34,7 +34,10 @@ describe("signed payloads", () => {
     expect(await verifyPayload<{ hello: string }>(token)).toEqual({ hello: "world" });
     const [body, sig] = token.split(".");
     expect(await verifyPayload(`${body}x.${sig}`)).toBeNull();
-    expect(await verifyPayload(`${body}.${sig.slice(0, -1)}A`)).toBeNull();
+    // Flip the last signature character to something guaranteed different (verifyPayload compares
+    // characters directly, so replacing it with a char that happens to already be there is a no-op).
+    const flippedLastChar = sig.at(-1) === "A" ? "B" : "A";
+    expect(await verifyPayload(`${body}.${sig.slice(0, -1)}${flippedLastChar}`)).toBeNull();
     expect(await verifyPayload("")).toBeNull();
     expect(await verifyPayload("nodot")).toBeNull();
   });

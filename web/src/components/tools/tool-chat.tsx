@@ -258,6 +258,11 @@ function AccountChip() {
       <div className="hidden items-center gap-1.5 pr-1 text-[12px] text-ink-3 sm:flex" data-account-chip="user">
         <UserRound className="h-3.5 w-3.5" />
         <span className="max-w-[160px] truncate">{session.user.name || session.user.email}</span>
+        {session.isPro && (
+          <span className="rounded-[4px] bg-primary/10 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary" data-pro-badge="true">
+            Pro
+          </span>
+        )}
         <button type="button" onClick={() => void signOut()} className="text-ink-3 hover:text-ink">
           Sign out
         </button>

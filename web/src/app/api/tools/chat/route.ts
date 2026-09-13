@@ -8,7 +8,7 @@ import { chatRateLimiter, clientKey, describeRetry } from "@/lib/ai/rate-limit";
 import { repairToolCall } from "@/lib/ai/repair";
 import { streamWithFallback } from "@/lib/ai/stream";
 import { checkDailySpend, recordUsage, SPEND_CAP_MESSAGE } from "@/lib/ai/usage";
-import { checkEntitlement, NEEDS_PRO_MESSAGE } from "@/lib/ai/entitlement";
+import { checkEntitlement, guardMergedImageGeneration, NEEDS_PRO_MESSAGE } from "@/lib/ai/entitlement";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 import { ATTACHMENT_INSTRUCTIONS, inlineAttachments, trimImageHistory } from "@/lib/chat/inline-attachments";
 import { gateRun, SIGN_IN_REQUIRED_MESSAGE } from "@/lib/auth/session";
@@ -94,6 +94,13 @@ export async function POST(request: NextRequest) {
   }
   if ("spentCredit" in entitlement && entitlement.spentCredit) responseHeaders.set("x-launchabl-credits-left", String(entitlement.creditsLeft));
 
+  // The "agent" and "social-card-generator" runtimes can reach real image
+  // generation through tools not tagged "ai-image-generator" — see
+  // guardMergedImageGeneration's docstring. Re-check (lazily, at most once,
+  // only if the model actually tries) rather than trusting the entitlement
+  // check above, which only covers `slug` itself.
+  const tools = guardMergedImageGeneration(slug, runtime.tools, gate.kind === "user" ? gate.session : null);
+
   // Active project (signed-in only, must be theirs): its context goes into the
   // system prompt so tools stop asking for company, site, audience and tone.
   const project = gate.kind === "user" && typeof body?.project === "string" ? await loadProject(body.project, gate.session.uid) : null;
@@ -111,7 +118,7 @@ export async function POST(request: NextRequest) {
 
   const chain = modelChain(runtime.modelKind);
   const modelMessages = await convertToModelMessages(prepared.messages, {
-    tools: runtime.tools,
+    tools,
     ignoreIncompleteToolCalls: true,
   });
 
@@ -130,7 +137,7 @@ export async function POST(request: NextRequest) {
         .filter(Boolean)
         .join("\n\n"),
       messages: modelMessages,
-      tools: runtime.tools,
+      tools,
       stopWhen: isStepCount(runtime.maxSteps ?? 3),
       prepareStep: runtime.prepareStep,
       repairToolCall,
@@ -174,7 +181,7 @@ export async function POST(request: NextRequest) {
       headers: responseHeaders,
       stream: toUIMessageStream<typeof runtime.tools & object, ToolChatMessage>({
         stream,
-        tools: runtime.tools,
+        tools,
         originalMessages: messages,
         sendReasoning: false,
         messageMetadata: ({ part }): ToolChatMetadata | undefined => {

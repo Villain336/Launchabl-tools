@@ -11,13 +11,19 @@ import { resetProjects } from "@/lib/projects/use-projects";
  */
 
 export type SessionUser = { email: string; name: string | null };
-/** `credits` is the purchased credit-pack balance (lib/billing/credits.ts); null while signed out or loading. */
-export type SessionState = { status: "loading" | "ready"; user: SessionUser | null; freeRunsLeft: number | null; credits: number | null };
+/** `credits` is the purchased credit-pack balance (lib/billing/credits.ts); `isPro`/`credits` are null while signed out or loading. */
+export type SessionState = {
+  status: "loading" | "ready";
+  user: SessionUser | null;
+  freeRunsLeft: number | null;
+  credits: number | null;
+  isPro: boolean | null;
+};
 
-let state: SessionState = { status: "loading", user: null, freeRunsLeft: null, credits: null };
+let state: SessionState = { status: "loading", user: null, freeRunsLeft: null, credits: null, isPro: null };
 let inflight: Promise<void> | null = null;
 const listeners = new Set<() => void>();
-const SERVER_STATE: SessionState = { status: "loading", user: null, freeRunsLeft: null, credits: null };
+const SERVER_STATE: SessionState = { status: "loading", user: null, freeRunsLeft: null, credits: null, isPro: null };
 
 function emit(next: SessionState) {
   state = next;
@@ -27,10 +33,16 @@ function emit(next: SessionState) {
 export function refreshSession(): Promise<void> {
   inflight ??= fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
     .then(async (res) => {
-      const data = (await res.json()) as { user: SessionUser | null; freeRunsLeft: number | null; credits?: number };
-      emit({ status: "ready", user: data.user, freeRunsLeft: data.freeRunsLeft, credits: data.user ? data.credits ?? 0 : null });
+      const data = (await res.json()) as { user: SessionUser | null; freeRunsLeft: number | null; credits?: number; isPro?: boolean };
+      emit({
+        status: "ready",
+        user: data.user,
+        freeRunsLeft: data.freeRunsLeft,
+        credits: data.user ? data.credits ?? 0 : null,
+        isPro: data.user ? data.isPro ?? false : null,
+      });
     })
-    .catch(() => emit({ status: "ready", user: null, freeRunsLeft: null, credits: null }))
+    .catch(() => emit({ status: "ready", user: null, freeRunsLeft: null, credits: null, isPro: null }))
     .finally(() => {
       inflight = null;
     });
@@ -38,12 +50,12 @@ export function refreshSession(): Promise<void> {
 }
 
 export function setSessionUser(user: SessionUser | null) {
-  emit({ status: "ready", user, freeRunsLeft: user ? null : 0, credits: user ? state.credits : null });
+  emit({ status: "ready", user, freeRunsLeft: user ? null : 0, credits: user ? state.credits : null, isPro: user ? state.isPro : null });
 }
 
 export async function signOut(): Promise<void> {
   await fetch("/api/auth/sign-out", { method: "POST", credentials: "same-origin" }).catch(() => undefined);
-  emit({ status: "ready", user: null, freeRunsLeft: 0, credits: null });
+  emit({ status: "ready", user: null, freeRunsLeft: 0, credits: null, isPro: null });
   resetHistorySync();
   resetProjects();
 }
