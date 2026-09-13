@@ -5,7 +5,8 @@ import { KeyRound, RefreshCw } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { GatewayCredits, PaywallStats, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
+import type { CreditStats, GatewayCredits, PaywallStats, UpsellBucket, UsageBucket, UsageDay } from "@/lib/ai/usage";
+import { CREDIT_PACKS } from "@/lib/billing/plan-display";
 import type { RateLimitTier } from "@/lib/ai/rate-limit";
 import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
@@ -29,6 +30,7 @@ type UsagePayload = {
   reports?: { created: number; views: number; byTool: Record<string, number> };
   billing?: { activeSubscribers: number; byInterval: Record<"month" | "year", number>; mrrUsd: number };
   paywall?: PaywallStats;
+  creditPacks?: CreditStats;
   days: UsageDay[];
 };
 
@@ -344,6 +346,58 @@ function BillingPanel({
   );
 }
 
+/** One-time credit-pack purchases and spend — the fallback path once the Tools Pro paywall is actually enforced (see lib/billing/credits.ts). */
+function CreditPacksPanel({ stats, days }: { stats: CreditStats; days: number }) {
+  const packRows = Object.entries(stats.byPack);
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-white">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Credit packs</h2>
+          <p className="text-xs text-muted-foreground">One-time purchases that cover pro-tier tool runs without a subscription.</p>
+        </div>
+        <div className="flex gap-4 text-xs text-muted-foreground">
+          <span>
+            Packs sold <span className="font-medium text-foreground">{int(stats.packsSold)}</span>
+          </span>
+          <span>
+            Revenue <span className="font-medium text-foreground">{usd(stats.revenueUsd)}</span>
+          </span>
+          <span>
+            Credits purchased <span className="font-medium text-foreground">{int(stats.creditsPurchased)}</span>
+          </span>
+          <span>
+            Credits spent <span className="font-medium text-foreground">{int(stats.creditsSpent)}</span>
+          </span>
+        </div>
+      </div>
+      {packRows.length === 0 ? (
+        <p className="px-4 py-6 text-sm text-muted-foreground">No credit-pack purchases yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-xs text-muted-foreground">
+            <tr>
+              <th className="px-4 py-2 text-left font-medium">Pack</th>
+              <th className="px-4 py-2 text-right font-medium">Sold</th>
+              <th className="px-4 py-2 text-right font-medium">Revenue</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {packRows.map(([pack, sold]) => (
+              <tr key={pack}>
+                <td className="px-4 py-2 text-foreground">{CREDIT_PACKS[pack as keyof typeof CREDIT_PACKS]?.label ?? pack}</td>
+                <td className="px-4 py-2 text-right tabular-nums">{int(sold)}</td>
+                <td className="px-4 py-2 text-right tabular-nums font-medium">{usd(sold * (CREDIT_PACKS[pack as keyof typeof CREDIT_PACKS]?.priceUsd ?? 0))}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">Last {days} days.</p>
+    </div>
+  );
+}
+
 const TOKEN_KEY = "launchabl.admin.token";
 
 type FetchResult = { data: UsagePayload } | { error: string; status: number };
@@ -515,6 +569,7 @@ export function UsageDashboard() {
           )}
           {data.accounts && <AccountsPanel accounts={data.accounts} days={days} labelFor={toolLabel} />}
           {data.billing && data.paywall && <BillingPanel billing={data.billing} paywall={data.paywall} labelFor={toolLabel} days={days} />}
+          {data.creditPacks && <CreditPacksPanel stats={data.creditPacks} days={days} />}
           {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
           <EvalsPanel token={token} />

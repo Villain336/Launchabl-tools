@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminAuthorized } from "@/lib/admin/auth";
 import { getStore, redisCredentials } from "@/lib/ai/store";
-import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readPaywallStats, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
+import { dailySpendCapUsd, fetchGatewayCredits, MODEL_PRICES, readCreditStats, readPaywallStats, readUsage, sumBuckets, sumUpsell, type UpsellBucket, type UsageBucket } from "@/lib/ai/usage";
 import { CHAT_LIMITS } from "@/lib/ai/rate-limit";
 import { imageModelChain, modelChain } from "@/lib/ai/models";
 import { authStats, billingStats } from "@/lib/auth/session";
@@ -20,13 +20,14 @@ export async function GET(request: NextRequest) {
 
   const days = Math.min(90, Math.max(1, Number(request.nextUrl.searchParams.get("days") ?? 30) || 30));
   const store = getStore();
-  const [usage, credits, accounts, reports, billing, paywall] = await Promise.all([
+  const [usage, credits, accounts, reports, billing, paywall, creditPacks] = await Promise.all([
     readUsage(days, store),
     fetchGatewayCredits(),
     authStats(days, store),
     reportStats(days, store),
     billingStats(store),
     readPaywallStats(days, store),
+    readCreditStats(days, store),
   ]);
   const mrrUsd = billing.byInterval.month * TOOLS_PRO_PRICE_USD.month + billing.byInterval.year * (TOOLS_PRO_PRICE_USD.year / 12);
 
@@ -84,6 +85,7 @@ export async function GET(request: NextRequest) {
     reports,
     billing: { ...billing, mrrUsd },
     paywall,
+    creditPacks,
     days: usage,
   });
 }
