@@ -1369,26 +1369,46 @@ That is the starting lineup. Four trades, **Greensboro first** (Raleigh only as 
 | **Pool** | Would rank #2 on cadence. Thin in Greensboro vs Charlotte / Triangle suburbs. **Stay off the catalog** until the four above have claiming crews. |
 | **Painting / parking-lot** | Listed. Not hunted. |
 
-### 33.3 What “start” means in order (do not skip)
+### 33.3 What “start” means — two clocks
 
-§30.3 still governs density. The lineup is the *hunt order*, not four empty boards on day one.
+§30.3 still governs density. The annual scoreboard in §33.1 is not the hunt order for late 2026. See **§33.5**.
 
-1. **Greensboro lawn to three claiming orgs** and a paid Checkout job. Until that is true, lawn *is* the product.
-2. **Sell Launch in parallel** to Greensboro cleaning and one HVAC shop (GSO or Raleigh). Parallel *sales* are allowed. Parallel *“the marketplace is live”* claims are not.
-3. **Pest is the fourth Launch target**, not the first. Add it to outbound after one of lawn or cleaning has a real board, or if a pest operator writes the $1,200 first — take the money, do not pretend the city page is liquid.
-4. Junk, roadside, towing, pool: inbound only, or a later quarter.
-
-Cash this quarter is still Launch ($1,200) + Managed ($497/mo). The lineup is chosen so those clients (a) get repeat jobs and (b) seed boards people will ping again. A wrecker Launch is $1,200 once. A lawn + cleaning + pest book is the OS they do not churn from.
+Cash this quarter is still Launch ($1,200) + Managed ($497/mo). The lineup is chosen so those clients (a) get repeat jobs and (b) seed boards people will ping again. A wrecker Launch is $1,200 once. A cleaning + HVAC + pest book is the OS they do not churn from in January.
 
 ### 33.4 What this round shipped
 
 - `pest-control` in `TRADES` / sitemap / CRM. Pitch is the quarterly plan, same shape as HVAC membership.
-- `REPEAT_TRADES` is the starting lineup: lawn, cleaning, HVAC, pest. Junk is no longer a hunt-list equal.
-- `FEATURED_NAV_TRADES` leads with those four, then junk, then roadside/towing.
+- `REPEAT_TRADES` / `FEATURED_NAV_TRADES` follow the **remaining-season** order in §33.5: cleaning, HVAC, pest, lawn. Junk is no longer a hunt-list equal.
 - No invented pest founding listing.
+
+### 33.5 Remaining season — it is mid-September
+
+The founder is right: we do not have a summer left. Today is mid-September 2026. Greensboro Airport’s average **first fall freeze is October 31**; High Point is November 1 ([NC State Extension freeze dates](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)). Piedmont grass keeps growing until nightly lows sit under ~50°F — most years **late October / early November** ([Piedmont Triad fall lawn checklist](https://lawnlove.com/blog/fall-lawn-care-checklist-piedmont-triad/)). That is **six to eight weekly mows**, then leaf, then a dead board until March.
+
+Do not prove the marketplace on Saturday mows through February. Do not wait until March either.
+
+Two different “starts”:
+
+| Clock | What we do | What we do not do |
+|---|---|---|
+| **Marketplace requests (next 90 days)** | Prove density on **cleaning** (year-round) and **HVAC fall heat tune-ups / memberships** (this is their Q4). Pest rides the same months — rodents move inside, last outdoor quarter. | Treat lawn dispatch as the live product after Halloween. Flip to roadside because Thanksgiving travel exists (AAA still owns those calls). |
+| **Agency sales (this month)** | Sell Launch to lawn operators **now**. They have time, they are selling aeration / fescue overseed / leaf, and they need a `/b` link before March. Same week: cleaning + one HVAC shop. | Sit on lawn outbound until spring. A crew that buys in October and has no ping until April still churns if we promised Saturday volume. |
+
+**Hunt / public-nav order until March:** cleaning → HVAC → pest → lawn. Annual scoreboard in §33.1 does not change — lawn is still the best *year* habit. It is the worst *winter* proof.
+
+Concrete next 90 days, Greensboro:
+
+1. **Cleaning to three claiming orgs** and a paid Checkout job. That board still has work in January. Until that is true, cleaning *is* the product we can show.
+2. **HVAC Launch this month** — pitch the **fall heat tune-up + membership**, not no-cool. One GSO or Raleigh shop. On-shift pings only.
+3. **Pest Launch** in parallel if the operator writes the check. Quarterly plans do not freeze on Oct 31.
+4. **Lawn Launch** is a spring lock-in sale: last cuts, leaf, overseed, calendar for March. Do not staff a lawn-only Facebook test after the last mow. Do not claim `/nc/greensboro/lawn-care` is liquid because three crews exist and nobody is booking.
+
+Pool closing is a two-week spike, then dead until April — still not a catalog add. Pressure wash is a leaf-and-pollen add-on, not a fourth target.
 
 **Sources:**
 - [NC State Extension — tall fescue lawn calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [NC State Extension — average first/last freeze dates (KGSO Oct 31)](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)
+- [Lawn Love — Piedmont Triad fall lawn checklist](https://lawnlove.com/blog/fall-lawn-care-checklist-piedmont-triad/)
 - [HIRI — home care purchase frequency](https://www.hiri.org/blog/home-care-and-maintenance-services)
 - [Keepsake — cleaning booking mix](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)
 - [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)

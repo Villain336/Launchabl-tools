@@ -75,12 +75,17 @@ export const TRADE_REPEAT = {
   painting: "project",
 } as const satisfies Record<Trade, TradeRepeatShape>;
 
-/** Starting lineup (§33): the four trades that score on both requests and revenue. */
-export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "pest-control"] as const;
+/**
+ * Hunt / public-nav order for the remaining season (§33.5).
+ * Annual scoreboard is still lawn → cleaning → HVAC → pest (§33.1).
+ * Mid-September through March, cleaning and fall HVAC have to carry
+ * requests; a lawn-first board starves after first freeze (GSO ~Oct 31).
+ */
+export const REPEAT_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
-/** Public chips: starting lineup first, then junk, then trucks, then the rest, painting last. */
-export const FEATURED_NAV_TRADES = ["lawn-care", "cleaning", "hvac", "pest-control", "junk-removal", "roadside-assistance", "towing"] as const;
+/** Public chips: remaining-season lineup first, then junk, then trucks, painting last. */
+export const FEATURED_NAV_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care", "junk-removal", "roadside-assistance", "towing"] as const;
 
 export function tradesForPublicNav(): Trade[] {
   const lead = new Set<string>(FEATURED_NAV_TRADES);
