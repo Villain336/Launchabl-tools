@@ -781,7 +781,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 ### 25.7 Founder decisions
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
-2. **Launch trade categories — decided, then extended in §31.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added when the founder asked to hunt repeat trades. `TRADES` in `src/lib/service-business/profile.ts` is the nine. Agency *sourcing* is the four repeat trades in §31, not painting.
+2. **Launch trade categories — decided, then extended in §31 and §32.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added when the founder asked to hunt repeat trades. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). Agency *sourcing* is still the four household-repeat trades in §31, not painting and not “households tow weekly.”
 3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
@@ -1256,4 +1256,87 @@ Three claiming crews are still required **per city×trade** (§30.3). A liquid l
 - [Junk removal industry notes — The Deal Sheet](https://thedealsheet.co/industries/junk-removal)
 - [Commercial junk / apartment turnover costs — Dropcurb](https://dropcurb.com/blog/commercial-junk-removal-cost-calculator)
 - [Growing a junk business / PM accounts](https://kickbackservices.com/grow-your-junk-removal-business)
+
+---
+
+## 32. Ranked repeat-purchase frequency (NC-flavored) + roadside / towing
+
+The founder asked for two things: add **roadside assistance** and **tow truck drivers**, and rank **how often the same buyer comes back** across services — specifically in North Carolina.
+
+These are different questions. Do not flatten them.
+
+- **Household cadence** = visits or purchases per year *among people who already buy that service*. That is what this ranking is.
+- **Market velocity** = how many pings a city produces in a week. Roadside and towing are high here and **low** on household cadence.
+- **NC demand mix** = which trades stay busy because of heat, humidity, pollen, growth, or storms. Busy ≠ weekly-repeat. Roofing after a hurricane is a spike, not a route.
+
+Do **not** add pest or pool to `TRADES` in this round. They belong on the ranking (they would outrank HVAC on household visits) but the founder asked to add roadside and towing, not to reopen the catalog.
+
+### 32.1 How to read the table
+
+Two published “how often” datasets disagree in useful ways:
+
+- [Thumbtack’s Home Care Price Index](https://blog.thumbtack.com/thumbtack-relaunches-home-care-price-index-to-provide-deeper-insights-into-home-maintenance-trends-807200141331) is **recommended** cadence (what a home *should* buy), used to weight their cost index. House cleaning and lawn mowing are listed as **1×/month**; pest, gutters, windows, and “full-service lawn” as **2×/year**; pressure wash, carpet, chimney, tree, appliance/water-heater/AC maintenance as **1×/year**.
+- [HIRI’s home-care survey](https://www.hiri.org/blog/home-care-and-maintenance-services) is **actual purchases among buyers** (2019): lawn/landscaping **8.9 purchases/year** (~$66 each), pest **3.1**, HVAC **1.4**. That is the closest public “repeat purchase frequency” we have for US homeowners. It is national, not NC.
+
+NC overlays, not substitutes:
+
+- [NC State Extension lawn calendars](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar) — Piedmont tall fescue is mowed often enough that late spring is **every 5–7 days**; warm-season Bermuda/zoysia grow hard through the humid summer and are cut until frost. A weekly pro route Mar–Oct/Nov is **~30–40 cuts**, not Thumbtack’s 12.
+- [Elev8’s 2026 NC home-services notes](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026) — Charlotte/Triangle growth keeps HVAC, remodeling, and electrical busy; heat + humidity support HVAC, pest, and pressure washing; hurricanes and inland flooding spike roofing, tree, water restoration, and generators. Use this for **which boards will have work**, not for visit counts. Greensboro/Triad leads are cheaper ($26–$75 LSA range on that page).
+- Snow removal is effectively **N/A** for most of the state. Do not copy a Northeast route model.
+
+Zipdo-style “2.1 roadside requests per vehicle owner” conflicts with AAA’s published call volume. Treat aggregator blogs as weak; use AAA’s own 2024 numbers.
+
+### 32.2 Ranked by household / buyer cadence (highest first)
+
+| Rank | Service | Cadence among buyers | NC note | In `TRADES`? |
+|---|---|---|---|---|
+| 1 | House / office cleaning | Among recurring customers, monthly is the modal book (~60%), biweekly ~33%, weekly ~7% ([Keepsake booking mix](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)). Industry write-ups also cite ~**2.3 pro visits/month** ([Gitnux](https://gitnux.org/house-cleaning-industry-statistics/)). Thumbtack recommends **1×/month**. | Year-round. Offices and move-outs are extra, not the route. | Yes — hunt |
+| 2 | Pool service | Weekly in season; heat + pollen in the Carolinas often keep that weekly, not “every other week if you’re lucky.” | Strong in Charlotte / Triangle / coastal suburbs. **Not in the catalog this round.** | No |
+| 3 | Lawn mowing / basic landscaping | Weekly or every 5–7 days in growth ([NC State tall fescue calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)). HIRI buyers averaged **8.9 purchases/yr** (many DIY the rest of the year). A professional weekly NC route is **~30–40 cuts** Mar–Nov. | The closest thing we have to a DoorDash habit. Dormant Dec–Feb except leaf/cleanup. | Yes — hunt |
+| 4 | Dog walking / pet sitting | Daily or several times/week for the households that buy it. | Urban cores. Not a Launch trade. | No |
+| 5 | Mobile car wash / detailing (membership) | Weekly–monthly if they buy a plan; otherwise 2–4×/year. | Complements roadside, is not roadside. | No |
+| 6 | Pest control | HIRI **3.1 purchases/yr** among buyers. Routes are quarterly–monthly (4–12). Thumbtack’s index still lists pest as **2×/year** recommended — that is a floor, not an NC route. | Humidity + a long warm season support more pest work than the national average ([Elev8 NC](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). **Not in the catalog this round.** | No |
+| 7 | Oil change / light auto service | Every ~5k–7.5k miles → **2–4×/year** per vehicle. | High market volume, shop-based, not our dispatch. | No |
+| 8 | HVAC membership | **2 visits/yr** (spring AC, fall heat), typically $200–$350/yr; HIRI HVAC buyers **1.4 purchases/yr** including repairs (§31). | Heat + humidity make the AC half of the year the money. Hunt the **plan**, not 2 a.m. no-cool. | Yes — hunt |
+| 9 | Gutter clean / window clean / “full-service” lawn (fert + weed, not mow) | Thumbtack **2×/year**. Gutters in leafy / stormy lots 2–4× ([Thumbtack gutter guide](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)). | Fall leaves + tropical remnants argue for the high end in NC. | Partial (lawn) |
+| 10 | Pressure wash / carpet / chimney / tree trim / appliance & water-heater maint / dryer vent | Thumbtack **1×/year**. Carpet often 12–18 months. | Pressure wash is busier here because of pollen and mildew. Tree work spikes after storms. | Pressure wash yes; rest no |
+| 11 | Plumbing / electrical / garage door / appliance repair | As-needed. Plumbers are the most-called home pro in several DIY-vs-pro surveys; electricians less often. Garage-door pro inspect **1×/year**, lube quarterly (often DIY). | Growth metros keep electricians busy (new construction + panels). Still not a weekly household. | Plumbing + electrical listed, not hunted |
+| 12 | Junk removal | Residential **~80% one-time**; a property-manager account is **3–10 jobs/month** (§31). | Hunt PMs, not garage-cleanout Facebook ads. | Yes — hunt PMs |
+| 13 | Septic pump / inspect | Inspect **1–3 years**; pump **3–5 years** ([EPA](https://www.epa.gov/septic/how-care-your-septic-system)). | Rural / county NC, not the Triangle apartment. | No |
+| 14 | Roadside assistance | AAA **>27 million** US calls in 2024, ~**7 million** battery ([AAA Apr 2025](https://newsroom.aaa.com/2025/04/aaa-urges-drivers-to-stay-proactive-on-auto-repair-and-maintenance/); [Tow Times](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)). ~**58 million** US members → **~0.47 calls per member-year**. Clubs cap Classic/Plus at **4 calls/year** — a ceiling, not the mean. | NC Memorial Day weekend alone was **~8,000** AAA calls ([AAA Carolinas](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)). Holiday I-40/I-85/I-77 spikes. Household LTV is terrible unless the “customer” is a fleet, rental lot, or club overflow. | Yes — dispatch-native |
+| 15 | Towing | ~**13 million** of those AAA calls were tows (~**0.22 tows per member-year**). Separate trade: hook-and-haul is not a jump-start. | Same NC highway spikes. Impound / repo / dealer lot is the repeat book. | Yes — dispatch-native |
+| 16 | Locksmith (home / auto) | Once every few years per household; auto lockout is often billed through roadside. | Overlaps roadside; do not invent a third chip. | No |
+| 17 | Moving | Once every few years per household. | College-town August spikes (Chapel Hill, Raleigh, Greensboro). | No |
+| 18 | Water restoration / emergency roof tarp | Almost never — until a storm. Then it is the only board that matters for two weeks. | [Elev8](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026): coastal landfalls + inland flooding. | No |
+| 19 | Painting / deck stain / parking-lot sealcoat / roof replace | Years between jobs (Thumbtack: deck stain every 2–3 years; duct clean 3–5). Sealcoat often 3–5 years. Roof replace is a decade-scale event unless a storm writes it off. | Atlas’s parking-lot trade stays listed because we already work it, not because it repeats. | Painting + parking-lot listed, not hunted |
+| — | Snow / ice | Weekly in season up north. | **N/A** for most of NC. Do not staff a sales week on it. | No |
+
+### 32.3 What we actually added
+
+`roadside-assistance` and `towing` are first-class, **separate** slugs. A jump pack and a wrecker are different trucks, different licenses, different dispatch.
+
+`TRADE_REPEAT` for both is **`dispatch-native`**: first truck claims (same DoorDash loop as lawn), but the city×trade pitch must say households need this rarely. The book worth selling Launch into is fleets, rental lots, and motor-club overflow — same shape as junk + property managers, not lawn + weekly route.
+
+Public nav (`FEATURED_NAV_TRADES`): lawn, cleaning, HVAC, junk, **then** roadside, towing, then the rest, painting last. `REPEAT_TRADES` is unchanged — agency outbound this quarter is still the four household-repeat trades in §31. Do not pretend a household tows like they mow.
+
+No invented roadside or tow founding listings. Liquidity is still per city×trade (§30.3). A liquid Greensboro lawn board does not let us lie on `/nc/greensboro/towing`.
+
+### 32.4 Agency implication
+
+Do **not** insert roadside/towing into the §31.2 hunt list as items 5 and 6. If a wrecker or roadside shop wants Launch, take the $1,200 — the OS and `/b` link still work. Do not spend a sourcing week on them until a fleet or lot is the buyer, or until three claiming trucks exist in one city.
+
+Pest and pool would be the next *household-repeat* adds if we reopen the catalog. They are not this PR.
+
+**Sources:**
+- [Thumbtack Home Care Price Index — recommended frequencies](https://blog.thumbtack.com/thumbtack-relaunches-home-care-price-index-to-provide-deeper-insights-into-home-maintenance-trends-807200141331)
+- [Thumbtack — how often to clean gutters](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)
+- [HIRI — home care and maintenance services (8.9 / 3.1 / 1.4 purchases)](https://www.hiri.org/blog/home-care-and-maintenance-services)
+- [NC State Extension — tall fescue lawn calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [Gitnux — house cleaning industry statistics](https://gitnux.org/house-cleaning-industry-statistics/)
+- [Keepsake — how often customers actually book cleaning](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)
+- [Elev8 — North Carolina home services statistics 2026](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)
+- [AAA — 27M roadside calls in 2024](https://newsroom.aaa.com/2025/04/aaa-urges-drivers-to-stay-proactive-on-auto-repair-and-maintenance/)
+- [Tow Times — AAA 2024 call mix (13M tows, 7M battery)](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)
+- [AAA Carolinas — NC Memorial Day (~8,000 calls)](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
+- [EPA — septic inspect 1–3 years, pump 3–5](https://www.epa.gov/septic/how-care-your-septic-system)
 

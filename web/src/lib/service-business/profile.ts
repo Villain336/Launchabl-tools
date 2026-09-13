@@ -16,15 +16,18 @@ import { logAuditEvent } from "@/lib/audit/log";
 import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
- * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31) —
- * the original five (§24) plus plumbing, electrical, painting, and
- * junk-removal (added when the founder asked to target repeat trades).
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31, §32) —
+ * the original five (§24) plus plumbing, electrical, painting, junk-removal
+ * (§31), and roadside + towing (§32). Keep roadside and towing separate:
+ * jump/tire/lockout is not the same dispatch as hook-and-haul.
  */
 export const TRADES = [
   "lawn-care",
   "hvac",
   "cleaning",
   "junk-removal",
+  "roadside-assistance",
+  "towing",
   "pressure-washing",
   "parking-lot",
   "plumbing",
@@ -38,6 +41,8 @@ export const TRADE_LABELS: Record<Trade, string> = {
   hvac: "HVAC",
   cleaning: "Cleaning",
   "junk-removal": "Junk removal & haul-away",
+  "roadside-assistance": "Roadside assistance",
+  towing: "Towing",
   "pressure-washing": "Pressure washing & exterior",
   "parking-lot": "Parking lot & exterior paving",
   plumbing: "Plumbing",
@@ -45,28 +50,38 @@ export const TRADE_LABELS: Record<Trade, string> = {
   painting: "Painting",
 };
 
+export type TradeRepeatShape = "weekly" | "membership" | "on-demand-repeat" | "seasonal" | "project" | "dispatch-native";
+
 /**
- * How often the same customer comes back. Agency sourcing and public
- * nav lead with these; parking-lot and painting stay listed, not hunted (§31).
+ * How often the same *household* comes back — not market ping volume.
+ * Agency sourcing still hunts REPEAT_TRADES (§31). Roadside/towing are
+ * dispatch-native: high market velocity, low household LTV (§32).
+ * Parking-lot and painting stay listed, not hunted.
  */
 export const TRADE_REPEAT = {
   "lawn-care": "weekly",
   cleaning: "weekly",
   hvac: "membership",
   "junk-removal": "on-demand-repeat",
+  "roadside-assistance": "dispatch-native",
+  towing: "dispatch-native",
   "pressure-washing": "seasonal",
   plumbing: "on-demand-repeat",
   electrical: "on-demand-repeat",
   "parking-lot": "project",
   painting: "project",
-} as const satisfies Record<Trade, "weekly" | "membership" | "on-demand-repeat" | "seasonal" | "project">;
+} as const satisfies Record<Trade, TradeRepeatShape>;
 
 export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
+/** Public chips: household-repeat first, then dispatch-native, then the rest, painting last. */
+export const FEATURED_NAV_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal", "roadside-assistance", "towing"] as const;
+
 export function tradesForPublicNav(): Trade[] {
-  const lead = new Set<string>(REPEAT_TRADES);
-  return [...REPEAT_TRADES, ...TRADES.filter((trade) => !lead.has(trade))];
+  const lead = new Set<string>(FEATURED_NAV_TRADES);
+  const rest = TRADES.filter((trade) => !lead.has(trade) && trade !== "painting");
+  return [...FEATURED_NAV_TRADES, ...rest, "painting"];
 }
 
 export const isTrade = (value: unknown): value is Trade => typeof value === "string" && (TRADES as readonly string[]).includes(value);
@@ -83,6 +98,10 @@ export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
       return `Tell us the job. We ping every available crew in ${cityName}. First claim quotes and gets paid here. Or pick a specific crew and book their calendar.`;
     case "project":
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar.`;
+    case "dispatch-native":
+      return trade === "towing"
+        ? `Need a hook? We ping every available wrecker in ${cityName}. First claim owns the haul. Households tow rarely — fleets, lots, and motor-club overflow keep the trucks moving.`
+        : `Flat, dead battery, lockout — we ping every available truck in ${cityName}. First claim owns the job. A household needs this rarely; the book is fleets, lots, and clubs.`;
   }
 }
 
