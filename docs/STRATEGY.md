@@ -781,7 +781,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 ### 25.7 Founder decisions
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
-2. **Launch trade categories — decided, then extended in §31–§33.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added in §31. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). **Pest control** added as the fourth starting-lineup trade (§33). Agency *sourcing* is lawn, cleaning, HVAC, pest — not painting, not “households tow weekly.”
+2. **Launch trade categories — decided, then extended in §31–§34.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added in §31. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). **Pest control** added as the fourth starting-lineup trade (§33). **Courier / cargo van** added in §34 for drivers who cannot live on DoorDash. Agency *sourcing* for the remaining season is cleaning, HVAC, pest, then lawn — not painting, not “households tow weekly,” not food delivery.
 3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
@@ -1294,7 +1294,8 @@ Zipdo-style “2.1 roadside requests per vehicle owner” conflicts with AAA’s
 | 9 | Gutter clean / window clean / “full-service” lawn (fert + weed, not mow) | Thumbtack **2×/year**. Gutters in leafy / stormy lots 2–4× ([Thumbtack gutter guide](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)). | Fall leaves + tropical remnants argue for the high end in NC. | Partial (lawn) |
 | 10 | Pressure wash / carpet / chimney / tree trim / appliance & water-heater maint / dryer vent | Thumbtack **1×/year**. Carpet often 12–18 months. | Pressure wash is busier here because of pollen and mildew. Tree work spikes after storms. | Pressure wash yes; rest no |
 | 11 | Plumbing / electrical / garage door / appliance repair | As-needed. Plumbers are the most-called home pro in several DIY-vs-pro surveys; electricians less often. Garage-door pro inspect **1×/year**, lube quarterly (often DIY). | Growth metros keep electricians busy (new construction + panels). Still not a weekly household. | Plumbing + electrical listed, not hunted |
-| 12 | Junk removal | Residential **~80% one-time**; a property-manager account is **3–10 jobs/month** (§31). | Hunt PMs, not garage-cleanout Facebook ads. | Yes — hunt PMs |
+| 12 | Junk removal | Residential **~80% one-time**; a property-manager account is **3–10 jobs/month** (§31). | Hunt PMs, not garage-cleanout Facebook ads. | Yes — listed; PM inbound |
+| 12b | Courier / cargo van | Households almost never. A shop, warehouse, or lab that buys it wants **daily/weekly standing lanes** plus STAT when a job is down ([Dispatch Greensboro](https://www.dispatchit.com/company/locations/greensboro); [Carolina Quick Courier](https://www.carolinaquickcourier.com/)). | Same shape as junk: the *buyer* repeats. Not DoorDash. See §34. | Yes — listed, not hunted |
 | 13 | Septic pump / inspect | Inspect **1–3 years**; pump **3–5 years** ([EPA](https://www.epa.gov/septic/how-care-your-septic-system)). | Rural / county NC, not the Triangle apartment. | No |
 | 14 | Roadside assistance | AAA **>27 million** US calls in 2024, ~**7 million** battery ([AAA Apr 2025](https://newsroom.aaa.com/2025/04/aaa-urges-drivers-to-stay-proactive-on-auto-repair-and-maintenance/); [Tow Times](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)). ~**58 million** US members → **~0.47 calls per member-year**. Clubs cap Classic/Plus at **4 calls/year** — a ceiling, not the mean. | NC Memorial Day weekend alone was **~8,000** AAA calls ([AAA Carolinas](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)). Holiday I-40/I-85/I-77 spikes. Household LTV is terrible unless the “customer” is a fleet, rental lot, or club overflow. | Yes — dispatch-native |
 | 15 | Towing | ~**13 million** of those AAA calls were tows (~**0.22 tows per member-year**). Separate trade: hook-and-haul is not a jump-start. | Same NC highway spikes. Impound / repo / dealer lot is the repeat book. | Yes — dispatch-native |
@@ -1363,6 +1364,7 @@ That is the starting lineup. Four trades, **Greensboro first** (Raleigh only as 
 | Trade | Role |
 |---|---|
 | **Junk** | Revenue *if* the buyer is a property manager (3–10 jobs/month). Not a consumer-request engine. Sell it when a PM walk-in or a hauler already on Launch wants the OS. Do not spend the first sourcing month on Facebook garage cleanouts. |
+| **Courier / cargo van** | Same shape as junk, on wheels. The buyer is a shop or warehouse, not a household. Listed. Not in the remaining-season hunt. See §34. |
 | **Roadside / towing** | Listed. Dispatch-native. Take Launch if a fleet, lot, or three trucks walk in. Do not hunt. AAA already owns household requests. |
 | **Pressure wash** | Seasonal NC pollen/mildew add-on for a lawn or exterior crew already on the board. Not a fourth Launch target. |
 | **Plumbing / electrical** | Pages exist. Emergency, not a route. |
@@ -1414,4 +1416,49 @@ Pool closing is a two-week spike, then dead until April — still not a catalog 
 - [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)
 - [Elev8 — NC home services 2026](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)
 - [AAA Carolinas — NC Memorial Day calls](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
+
+---
+
+## 34. Courier and cargo-van drivers who cannot live on DoorDash
+
+The founder asked about van drivers and couriers who **cannot** do DoorDash or consumer deliveries. That is a real supply pool. It is not a new consumer habit, and it is not the remaining-season starting lineup.
+
+### 34.1 Why they are locked out of food apps (even when the app says “vans OK”)
+
+DoorDash’s public vehicle rules are loose — any car, no model year ([Dasher requirements](https://dasher.doordash.com/en-us/requirements)). Amazon Flex lists vans as eligible ([Flex requirements](https://flex.amazon.com/get-started/requirements/)). That is not the constraint.
+
+The constraint is the **vehicle and the insurance**, not the signup form:
+
+- A Transit / Sprinter / box van is sized and fueled for a **$75–$200 B2B run**, not a $6 burrito. Parking a cargo van at a drive-through for a $4 tip is how those drivers go broke.
+- North Carolina cargo vans used for hire need a **commercial auto** policy; a personal policy does not cover for-hire freight ([NC cargo-van insurance](https://pegramonline.com/cargo-van-insurance-north-carolina/); [Insurance.com NC commercial auto](https://www.insurance.com/small-business/commercial-auto-insurance-in-north-carolina/)). Gig-app contingent liability is not cargo coverage.
+- What they actually haul — HVAC compressors, auto parts, industrial pieces, legal pouches — is not a DoorDash SKU. Greensboro already has same-day **parts / hotshot** boards ([Dispatch Piedmont Triad](https://www.dispatchit.com/company/locations/greensboro); [Carolina Quick Courier](https://www.carolinaquickcourier.com/); [Reliable Couriers Greensboro](https://www.reliablecouriers.com/service-area/north-carolina/greensboro)). Hoffman and AIR Carolinas sit in this city with warehouses a tech cannot always leave a job to visit ([Hoffman parts](https://www.hoffman-hoffman.com/parts-and-warehouse/); [AIR Carolinas Greensboro](https://www.air-carolinas.com/parts)).
+
+We do **not** claim STAT medical / chain-of-custody / pharma. That is a licensed courier world (temperature, USP, $100k+ cargo). Our pitch is shops and parts, not chemo.
+
+### 34.2 Repeat shape — same as junk, not lawn
+
+Households do not courier weekly. A body shop, HVAC contractor, or warehouse that buys a van **does** — daily or weekly standing lanes, plus a STAT ping when a job is down. Same-day is the premium layer in healthcare last-mile; next-day is still the volume ([US healthcare last-mile](https://www.mordorintelligence.com/industry-reports/united-states-healthcare-parcel-last-mile-delivery-market)). For us the analog is: first van claims the run, then the shop puts that driver on the book.
+
+`TRADE_REPEAT` is **`dispatch-native`**. The city pitch must say the book is shops and parts counters, not “we are DoorDash without food.”
+
+### 34.3 Where it sits on the roster
+
+- **Listed.** `courier` is a first-class slug, separate from junk, roadside, and towing. A haul-away is not a parts run. A wrecker is not a cargo van.
+- **Not hunted this quarter.** Remaining-season proof is still cleaning → HVAC → pest (§33.5). Courier does not freeze on Oct 31, which is why we list it — winter supply exists. It does not get a sourcing week until a parts house, HVAC shop, or three vans walk in.
+- **Take Launch if they write the $1,200.** The OS and `/b` link are useful to a one-van operator who already has three shops on speed-dial. Do not promise we will fill a cold courier board from homepage chips.
+- **No invented courier founding listing.** Liquidity is per city×trade. A liquid cleaning board does not make `/nc/greensboro/courier` real.
+
+This is how we absorb drivers the food apps cannot pay, without becoming a food app.
+
+**Sources:**
+- [DoorDash Dasher vehicle requirements](https://dasher.doordash.com/en-us/requirements)
+- [Amazon Flex delivery partner requirements](https://flex.amazon.com/get-started/requirements/)
+- [Pegram — cargo van insurance in North Carolina](https://pegramonline.com/cargo-van-insurance-north-carolina/)
+- [Insurance.com — NC commercial auto](https://www.insurance.com/small-business/commercial-auto-insurance-in-north-carolina/)
+- [Dispatch — Greensboro / Piedmont Triad courier](https://www.dispatchit.com/company/locations/greensboro)
+- [Carolina Quick Courier](https://www.carolinaquickcourier.com/)
+- [Reliable Couriers — Greensboro](https://www.reliablecouriers.com/service-area/north-carolina/greensboro)
+- [Hoffman Parts & Warehouse — Greensboro](https://www.hoffman-hoffman.com/parts-and-warehouse/)
+- [AIR Carolinas parts](https://www.air-carolinas.com/parts)
+- [Mordor — US healthcare last-mile delivery](https://www.mordorintelligence.com/industry-reports/united-states-healthcare-parcel-last-mile-delivery-market)
 

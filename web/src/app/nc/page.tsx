@@ -9,7 +9,7 @@ import { TRADE_LABELS, tradesForPublicNav } from "@/lib/service-business/profile
 
 export const metadata: Metadata = {
   title: "North Carolina service directory",
-  description: "Find lawn care, cleaning, HVAC, pest control, junk removal, roadside assistance, towing, and more across North Carolina.",
+  description: "Find lawn care, cleaning, HVAC, pest control, junk removal, cargo-van courier, roadside assistance, towing, and more across North Carolina.",
   alternates: { canonical: "/nc" },
 };
 

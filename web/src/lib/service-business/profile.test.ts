@@ -15,16 +15,18 @@ describe("service business profile", () => {
   it("leads public nav with the remaining-season lineup (cleaning, HVAC, pest, lawn), then junk and trucks (§33.5)", () => {
     expect(TRADES).toContain("pest-control");
     expect(TRADES).toContain("junk-removal");
+    expect(TRADES).toContain("courier");
     expect(TRADES).toContain("roadside-assistance");
     expect(TRADES).toContain("towing");
     expect(TRADES.indexOf("roadside-assistance")).not.toBe(TRADES.indexOf("towing"));
     expect(tradesForPublicNav()[0]).toBe("cleaning");
-    expect(tradesForPublicNav().slice(0, 7)).toEqual([
+    expect(tradesForPublicNav().slice(0, 8)).toEqual([
       "cleaning",
       "hvac",
       "pest-control",
       "lawn-care",
       "junk-removal",
+      "courier",
       "roadside-assistance",
       "towing",
     ]);
@@ -32,6 +34,7 @@ describe("service business profile", () => {
     expect(tradeMarketplacePitch("hvac", "Raleigh")).toMatch(/maintenance plan/i);
     expect(tradeMarketplacePitch("pest-control", "Greensboro")).toMatch(/quarterly plan/i);
     expect(tradeMarketplacePitch("junk-removal", "Greensboro")).toMatch(/properties/i);
+    expect(tradeMarketplacePitch("courier", "Greensboro")).toMatch(/parts counters/i);
     expect(tradeMarketplacePitch("roadside-assistance", "Charlotte")).toMatch(/rarely/i);
     expect(tradeMarketplacePitch("towing", "Raleigh")).toMatch(/rarely/i);
     expect(tradeMarketplacePitch("towing", "Raleigh")).toMatch(/wrecker/i);

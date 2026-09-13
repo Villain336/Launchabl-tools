@@ -16,10 +16,11 @@ import { logAuditEvent } from "@/lib/audit/log";
 import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
- * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31–§33) —
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31–§34) —
  * the original five (§24) plus plumbing, electrical, painting, junk-removal
- * (§31), roadside + towing (§32), and pest-control (§33). Keep roadside and
- * towing separate: jump/tire/lockout is not hook-and-haul.
+ * (§31), roadside + towing (§32), pest-control (§33), and courier / cargo-van
+ * (§34). Keep roadside, towing, and courier separate: a jump pack is not a
+ * wrecker, and a cargo van is not a burrito bag.
  */
 export const TRADES = [
   "lawn-care",
@@ -27,6 +28,7 @@ export const TRADES = [
   "cleaning",
   "pest-control",
   "junk-removal",
+  "courier",
   "roadside-assistance",
   "towing",
   "pressure-washing",
@@ -43,6 +45,7 @@ export const TRADE_LABELS: Record<Trade, string> = {
   cleaning: "Cleaning",
   "pest-control": "Pest control",
   "junk-removal": "Junk removal & haul-away",
+  courier: "Courier & cargo van",
   "roadside-assistance": "Roadside assistance",
   towing: "Towing",
   "pressure-washing": "Pressure washing & exterior",
@@ -56,8 +59,9 @@ export type TradeRepeatShape = "weekly" | "membership" | "on-demand-repeat" | "s
 
 /**
  * How often the same *household* comes back — not market ping volume.
- * Agency sourcing hunts REPEAT_TRADES (§33 starting lineup). Roadside/towing
- * are dispatch-native: high market velocity, low household LTV (§32).
+ * Agency sourcing hunts REPEAT_TRADES (§33 starting lineup). Roadside, towing,
+ * and courier are dispatch-native: high market velocity, low household LTV
+ * unless the buyer is a shop, lot, or standing route (§32, §34).
  * Parking-lot and painting stay listed, not hunted.
  */
 export const TRADE_REPEAT = {
@@ -66,6 +70,7 @@ export const TRADE_REPEAT = {
   hvac: "membership",
   "pest-control": "membership",
   "junk-removal": "on-demand-repeat",
+  courier: "dispatch-native",
   "roadside-assistance": "dispatch-native",
   towing: "dispatch-native",
   "pressure-washing": "seasonal",
@@ -84,8 +89,8 @@ export const TRADE_REPEAT = {
 export const REPEAT_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
-/** Public chips: remaining-season lineup first, then junk, then trucks, painting last. */
-export const FEATURED_NAV_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care", "junk-removal", "roadside-assistance", "towing"] as const;
+/** Public chips: remaining-season lineup first, then junk and vans, then trucks, painting last. */
+export const FEATURED_NAV_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care", "junk-removal", "courier", "roadside-assistance", "towing"] as const;
 
 export function tradesForPublicNav(): Trade[] {
   const lead = new Set<string>(FEATURED_NAV_TRADES);
@@ -110,9 +115,13 @@ export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
     case "project":
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar.`;
     case "dispatch-native":
-      return trade === "towing"
-        ? `Need a hook? We ping every available wrecker in ${cityName}. First claim owns the haul. Households tow rarely — fleets, lots, and motor-club overflow keep the trucks moving.`
-        : `Flat, dead battery, lockout — we ping every available truck in ${cityName}. First claim owns the job. A household needs this rarely; the book is fleets, lots, and clubs.`;
+      if (trade === "towing") {
+        return `Need a hook? We ping every available wrecker in ${cityName}. First claim owns the haul. Households tow rarely — fleets, lots, and motor-club overflow keep the trucks moving.`;
+      }
+      if (trade === "courier") {
+        return `Need a cargo van, not a food bag? We ping every available courier in ${cityName}. First claim owns the run. Households don't courier weekly — shops, parts counters, and standing routes keep the book full.`;
+      }
+      return `Flat, dead battery, lockout — we ping every available truck in ${cityName}. First claim owns the job. A household needs this rarely; the book is fleets, lots, and clubs.`;
   }
 }
 
