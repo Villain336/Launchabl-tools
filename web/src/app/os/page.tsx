@@ -7,7 +7,7 @@ import { ToolStatusBadge } from "@/components/ui/agency-badge";
 import { siteConfig } from "@/lib/site-config";
 
 const title = "The OS";
-const description = "Customers pick a weekday time on your page. It lands on your job book. You run the work from your phone — not another CRM speech."
+const description = "City-wide jobs ping your phone. First claim owns the quote. Or customers pick a weekday time on your page. You run the work from the truck — not another CRM speech."
 
 export const metadata: Metadata = {
   title,
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
  */
 const features: { name: string; summary: string; status: "live" | "beta" | "coming-soon" }[] = [
   { name: "Unified customer profiles", summary: "Every customer, their contact info, job history, and notes in one place — not scattered across texts and spreadsheets.", status: "live" },
+  { name: "Dispatch offers", summary: "A homeowner asks for the trade in your city. Every available crew gets the ping. First claim owns the job, sends the quote, and gets paid on that request.", status: "live" },
   { name: "Public booking", summary: "Customers pick an open weekday slot on your page. It becomes a job on the calendar, not a quote you have to chase.", status: "live" },
   { name: "Customizable storefront", summary: "Your public listing is a theme you control — colors, services, photos, booking — like Shopify, for a trade.", status: "live" },
   { name: "Marketplace leads", summary: "Quote requests still work for messy jobs. Booked slots always land — we do not hold a Saturday because your allotment ran out.", status: "live" },
@@ -45,8 +46,8 @@ export default function OsPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="The OS"
-        title="Your public page is a booking link"
-        description="Text /b/your-name after a call. Put it on Google. When someone grabs Saturday, it is on the book — customer, time, address. The rest of the OS is what you use after that. Built for NC lawn, HVAC, cleaning, plumbing, and the other launch trades."
+        title="Jobs hit your phone. The page still books your regulars."
+        description="City-wide work lands in Offers — Telegram or email today, not carrier SMS yet. First claim owns the quote. /b/your-name is still what you text after a call. Built for NC lawn, HVAC, cleaning, plumbing, and the other launch trades."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,6 +75,9 @@ export default function OsPage() {
           </LinkButton>
           <LinkButton href="/os/dashboard" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Open the dashboard
+          </LinkButton>
+          <LinkButton href="/os/offers" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            Open offers
           </LinkButton>
           <LinkButton href="/os/storefront" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Customize your page

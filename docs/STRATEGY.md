@@ -1046,3 +1046,46 @@ Exclusive delivery and job-tied reviews stay. They are how we don't rot. They ar
 - [Online Booking: What the Data Says — Runchey](https://www.runcheywebsites.com/blog/online-booking-for-contractors)
 - [FSM Migration Guide — FieldProxy](https://www.fieldproxy.ai/resources/blog/fsm-migration-guide-switch-field-service-software)
 
+---
+
+## 29. DoorDash-style dispatch — ping the trade, first claim owns it
+
+§28 shipped the OpenTable path: pick a specific crew and take a weekday slot. The founder then named the other loop locals already understand from DoorDash / Postmates: pick the **job**, not the vendor. We ping every available member in that city×trade. First one to claim it does the quote and the payment in one place.
+
+That is not Angi. Angi **sells the same contact to several pros**. DoorDash **pings many, first accept owns fulfillment**. After claim the job is exclusive (`exclusiveAfterClaim: true`). We do not charge per ping.
+
+### 29.1 Two consumer paths, both stay
+
+1. **Dispatch (this section).** `/nc/{city}/{trade}` — “get this done.” Open offer, 2-hour window, first claim creates the lead + customer + job on that org. Homeowner stays on `/request/{id}` for quote and Stripe Checkout.
+2. **Direct book (§28).** `/b/{slug}` or the storefront — “I want this crew.” Calendar slot, `mustDeliver`, no race.
+
+A homeowner who already has a name should not be forced through a blast. A homeowner who just needs a Saturday mow should not have to interview three listings.
+
+### 29.2 What “available” means today
+
+`listAvailableCrews` only pings **published, org-backed** listings in that city×trade with `acceptingOffers !== false`. Founding listings (Atlas + the two placeholders) have `orgId: null`. They **cannot be pinged or claim**. That is honest, not a bug: there is no OS inbox to receive the job.
+
+Cold start: a city×trade that only has founding rows can still create an offer. `pingedCount` will be **0**. The request sits until it expires. We will not invent a crew to take it.
+
+### 29.3 Phone notifications, said honestly
+
+Contractors asked for the ping on their phone and the full quote + transaction in one place.
+
+- **One place** is shipped: claim → dollar quote → homeowner pays the same request URL.
+- **Phone** today is Telegram and email (`sendOrgAlert`). iMessage is not a public API. Carrier SMS (Twilio) is not built. Do not put “we text every contractor’s cell” on the homepage until that exists. `/os/offers` is the inbox either way.
+
+### 29.4 What this round shipped
+
+- `offer.ts`: open → claimed → quoted → paid, 2-hour FCFS window, `setNx` claim lock.
+- Public `POST /api/marketplace/offers`, `/request/{id}`, city×trade `DispatchForm`.
+- Contractor `/os/offers` (claim + quote) and storefront `acceptingOffers`.
+- Stripe Checkout on the offer; webhook `metadata.offerId` marks it paid.
+- Tests: two Raleigh plumbing orgs both pinged; first claim wins; founding-only city pings 0; expired cannot claim.
+
+### 29.5 Still missing
+
+- SMS to the contractor’s cell. Telegram/email is what we can actually send.
+- Founding partners claiming dispatch jobs — they need an org + published storefront first.
+- After-hours emergency. A 2-hour board is for scheduled work, same limit as booking.
+- We will still lose to whoever answers the phone on a burst pipe. Say that out loud.
+

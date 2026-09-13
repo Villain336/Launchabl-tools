@@ -172,6 +172,10 @@ export function StorefrontEditor() {
           <input type="checkbox" checked={draft.bookingEnabled !== false} onChange={(e) => patch("bookingEnabled", e.target.checked)} />
           Let customers book a weekday time on this page
         </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={draft.acceptingOffers !== false} onChange={(e) => patch("acceptingOffers", e.target.checked)} />
+          Get city-wide job pings (first crew to claim owns it)
+        </label>
         <Input value={draft.logoUrl ?? ""} onChange={(e) => patch("logoUrl", e.target.value || null)} placeholder="Logo URL" />
         <Input value={draft.coverUrl ?? ""} onChange={(e) => patch("coverUrl", e.target.value || null)} placeholder="Cover photo URL" />
         <Input value={draft.phone} onChange={(e) => patch("phone", e.target.value)} placeholder="Phone" />
