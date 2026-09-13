@@ -16,6 +16,43 @@ export type ProjectBrand = {
   hideBadge: boolean;
 };
 
+/**
+ * A vertical this project belongs to, so relevant tools can apply real
+ * category knowledge instead of staying generic. See STRATEGY.md §23.5/§24 —
+ * this is the "vertical depth" moat vector (§18.2.5), scoped to the one
+ * vertical the founder committed to first: home/local services, anchored on
+ * the one real customer this product has. Add more verticals here only once
+ * this one has real, measured evidence behind it (§24.2's roadmap).
+ */
+export const VERTICALS = ["home-services"] as const;
+export type Vertical = (typeof VERTICALS)[number];
+export const VERTICAL_LABELS: Record<Vertical, string> = {
+  "home-services": "Home & local services (lawn care, cleaning, HVAC, pressure washing, parking lot & exterior, similar trades)",
+};
+export const isVertical = (value: unknown): value is Vertical => typeof value === "string" && (VERTICALS as readonly string[]).includes(value);
+
+/**
+ * Category knowledge injected into every tool run for a project in this
+ * vertical, on top of the generic project facts (company, audience, tone).
+ * This is the actual content of the "vertical depth" moat vector — real,
+ * specific, trade-level guidance a horizontal "AI tools for any business"
+ * competitor doesn't encode, not just a label on the project.
+ */
+const VERTICAL_GUIDES: Record<Vertical, string> = {
+  "home-services": `This account is a home/local service business (lawn care, cleaning, HVAC, pressure washing/exterior, parking-lot/paving, or a similar trade). Apply this without being asked:
+- Seasonality drives demand and messaging: lawn care/landscaping peaks in spring (push sign-ups Feb–Mar); HVAC has two peaks (cooling before summer, heating before winter) plus a maintenance-plan window in shoulder seasons; cleaning and exterior/pressure-washing see a "get ready for the season" spike in spring. Time copy and GBP posts to the trade's real season, not a generic calendar.
+- Review velocity is the single biggest local-pack ranking lever for this category, more than backlinks or on-page content. As a rule of thumb, a business under roughly 15 total Google reviews will consistently lose the map pack to a lower-quality competitor with 50+, no matter how good the website is. Below that threshold, prioritise review-request automation over more SEO copy.
+- The map pack, not organic blue links, is where this category's customers actually click for "[service] near me" and "[service] in [city]" intent — proximity, review count/recency and correct GBP categorisation outrank on-page SEO here. A great website with a neglected GBP profile loses to a mediocre one with a strong profile.
+- Service-area pages need one real page per (service × city), not a single combined "areas we serve" page — intent here is hyper-local ("lawn care Greensboro" vs. "lawn care"), and a combined page ranks for neither.
+- The real conversion event is a quote/estimate request, not a generic "contact us" — forms and CTAs should ask for the job details (property size, service type, urgency) that let the business quote fast.
+- Trust signals that convert for this category specifically: licensed/insured/bonded badges, years in business, and real before/after photos — more than testimonial text alone, which reads as generic across this whole category.`,
+};
+
+/** The category-knowledge block for a project's vertical, or `null` if it has none. */
+export function verticalContext(project: Pick<Project, "vertical">): string | null {
+  return project.vertical ? VERTICAL_GUIDES[project.vertical] : null;
+}
+
 export type Project = {
   id: string;
   ownerUid: string;
@@ -27,6 +64,8 @@ export type Project = {
   offers: string;
   competitors: string[];
   notes: string;
+  /** Optional vertical, so tools can apply category-specific knowledge (§18.2.5). Null = stay generic. */
+  vertical: Vertical | null;
   brand: ProjectBrand;
   createdAt: string;
   updatedAt: string;
@@ -66,6 +105,7 @@ export function normaliseProject(input: ProjectInput, base: Pick<Project, "id" |
     offers: multiline(input.offers ?? base.offers, PROJECT_LIMITS.field),
     competitors,
     notes: multiline(input.notes ?? base.notes, PROJECT_LIMITS.notes),
+    vertical: input.vertical === null ? null : isVertical(input.vertical) ? input.vertical : base.vertical ?? null,
     brand: {
       primary: primary && isHexColour(primary) ? primary.toUpperCase() : null,
       logoUrl: logoUrl && isHttpUrl(logoUrl) && logoUrl.length <= 500 ? logoUrl : null,
@@ -103,6 +143,8 @@ export function projectContext(project: Project): string {
   if (project.competitors.length) lines.push(`Competitors: ${project.competitors.join(", ")}`);
   if (project.notes) lines.push(`Notes from the user: ${project.notes}`);
   if (project.brand.primary) lines.push(`Brand colour: ${project.brand.primary} (use it for designs, cards and images unless told otherwise).`);
+  const vertical = verticalContext(project);
+  if (vertical) lines.push("", vertical);
   return lines.join("\n");
 }
 
