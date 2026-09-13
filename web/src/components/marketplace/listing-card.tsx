@@ -20,6 +20,12 @@ export function ListingCard({ listing, city, trade }: { listing: PublicListing; 
         )}
       </div>
       <p className="mt-2 text-sm text-muted-foreground">{listing.storefront.tagline || what}</p>
+      {(listing.nextSlot || listing.startingPrice) && (
+        <p className="mt-3 text-sm text-foreground">
+          {listing.nextSlot ? `Next opening: ${listing.nextSlot.label}` : "Book a weekday time"}
+          {listing.startingPrice ? ` · from ${listing.startingPrice}` : ""}
+        </p>
+      )}
       <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">{where}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {listing.licensed && <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground">Licensed</span>}

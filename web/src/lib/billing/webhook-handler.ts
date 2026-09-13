@@ -119,6 +119,10 @@ async function applyJobInvoicePayment(session: Stripe.Checkout.Session, eventId:
     status: "paid",
     raw: { sessionId: session.id, orgId, jobId, paymentId: payment.id },
   });
+  if (session.metadata?.offerId) {
+    const { markOfferPaid } = await import("@/lib/service-business/offer");
+    await markOfferPaid(session.metadata.offerId, store);
+  }
 }
 
 export async function applyStripeEvent(event: Stripe.Event, store: KeyValueStore = getStore()): Promise<void> {

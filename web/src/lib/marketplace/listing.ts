@@ -5,8 +5,10 @@ import { defaultStorefront, getOrgStorefront, getSeedStorefront, saveSeedStorefr
 import { cleanText, RECORD_TTL } from "@/lib/service-business/shared";
 import { citySlug, getCity, isNcCitySlug, isTradeSlug, matchCitySlug } from "./cities";
 import { FOUNDING_LISTINGS, getFoundingListing, type FoundingListing } from "./founding";
+import { bookingHoursFrom, listOpenSlots, startingPriceFrom, type OpenSlot } from "@/lib/service-business/booking";
 import { listJobs } from "@/lib/service-business/job";
 import { EMPTY_PROOF, listReviewsForListing, type ListingProof } from "@/lib/service-business/review";
+import { normalizeStorefront } from "@/lib/service-business/storefront";
 
 export type FoundingMeta = { name?: string; phone?: string; address?: string };
 
@@ -33,6 +35,8 @@ export type PublicListing = {
   placeholder: boolean;
   storefront: Storefront;
   proof: ListingProof;
+  nextSlot: OpenSlot | null;
+  startingPrice: string | null;
 };
 
 /** Product law (§27): rank by OS-verified completed work, never by paid placement. */
@@ -74,8 +78,10 @@ async function listingFromFounding(seed: FoundingListing, store: KeyValueStore):
     websiteUrl: seed.websiteUrl,
     gbpUrl: seed.gbpUrl,
     placeholder: seed.placeholder && !meta.name,
-    storefront: overlay ?? seed.storefront,
+    storefront: normalizeStorefront(overlay ?? seed.storefront),
     proof: EMPTY_PROOF,
+    nextSlot: null,
+    startingPrice: startingPriceFrom(overlay ?? seed.storefront),
   };
   return withProof(listing, store);
 }
@@ -101,17 +107,24 @@ async function listingFromProfile(profile: ServiceBusinessProfile, store: KeyVal
     websiteUrl: profile.websiteUrl,
     gbpUrl: profile.gbpUrl,
     placeholder: false,
-    storefront,
+    storefront: normalizeStorefront(storefront),
     proof: EMPTY_PROOF,
+    nextSlot: null,
+    startingPrice: startingPriceFrom(storefront),
   };
   return withProof(listing, store);
 }
 
 async function withProof(listing: PublicListing, store: KeyValueStore): Promise<PublicListing> {
   const reviews = await listReviewsForListing(listing.slug, store);
-  if (!listing.orgId) return { ...listing, proof: { completedJobs: 0, reviews } };
-  const jobs = await listJobs(listing.orgId, store);
-  return { ...listing, proof: { completedJobs: jobs.filter((job) => job.status === "completed").length, reviews } };
+  const jobs = listing.orgId ? await listJobs(listing.orgId, store) : [];
+  const slots = listOpenSlots(bookingHoursFrom(listing.storefront), jobs);
+  return {
+    ...listing,
+    proof: { completedJobs: listing.orgId ? jobs.filter((job) => job.status === "completed").length : 0, reviews },
+    nextSlot: slots[0] ?? null,
+    startingPrice: startingPriceFrom(listing.storefront),
+  };
 }
 
 export async function listDirectory(store: KeyValueStore = getStore()): Promise<PublicListing[]> {

@@ -14,6 +14,7 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/os", priority: 0.8, changeFrequency: "weekly" },
   { path: "/os/storefront", priority: 0.6, changeFrequency: "weekly" },
   { path: "/os/dashboard", priority: 0.5, changeFrequency: "weekly" },
+  { path: "/os/offers", priority: 0.5, changeFrequency: "weekly" },
   { path: "/os/schedule", priority: 0.5, changeFrequency: "weekly" },
   { path: "/os/inventory", priority: 0.5, changeFrequency: "weekly" },
   { path: "/os/warranty", priority: 0.5, changeFrequency: "weekly" },

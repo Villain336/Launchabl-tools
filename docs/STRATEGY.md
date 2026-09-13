@@ -990,3 +990,102 @@ We have not beaten Angi, Jobber, or HubSpot at anything that shows up in their b
 - [FTC charges HomeAdvisor with cheating businesses seeking leads](https://www.ftc.gov/news-events/news/press-releases/2022/03/ftc-charges-homeadvisor-inc-cheating-businesses-including-small-businesses-seeking-leads-home) (Mar 2022)
 - [FTC approves final order against HomeAdvisor](https://www.ftc.gov/news-events/news/press-releases/2023/04/ftc-approves-final-order-against-homeadvisor-inc-deceptively-marketing-its-leads-home-improvement) (Apr 2023)
 
+---
+
+## 28. They don't care — what locals will actually use
+
+§27 named exclusive leads, job-tied reviews, and verified-work rank as the moat. The founder was right to call that weak. Those are **constraints** (how we refuse to become Angi). They are not a reason a Greensboro homeowner or a two-truck HVAC shop opens this. Nobody hires a plumber because the lead is exclusive. Nobody switches off a notebook because reviews require a `reviewToken`.
+
+This section replaces "what's unique" with "what they already do, and where we can sit in that path."
+
+### 28.1 Homeowners do not adopt platforms
+
+They adopt a person who will show up. The default path is Google, a Facebook group, a neighbor, or the contractor they already have. Housecall Pro's own 2025 homeowner survey (1,000+ U.S. homeowners) is the honest demand signal, and it is not about directories:
+
+- **80%** say online booking influences who they hire; **80%** also say a professional website matters ([Housecall Pro 2025 Customer Service Report](https://www.housecallpro.com/resources/home-service-customer-service-report-trends-statistics/)).
+- Industry write-ups of the same research: **62%** prefer booking home services online vs calling, and **78%** of those want to do it outside business hours; Jobber-cited research: **68%** want estimated pricing before they book ([Home Services Online Self-Service Booking 2026 Guide](https://ustechautomations.com/resources/blog/home-services-online-self-service-booking-how-to-2026)).
+
+Treat vendor-sponsored numbers as directional, not scripture. The behavior is still obvious: a quote form is a hope someone calls back. A Saturday 9:00 slot is a decision. We were selling the hope.
+
+They will never "use Launchabl." They will use **Atlas's booking link** the way they already use a Housecall Pro pay link without knowing the brand. The contractor is the distribution. If we ask the homeowner to join a new directory brand, we lose to Google every time.
+
+### 28.2 Contractors do not adopt philosophy
+
+They adopt something that makes the phone ring or gets them paid faster. A shop already on Jobber/Housecall Pro will not migrate for exclusive NC leads from a three-listing directory — switching cost is weeks of data and training ([FSM migration guides put small-shop cutovers in the 2–6 week range](https://www.fieldproxy.ai/resources/blog/fsm-migration-guide-switch-field-service-software)). Do not waste the next quarter trying to rip Jobber out of a 10-truck shop.
+
+The actual OS buyer is the shop still on **paper, Google Calendar, and a Facebook page**: one owner, 2–8 jobs a day, invoices from a Word doc. They do not want a CRM. They want "the customer picked Saturday and I saw it on my phone." That is also the agency buyer: $1,200 for a page they can text, not for "marketplace supply."
+
+### 28.3 The adoption loop that is not weak
+
+1. **The public page is a calendar, not a brochure.** Weekday slots from the real job book. Starting price if they published one — never invented. A booked slot creates a lead that **cannot be held** (allotment holds are for quote requests; a Saturday on the book is work).
+2. **`/b/{slug}` is what the contractor distributes.** Text after a call. Google Business Profile. Truck QR. Invoice. Neighborhood Facebook post *as the business*, not as Launchabl. This is how HCP/Jobber actually get consumer usage.
+3. **Agency sells that loop, not "join our directory."** Launch = booking page live on Google + the OS behind it. Managed Growth = keep the page fed. Atlas Lot Care should be the first real send of the booking link to existing customers — one named client, no invented case study.
+4. **SEO pages exist so the booking page is findable**, not so we can lecture about Angi. `/nc/greensboro/lawn-care` should say "pick a time," not "we don't sell you five ways."
+
+Exclusive delivery and job-tied reviews stay. They are how we don't rot. They are not the homepage.
+
+### 28.4 What this round shipped
+
+- Public weekday booking against the real calendar (`booking.ts`, `/api/marketplace/bookings`). Overlaps and a slot lock prevent double-booking.
+- Storefronts show **next opening** and **starting price** when those exist; empty stays empty.
+- Booked slots always deliver (`mustDeliver`) — we do not tell a homeowner they're booked and then hold the lead.
+- `/`, `/os`, `/agency`, `/how-it-works`, and city×trade copy lead with the booking loop.
+
+### 28.5 Still missing, and it is not more software
+
+- Atlas (and the next two founding partners) actually texting `/b/{slug}` to real customers.
+- A starting price on services that have one — the contractor types it; we do not invent "$45 mows."
+- Google Business Profile and Facebook as the place the link lives. That is agency labor, not a feature.
+- SMS to the homeowner ("you're on the book Saturday 9am"). Email/Telegram to the shop exists; the customer confirmation is still thin.
+- We will still lose after-hours emergency calls to whoever answers the phone. Booking is for scheduled work. Say that out loud.
+
+**Sources:**
+- [Housecall Pro 2025 Home Service Customer Service Report](https://www.housecallpro.com/resources/home-service-customer-service-report-trends-statistics/)
+- [Housecall Pro 2025 report PDF](https://www.housecallpro.com/wp-content/uploads/2025/12/120425-Customer-Service-Report.pdf)
+- [Home Services Online Self-Service Booking: 2026 Guide](https://ustechautomations.com/resources/blog/home-services-online-self-service-booking-how-to-2026)
+- [Online Booking: What the Data Says — Runchey](https://www.runcheywebsites.com/blog/online-booking-for-contractors)
+- [FSM Migration Guide — FieldProxy](https://www.fieldproxy.ai/resources/blog/fsm-migration-guide-switch-field-service-software)
+
+---
+
+## 29. DoorDash-style dispatch — ping the trade, first claim owns it
+
+§28 shipped the OpenTable path: pick a specific crew and take a weekday slot. The founder then named the other loop locals already understand from DoorDash / Postmates: pick the **job**, not the vendor. We ping every available member in that city×trade. First one to claim it does the quote and the payment in one place.
+
+That is not Angi. Angi **sells the same contact to several pros**. DoorDash **pings many, first accept owns fulfillment**. After claim the job is exclusive (`exclusiveAfterClaim: true`). We do not charge per ping.
+
+### 29.1 Two consumer paths, both stay
+
+1. **Dispatch (this section).** `/nc/{city}/{trade}` — “get this done.” Open offer, 2-hour window, first claim creates the lead + customer + job on that org. Homeowner stays on `/request/{id}` for quote and Stripe Checkout.
+2. **Direct book (§28).** `/b/{slug}` or the storefront — “I want this crew.” Calendar slot, `mustDeliver`, no race.
+
+A homeowner who already has a name should not be forced through a blast. A homeowner who just needs a Saturday mow should not have to interview three listings.
+
+### 29.2 What “available” means today
+
+`listAvailableCrews` only pings **published, org-backed** listings in that city×trade with `acceptingOffers !== false`. Founding listings (Atlas + the two placeholders) have `orgId: null`. They **cannot be pinged or claim**. That is honest, not a bug: there is no OS inbox to receive the job.
+
+Cold start: a city×trade that only has founding rows can still create an offer. `pingedCount` will be **0**. The request sits until it expires. We will not invent a crew to take it.
+
+### 29.3 Phone notifications, said honestly
+
+Contractors asked for the ping on their phone and the full quote + transaction in one place.
+
+- **One place** is shipped: claim → dollar quote → homeowner pays the same request URL.
+- **Phone** today is Telegram and email (`sendOrgAlert`). iMessage is not a public API. Carrier SMS (Twilio) is not built. Do not put “we text every contractor’s cell” on the homepage until that exists. `/os/offers` is the inbox either way.
+
+### 29.4 What this round shipped
+
+- `offer.ts`: open → claimed → quoted → paid, 2-hour FCFS window, `setNx` claim lock.
+- Public `POST /api/marketplace/offers`, `/request/{id}`, city×trade `DispatchForm`.
+- Contractor `/os/offers` (claim + quote) and storefront `acceptingOffers`.
+- Stripe Checkout on the offer; webhook `metadata.offerId` marks it paid.
+- Tests: two Raleigh plumbing orgs both pinged; first claim wins; founding-only city pings 0; expired cannot claim.
+
+### 29.5 Still missing
+
+- SMS to the contractor’s cell. Telegram/email is what we can actually send.
+- Founding partners claiming dispatch jobs — they need an org + published storefront first.
+- After-hours emergency. A 2-hour board is for scheduled work, same limit as booking.
+- We will still lose to whoever answers the phone on a burst pipe. Say that out loud.
+

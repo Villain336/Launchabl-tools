@@ -14,7 +14,7 @@ export default function OsDashboardPage() {
   return (
     <Container className="py-12 sm:py-16">
       <OsSubnav current="/os/dashboard" />
-      <SectionHeading eyebrow="OS" title="Revenue and the job book" description="Leads from the directory land here. Turn them into jobs, send an estimate, record the payment." />
+      <SectionHeading eyebrow="OS" title="Revenue and the job book" description="City-wide pings sit under Offers. Direct bookings and quote requests land here as leads. Turn them into jobs, send an estimate, record the payment." />
       <div className="mt-10">
         <OpsWorkspace />
       </div>

@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 
 const title = "How this works";
-const description = "Quote requests go to one contractor. Reviews only exist after completed work. We do not invent stars or sell the same homeowner five ways.";
+const description = "Ask for the job and we ping every available crew — first claim quotes and gets paid here. Or book a specific crew's Saturday. Not a shared Angi lead.";
 
 export const metadata: Metadata = {
   title,
@@ -19,15 +19,21 @@ export default function HowItWorksPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="Trust"
-        title="What we will not copy from Angi, Jobber, or a generic CRM"
-        description="The directory is small on purpose. The OS is thinner than ServiceTitan. The only things we will not compromise are exclusive leads and reviews that require a real job."
+        title="Why a local would actually use this"
+        description="Nobody opens an app because leads are exclusive. They open it to get the lawn done this week — ping the trade, or grab Saturday at 9 with a crew they already know."
       />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
         <article className="rounded-3xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold">Exclusive quote requests</h2>
+          <h2 className="text-lg font-semibold">Ping the trade, or book a name</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Angi&rsquo;s own pro agreement says a lead is frequently sent to several other approved pros. Thumbtack shows a list and charges when a homeowner contacts more than one. Here, the form on a storefront goes to that listing only. City pages do not silently assign you to whoever is first in the grid.
+            DoorDash, not Angi: we notify every available crew in that city and trade. First one to claim owns the job, sends the quote, and you pay on the same page. If you already have a name, skip the blast and take a weekday slot on their calendar. After a claim, nobody else gets your number.
+          </p>
+        </article>
+        <article className="rounded-3xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold">Book a time, don&rsquo;t join a platform</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            Homeowners already have Google and a neighbor. They will not &ldquo;switch to Launchabl.&rdquo; They will tap a booking link the contractor texts them, or a weekday slot on a storefront that already showed up in search. The contractor is the distribution. The page is a calendar, not a brand.
           </p>
         </article>
         <article className="rounded-3xl border border-border bg-card p-6">
