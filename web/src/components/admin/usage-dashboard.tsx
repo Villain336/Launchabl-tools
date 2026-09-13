@@ -12,6 +12,7 @@ import { getToolBySlug } from "@/lib/site-config";
 import { modelLabel } from "@/lib/ai/models";
 import { AGENT_TEMPLATES } from "@/lib/agent/templates";
 import { EvalsPanel } from "@/components/admin/evals-panel";
+import { AuditPanel } from "@/components/admin/audit-panel";
 
 type UsagePayload = {
   generatedAt: string;
@@ -572,6 +573,7 @@ export function UsageDashboard() {
           {data.creditPacks && <CreditPacksPanel stats={data.creditPacks} days={days} />}
           {data.reports && <ReportsPanel reports={data.reports} labelFor={toolLabel} days={days} />}
           {data.upsell && <UpsellPanel upsell={data.upsell} labelFor={toolLabel} days={days} />}
+          <AuditPanel token={token} />
           <EvalsPanel token={token} />
           <BucketTable title="By model" rows={Object.entries(data.byModel)} labelFor={(m) => `${modelLabel(m)} · ${m}`} />
 

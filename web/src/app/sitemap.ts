@@ -16,6 +16,9 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/legal/privacy", priority: 0.2, changeFrequency: "yearly" },
   { path: "/legal/terms", priority: 0.2, changeFrequency: "yearly" },
   { path: "/legal/acceptable-use", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/legal/subprocessors", priority: 0.2, changeFrequency: "monthly" },
+  { path: "/legal/dpa", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/security", priority: 0.3, changeFrequency: "monthly" },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
