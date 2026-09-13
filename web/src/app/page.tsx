@@ -5,7 +5,7 @@ import { LinkButton } from "@/components/ui/agency-button";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { listDirectory } from "@/lib/marketplace/listing";
 import { NC_CITIES } from "@/lib/marketplace/cities";
-import { TRADE_LABELS, TRADES } from "@/lib/service-business/profile";
+import { TRADE_LABELS, tradesForPublicNav } from "@/lib/service-business/profile";
 import { siteConfig } from "@/lib/site-config";
 
 export default async function Home() {
@@ -64,7 +64,7 @@ export default async function Home() {
         <Container>
           <h2 className="font-heading text-3xl font-bold">Trades and cities</h2>
           <div className="mt-6 flex flex-wrap gap-2">
-            {TRADES.map((trade) => (
+            {tradesForPublicNav().map((trade) => (
               <Link key={trade} href={`/nc/greensboro/${trade}`} className="rounded-full border border-border px-3 py-1.5 text-sm hover:border-primary/40">
                 {TRADE_LABELS[trade]}
               </Link>

@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { getCity, NC_CITIES } from "@/lib/marketplace/cities";
 import { listDirectoryFiltered } from "@/lib/marketplace/listing";
-import { TRADE_LABELS, TRADES } from "@/lib/service-business/profile";
+import { TRADE_LABELS, tradesForPublicNav } from "@/lib/service-business/profile";
 
 export function generateStaticParams() {
   return NC_CITIES.map((city) => ({ city: city.slug }));
@@ -36,7 +36,7 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
         description="Pick a trade to ping every available crew — first claim quotes and gets paid. Or open a listing and book that crew&rsquo;s calendar."
       />
       <div className="mt-6 flex flex-wrap gap-2">
-        {TRADES.map((trade) => (
+        {tradesForPublicNav().map((trade) => (
           <Link key={trade} href={`/nc/${record.slug}/${trade}`} className="rounded-full border border-border px-3 py-1.5 text-sm">
             {TRADE_LABELS[trade]}
           </Link>

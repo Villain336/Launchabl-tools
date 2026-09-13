@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMemoryStore } from "@/lib/ai/store";
 import { setUserOrg, upsertUser } from "@/lib/auth/session";
 import { createOrg } from "@/lib/orgs/org";
-import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, setEngagementType, TRADES, updateServiceBusinessProfile } from "./profile";
+import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, setEngagementType, TRADES, tradeMarketplacePitch, tradesForPublicNav, updateServiceBusinessProfile } from "./profile";
 
 async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
   const { user } = await upsertUser("owner@example.com", "Owner", store);
@@ -12,8 +12,14 @@ async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
 }
 
 describe("service business profile", () => {
-  it("launches with the eight decided NC trade categories (STRATEGY.md §25.7 Q2)", () => {
-    expect(TRADES).toEqual(["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot", "plumbing", "electrical", "painting"]);
+  it("launches with the NC trades including junk removal, and leads public nav with repeat trades (§31)", () => {
+    expect(TRADES).toContain("junk-removal");
+    expect(TRADES).toContain("hvac");
+    expect(tradesForPublicNav()[0]).toBe("lawn-care");
+    expect(tradesForPublicNav().slice(0, 4)).toEqual(["lawn-care", "cleaning", "hvac", "junk-removal"]);
+    expect(tradesForPublicNav().at(-1)).toBe("painting");
+    expect(tradeMarketplacePitch("hvac", "Raleigh")).toMatch(/maintenance plan/i);
+    expect(tradeMarketplacePitch("junk-removal", "Greensboro")).toMatch(/properties/i);
   });
 
 

@@ -5,11 +5,11 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { NC_CITIES } from "@/lib/marketplace/cities";
 import { listDirectory } from "@/lib/marketplace/listing";
-import { TRADE_LABELS, TRADES } from "@/lib/service-business/profile";
+import { TRADE_LABELS, tradesForPublicNav } from "@/lib/service-business/profile";
 
 export const metadata: Metadata = {
   title: "North Carolina service directory",
-  description: "Find lawn care, HVAC, cleaning, plumbing, and more across North Carolina.",
+    description: "Find lawn care, cleaning, HVAC, junk removal, plumbing, and more across North Carolina.",
   alternates: { canonical: "/nc" },
 };
 
@@ -29,7 +29,7 @@ export default async function NcIndexPage() {
             {city.name}
           </Link>
         ))}
-        {TRADES.map((trade) => (
+        {tradesForPublicNav().map((trade) => (
           <Link key={trade} href={`/nc/greensboro/${trade}`} className="rounded-full border border-border px-3 py-1.5 text-sm">
             {TRADE_LABELS[trade]}
           </Link>

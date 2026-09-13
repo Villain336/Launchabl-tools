@@ -781,7 +781,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 ### 25.7 Founder decisions
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
-2. **Launch trade categories — decided.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), **plus plumbing, electrical, and painting**, added at this decision point. `TRADES` in `src/lib/service-business/profile.ts` reflects all eight.
+2. **Launch trade categories — decided, then extended in §31.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added when the founder asked to hunt repeat trades. `TRADES` in `src/lib/service-business/profile.ts` is the nine. Agency *sourcing* is the four repeat trades in §31, not painting.
 3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
@@ -854,7 +854,7 @@ This is the part worth being deliberate about rather than running the agency and
 1. **Managed-tier structure — decided, prices published.** Launch is **$1,200** one-time (the lifetime-plan descendant). Managed Growth starts at **$497/month**. Multi-location or unusual trades still get a custom quote on top of that floor. OS lead-volume tiers published alongside: listing (free, 5 leads), OS ($49/mo, 25), OS Plus ($149/mo, 80), Managed (200 leads, included in the retainer).
 2. **Who delivers it — decided.** The agency runs like a real agency, not "the self-serve tools operated by an employee instead of the client." It uses a bigger suite of tools and resources than the self-serve OS exposes, delivered by people. The platform's software is explicitly both a revenue engine (subscriptions, retainers) and a lead engine (the free-tools funnel and the marketplace itself feed the agency's own sales pipeline, not only self-serve signups).
 3. **Public positioning — decided, with a specific target structure (§26.7).** Not "rewrite everything now" — a specific site architecture to build toward: the brand presents primarily as the marketplace/directory, with dedicated pages for the OS and the agency, and CTAs for both placed along the marketplace landing page.
-4. **Sourcing — decided.** The next agency clients are deliberately sourced as NC home/local-service contractors in the eight launch trades, specifically to seed the marketplace (§26.3) — not the agency's existing broader clientele.
+4. **Sourcing — decided, narrowed in §31.** The next agency clients are NC home/local-service contractors. Hunt the **repeat** trades (lawn, cleaning, HVAC membership, junk removal), not every slug on the directory. Still seed the marketplace (§26.3) — not the agency's existing broader clientele.
 
 ### 26.7 Site architecture, target state
 
@@ -862,7 +862,7 @@ The decided identity: **the brand presents primarily as a directory/marketplace*
 
 - **Homepage → the marketplace/directory.** Shipped. The homepage is the NC directory, seeded with the three founding listings, with CTAs for the OS and the agency along the page. `/os` and `/agency` stay dedicated pages.
 - **`/os` — shipped this round.** A dedicated page for the self-serve OS, honestly split into what's live vs. still later (AI-drafted estimates as a real agent workflow, iMessage as a Messages provider). Scheduling, automations, warranty, inventory, Telegram/email alerts, payments, and the dashboard are live.
-- **`/agency` — shipped this round.** A dedicated page for Launch + Managed Growth, scoped to the eight launch trades, with a real contact path (not a fake form) and an explicit note that agency clients get OS access included and can self-serve at any time.
+- **`/agency` — shipped this round.** A dedicated page for Launch + Managed Growth, scoped to the launch trades (repeat trades first, §31), with a real contact path (not a fake form) and an explicit note that agency clients get OS access included and can self-serve at any time.
 - Both are linked from primary nav now (`OS`, `Agency`) and cross-link each other, ahead of the homepage rebuild — CTAs "along the landing page" become real once the homepage itself is directory-first.
 
 ---
@@ -1142,7 +1142,7 @@ Agency clients **are** marketplace supply (§26.3). If Launch does not produce a
 
 Greensboro lawn-care today: founding listing, `orgId: null`, `pingedCount: 0`. That is not a marketplace. It is a form.
 
-**Wedge (recommended):** Greensboro × lawn-care. Highest repeat rate of the eight launch trades. Closest to DoorDash’s habit (weekly, not once a decade). Not Atlas’s parking lots. Not Raleigh HVAC emergency (those still call whoever answers).
+**Wedge (recommended, then widened in §31):** Greensboro first. Hunt **repeat** trades — lawn, cleaning, HVAC (the maintenance book, not the 2 a.m. no-cool), junk removal — not Atlas’s parking lots and not painting. Liquidity is still per city×trade: three claiming lawn crews does not make the junk board real. Do not open ten empty junk pages.
 
 **Done looks like this, and only this:**
 
@@ -1210,4 +1210,50 @@ If those retainers do not sell, the marketplace is a hobby. Build the sales moti
 - [How much does Thumbtack charge per lead — Pipeline On](https://pipelineon.com/blog/how-much-does-thumbtack-charge-per-lead/)
 - [Housecall Pro pricing](https://www.housecallpro.com/pricing/)
 - [Jobber vs Housecall Pro pricing](https://www.getjobber.com/comparison/jobber-vs-housecall-pro/)
+
+---
+
+## 31. Target repeat trades — HVAC, junk, lawn, cleaning. Not every slug.
+
+§30 said Greensboro lawn-care because a weekly mow is the closest thing we have to a DoorDash habit. The founder is right that **lawn alone is too thin**. Hunt trades where the same buyer comes back, or where a property manager is a walking route. Do not hunt painting because the directory has a chip for it.
+
+`junk-removal` is now a first-class trade. HVAC was already one. Cleaning was already one. The change is **what we sell Launch into**, and what the homepage leads with (`REPEAT_TRADES`), not a ninth empty promise.
+
+### 31.1 What “repeat” actually means (do not flatten these)
+
+| Trade | Repeat shape | Typical ticket | What we sell | What we do not pretend |
+|---|---|---|---|---|
+| Lawn care | Weekly / biweekly route | ~$45–$70 per cut (§30) | First mow on dispatch → calendar route | That one Saturday is the business |
+| Cleaning | Weekly / biweekly house or office | Same shape as lawn | Same loop | One move-out clean is a project |
+| HVAC | **Membership**: 2 tune-ups/year (spring AC, fall heat), $150–$500/yr, most shops **$200–$350**; members spend 3-year **~$3k–$4.5k** vs **~$700–$1.1k** without a plan ([Built on Tenth memberships](https://www.builtontenth.com/hvac-research/hvac-membership-pricing-maintenance-agreements); [Plyrium 2026](https://www.plyrium.com/academy/hvac/hvac-maintenance-agreements-pricing-2026)) | Diagnostic $75–$200; repairs often $150–$650 ([ticket sizes](https://www.builtontenth.com/hvac-research/hvac-average-ticket-size-by-job-type)) | Dispatch for “it’s 90° and the unit is dead” **only if a crew is on-shift**. The money is the plan on `/b/{slug}` | That we beat the shop that answers the phone at 2 a.m. |
+| Junk removal | Residential **~80% one-time**; commercial / PM **recurring**. National haul ~**$241–$250**; commercial ~**$550**. One PM relationship is **3–10 jobs/month** ([Angi/Extra Space ~$250](https://www.extraspace.com/moving/guides/trends/how-much-does-junk-removal-cost/); [Deal Sheet industry notes](https://thedealsheet.co/industries/junk-removal); [PM turnovers](https://dropcurb.com/blog/commercial-junk-removal-cost-calculator); [3–10 cleanouts/mo](https://kickbackservices.com/grow-your-junk-removal-business)) | $150–$600 typical residential | Dispatch = first haul. Then the OS is the PM’s book | That homeowners junk-out every Saturday like they mow |
+
+Pressure washing is seasonal (1–2×/year). Plumbing and electrical are mostly emergency — keep the pages, do not staff a sales week on them. Parking-lot is Atlas’s trade and low frequency. Painting is a project.
+
+### 31.2 Agency list, not eight equal chips
+
+Launch / Managed outbound this quarter, in order:
+
+1. Greensboro lawn
+2. Greensboro cleaning
+3. Greensboro / Raleigh HVAC (pitch the **membership book** + on-shift pings, not “we will be your after-hours answering service”)
+4. Greensboro junk (pitch **property managers**, not only Facebook garage cleanouts)
+
+Three claiming crews are still required **per city×trade** (§30.3). A liquid lawn board does not let us lie on `/nc/greensboro/junk-removal`. Selling Launch to an HVAC shop and a junk hauler *in parallel* is allowed. Pretending four empty boards are a marketplace is not.
+
+### 31.3 What this round shipped
+
+- `junk-removal` in `TRADES` / sitemap / city×trade pages.
+- `REPEAT_TRADES` + `tradesForPublicNav()` — homepage and city chips lead lawn, cleaning, HVAC, junk.
+- `TRADE_REPEAT` + `tradeMarketplacePitch` — HVAC and junk pages say the honest second sentence (plan / PM book), not a copied mow pitch.
+- CRM trade checkboxes read from the same list. No invented junk founding listing.
+
+**Sources:**
+- [HVAC maintenance agreement pricing 2026 — Built on Tenth](https://www.builtontenth.com/hvac-research/hvac-membership-pricing-maintenance-agreements)
+- [HVAC maintenance agreements 2026 — Plyrium](https://www.plyrium.com/academy/hvac/hvac-maintenance-agreements-pricing-2026)
+- [HVAC average ticket by job type](https://www.builtontenth.com/hvac-research/hvac-average-ticket-size-by-job-type)
+- [How much does junk removal cost — Extra Space](https://www.extraspace.com/moving/guides/trends/how-much-does-junk-removal-cost/)
+- [Junk removal industry notes — The Deal Sheet](https://thedealsheet.co/industries/junk-removal)
+- [Commercial junk / apartment turnover costs — Dropcurb](https://dropcurb.com/blog/commercial-junk-removal-cost-calculator)
+- [Growing a junk business / PM accounts](https://kickbackservices.com/grow-your-junk-removal-business)
 

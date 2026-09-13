@@ -16,18 +16,28 @@ import { logAuditEvent } from "@/lib/audit/log";
 import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
- * Launch trade taxonomy for the NC marketplace + OS (§25.7, decided) —
- * the home-services vertical overlay's original five (§24) plus plumbing,
- * electrical, and painting, added by the founder at launch-category
- * confirmation time.
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31) —
+ * the original five (§24) plus plumbing, electrical, painting, and
+ * junk-removal (added when the founder asked to target repeat trades).
  */
-export const TRADES = ["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot", "plumbing", "electrical", "painting"] as const;
+export const TRADES = [
+  "lawn-care",
+  "hvac",
+  "cleaning",
+  "junk-removal",
+  "pressure-washing",
+  "parking-lot",
+  "plumbing",
+  "electrical",
+  "painting",
+] as const;
 export type Trade = (typeof TRADES)[number];
 
 export const TRADE_LABELS: Record<Trade, string> = {
   "lawn-care": "Lawn care & landscaping",
   hvac: "HVAC",
   cleaning: "Cleaning",
+  "junk-removal": "Junk removal & haul-away",
   "pressure-washing": "Pressure washing & exterior",
   "parking-lot": "Parking lot & exterior paving",
   plumbing: "Plumbing",
@@ -35,7 +45,46 @@ export const TRADE_LABELS: Record<Trade, string> = {
   painting: "Painting",
 };
 
+/**
+ * How often the same customer comes back. Agency sourcing and public
+ * nav lead with these; parking-lot and painting stay listed, not hunted (§31).
+ */
+export const TRADE_REPEAT = {
+  "lawn-care": "weekly",
+  cleaning: "weekly",
+  hvac: "membership",
+  "junk-removal": "on-demand-repeat",
+  "pressure-washing": "seasonal",
+  plumbing: "on-demand-repeat",
+  electrical: "on-demand-repeat",
+  "parking-lot": "project",
+  painting: "project",
+} as const satisfies Record<Trade, "weekly" | "membership" | "on-demand-repeat" | "seasonal" | "project">;
+
+export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal"] as const;
+export type RepeatTrade = (typeof REPEAT_TRADES)[number];
+
+export function tradesForPublicNav(): Trade[] {
+  const lead = new Set<string>(REPEAT_TRADES);
+  return [...REPEAT_TRADES, ...TRADES.filter((trade) => !lead.has(trade))];
+}
+
 export const isTrade = (value: unknown): value is Trade => typeof value === "string" && (TRADES as readonly string[]).includes(value);
+
+export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
+  switch (TRADE_REPEAT[trade]) {
+    case "weekly":
+      return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. The money for that crew is the weekly route — book them next time on their page.`;
+    case "membership":
+      return `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
+    case "on-demand-repeat":
+      return `Ping every available crew in ${cityName}. First claim owns the haul. If you run properties, put the crew you liked on the book so the next turnover is not another blast.`;
+    case "seasonal":
+      return `Tell us the job. We ping every available crew in ${cityName}. First claim quotes and gets paid here. Or pick a specific crew and book their calendar.`;
+    case "project":
+      return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar.`;
+  }
+}
 
 /**
  * Which of §26's three legs is actually running this account's operation —
