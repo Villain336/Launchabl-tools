@@ -44,7 +44,13 @@ export type AuditAction =
   | "job.updated"
   | "estimate.created"
   | "estimate.updated"
-  | "payment.recorded";
+  | "payment.recorded"
+  | "warranty.created"
+  | "warranty.updated"
+  | "inventory.created"
+  | "inventory.updated"
+  | "automation.updated"
+  | "alerts.updated";
 
 export type AuditEvent = {
   /** Null/omitted for actions not scoped to an org (e.g. an admin-dashboard view). */

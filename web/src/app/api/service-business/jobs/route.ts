@@ -29,6 +29,10 @@ function readJobInput(body: unknown): JobInput {
     scheduledFor: typeof b.scheduledFor === "string" || b.scheduledFor === null ? (b.scheduledFor as string | null) : undefined,
     notes: typeof b.notes === "string" ? b.notes : undefined,
     estimateId: typeof b.estimateId === "string" || b.estimateId === null ? (b.estimateId as string | null) : undefined,
+    durationMinutes: typeof b.durationMinutes === "number" ? b.durationMinutes : Number(b.durationMinutes) || undefined,
+    driveMinutes: typeof b.driveMinutes === "number" ? b.driveMinutes : b.driveMinutes !== undefined ? Number(b.driveMinutes) : undefined,
+    address: typeof b.address === "string" ? b.address : undefined,
+    allowOverlap: typeof b.allowOverlap === "boolean" ? b.allowOverlap : undefined,
   };
 }
 

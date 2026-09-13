@@ -4,6 +4,10 @@ import { createMemoryStore } from "@/lib/ai/store";
 import { getUser, hasProAccess, setUserBilling, upsertUser } from "@/lib/auth/session";
 import { getCreditBalance } from "@/lib/billing/credits";
 import { readCreditStats } from "@/lib/ai/usage";
+import { createOrg } from "@/lib/orgs/org";
+import { createCustomer } from "@/lib/service-business/customer";
+import { createJob } from "@/lib/service-business/job";
+import { listPayments } from "@/lib/service-business/payment";
 import { alreadyProcessed, applyStripeEvent, markProcessed } from "./webhook-handler";
 
 function subscriptionEvent(
@@ -160,6 +164,38 @@ describe("applyStripeEvent — credit pack purchases", () => {
     expect(await getCreditBalance(user.uid, store)).toBe(20);
     const stats = await readCreditStats(1, store);
     expect(stats.packsSold).toBe(1);
+  });
+});
+
+describe("applyStripeEvent — job invoices", () => {
+  it("records a paid job payment once for a job_invoice checkout", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("invoice@example.com", "Owner", store);
+    const org = await createOrg(user.uid, "Piedmont Plumbing", store);
+    if ("error" in org) throw new Error(org.error);
+    const customer = await createCustomer(org.id, user.uid, { name: "Jordan" }, store);
+    if ("error" in customer) throw new Error(customer.error);
+    const job = await createJob(org.id, user.uid, { customerId: customer.id, title: "Water heater" }, store);
+    if ("error" in job) throw new Error(job.error);
+
+    const session = {
+      id: "cs_job_1",
+      mode: "payment" as const,
+      subscription: null,
+      customer: null,
+      amount_total: 165000,
+      currency: "usd",
+      metadata: { kind: "job_invoice", orgId: org.id, jobId: job.id, uid: user.uid, amountCents: "165000" },
+    };
+
+    await applyStripeEvent(checkoutCompletedEvent(session), store);
+    await applyStripeEvent(checkoutCompletedEvent(session), store);
+
+    const payments = await listPayments(org.id, store);
+    expect(payments).toHaveLength(1);
+    expect(payments[0]?.amountCents).toBe(165000);
+    expect(payments[0]?.method).toBe("card");
+    expect(payments[0]?.stripeSessionId).toBe("cs_job_1");
   });
 });
 
