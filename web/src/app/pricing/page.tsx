@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
 import PricingBlock from "@/components/blocks/pricing-3";
 import ToolsProPricing from "@/components/blocks/tools-pro-pricing";
+import { CreditPacksSection } from "@/components/blocks/credit-packs-section";
 import FeaturesBlock from "@/components/blocks/features-3";
 import ComparisonBlock from "@/components/blocks/comparison-2";
 import FaqsBlock from "@/components/blocks/faqs-1";
@@ -112,6 +113,7 @@ export default function PricingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd()) }} />
       <PricingBlock />
       <ToolsProPricing />
+      <CreditPacksSection />
       <ComparisonBlock />
       <FeaturesBlock />
       <FaqsBlock

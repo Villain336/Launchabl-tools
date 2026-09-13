@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createMemoryStore } from "@/lib/ai/store";
 import { setUserBilling, upsertUser, type Session } from "@/lib/auth/session";
+import { getCreditBalance, grantCredits } from "@/lib/billing/credits";
 import { checkEntitlement, isProTool, PRO_TRIAL_RUNS } from "./entitlement";
 
 const PRO_SLUG = "ai-image-generator";
@@ -93,6 +94,37 @@ describe("checkEntitlement", () => {
     for (let i = 0; i < PRO_TRIAL_RUNS; i++) await checkEntitlement(PRO_SLUG, session, store, { env: {} });
     const decision = await checkEntitlement(PRO_SLUG, session, store, { env: { PAYWALL_ENFORCED_TOOLS: "*" } });
     expect(decision).toEqual({ allowed: false, reason: "needs_pro" });
+  });
+
+  it("spends a purchased credit as a fallback once enforced and the trial is spent, then blocks once credits run out", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("credits@example.com", null, store);
+    const session = sessionFor(user.uid, user.email);
+    await grantCredits(user.uid, 2, store);
+
+    for (let i = 0; i < PRO_TRIAL_RUNS; i++) await checkEntitlement(PRO_SLUG, session, store, { env: { PAYWALL_ENFORCED_TOOLS: "*" } });
+
+    const first = await checkEntitlement(PRO_SLUG, session, store, { env: { PAYWALL_ENFORCED_TOOLS: "*" } });
+    expect(first).toEqual({ allowed: true, wouldBlock: false, spentCredit: true, creditsLeft: 1 });
+
+    const second = await checkEntitlement(PRO_SLUG, session, store, { env: { PAYWALL_ENFORCED_TOOLS: "*" } });
+    expect(second).toEqual({ allowed: true, wouldBlock: false, spentCredit: true, creditsLeft: 0 });
+
+    const blocked = await checkEntitlement(PRO_SLUG, session, store, { env: { PAYWALL_ENFORCED_TOOLS: "*" } });
+    expect(blocked).toEqual({ allowed: false, reason: "needs_pro" });
+    expect(await getCreditBalance(user.uid, store)).toBe(0);
+  });
+
+  it("doesn't spend credits during dark-launch — only once the tool is actually enforced", async () => {
+    const store = createMemoryStore();
+    const { user } = await upsertUser("darklaunch@example.com", null, store);
+    const session = sessionFor(user.uid, user.email);
+    await grantCredits(user.uid, 5, store);
+
+    for (let i = 0; i < PRO_TRIAL_RUNS; i++) await checkEntitlement(PRO_SLUG, session, store, { env: {} });
+    const decision = await checkEntitlement(PRO_SLUG, session, store, { env: {} });
+    expect(decision).toEqual({ allowed: true, wouldBlock: true });
+    expect(await getCreditBalance(user.uid, store)).toBe(5);
   });
 
   it("forcePro gates a tool that isn't tagged tier: pro, keyed by whatever pseudo-slug is passed", async () => {

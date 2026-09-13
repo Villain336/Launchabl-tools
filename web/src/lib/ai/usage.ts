@@ -170,6 +170,66 @@ export async function readPaywallStats(days: number, store: KeyValueStore = getS
   return applyPaywall(merged);
 }
 
+/* ── Credit packs ────────────────────────────────────────── 
+ * One-time-payment alternative to the Tools Pro subscription (see
+ * lib/billing/credits.ts for the ledger itself). "purchased" is recorded
+ * when the Stripe webhook grants a pack; "spent" when entitlement.ts draws
+ * one down as a fallback before it would otherwise block a pro-tier request.
+ */
+
+export type CreditEventKind = "purchased" | "spent";
+
+export async function recordCreditEvent(
+  kind: CreditEventKind,
+  opts: { pack?: string; amount?: number; revenueUsd?: number } = {},
+  store: KeyValueStore = getStore(),
+  date = new Date(),
+): Promise<void> {
+  const day = dayKey(date);
+  const fields: Record<string, number> =
+    kind === "purchased"
+      ? {
+          [field("credits", "purchased", "packs")]: 1,
+          [field("credits", "purchased", "credits")]: opts.amount ?? 0,
+          [field("credits", "purchased", "revenue")]: toMicro(opts.revenueUsd ?? 0),
+          ...(opts.pack ? { [field("credits", "purchased", "pack", opts.pack)]: 1 } : {}),
+        }
+      : { [field("credits", "spent", "credits")]: 1 };
+  try {
+    await Promise.all([store.hincrby(`${KEY_PREFIX}:day:${day}`, fields, RETENTION_SECONDS), store.sadd(`${KEY_PREFIX}:days`, day, RETENTION_SECONDS)]);
+  } catch (error) {
+    console.warn("[usage] failed to record credit event", error);
+  }
+}
+
+export type CreditStats = { packsSold: number; creditsPurchased: number; creditsSpent: number; revenueUsd: number; byPack: Record<string, number> };
+
+export function emptyCreditStats(): CreditStats {
+  return { packsSold: 0, creditsPurchased: 0, creditsSpent: 0, revenueUsd: 0, byPack: {} };
+}
+
+const PACK_FIELD_PREFIX = "credits:purchased:pack:";
+
+export async function readCreditStats(days: number, store: KeyValueStore = getStore(), now = new Date()): Promise<CreditStats> {
+  const stats = emptyCreditStats();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - i);
+    const raw = await store.hgetall(`${KEY_PREFIX}:day:${dayKey(d)}`);
+    for (const [key, value] of Object.entries(raw)) {
+      if (key === "credits:purchased:packs") stats.packsSold += value;
+      else if (key === "credits:purchased:credits") stats.creditsPurchased += value;
+      else if (key === "credits:purchased:revenue") stats.revenueUsd += fromMicro(value);
+      else if (key === "credits:spent:credits") stats.creditsSpent += value;
+      else if (key.startsWith(PACK_FIELD_PREFIX)) {
+        const pack = key.slice(PACK_FIELD_PREFIX.length);
+        stats.byPack[pack] = (stats.byPack[pack] ?? 0) + value;
+      }
+    }
+  }
+  return stats;
+}
+
 export function emptyUpsell(): UpsellBucket {
   return { views: 0, clicks: 0, dismissals: 0 };
 }

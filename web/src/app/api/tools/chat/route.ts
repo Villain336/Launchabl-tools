@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
     const status = entitlement.reason === "sign_in_required" ? 401 : 402;
     return NextResponse.json({ error: message, cause: entitlement.reason }, { status, headers: responseHeaders });
   }
+  if ("spentCredit" in entitlement && entitlement.spentCredit) responseHeaders.set("x-launchabl-credits-left", String(entitlement.creditsLeft));
 
   // Active project (signed-in only, must be theirs): its context goes into the
   // system prompt so tools stop asking for company, site, audience and tone.
