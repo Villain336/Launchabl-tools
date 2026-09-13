@@ -22,6 +22,7 @@ const TRADE_LABELS: Record<Trade, string> = {
 };
 
 type OrgRecord = { id: string; name: string };
+type EngagementType = "self-serve" | "managed";
 type ServiceBusinessProfile = {
   orgId: string;
   slug: string;
@@ -33,6 +34,7 @@ type ServiceBusinessProfile = {
   insured: boolean;
   bonded: boolean;
   allowKnowledgeSharing: boolean;
+  engagementType: EngagementType;
 };
 type Customer = {
   id: string;
@@ -163,12 +165,21 @@ export function CrmManager() {
   return (
     <div className="flex flex-col gap-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Business profile</CardTitle>
+          {profile?.engagementType === "managed" && (
+            <span className="rounded-[4px] bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">Managed by Launchabl</span>
+          )}
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {error && <p className="text-sm text-destructive">{error}</p>}
           {notice && <p className="text-sm text-emerald-600">{notice}</p>}
+          {profile?.engagementType === "managed" && (
+            <p className="text-sm text-muted-foreground">
+              Your Launchabl team is running this account&rsquo;s marketing and setup for you. Everything below still reflects what&rsquo;s happening on your account — you don&rsquo;t need to do
+              anything here unless you want to.
+            </p>
+          )}
           <div>
             <h3 className="mb-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">Trades served</h3>
             <div className="flex flex-wrap gap-2">

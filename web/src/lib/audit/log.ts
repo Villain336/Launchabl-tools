@@ -31,6 +31,7 @@ export type AuditAction =
   | "svcprofile.created"
   | "svcprofile.updated"
   | "svcprofile.knowledge_consent_changed"
+  | "svcprofile.engagement_changed"
   | "customer.created"
   | "customer.updated"
   | "customer.archived"

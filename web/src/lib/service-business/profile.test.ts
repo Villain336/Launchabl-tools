@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMemoryStore } from "@/lib/ai/store";
 import { setUserOrg, upsertUser } from "@/lib/auth/session";
 import { createOrg } from "@/lib/orgs/org";
-import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, TRADES, updateServiceBusinessProfile } from "./profile";
+import { createServiceBusinessProfile, getServiceBusinessProfile, getServiceBusinessProfileBySlug, setEngagementType, TRADES, updateServiceBusinessProfile } from "./profile";
 
 async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
   const { user } = await upsertUser("owner@example.com", "Owner", store);
@@ -95,6 +95,36 @@ describe("service business profile", () => {
     const consented = await updateServiceBusinessProfile(org.id, owner.uid, { allowKnowledgeSharing: true }, store);
     if ("error" in consented) throw new Error(consented.error);
     expect(consented.allowKnowledgeSharing).toBe(true);
+  });
+
+  it("defaults engagementType to self-serve, and only setEngagementType (a platform-ops action) can change it (§26.4)", async () => {
+    const { store, owner, org } = await seedOrg();
+    const created = await createServiceBusinessProfile(org.id, owner.uid, {}, store);
+    if ("error" in created) throw new Error(created.error);
+    expect(created.engagementType).toBe("self-serve");
+
+    // the ordinary org-scoped update path has no engagementType field to set — a contractor can't self-assign managed service
+    const selfUpdate = await updateServiceBusinessProfile(org.id, owner.uid, { phone: "555-0100" }, store);
+    if ("error" in selfUpdate) throw new Error(selfUpdate.error);
+    expect(selfUpdate.engagementType).toBe("self-serve");
+
+    const flipped = await setEngagementType(org.id, "admin@launchabl.io", "managed", store);
+    if ("error" in flipped) throw new Error(flipped.error);
+    expect(flipped.engagementType).toBe("managed");
+    expect((await getServiceBusinessProfile(org.id, store))?.engagementType).toBe("managed");
+  });
+
+  it("setEngagementType is a no-op (no audit event) when the value is already what's requested", async () => {
+    const { store, owner, org } = await seedOrg();
+    const created = await createServiceBusinessProfile(org.id, owner.uid, {}, store);
+    if ("error" in created) throw new Error(created.error);
+    const result = await setEngagementType(org.id, "admin@launchabl.io", "self-serve", store);
+    expect(result).toEqual(created);
+  });
+
+  it("setEngagementType errors on an org with no profile yet", async () => {
+    const { store, org } = await seedOrg();
+    expect(await setEngagementType(org.id, "admin@launchabl.io", "managed", store)).toEqual({ error: "This org hasn't set up a service-business profile yet." });
   });
 
   it("returns an error when updating a profile that doesn't exist yet", async () => {

@@ -36,8 +36,24 @@ export const TRADE_LABELS: Record<Trade, string> = {
 
 export const isTrade = (value: unknown): value is Trade => typeof value === "string" && (TRADES as readonly string[]).includes(value);
 
+/**
+ * Which of §26's three legs is actually running this account's operation —
+ * `"self-serve"` (the contractor runs their own OS) or `"managed"`
+ * (Launchabl's own team runs it for them, the agency/"Managed Growth" leg,
+ * §26.4). Deliberately not settable through the ordinary org-scoped update
+ * path (`ServiceBusinessProfileInput`/`updateServiceBusinessProfile`) — a
+ * contractor can't self-assign white-glove service any more than they can
+ * self-assign a subscription tier; only `setEngagementType`, gated by
+ * platform-admin auth at the route level rather than org membership, can
+ * change it.
+ */
+export const ENGAGEMENT_TYPES = ["self-serve", "managed"] as const;
+export type EngagementType = (typeof ENGAGEMENT_TYPES)[number];
+export const isEngagementType = (value: unknown): value is EngagementType => typeof value === "string" && (ENGAGEMENT_TYPES as readonly string[]).includes(value);
+
 export type ServiceBusinessProfile = {
   orgId: string;
+  engagementType: EngagementType;
   /** Public marketplace listing slug — e.g. `/nc/greensboro/lawn-care/{slug}`. Unique across all profiles. */
   slug: string;
   trades: Trade[];
@@ -180,6 +196,7 @@ export async function createServiceBusinessProfile(
     gbpUrl: cleanUrl(input.gbpUrl),
     websiteUrl: cleanUrl(input.websiteUrl),
     allowKnowledgeSharing: Boolean(input.allowKnowledgeSharing),
+    engagementType: "self-serve",
     createdAt: now,
     updatedAt: now,
   };
@@ -223,6 +240,30 @@ export async function updateServiceBusinessProfile(
       store,
     );
   }
+  return updated;
+}
+
+/**
+ * Platform-ops action (§26.4): flips an account between the self-serve OS
+ * and Launchabl-managed delivery. `actorLabel` is an internal identifier
+ * for the audit trail (e.g. an admin email), not an org member — callers
+ * must gate this at the route level with platform-admin auth
+ * (`lib/admin/auth.ts`'s `adminAuthorized`), not org role, since the
+ * whole point is that a contractor can't grant themselves managed service.
+ */
+export async function setEngagementType(
+  orgId: string,
+  actorLabel: string,
+  engagementType: EngagementType,
+  store: KeyValueStore = getStore(),
+): Promise<ServiceBusinessProfile | ProfileError> {
+  const existing = await getServiceBusinessProfile(orgId, store);
+  if (!existing) return { error: "This org hasn't set up a service-business profile yet." };
+  if (existing.engagementType === engagementType) return existing;
+
+  const updated: ServiceBusinessProfile = { ...existing, engagementType, updatedAt: new Date().toISOString() };
+  await store.set(profileKey(orgId), JSON.stringify(updated), PROFILE_TTL);
+  await logAuditEvent({ orgId, actorUid: actorLabel, action: "svcprofile.engagement_changed", target: orgId, detail: { engagementType } }, store);
   return updated;
 }
 

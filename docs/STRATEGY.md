@@ -783,7 +783,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
 2. **Launch trade categories — decided.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), **plus plumbing, electrical, and painting**, added at this decision point. `TRADES` in `src/lib/service-business/profile.ts` reflects all eight.
 3. **The tool cut list (§25.2) — under review, not yet executed.** The founder asked to see the full itemized list before anything is removed. §25.2's grouping *is* that itemized list (all ~50 current tool slugs, bucketed keep/repurpose/cut) — nothing has been deleted from the codebase pending explicit sign-off on it.
-4. **The existing consumer-facing funnel and Tools Pro subscription — decided.** Runs as-is, in parallel, untouched, through the Phase 3.0 build. No redirect, no wind-down, no new-signup changes until the marketplace has real NC contractor density.
+4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
 ### 25.8 What's scaffolded so far
 
@@ -792,3 +792,57 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 - **[x] `KnowledgeNote`** (`src/lib/service-business/knowledge.ts`) — always saved privately to the org; additionally indexed into a shared cross-account pool only if `allowKnowledgeSharing` was on at save time (revoking consent stops new sharing immediately without touching already-shared notes). `listSharedKnowledgeNotes` is an internal/ops reader only — it's explicitly not wired into any other tenant's agent context, since a raw note can carry one contractor's customer PII and injecting it into another contractor's AI conversation would be a real privacy leak, not just noise; a genuine anonymization/redaction step is separate, unstarted work.
 - **[x] The CRM surface** — `/api/service-business/{profile,customers,customers/[id],knowledge}` routes and a `/crm` page (`components/service-business/crm-manager.tsx`): trades + knowledge-sharing consent, customer list/add/archive, and a knowledge-notes panel (manual save now; the repurposed `markdown-file-generator` chat tool, `lib/ai/tools/documents.ts`, produces the Markdown a contractor then saves here — same "generate in chat, save explicitly" pattern already used for reports/schedules elsewhere in this codebase). Linked from `/team`.
 - **[ ] `Lead`, `Job`, `Estimate`, the lead-allotment counter, the marketplace landing-page template, and the revenue dashboard** — the rest of Phase 3.0 (§25.6), not yet built.
+
+---
+
+## 26. The third leg: the agency stays, on purpose, as the profitability answer
+
+### 26.1 The correction
+
+§25.7 Q4 treated the existing agency/Tools Pro subscription as legacy — something to leave running untouched while the "real" new work (marketplace + self-serve OS) got built elsewhere. The founder corrected that: the agency isn't a separate, tolerated legacy stream. It's the third, permanent leg of the exact same NC service-business mission, and it keeps getting built out — specifically as **heavier, more hands-on, done-for-you service**, sitting alongside (not instead of) the self-serve OS the founder already described (§25's agents/tools/automations/organization, subscribers running their own operation).
+
+So the model is three legs, not two:
+
+1. **Marketplace** — the lead engine (§25.1). Consumer-facing, SEO-driven, NC-first.
+2. **Self-serve OS** — the subscription product (§25.1/§25.6). A contractor runs their own scheduling, CRM, estimates, automations, warranty tracking, staff, inventory, alerts, and payments, with AI agents assisting.
+3. **Agency / managed services** — Launchabl's own team does the hands-on work *for* a contractor who'd rather pay for outcomes than run software: brand/site/profile setup, local SEO, ongoing marketing, and — as the OS matures — even running a client's OS on their behalf (drafting their estimates, following up their leads, keeping their schedule). This is this codebase's original DNA (§1's "unlimited service for one price" thesis) pointed permanently at the NC service-business vertical instead of at generic businesses.
+
+### 26.2 Why this is the actual answer to "how does this get profitable"
+
+Asked directly, and worth being blunt about it:
+
+- **The marketplace has a cold-start problem, and no amount of good engineering fixes that faster than time and either capital or manual hustle.** A lead marketplace is worth nothing to a contractor until there's real lead volume, and worth nothing to a consumer until there's real contractor density and trust (reviews, listings). That's true of every two-sided marketplace ever built — Thumbtack and Angi both spent years and real money on exactly this before either side's network effects did any work on their own.
+- **The self-serve OS has the standard SaaS ramp problem.** It needs to exist, be good, and be discovered before it generates meaningful subscription revenue — and self-serve products convert slowly without either strong inbound (which the marketplace is supposed to eventually provide) or a sales motion (which self-serve products don't have by definition).
+- **The agency has neither problem.** It converts on contact, at a real price, using tools that mostly already exist (`local-seo-optimizer`, `schema-generator`, `brand-creator`, `brand-identity-kit`, the domain/hosting tools, and the `website-audit-report`/`landing-page-grader` free-tool funnel that already produces qualified leads). It is the one leg of this business that can generate real revenue this week, not after a build-out.
+
+That's the case for treating it as permanent rather than incidental: it's not a distraction from the "real" pivot, it's what pays for the real pivot.
+
+### 26.3 The bigger unlock: the agency is the marketplace's bootstrapping mechanism, not a separate business
+
+This is the part worth being deliberate about rather than running the agency and the marketplace as two unrelated motions that happen to share a codebase:
+
+- **Every managed-service client becomes a real marketplace listing.** Onboarding a contractor into a "we'll set this up for you" engagement is the same work as onboarding them onto the marketplace (§25.2's repurposed brand/domain/SEO tools) — so agency sales *are* marketplace-supply sales. This solves the marketplace's cold-start problem on the supply (contractor) side directly, with a sales motion instead of waiting for organic self-serve signups.
+- **Every managed-service engagement produces a real case study.** §22.2 already documented the cost of a fabricated case study (Riverside Roasters, Northstar Legal) and the fix (an explicit `illustrative` flag). Paying agency clients in the exact target vertical are the source of the real, attributable, non-illustrative case studies this project has been missing since §22.2 — a materially better position than either inventing more examples or waiting years for self-serve users to volunteer testimonials.
+- **The agency is a natural feeder into the self-serve OS, not a dead end.** A managed client whose SEO/marketing engine is running well is exactly who should be offered "graduate to running your own operation on the OS, at a lower monthly cost than the managed retainer" — turning a one-time or retainer engagement into a recurring subscription relationship instead of a single payment with no ongoing product relationship (a real weakness of the original flat-fee-for-life model this document never fully resolved).
+
+### 26.4 Proposed packaging (illustrative — confirm before treating as final, same as §25.7's other decisions)
+
+- **Marketplace listing** — free or near-free profile + a share of free/allotted leads, to seed contractor density (supply side of §25.1's flywheel) without a purchase decision in the way.
+- **Self-serve OS subscription** — tiered (§25.7 Q1's lead-volume tiers), the contractor runs their own operation.
+- **Agency — "Launch"** — a one-time, flat-fee, done-for-you setup (brand, site, marketplace profile, local SEO/schema/GBP foundation): the direct descendant of the original $1,200-lifetime offer, scoped specifically to getting an NC service business fully set up and marketplace-ready.
+- **Agency — "Managed Growth"** — an ongoing monthly retainer where Launchabl's team keeps running local SEO, content, and review generation for a contractor who doesn't want to self-serve the OS at all, with a built-in graduation path to the self-serve subscription once their engine is proven out.
+
+### 26.5 Roadmap adjustment
+
+§25.6's phased build order is unchanged for the marketplace/OS (Lead → Job → Estimate → payment → landing page → dashboard, then AI agents/scheduling, then retention features, then SEO scale-out) — this section adds a parallel, immediately actionable track rather than replacing that sequencing:
+
+1. **Now, in parallel with Phase 3.0.** Package and start selling the "Launch" and "Managed Growth" agency tiers explicitly to NC home/local-service contractors, using tools that already exist. This doesn't wait on `Lead`/`Job`/`Estimate` or marketplace liquidity — it's sellable today.
+2. **As each agency client is onboarded**, deliberately capture it as marketplace supply (a real `ServiceBusinessProfile` + listing) and, with the client's permission, a real case study — directly seeding §25.5's SEO pages with real density and §22's case-studies page with real, non-illustrative proof instead of more invented examples.
+3. **Once the self-serve OS (Phase 3.0/3.1) is far enough along**, use it as the graduation path for agency clients whose engine is running well, and as the delivery tool agency staff themselves use internally for managed clients (the same tools, staffed by Launchabl instead of by the contractor) — i.e., no separate "agency-only" tooling gets built; the OS is both the self-serve product and the agency's own internal delivery system.
+
+### 26.6 Open questions — the founder's call, asked directly alongside this section
+
+1. **Managed-tier structure.** Keep the original $1,200-lifetime-flat-fee shape for "Launch," add a recurring "Managed Growth" retainer alongside it, or something else entirely?
+2. **Who delivers it.** Human operators running the existing tools on a client's behalf, or an AI-agent-assisted internal workflow (the same `agent.ts` engine, staffed/reviewed by a human before anything ships to or on behalf of a client)?
+3. **Public positioning, now or later.** Update `/pricing` and the homepage now to present all three legs (marketplace, self-serve OS, agency) as one coherent NC service-business offering, or hold that rewrite until more of the self-serve OS actually exists to show?
+4. **Sourcing.** Should the *next* agency clients be deliberately NC home/local-service contractors sourced specifically to seed the marketplace (§26.3), or should the agency keep serving whatever clientele it already reaches, independent of the marketplace?
