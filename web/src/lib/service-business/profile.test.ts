@@ -12,22 +12,25 @@ async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
 }
 
 describe("service business profile", () => {
-  it("launches with roadside and towing as separate dispatch-native trades, and leads public nav with repeat then trucks (§31, §32)", () => {
+  it("starts public nav with the §33 lineup (lawn, cleaning, HVAC, pest), then junk and trucks", () => {
+    expect(TRADES).toContain("pest-control");
     expect(TRADES).toContain("junk-removal");
     expect(TRADES).toContain("roadside-assistance");
     expect(TRADES).toContain("towing");
     expect(TRADES.indexOf("roadside-assistance")).not.toBe(TRADES.indexOf("towing"));
     expect(tradesForPublicNav()[0]).toBe("lawn-care");
-    expect(tradesForPublicNav().slice(0, 6)).toEqual([
+    expect(tradesForPublicNav().slice(0, 7)).toEqual([
       "lawn-care",
       "cleaning",
       "hvac",
+      "pest-control",
       "junk-removal",
       "roadside-assistance",
       "towing",
     ]);
     expect(tradesForPublicNav().at(-1)).toBe("painting");
     expect(tradeMarketplacePitch("hvac", "Raleigh")).toMatch(/maintenance plan/i);
+    expect(tradeMarketplacePitch("pest-control", "Greensboro")).toMatch(/quarterly plan/i);
     expect(tradeMarketplacePitch("junk-removal", "Greensboro")).toMatch(/properties/i);
     expect(tradeMarketplacePitch("roadside-assistance", "Charlotte")).toMatch(/rarely/i);
     expect(tradeMarketplacePitch("towing", "Raleigh")).toMatch(/rarely/i);

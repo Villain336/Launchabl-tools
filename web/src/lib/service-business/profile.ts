@@ -16,15 +16,16 @@ import { logAuditEvent } from "@/lib/audit/log";
 import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
- * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31, §32) —
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31–§33) —
  * the original five (§24) plus plumbing, electrical, painting, junk-removal
- * (§31), and roadside + towing (§32). Keep roadside and towing separate:
- * jump/tire/lockout is not the same dispatch as hook-and-haul.
+ * (§31), roadside + towing (§32), and pest-control (§33). Keep roadside and
+ * towing separate: jump/tire/lockout is not hook-and-haul.
  */
 export const TRADES = [
   "lawn-care",
   "hvac",
   "cleaning",
+  "pest-control",
   "junk-removal",
   "roadside-assistance",
   "towing",
@@ -40,6 +41,7 @@ export const TRADE_LABELS: Record<Trade, string> = {
   "lawn-care": "Lawn care & landscaping",
   hvac: "HVAC",
   cleaning: "Cleaning",
+  "pest-control": "Pest control",
   "junk-removal": "Junk removal & haul-away",
   "roadside-assistance": "Roadside assistance",
   towing: "Towing",
@@ -54,14 +56,15 @@ export type TradeRepeatShape = "weekly" | "membership" | "on-demand-repeat" | "s
 
 /**
  * How often the same *household* comes back — not market ping volume.
- * Agency sourcing still hunts REPEAT_TRADES (§31). Roadside/towing are
- * dispatch-native: high market velocity, low household LTV (§32).
+ * Agency sourcing hunts REPEAT_TRADES (§33 starting lineup). Roadside/towing
+ * are dispatch-native: high market velocity, low household LTV (§32).
  * Parking-lot and painting stay listed, not hunted.
  */
 export const TRADE_REPEAT = {
   "lawn-care": "weekly",
   cleaning: "weekly",
   hvac: "membership",
+  "pest-control": "membership",
   "junk-removal": "on-demand-repeat",
   "roadside-assistance": "dispatch-native",
   towing: "dispatch-native",
@@ -72,11 +75,12 @@ export const TRADE_REPEAT = {
   painting: "project",
 } as const satisfies Record<Trade, TradeRepeatShape>;
 
-export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal"] as const;
+/** Starting lineup (§33): the four trades that score on both requests and revenue. */
+export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "pest-control"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
-/** Public chips: household-repeat first, then dispatch-native, then the rest, painting last. */
-export const FEATURED_NAV_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal", "roadside-assistance", "towing"] as const;
+/** Public chips: starting lineup first, then junk, then trucks, then the rest, painting last. */
+export const FEATURED_NAV_TRADES = ["lawn-care", "cleaning", "hvac", "pest-control", "junk-removal", "roadside-assistance", "towing"] as const;
 
 export function tradesForPublicNav(): Trade[] {
   const lead = new Set<string>(FEATURED_NAV_TRADES);
@@ -91,7 +95,9 @@ export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
     case "weekly":
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. The money for that crew is the weekly route — book them next time on their page.`;
     case "membership":
-      return `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
+      return trade === "pest-control"
+        ? `Need it done now? We ping available crews in ${cityName}; first claim owns the job. Pest shops live on the quarterly plan, not one wasp nest — book the route on their calendar.`
+        : `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
     case "on-demand-repeat":
       return `Ping every available crew in ${cityName}. First claim owns the haul. If you run properties, put the crew you liked on the book so the next turnover is not another blast.`;
     case "seasonal":

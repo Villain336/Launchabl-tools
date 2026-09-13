@@ -47,7 +47,7 @@ export default function OsPage() {
       <SectionHeading
         eyebrow="The OS"
         title="Jobs hit your phone. The page still books your regulars."
-        description="City-wide work lands in Offers — Telegram or email today, not carrier SMS yet. First claim owns the quote. /b/your-name is still what you text after a call. Built for NC lawn, cleaning, HVAC, junk, roadside, towing, and the other launch trades."
+        description="City-wide work lands in Offers — Telegram or email today, not carrier SMS yet. First claim owns the quote. /b/your-name is still what you text after a call. Built for NC lawn, cleaning, HVAC, pest, and the other launch trades."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

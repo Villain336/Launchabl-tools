@@ -781,7 +781,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 ### 25.7 Founder decisions
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
-2. **Launch trade categories — decided, then extended in §31 and §32.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added when the founder asked to hunt repeat trades. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). Agency *sourcing* is still the four household-repeat trades in §31, not painting and not “households tow weekly.”
+2. **Launch trade categories — decided, then extended in §31–§33.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added in §31. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). **Pest control** added as the fourth starting-lineup trade (§33). Agency *sourcing* is lawn, cleaning, HVAC, pest — not painting, not “households tow weekly.”
 3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
@@ -1232,14 +1232,7 @@ Pressure washing is seasonal (1–2×/year). Plumbing and electrical are mostly 
 
 ### 31.2 Agency list, not eight equal chips
 
-Launch / Managed outbound this quarter, in order:
-
-1. Greensboro lawn
-2. Greensboro cleaning
-3. Greensboro / Raleigh HVAC (pitch the **membership book** + on-shift pings, not “we will be your after-hours answering service”)
-4. Greensboro junk (pitch **property managers**, not only Facebook garage cleanouts)
-
-Three claiming crews are still required **per city×trade** (§30.3). A liquid lawn board does not let us lie on `/nc/greensboro/junk-removal`. Selling Launch to an HVAC shop and a junk hauler *in parallel* is allowed. Pretending four empty boards are a marketplace is not.
+Superseded in order by **§33**. Still true: three claiming crews are required **per city×trade** (§30.3). A liquid lawn board does not let us lie on `/nc/greensboro/junk-removal` or `/nc/greensboro/pest-control`. Selling Launch to an HVAC shop and a pest operator *in parallel* is allowed. Pretending four empty boards are a marketplace is not.
 
 ### 31.3 What this round shipped
 
@@ -1269,7 +1262,7 @@ These are different questions. Do not flatten them.
 - **Market velocity** = how many pings a city produces in a week. Roadside and towing are high here and **low** on household cadence.
 - **NC demand mix** = which trades stay busy because of heat, humidity, pollen, growth, or storms. Busy ≠ weekly-repeat. Roofing after a hurricane is a spike, not a route.
 
-Do **not** add pest or pool to `TRADES` in this round. They belong on the ranking (they would outrank HVAC on household visits) but the founder asked to add roadside and towing, not to reopen the catalog.
+Pest is now in `TRADES` because §33 picked it as the fourth starting-lineup trade (requests + revenue). Pool still stays off the catalog — weekly cadence, thin Greensboro density.
 
 ### 32.1 How to read the table
 
@@ -1295,7 +1288,7 @@ Zipdo-style “2.1 roadside requests per vehicle owner” conflicts with AAA’s
 | 3 | Lawn mowing / basic landscaping | Weekly or every 5–7 days in growth ([NC State tall fescue calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)). HIRI buyers averaged **8.9 purchases/yr** (many DIY the rest of the year). A professional weekly NC route is **~30–40 cuts** Mar–Nov. | The closest thing we have to a DoorDash habit. Dormant Dec–Feb except leaf/cleanup. | Yes — hunt |
 | 4 | Dog walking / pet sitting | Daily or several times/week for the households that buy it. | Urban cores. Not a Launch trade. | No |
 | 5 | Mobile car wash / detailing (membership) | Weekly–monthly if they buy a plan; otherwise 2–4×/year. | Complements roadside, is not roadside. | No |
-| 6 | Pest control | HIRI **3.1 purchases/yr** among buyers. Routes are quarterly–monthly (4–12). Thumbtack’s index still lists pest as **2×/year** recommended — that is a floor, not an NC route. | Humidity + a long warm season support more pest work than the national average ([Elev8 NC](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). **Not in the catalog this round.** | No |
+| 6 | Pest control | HIRI **3.1 purchases/yr** among buyers. Routes are quarterly–monthly (4–12). Thumbtack’s index still lists pest as **2×/year** recommended — that is a floor, not an NC route. | Humidity + a long warm season support more pest work than the national average ([Elev8 NC](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). NC quarterly plans run ~**$400–$680/yr** ([NC pest pricing 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)). | Yes — hunt (§33) |
 | 7 | Oil change / light auto service | Every ~5k–7.5k miles → **2–4×/year** per vehicle. | High market volume, shop-based, not our dispatch. | No |
 | 8 | HVAC membership | **2 visits/yr** (spring AC, fall heat), typically $200–$350/yr; HIRI HVAC buyers **1.4 purchases/yr** including repairs (§31). | Heat + humidity make the AC half of the year the money. Hunt the **plan**, not 2 a.m. no-cool. | Yes — hunt |
 | 9 | Gutter clean / window clean / “full-service” lawn (fert + weed, not mow) | Thumbtack **2×/year**. Gutters in leafy / stormy lots 2–4× ([Thumbtack gutter guide](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)). | Fall leaves + tropical remnants argue for the high end in NC. | Partial (lawn) |
@@ -1317,15 +1310,15 @@ Zipdo-style “2.1 roadside requests per vehicle owner” conflicts with AAA’s
 
 `TRADE_REPEAT` for both is **`dispatch-native`**: first truck claims (same DoorDash loop as lawn), but the city×trade pitch must say households need this rarely. The book worth selling Launch into is fleets, rental lots, and motor-club overflow — same shape as junk + property managers, not lawn + weekly route.
 
-Public nav (`FEATURED_NAV_TRADES`): lawn, cleaning, HVAC, junk, **then** roadside, towing, then the rest, painting last. `REPEAT_TRADES` is unchanged — agency outbound this quarter is still the four household-repeat trades in §31. Do not pretend a household tows like they mow.
+Public nav (`FEATURED_NAV_TRADES`): §33 starting lineup first (lawn, cleaning, HVAC, pest), then junk, then roadside/towing, then the rest, painting last. Do not pretend a household tows like they mow.
 
 No invented roadside or tow founding listings. Liquidity is still per city×trade (§30.3). A liquid Greensboro lawn board does not let us lie on `/nc/greensboro/towing`.
 
 ### 32.4 Agency implication
 
-Do **not** insert roadside/towing into the §31.2 hunt list as items 5 and 6. If a wrecker or roadside shop wants Launch, take the $1,200 — the OS and `/b` link still work. Do not spend a sourcing week on them until a fleet or lot is the buyer, or until three claiming trucks exist in one city.
+Do **not** insert roadside/towing into the starting lineup. If a wrecker or roadside shop wants Launch, take the $1,200 — the OS and `/b` link still work. Do not spend a sourcing week on them until a fleet or lot is the buyer, or until three claiming trucks exist in one city.
 
-Pest and pool would be the next *household-repeat* adds if we reopen the catalog. They are not this PR.
+Pest is the fourth starting-lineup trade (§33). Pool stays off the catalog.
 
 **Sources:**
 - [Thumbtack Home Care Price Index — recommended frequencies](https://blog.thumbtack.com/thumbtack-relaunches-home-care-price-index-to-provide-deeper-insights-into-home-maintenance-trends-807200141331)
@@ -1339,4 +1332,66 @@ Pest and pool would be the next *household-repeat* adds if we reopen the catalog
 - [Tow Times — AAA 2024 call mix (13M tows, 7M battery)](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)
 - [AAA Carolinas — NC Memorial Day (~8,000 calls)](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
 - [EPA — septic inspect 1–3 years, pump 3–5](https://www.epa.gov/septic/how-care-your-septic-system)
+- [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)
+
+---
+
+## 33. Starting lineup — most requests *and* most revenue
+
+§32 ranked **how often the same household comes back**. That is not the same as “what we should sell first.” Requests (pings we can actually win) and revenue (Launch + Managed + later GMV) pull in different directions. The starting lineup is the overlap.
+
+Two numbers we do **not** optimize for:
+
+- **Raw market emergencies.** Roadside and towing produce the most stranded-driver calls in the state ([~8,000 AAA calls in NC on one Memorial Day weekend](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)). Those calls already have a phone number: AAA, insurance, the shop on the exit. A new board with zero trucks captures none of them. High request *in the world* is not high request *on Launchabl*.
+- **One fat ticket.** Painting, parking-lot, roof replace, and a 2 a.m. HVAC changeout look like revenue. They do not refill the board next Saturday. Atlas stays listed; it is not the lineup.
+
+### 33.1 The scoreboard (existing catalog + pest)
+
+Approximate **annual $ from one retained household** × **how often they generate a job we could dispatch or book**:
+
+| Slot | Trade | Why it scores | Why it is not #1 alone |
+|---|---|---|---|
+| 1 | **Lawn — Greensboro** | Weekly Mar–Nov = 30–40 paid visits if they stay ([NC State](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)). ~$45–$70/cut (§30) → **~$1,500–$2,500/yr** on a weekly route. Closest consumer habit to DoorDash. Triad leads are cheaper ([Elev8](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). | Quiet Dec–Feb. Small ticket. Need three claiming crews before the page is real (§30.3). |
+| 2 | **Cleaning — Greensboro** | Highest household cadence we have — monthly is the modal book, weekly/biweekly common ([Keepsake](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)). Year-round, not a growing-season trade. Same dispatch → calendar loop as lawn. | More “I already have a person” than lawn. First request is still a Saturday we have to earn. |
+| 3 | **HVAC — Greensboro / Raleigh** | Lowest visit count (2 tune-ups/yr) and the **highest contractor check**. Memberships $200–$350/yr; members spend **~$3k–$4.5k over 3 years** vs ~$700–$1.1k without a plan (§31). NC heat makes the AC half of the year the money. Shops can actually write a $1,200 Launch check. | Do not sell “we will be your 2 a.m. answering service.” On-shift pings + the plan on `/b/{slug}`. |
+| 4 | **Pest — Greensboro** | HIRI buyers come back **3.1×/yr** ([HIRI](https://www.hiri.org/blog/home-care-and-maintenance-services)); NC humidity supports quarterly–monthly routes. Quarterly plans here run ~**$400–$680/yr** ([NC 2026 pricing](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)). Recurring like HVAC, more visits than HVAC, cheaper than inventing a roadside network. | Termite bonds are a different sale. Hunt general-pest routes, not one wasp nest. |
+
+That is the starting lineup. Four trades, **Greensboro first** (Raleigh only as the HVAC twin). Not eleven chips.
+
+### 33.2 On the roster, not in the starting five
+
+| Trade | Role |
+|---|---|
+| **Junk** | Revenue *if* the buyer is a property manager (3–10 jobs/month). Not a consumer-request engine. Sell it when a PM walk-in or a hauler already on Launch wants the OS. Do not spend the first sourcing month on Facebook garage cleanouts. |
+| **Roadside / towing** | Listed. Dispatch-native. Take Launch if a fleet, lot, or three trucks walk in. Do not hunt. AAA already owns household requests. |
+| **Pressure wash** | Seasonal NC pollen/mildew add-on for a lawn or exterior crew already on the board. Not a fourth Launch target. |
+| **Plumbing / electrical** | Pages exist. Emergency, not a route. |
+| **Pool** | Would rank #2 on cadence. Thin in Greensboro vs Charlotte / Triangle suburbs. **Stay off the catalog** until the four above have claiming crews. |
+| **Painting / parking-lot** | Listed. Not hunted. |
+
+### 33.3 What “start” means in order (do not skip)
+
+§30.3 still governs density. The lineup is the *hunt order*, not four empty boards on day one.
+
+1. **Greensboro lawn to three claiming orgs** and a paid Checkout job. Until that is true, lawn *is* the product.
+2. **Sell Launch in parallel** to Greensboro cleaning and one HVAC shop (GSO or Raleigh). Parallel *sales* are allowed. Parallel *“the marketplace is live”* claims are not.
+3. **Pest is the fourth Launch target**, not the first. Add it to outbound after one of lawn or cleaning has a real board, or if a pest operator writes the $1,200 first — take the money, do not pretend the city page is liquid.
+4. Junk, roadside, towing, pool: inbound only, or a later quarter.
+
+Cash this quarter is still Launch ($1,200) + Managed ($497/mo). The lineup is chosen so those clients (a) get repeat jobs and (b) seed boards people will ping again. A wrecker Launch is $1,200 once. A lawn + cleaning + pest book is the OS they do not churn from.
+
+### 33.4 What this round shipped
+
+- `pest-control` in `TRADES` / sitemap / CRM. Pitch is the quarterly plan, same shape as HVAC membership.
+- `REPEAT_TRADES` is the starting lineup: lawn, cleaning, HVAC, pest. Junk is no longer a hunt-list equal.
+- `FEATURED_NAV_TRADES` leads with those four, then junk, then roadside/towing.
+- No invented pest founding listing.
+
+**Sources:**
+- [NC State Extension — tall fescue lawn calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [HIRI — home care purchase frequency](https://www.hiri.org/blog/home-care-and-maintenance-services)
+- [Keepsake — cleaning booking mix](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)
+- [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)
+- [Elev8 — NC home services 2026](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)
+- [AAA Carolinas — NC Memorial Day calls](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
 
