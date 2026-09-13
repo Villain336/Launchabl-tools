@@ -7,19 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const TRADES = ["lawn-care", "hvac", "cleaning", "pressure-washing", "parking-lot", "plumbing", "electrical", "painting"] as const;
-type Trade = (typeof TRADES)[number];
-const TRADE_LABELS: Record<Trade, string> = {
-  "lawn-care": "Lawn care & landscaping",
-  hvac: "HVAC",
-  cleaning: "Cleaning",
-  "pressure-washing": "Pressure washing & exterior",
-  "parking-lot": "Parking lot & exterior paving",
-  plumbing: "Plumbing",
-  electrical: "Electrical",
-  painting: "Painting",
-};
+import { TRADE_LABELS, TRADES, type Trade } from "@/lib/service-business/profile";
 
 type OrgRecord = { id: string; name: string };
 type EngagementType = "self-serve" | "managed";

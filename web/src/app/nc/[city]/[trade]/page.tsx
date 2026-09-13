@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/marketplace/listing-card";
 import { DispatchForm } from "@/components/marketplace/dispatch-form";
 import { getCity, NC_CITIES, isTradeSlug } from "@/lib/marketplace/cities";
 import { listDirectoryFiltered } from "@/lib/marketplace/listing";
-import { TRADE_LABELS, TRADES } from "@/lib/service-business/profile";
+import { TRADE_LABELS, TRADES, tradeMarketplacePitch } from "@/lib/service-business/profile";
 
 export function generateStaticParams() {
   return NC_CITIES.flatMap((city) => TRADES.map((trade) => ({ city: city.slug, trade })));
@@ -37,7 +37,7 @@ export default async function TradeCityPage({ params }: { params: Promise<{ city
       <SectionHeading
         eyebrow={`${record.name}, NC`}
         title={`${TRADE_LABELS[trade]} in ${record.name}`}
-        description="Tell us the job. We ping every available crew in this city and trade. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar."
+        description={tradeMarketplacePitch(trade, record.name)}
       />
       <div className="mt-10 max-w-xl">
         <DispatchForm

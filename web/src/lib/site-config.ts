@@ -3,7 +3,7 @@ export const siteConfig = {
   url: "https://launchabl.io",
   tagline: "NC directory for home & local services. OS and agency on the same platform.",
   description:
-    "Find licensed lawn care, HVAC, cleaning, plumbing, and more across North Carolina — or run your service business on the Launchabl OS. Agency Launch is $1,200 to get set up; Managed Growth is $497/month.",
+    "Find licensed lawn care, cleaning, HVAC, junk removal, plumbing, and more across North Carolina — or run your service business on the Launchabl OS. Agency Launch is $1,200 to get set up; Managed Growth is $497/month.",
   price: "$1,200",
   /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
   priceNumeric: "1200",
