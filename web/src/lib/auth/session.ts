@@ -45,7 +45,12 @@ export type UserRecord = {
   planInterval?: "month" | "year";
   /** ISO timestamp of the current billing period's end, from Stripe. Display only — access is driven by subscriptionStatus. */
   proCurrentPeriodEnd?: string;
+  /** Org/team membership (`lib/orgs/org.ts`). A user belongs to at most one org today. */
+  orgId?: string;
+  orgRole?: OrgRole;
 };
+
+export type OrgRole = "owner" | "admin" | "member";
 
 const enc = new TextEncoder();
 
@@ -209,6 +214,21 @@ export async function setUserBilling(
 export async function getUserByStripeCustomerId(customerId: string, store: KeyValueStore = getStore()): Promise<UserRecord | null> {
   const uid = await store.get(`stripeCustomer:${customerId}`);
   return uid ? getUser(uid, store) : null;
+}
+
+/* ── org/team membership (lib/orgs/org.ts owns the org record itself) ── */
+
+/** Set or clear a user's org membership. `null` fields clear that field (used when leaving/removed from an org). */
+export async function setUserOrg(uid: string, patch: { orgId: string | null; orgRole: OrgRole | null }, store: KeyValueStore = getStore()): Promise<UserRecord | null> {
+  const key = `user:${uid}`;
+  const raw = await store.get(key);
+  if (!raw) return null;
+  const prev = JSON.parse(raw) as UserRecord;
+  const user: UserRecord = { ...prev, orgId: patch.orgId ?? undefined, orgRole: patch.orgRole ?? undefined };
+  if (!user.orgId) delete user.orgId;
+  if (!user.orgRole) delete user.orgRole;
+  await store.set(key, JSON.stringify(user));
+  return user;
 }
 
 export type BillingStats = { activeSubscribers: number; byInterval: Record<"month" | "year", number> };
