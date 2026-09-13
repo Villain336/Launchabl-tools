@@ -3,7 +3,7 @@ export const siteConfig = {
   url: "https://launchabl.io",
   tagline: "Build and run your business. The client network comes with it.",
   description:
-    "Launchabl builds and runs local businesses — home services first, then medspas, dentists, and vets. The customer network is included. Build is $1,200. Network (the DoorDash seat) is $99/month. Run is $497/month and includes Network.",
+    "Launchabl builds and runs local businesses. Home services first, then trades people still request that have no established platform — appliance repair, detailing, hoods — then medspas, dentists, and vets. Build is $1,200. Network is $99/month. Run is $497/month and includes Network.",
   price: "$1,200",
   /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
   priceNumeric: "1200",

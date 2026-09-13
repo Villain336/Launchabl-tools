@@ -10,7 +10,7 @@ import { AGENCY_VERTICAL_GROUPS } from "@/lib/service-business/verticals";
 
 const title = "Build and run your business";
 const description =
-  "We build the front door and run the operation. The client and customer network comes with it — home services first, then medspas, dentists, and vets.";
+  "We build the front door and run the operation. The client network comes with it. Home services, then trades people still request on Nextdoor that have no established platform — appliance repair, detailing, hoods — then medspas, dentists, and vets.";
 
 export const metadata: Metadata = {
   title,
@@ -62,10 +62,10 @@ export default function AgencyPage() {
       <SectionHeading
         eyebrow="Agency"
         title="The first build-and-run agency. The network comes with it."
-        description="We do not sell a logo and walk away. We build the business, put you on the client and customer network, and stay to run the front door. Start with home services. Local care — medspa, dentist, vet — is booking and reviews, not a clinical chart."
+        description="We do not sell a logo and walk away. We build the business, put you on the client and customer network, and stay to run the front door. We hunt where people already ask and no app owns the ask — appliance repair, mobile detailing, hoods — not another Jobber clone. Local care is booking and reviews, not a clinical chart."
       />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {AGENCY_VERTICAL_GROUPS.map((group) => (
           <div key={group.id} className="rounded-2xl border border-border p-5">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">{group.label}</p>
@@ -99,7 +99,7 @@ export default function AgencyPage() {
 
       <p className="mt-8 text-sm text-muted-foreground">
         Build is ${AGENCY_PACKAGES.launch.price.toLocaleString()}. Network is ${AGENCY_PACKAGES.network.price}/month to stay on the board — we do not charge per ping. Run is $
-        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
+        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. Appliance, detailing, and hood work is agency-first until a real crew is live — we do not invent empty city pages. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
       </p>
 
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">

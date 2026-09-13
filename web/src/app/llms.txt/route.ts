@@ -15,7 +15,7 @@ export function GET() {
     "",
     `> ${siteConfig.description}`,
     "",
-    "Launchabl is a build-and-run agency with a client and customer network. Home services use DoorDash-style dispatch (first claim owns the job). Medspas, dentists, and vets get booking and local demand — not a clinical chart. Build is $1,200. Network (the ping seat) is $99/month. Run is $497/month and includes Network. Public SEO tools stay free as the acquisition engine.",
+    "Launchabl is a build-and-run agency with a client and customer network. Home services use DoorDash-style dispatch. We also hunt frequent asks that have no established platform (appliance repair, mobile detailing, kitchen hoods) — those are agency-first, not empty city pages. Medspas, dentists, and vets get booking and local demand, not a clinical chart. Build is $1,200. Network is $99/month. Run is $497/month and includes Network.",
     "",
     "## Directory",
     "",

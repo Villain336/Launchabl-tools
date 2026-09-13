@@ -1630,3 +1630,89 @@ The 5% take is still a bonus after 3 crews and 20 paid dispatch jobs. Calendar b
 - Jobber / Housecall Pro pricing already cited in §30.2
 - Angi / Thumbtack lead ranges already cited in §30.1
 
+---
+
+## 37. Hunt where people ask — and no platform already owns the ask
+
+The founder asked to focus on services people request a lot that **still do not have a software or platform established**. That is the Build-and-Run wedge. It does not rewind §33.5 (winter proof is still cleaning → HVAC → pest) or §36 (Build / Network / Run). It changes **who we sell the agency to** once the checkbook is open.
+
+Do not read this as “no SaaS product exists.” In 2026 almost every trade has a landing page on [Jobber](https://www.getjobber.com/academy/housecall-pro-competitors/), a QuoteIQ SEO post, or a $29/mo CRM. That is not a platform. A platform is what the **customer already opens** (DoorDash, Rover, Handy, Wrench) or what the **category already lives in** (ServiceTitan for HVAC, Workiz for locksmiths, ServiceCore for dumpsters, Dentrix for dentists). If they still post “anyone know a guy?” on Nextdoor, the platform is not established.
+
+### 37.1 The test (all five, or we do not call it white space)
+
+1. **People ask often.** Household cadence (§32) or live Nextdoor/Facebook volume, not a founder hunch.
+2. **No consumer app they already have.** Not DoorDash, Rover, Handy, Wrench/YourMechanic, AAA.
+3. **No category-default OS.** Not ServiceTitan / Jobber / Housecall Pro as the shop’s actual system of record. Not Workiz for locksmith/garage/tow. Not ServiceCore for dumpsters/porta/septic. Not Dentrix / ezyVet / Booksy / Vagaro / Mindbody / Brightwheel.
+4. **Work still arrives from Google, GBP, Nextdoor, Facebook.** That is the front door we Build and Run.
+5. **We can stand them up without becoming their regulator.** No NFPA-certificate product. No EMR. No daycare compliance.
+
+### 37.2 What people are actually asking for (August 2026)
+
+[LeadHall](https://leadhall.com/blog/service-demand-report-2026-08-13) tracked **761,353** neighborhood requests in the 30 days to 13 Aug 2026 (mostly Nextdoor). **North Carolina was 6th** among states (**28,387**). **Charlotte was 4th** among cities (**5,996**).
+
+| Rank | What they asked | Requests | Platform already established? | Our move |
+|---|---|---|---|---|
+| 1 | Landscaping | 29,013 | Yes — Jobber, GreenPal, LawnStarter | Keep the winter/spring lawn plan (§33.5). Do not pretend we invented lawn software. |
+| 2 | Mover | 13,801 | Partial — Dolly, Bellhop, U-Haul in many metros | Take a Build check if a mover walks in. Do not hunt a moving board. |
+| 3 | Cleaning | 12,096 | Yes — Jobber, Handy | Still the winter *marketplace* proof. Agency is not “first cleaner OS.” |
+| 4 | Auto mechanic | 9,713 | Partial — shops + [Wrench/YourMechanic](https://wrench.com/faq/) (they claim 2,000+ cities, including NC) | Do not launch `/nc/greensboro/mobile-mechanic`. Independents can still buy Build. |
+| 5 | Daycare | 8,379 | Yes — Brightwheel and the state | Out. Kids + licensing. |
+| 6 | **Appliance repair** | **7,068** | **No.** Angi/HomeServe sell leads. There is no DoorDash and no ServiceTitan-default. | **Agency hunt #1 in this section.** Year-round. More Nextdoor asks than HVAC. |
+| 7 | HVAC | 5,898 | Yes — ServiceTitan, Housecall Pro, Jobber ([2026 trade comparisons](https://www.constructionperks.com/blog/jobber-vs-housecall-pro-vs-servicetitan-2026)) | Keep for winter memberships. Not white space. |
+| 8 | Junk removal | 5,786 | Partial — Workiz treats junk as an on-demand default ([Workiz vs Service Fusion](https://fieldservicesoftware.io/comparisons/service-fusion-vs-workiz/)) | Listed. PM inbound. Not a white-space story. |
+| 9 | Electrical | 5,451 | Yes — same FSM trio as HVAC | Listed, not hunted. |
+| 11 | Photographer | 4,208 | Partial — HoneyBook | Booking Build if they write $1,200. No city page. |
+
+Appliance repair out-asks HVAC on the neighborhood board and has no established platform. That is the point.
+
+### 37.3 Agency hunt list (not `TRADES`)
+
+Ranked by (frequent ask) × (no platform) × (we can Build / book / later ping):
+
+| Priority | Vertical | Why it passes | Shape | Do not claim |
+|---|---|---|---|---|
+| 1 | **Appliance repair** | LeadHall #6. Fridge/washer/dryer die year-round. Operators live on Nextdoor + a van. | Booking + later dispatch | That we are the next ServiceTitan. |
+| 2 | **Mobile detailing / wash memberships** | §32 rank 5 (weekly–monthly if they buy a plan). Software is fragmented (QuoteIQ, DetailDeck, Urable — vendor roundups, not a consumer app). No NC DoorDash for a wash. | Dispatch-native once seated | That no detailing CRM exists. |
+| 3 | **Exterior cluster** (pressure wash we already list, plus gutter / window / dryer vent) | Thumbtack 1–2×/year; NC pollen and leaves push the high end (§32). Jobber will *host* a gutter calendar. Homeowners still ask the neighborhood. | Add-on to a lawn/exterior Build | Empty `/nc/greensboro/gutter` pages. |
+| 4 | **Commercial kitchen hood / grease trap** | Fire code is a recurring B2B ask (monthly–annual by cooking type). HoodOps/MyHoodClean are new specialist tools, not a restaurant’s default app. | Booking / route | NFPA 96 certificates, fire-marshal software, FOG manifests. |
+| 5 | **Small-engine / outdoor power** | Every lawn household has a mower. Spring flood of “who can fix this?” RepairDesk/RepairShopr are counter POS, not a consumer board. | Booking, spring lock-in | That we beat the dealer shop. |
+| 6 | **Standby generator service** | NC storms. Membership shape like HVAC. GenCore/GenaForce exist for dealers; most independents are still on a clipboard. | Membership booking | That we are Generac’s dealer OS. |
+
+**Local care** (medspa, dentist, vet) stays §36.3 — booking only. Booksy/Vagaro/Mindbody *are* established for salons; Dentrix/ezyVet *are* established for charts. We sell the agency front door, not a clinic.
+
+### 37.4 Forbidden to call “no platform”
+
+| Category | Who already owns it | Why we do not pitch “first OS” |
+|---|---|---|
+| HVAC / plumbing / electrical | ServiceTitan, Housecall Pro, Jobber | The 2026 comparison pages are written for those three names. |
+| Lawn / cleaning / pest / pressure wash | Jobber, GreenPal, FieldRoutes, Handy | We still sell Network + Run. We do not say they have no software. |
+| Dumpster / porta / septic | [ServiceCore](https://servicecore.com/features/) | Purpose-built. Quote-per-truck. |
+| Locksmith / garage door / tow / on-demand junk | [Workiz](https://www.workiz.com/industries/) (they claim 120k+ pros) | That *is* the established on-demand desk. |
+| Mobile mechanic marketplace | Wrench / YourMechanic | They already take the job in many cities. |
+| Beauty / wellness | Booksy, Vagaro, Mindbody | |
+| Clinics | Dentrix, ezyVet, Aesthetic Record | |
+| Pets | Rover, Wag | |
+| Daycare | Brightwheel + DHHS | |
+
+### 37.5 What this does to the next 90 days
+
+- **Marketplace density** is still cleaning → HVAC → pest → lawn (§33.5). A liquid Greensboro cleaning board is how we survive January.
+- **Agency outbound** adds appliance, detailing, and hood/grease-trap operators **now**. They have year-round or restaurant-night work. They do not need Saturday mows to pay $1,200 / $99 / $497.
+- **Do not add** `appliance-repair`, `mobile-detailing`, `gutter-cleaning`, `window-cleaning`, `kitchen-hood`, `small-engine`, or `generator` to `TRADES` this round. Empty city pages are still a lie (§30.3, §36.3). They live in `AGENCY_VERTICAL_GROUPS` (`open-demand`).
+- If an appliance or detailing crew writes the check, they get Build + `/b` + Network when they want pings. The public chip appears when a real org is published — not before.
+
+### 37.6 What this round shipped
+
+- Third agency vertical group: **No-platform demand**.
+- Tests: the group exists; those slugs are not in `TRADES`.
+
+**Sources:**
+- [LeadHall — service demand 13 Aug 2026](https://leadhall.com/blog/service-demand-report-2026-08-13)
+- [Jobber — Housecall Pro competitors / industry list](https://www.getjobber.com/academy/housecall-pro-competitors/)
+- [Construction Perks — Jobber vs Housecall Pro vs ServiceTitan 2026](https://www.constructionperks.com/blog/jobber-vs-housecall-pro-vs-servicetitan-2026)
+- [Workiz industries](https://www.workiz.com/industries/)
+- [Service Fusion vs Workiz 2026](https://fieldservicesoftware.io/comparisons/service-fusion-vs-workiz/)
+- [ServiceCore — porta / septic / dumpster](https://servicecore.com/features/)
+- [Wrench FAQ — YourMechanic + 2,000 cities](https://wrench.com/faq/)
+- Thumbtack / HIRI frequencies already cited in §32
+

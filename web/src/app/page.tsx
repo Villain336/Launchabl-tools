@@ -20,7 +20,7 @@ export default async function Home() {
             We build and run your business. The client network comes with it.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Home services first — then medspas, dentists, and vets. Build is {siteConfig.price}. Network, the DoorDash seat, is $99/month. Run is $497/month and includes Network. Need work done? Ping a crew or book a name in the NC directory.
+            Home services first. Then trades people still request on Nextdoor that have no established platform — appliance repair, mobile detailing, kitchen hoods. Then medspas, dentists, and vets. Build is {siteConfig.price}. Network is $99/month. Run is $497/month and includes Network.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/nc/greensboro" size="lg">
