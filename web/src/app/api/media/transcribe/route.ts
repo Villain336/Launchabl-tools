@@ -97,11 +97,13 @@ export async function POST(request: NextRequest) {
   // small daily taste (capped tightly above) without needing an account;
   // signed-in accounts get a few free trials, then need a subscription (or
   // ride along in dark-launch until PAYWALL_ENFORCED_TOOLS says otherwise).
+  let creditsLeft: number | null = null;
   if (session) {
     const entitlement = await checkEntitlement(MEDIA_ENTITLEMENT_SLUG, session, store, { forcePro: true });
     if (!entitlement.allowed) {
       return NextResponse.json({ error: NEEDS_PRO_MESSAGE, cause: "needs_pro" }, { status: 402 });
     }
+    if ("spentCredit" in entitlement && entitlement.spentCredit) creditsLeft = entitlement.creditsLeft;
   }
 
   let bytes: Uint8Array;
@@ -158,6 +160,7 @@ export async function POST(request: NextRequest) {
         summary: describeTranscript(transcript),
       },
       minutesLeft: Math.max(0, Math.round((cap * 60 - usedSec - transcript.durationSec) / 60)),
+      ...(creditsLeft !== null ? { creditsLeft } : {}),
     });
   } catch (error) {
     if (request.signal.aborted) return new NextResponse(null, { status: 499 });

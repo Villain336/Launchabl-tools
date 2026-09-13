@@ -2,6 +2,7 @@ import { getChatToolRuntime } from "@/lib/ai/chat-runtime";
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { recordPaywallEvent } from "@/lib/ai/usage";
 import { getUser, hasProAccess, type Session } from "@/lib/auth/session";
+import { spendCredit } from "@/lib/billing/credits";
 
 /**
  * Tools Pro entitlement — parallel to `gateRun` in session.ts, but for the
@@ -42,6 +43,8 @@ export type EntitlementDecision =
   | { allowed: true; wouldBlock: false }
   /** Dark-launch: this request would have been blocked once enforcement is on, but isn't blocked now. */
   | { allowed: true; wouldBlock: true }
+  /** No subscription and the trial's spent, but a purchased credit pack covered this one run. */
+  | { allowed: true; wouldBlock: false; spentCredit: true; creditsLeft: number }
   | { allowed: false; reason: "sign_in_required" }
   | { allowed: false; reason: "needs_pro" };
 
@@ -56,7 +59,10 @@ async function trialRunsUsed(uid: string, slug: string, store: KeyValueStore): P
  * tool so the paywall doesn't ambush someone on their first-ever use, then
  * need an active subscription — or, while the tool isn't in
  * PAYWALL_ENFORCED_TOOLS yet, they're waved through with a shadow metric
- * recorded so we can see how many people would have hit the wall.
+ * recorded so we can see how many people would have hit the wall. Once
+ * enforcement is actually on and there's no subscription, a purchased
+ * credit pack (lib/billing/credits.ts) is spent one run at a time before
+ * finally falling back to `needs_pro`.
  *
  * `forcePro` skips the `isProTool(slug)` lookup and gates unconditionally.
  * Use it for capabilities that cost money at a point in the pipeline the
@@ -96,8 +102,13 @@ export async function checkEntitlement(
     void recordPaywallEvent("shadow_blocked", slug, store);
     return { allowed: true, wouldBlock: true };
   }
+
+  const creditsLeft = await spendCredit(session.uid, store);
+  if (creditsLeft !== null) return { allowed: true, wouldBlock: false, spentCredit: true, creditsLeft };
+
   void recordPaywallEvent("blocked", slug, store);
   return { allowed: false, reason: "needs_pro" };
 }
 
-export const NEEDS_PRO_MESSAGE = "You've used your free tries of this tool. Tools Pro unlocks unlimited image generation, transcription and clip-finding — upgrade to keep going.";
+export const NEEDS_PRO_MESSAGE =
+  "You've used your free tries of this tool. Subscribe to Tools Pro for unlimited use, or buy a credit pack to keep going a few runs at a time.";
