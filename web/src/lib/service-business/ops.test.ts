@@ -45,7 +45,7 @@ describe("directory + storefront", () => {
   it("starts with the three founding listings, including real Atlas Lot Care", async () => {
     const store = createMemoryStore();
     const listings = await listDirectory(store);
-    expect(listings.map((l) => l.slug)).toEqual(["atlas-lot-care", "founding-lawn-greensboro", "founding-hvac-raleigh"]);
+    expect(listings.map((l) => l.slug)).toEqual(["atlas-lot-care", "founding-hvac-raleigh", "founding-lawn-greensboro"]);
     const atlas = listings[0];
     expect(atlas.name).toBe("Atlas Lot Care");
     expect(atlas.placeholder).toBe(false);

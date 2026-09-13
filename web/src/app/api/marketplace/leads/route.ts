@@ -39,5 +39,5 @@ export async function POST(request: NextRequest) {
     store,
   );
   if ("error" in result) return NextResponse.json(result, { status: 400 });
-  return NextResponse.json({ ok: true, held: result.held });
+  return NextResponse.json({ ok: true, held: result.held, exclusive: result.exclusive });
 }
