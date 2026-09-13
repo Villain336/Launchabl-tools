@@ -1089,3 +1089,125 @@ Contractors asked for the ping on their phone and the full quote + transaction i
 - After-hours emergency. A 2-hour board is for scheduled work, same limit as booking.
 - We will still lose to whoever answers the phone on a burst pipe. Say that out loud.
 
+---
+
+## 30. How dispatch becomes a business — density, cash, and what not to copy
+
+§29 shipped the DoorDash *loop*. This section is the DoorDash *business*, and why copying it would bankrupt us. The founder asked how to build this properly so it is actually profitable. The answer is not more software. It is one dense board, a cash offer that already exists, and a fee model crews will not flee.
+
+### 30.1 The uncomfortable comparison
+
+DoorDash can take **15% / 25% / 30%** of a delivery subtotal (Basic / Plus / Premier) because the ticket is a $20–$40 meal, the labor is interchangeable, and the same customer orders again this week ([DoorDash merchant pricing](https://merchants.doordash.com/en-us/pricing); [commission explainer](https://merchants.doordash.com/en-us/learning-center/delivery-commission); [2026 rate card](https://www.directorders.com/blog/delivery-app-commission-rates-2026)). Multi-unit operators report an effective all-in closer to the mid-20s once ads sit on top ([OPA Delivery Fee Index, Apr 2026](https://opalink.com/blog/restaurant-delivery-fee-benchmarking-what-multi-unit-operators-actually-pay-in-2026)).
+
+A Saturday mow is not that. LawnStarter’s completed-job average was **$53.59** nationally in 2025; most residential cuts sit **$43–$70** ([LawnStarter cost study](https://www.lawnstarter.com/blog/studies/lawn-care-costs/); [LawnStarter price guide](https://www.lawnstarter.com/blog/cost/lawn-mowing-price/)). Housecall Pro’s 2026 pro guide puts a standard visit at **$45–$90**, most quarter-acres **$50–$55** ([How much to charge for lawn mowing](https://www.housecallpro.com/resources/how-much-charge-lawn-mowing/)). GreenPal’s latest 30-day U.S. average is **$44.37** ([GreenPal newsroom, Mar/Apr 2026](https://www.yourgreenpal.com/newsroom/average-cost-of-lawn-mowing-us-greenpal-report)).
+
+Do the take-rate on that ticket:
+
+| Cut | On a $55 mow | What the crew sees |
+|---|---|---|
+| DoorDash Premier (30%) | $16.50 | They delete the app |
+| LawnStarter-class (15–20%) | $8–$11 | Same fight GreenPal runs ads against |
+| GreenPal-class (5%) + Stripe ~2.9% | ~$4.40 + ~$1.60 | Survivable *after* the job is paid on-platform |
+| Angi/Thumbtack shared lead | $25–$75 *before* anyone mows | The FTC already burned HomeAdvisor for this (§27) |
+
+Angi commonly bills **$40–$60** per shared lead (often 3–4 other crews on the same contact). Thumbtack is typically **$25–$75** to respond, 4–5 competitors ([Angi vs Thumbtack 2026](https://www.reviewsell.com/blog/angi-vs-thumbtack-vs-bark-leads-2026/); [Thumbtack help: pay for leads](https://help.thumbtack.com/article/pay-for-leads); [Pipeline On lead-cost ranges](https://pipelineon.com/blog/how-much-does-thumbtack-charge-per-lead/)). Close rates on shared leads are ugly; cost per *booked* job is what wrecks a two-truck shop.
+
+**Product law:** we already refused per-ping and shared contacts (§27, §29). Do not reintroduce them as “the profitability plan.” A 20% cut of a $55 mow is the same betrayal with nicer UX.
+
+The closest honest comps are **GreenPal** (about **5%** on completed jobs, bidding free, Stripe payouts, then they nag the homeowner into a weekly route) and **LawnStarter** (up to **~20%** — and vendors complain) ([GreenPal vendor handbook](https://www.yourgreenpal.com/vendor-handbook/getting-started-and-completing-work); [GreenPal on LawnStarter commissions](https://www.yourgreenpal.com/blog/lawnstarter-and-lawn-love-have-high-commission-rates); [LawnStarter fee writeup, Jul 2026](https://bobby.app/compare/lawnstarter-fees)). GreenPal’s real trick is not the first mow. It is the **route**.
+
+### 30.2 What actually pays this company
+
+§26 already named it. Repeat it so we do not “optimize the marketplace” and starve:
+
+| Leg | Published price | When it is cash | Role |
+|---|---|---|---|
+| Agency Launch | **$1,200** one-time | This week, on a signed SOW | Setup + a real org on the board |
+| Agency Managed Growth | **$497**/month | This month, if they stay | Human SEO/reviews; includes 200 leads |
+| Self-serve OS | **$49** / **$149** | After a crew is claiming jobs | Board access + the job book |
+| Free listing | $0 / 5 leads | Never the P&L | Density bait only |
+| Dispatch take-rate | **$0 until paid jobs exist** | Later, and small | Optional 5% *after* Stripe Checkout, never on a ping |
+
+Jobber Core is **$29–$49**/mo. Housecall Pro Basic is **$59**/mo annual / **$79** month-to-month. Neither generates a lead ([Jobber pricing comparison](https://www.getjobber.com/comparison/jobber-vs-housecall-pro/); [Housecall Pro pricing](https://www.housecallpro.com/pricing/)). Our $49 OS is not cheap software. It is **cheap software plus the ping**. That is the only reason a shop still on paper pays us instead of Jobber.
+
+Honest P&L before density (the only P&L that can exist in 2026 for this repo):
+
+- **2 Launch** = $2,400. Pays Twilio, a month of Google/Facebook tests in one city, and the founder’s time to stand up two storefronts.
+- **3 Managed** = $1,491/month. That is a micro-business. Ten Managed is $4,970/month. That is a company. Dispatch GMV does not have to appear on this line yet.
+- **Marketplace take on 80 mows × $55 × 5%** = $220. Do not build a finance org around $220.
+
+Agency clients **are** marketplace supply (§26.3). If Launch does not produce an org-backed, `acceptingOffers: true` storefront, we sold a brochure. Atlas Lot Care is the only named real client (§22.2). Parking-lot work is low-frequency. It is a case study, not the liquidity proof.
+
+### 30.3 The wedge — one city, one trade, until the board is real
+
+Greensboro lawn-care today: founding listing, `orgId: null`, `pingedCount: 0`. That is not a marketplace. It is a form.
+
+**Wedge (recommended):** Greensboro × lawn-care. Highest repeat rate of the eight launch trades. Closest to DoorDash’s habit (weekly, not once a decade). Not Atlas’s parking lots. Not Raleigh HVAC emergency (those still call whoever answers).
+
+**Done looks like this, and only this:**
+
+1. **≥ 3 published orgs** on that board who have Telegram *or* SMS on and will claim.
+2. **≥ 70% of open offers claimed inside 30 minutes** during Saturday-morning hours. (The 2-hour window is a backstop, not the SLA.)
+3. **Homeowner pays on `/request/{id}`** for the first job. Cash outside the page does not count.
+4. **A second visit exists** — weekly/biweekly on that crew’s calendar (§28), not another blast. Dispatch is the first date. The route is the marriage.
+
+Until those four are true, we do not add a second trade, a second city, a matching algorithm, or a consumer app. Expanding an empty board is how directories die.
+
+How the three crews get there (not a feature list):
+
+1. Sell **Launch** to two Greensboro lawn operators who are still on Facebook + Venmo. The deliverable is: live `/b/{slug}`, published storefront, on the ping board, Telegram or SMS working on the owner’s phone.
+2. Atlas (or the founder) **manually sources the first 20 jobs** — existing customers, neighborhood groups, door hangers, a $500 Facebook test. SEO pages do not fill a cold board. People do.
+3. Every Launch includes “you answer the ping.” If they will not claim, they are a website client, not supply. Refund the listing part; do not pretend.
+
+### 30.4 Fee model that crews will keep
+
+Keep §25.7: **subscription buys volume, never quality. No pay-per-lead. No charge per ping.**
+
+Phase the money so it matches reality:
+
+1. **Now — $0 take-rate.** Stripe processing only on homeowner Checkout. Crews keep the quote. We keep Launch + Managed + (soon) OS.
+2. **When 3 crews are claiming — OS is the board pass.** Free listing can *see* the city page. Claiming requires `os` or `managed`. That is $49–$149 we can defend: Jobber does not ping the city.
+3. **When 20+ jobs/month clear Checkout — optional 5% of paid dispatch jobs**, GreenPal-shaped, disclosed on the quote, never on a no-show. Recurring calendar bookings from `/b/{slug}` stay take-rate-free (that is how we steal the route from LawnStarter). If a crew hates the 5%, they can keep regulars on their link.
+
+Do not ship (3) as code until (1) and (2) have real numbers. A take-rate switch with no volume is a scarecrow.
+
+### 30.5 What “build properly” means (ordered)
+
+Software that is worth writing, in this order, and nothing else until the previous line has a user:
+
+1. **Founding listings become orgs.** Atlas + the two partner slots cannot claim. Until they have `orgId` + published storefront, dispatch is demo-ware in those cities.
+2. **A ping they will see in 60 seconds.** Twilio SMS to the owner’s cell, or a hard requirement that Telegram is installed during Launch. Email is not a dispatch channel. iMessage is still not an API.
+3. **On-shift, not a checkbox.** `acceptingOffers` is a preference. “Available Saturday 8–12” is the product. A crew that is on a job should not get the ping. That is a schedule read we already have (`/os/schedule`).
+4. **Pay-in is the moat.** Quote → Checkout → `markOfferPaid` is already the transaction. Complete the job in the OS → review token. That is the only review that may appear on the city page.
+5. **Route conversion.** After paid, one button: “put them on weekly.” That is GreenPal’s actual business, and it is our §28 calendar, not a new marketplace.
+
+Explicitly not next: native app, ML matching, eight-trade statewide scale-out, Jobber feature parity, national brand ads, charging homeowners a “trust fee.”
+
+### 30.6 What this document will not pretend
+
+- We are not DoorDash. We will not have dasher-density or 15–30% take in this vertical.
+- We are not Angi. Shared leads are the thing we exist to not be, including when we are broke.
+- SEO will not fill the first board. Agency sales and the founder’s phone will.
+- Atlas as a named client does not equal a liquid lawn board.
+- Profitability in the next stretch is **3–10 Managed retainers and a handful of Launch checks**, not GMV.
+
+If those retainers do not sell, the marketplace is a hobby. Build the sales motion (NC lawn, Greensboro first) with the same seriousness we built `offer.ts`.
+
+**Sources:**
+- [DoorDash merchant pricing](https://merchants.doordash.com/en-us/pricing)
+- [DoorDash commission explainer](https://merchants.doordash.com/en-us/learning-center/delivery-commission)
+- [Delivery app commission rates 2026 — DirectOrders](https://www.directorders.com/blog/delivery-app-commission-rates-2026)
+- [OPA Delivery Fee Index, Apr 2026](https://opalink.com/blog/restaurant-delivery-fee-benchmarking-what-multi-unit-operators-actually-pay-in-2026)
+- [LawnStarter lawn-care cost study](https://www.lawnstarter.com/blog/studies/lawn-care-costs/)
+- [LawnStarter mowing price guide](https://www.lawnstarter.com/blog/cost/lawn-mowing-price/)
+- [Housecall Pro: how much to charge for lawn mowing](https://www.housecallpro.com/resources/how-much-charge-lawn-mowing/)
+- [GreenPal U.S. mowing average](https://www.yourgreenpal.com/newsroom/average-cost-of-lawn-mowing-us-greenpal-report)
+- [GreenPal vendor handbook (5% + Stripe)](https://www.yourgreenpal.com/vendor-handbook/getting-started-and-completing-work)
+- [GreenPal on LawnStarter/Lawn Love commissions](https://www.yourgreenpal.com/blog/lawnstarter-and-lawn-love-have-high-commission-rates)
+- [LawnStarter fees for pros, Jul 2026](https://bobby.app/compare/lawnstarter-fees)
+- [Angi vs Thumbtack vs Bark lead costs 2026](https://www.reviewsell.com/blog/angi-vs-thumbtack-vs-bark-leads-2026/)
+- [Thumbtack: how much do I pay for leads](https://help.thumbtack.com/article/pay-for-leads)
+- [How much does Thumbtack charge per lead — Pipeline On](https://pipelineon.com/blog/how-much-does-thumbtack-charge-per-lead/)
+- [Housecall Pro pricing](https://www.housecallpro.com/pricing/)
+- [Jobber vs Housecall Pro pricing](https://www.getjobber.com/comparison/jobber-vs-housecall-pro/)
+
