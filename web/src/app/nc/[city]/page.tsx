@@ -33,7 +33,7 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
       <SectionHeading
         eyebrow={`${record.region} · North Carolina`}
         title={`Contractors in ${record.name}`}
-        description="Request a quote on a listing. Every page is a customizable storefront for that business."
+        description="Pick a trade to ping every available crew — first claim quotes and gets paid. Or open a listing and book that crew&rsquo;s calendar."
       />
       <div className="mt-6 flex flex-wrap gap-2">
         {TRADES.map((trade) => (

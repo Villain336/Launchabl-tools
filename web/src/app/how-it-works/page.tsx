@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 
 const title = "How this works";
-const description = "Pick a weekday time on the contractor's page. It lands on their job book. Quote piles and shared leads are the old way.";
+const description = "Ask for the job and we ping every available crew — first claim quotes and gets paid here. Or book a specific crew's Saturday. Not a shared Angi lead.";
 
 export const metadata: Metadata = {
   title,
@@ -20,10 +20,16 @@ export default function HowItWorksPage() {
       <SectionHeading
         eyebrow="Trust"
         title="Why a local would actually use this"
-        description="Nobody opens an app because leads are exclusive. They open it to grab Saturday at 9, see a starting price, and know the crew has them on the book."
+        description="Nobody opens an app because leads are exclusive. They open it to get the lawn done this week — ping the trade, or grab Saturday at 9 with a crew they already know."
       />
 
       <div className="mt-12 grid gap-6 lg:grid-cols-2">
+        <article className="rounded-3xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold">Ping the trade, or book a name</h2>
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
+            DoorDash, not Angi: we notify every available crew in that city and trade. First one to claim owns the job, sends the quote, and you pay on the same page. If you already have a name, skip the blast and take a weekday slot on their calendar. After a claim, nobody else gets your number.
+          </p>
+        </article>
         <article className="rounded-3xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold">Book a time, don&rsquo;t join a platform</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">

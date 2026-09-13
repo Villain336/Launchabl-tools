@@ -38,6 +38,8 @@ export type Storefront = {
   bookingEndHour: number;
   slotMinutes: number;
   bookingDriveMinutes: number;
+  /** DoorDash-style pings (§29). Off = this crew is not on the open board. */
+  acceptingOffers: boolean;
   updatedAt: string;
 };
 
@@ -63,6 +65,7 @@ export type StorefrontInput = Partial<{
   bookingEndHour: number;
   slotMinutes: number;
   bookingDriveMinutes: number;
+  acceptingOffers: boolean;
 }>;
 
 export const STOREFRONT_LIMITS = {
@@ -100,6 +103,7 @@ export function defaultStorefront(overrides: Partial<Storefront> = {}): Storefro
     bookingEndHour: 17,
     slotMinutes: 60,
     bookingDriveMinutes: 20,
+    acceptingOffers: true,
     updatedAt: new Date().toISOString(),
     ...overrides,
   };
@@ -118,6 +122,7 @@ export function normalizeStorefront(storefront: Storefront): Storefront {
     bookingEndHour: clampHour(storefront.bookingEndHour, 17),
     slotMinutes: typeof storefront.slotMinutes === "number" && storefront.slotMinutes > 0 ? storefront.slotMinutes : 60,
     bookingDriveMinutes: typeof storefront.bookingDriveMinutes === "number" && storefront.bookingDriveMinutes >= 0 ? storefront.bookingDriveMinutes : 20,
+    acceptingOffers: storefront.acceptingOffers !== false,
   };
 }
 
@@ -180,6 +185,7 @@ export function applyStorefrontInput(base: Storefront, input: StorefrontInput): 
     bookingEndHour: input.bookingEndHour !== undefined ? clampHour(input.bookingEndHour, base.bookingEndHour) : base.bookingEndHour,
     slotMinutes: input.slotMinutes !== undefined && input.slotMinutes > 0 ? input.slotMinutes : base.slotMinutes,
     bookingDriveMinutes: input.bookingDriveMinutes !== undefined && input.bookingDriveMinutes >= 0 ? input.bookingDriveMinutes : base.bookingDriveMinutes,
+    acceptingOffers: input.acceptingOffers !== undefined ? Boolean(input.acceptingOffers) : base.acceptingOffers,
     updatedAt: new Date().toISOString(),
   };
 }
