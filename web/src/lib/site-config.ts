@@ -1,13 +1,13 @@
 export const siteConfig = {
   name: "Launchabl",
   url: "https://launchabl.io",
-  tagline: "NC directory for home & local services. OS and agency on the same platform.",
+  tagline: "Build and run your business. The client network comes with it.",
   description:
-    "Find licensed lawn care, cleaning, HVAC, pest control, junk removal, cargo-van courier, roadside assistance, towing, and more across North Carolina — or run your service business on the Launchabl OS. Agency Launch is $1,200 to get set up; Managed Growth is $497/month.",
+    "Launchabl builds and runs local businesses — home services first, then medspas, dentists, and vets. The customer network is included. Build is $1,200. Network (the DoorDash seat) is $99/month. Run is $497/month and includes Network.",
   price: "$1,200",
   /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
   priceNumeric: "1200",
-  priceNote: "one-time · lifetime access · no monthly retainer",
+  priceNote: "Build $1,200 one-time · Network $99/mo · Run $497/mo",
   /** The lead-in offer ahead of the paid plan — a real audit from the tool already built, not a lead-gen gimmick. */
   freeAudit: {
     name: "Free Website Audit",

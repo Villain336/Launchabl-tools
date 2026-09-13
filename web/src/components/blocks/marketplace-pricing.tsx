@@ -4,20 +4,19 @@ import { Container } from "@/components/ui/container";
 
 export function MarketplacePricing() {
   const cards = [
-    { name: "Directory listing", price: "Free", note: `${LEAD_TIERS.listing.monthlyLeads} leads / month`, href: "/os/storefront" },
-    { name: LEAD_TIERS.os.label, price: `$${LEAD_TIERS.os.priceMonthly}/mo`, note: `${LEAD_TIERS.os.monthlyLeads} leads / month`, href: "/os" },
-    { name: LEAD_TIERS["os-plus"].label, price: `$${LEAD_TIERS["os-plus"].priceMonthly}/mo`, note: `${LEAD_TIERS["os-plus"].monthlyLeads} leads / month`, href: "/os" },
-    { name: AGENCY_PACKAGES.launch.label, price: `$${AGENCY_PACKAGES.launch.price.toLocaleString()}`, note: "one-time setup", href: "/agency" },
-    { name: AGENCY_PACKAGES["managed-growth"].label, price: `$${AGENCY_PACKAGES["managed-growth"].price}/mo`, note: `${LEAD_TIERS.managed.monthlyLeads} leads / month + done-for-you`, href: "/agency" },
+    { name: "Directory listing", price: "Free", note: "Brochure only — cannot claim pings", href: "/os/storefront" },
+    { name: AGENCY_PACKAGES.network.label, price: `$${AGENCY_PACKAGES.network.price}/mo`, note: `DoorDash seat · ${LEAD_TIERS.network.monthlyLeads} leads + pings`, href: "/agency" },
+    { name: AGENCY_PACKAGES.launch.label, price: `$${AGENCY_PACKAGES.launch.price.toLocaleString()}`, note: "one-time — we build the business", href: "/agency" },
+    { name: AGENCY_PACKAGES["managed-growth"].label, price: `$${AGENCY_PACKAGES["managed-growth"].price}/mo`, note: `We run it · Network included · ${LEAD_TIERS.managed.monthlyLeads} leads`, href: "/agency" },
   ];
   return (
     <section className="border-t border-border py-16">
       <Container>
-        <h2 className="font-heading text-3xl font-bold">Directory, OS, and agency</h2>
+        <h2 className="font-heading text-3xl font-bold">Build, Network, Run</h2>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Subscription tiers buy lead volume, never quality. Every delivered lead is the same kind of request. Tools Pro and credit packs below stay for the compute-heavy tools.
+          We build the business and run the front door. Staying on the ping board has a price — not a fee per ping. Tools Pro and credit packs below stay for the compute-heavy tools.
         </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((card) => (
             <Link key={card.name} href={card.href} className="rounded-2xl border border-border bg-card p-5 hover:border-primary/40">
               <p className="text-sm font-medium text-muted-foreground">{card.name}</p>

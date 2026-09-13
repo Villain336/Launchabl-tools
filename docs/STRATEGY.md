@@ -1500,19 +1500,20 @@ Cleaning + HVAC + pest are the **year-round request mix**. Lawn is a **seasonal 
 
 Code: `lib/service-business/profit-model.ts`. Prices come from `LEAD_TIERS` / `AGENCY_PACKAGES`. If a page and this file disagree, the file is wrong.
 
-**Floor — must cover the month before we talk GMV**
+**Floor — must cover the month before we talk GMV** (names in §36: Build / Network / Run)
 
 | Line | Price | When it counts |
 |---|---|---|
-| Launch | **$1,200** one-time | Closed this month. Best sold Oct–Feb when crews have time. |
-| Managed Growth | **$497**/month | Every month they stay. Human SEO/reviews. **The winter floor.** |
+| Build (Launch) | **$1,200** one-time | Closed this month. Best sold Oct–Feb when crews have time. |
+| Network | **$99**/month | DoorDash seat. Recurring. 15 seats ≈ three Run retainers. |
+| Run (Managed Growth) | **$497**/month | Every month they stay. **Includes Network.** Human SEO/reviews. **The winter floor.** |
 
-**Growth — after a board is real**
+**Growth — desk only, not the board**
 
 | Line | Price | Gate |
 |---|---|---|
-| OS | **$49**/mo | Claiming requires `os` or `managed` once **3 crews** are on that city×trade. |
-| OS Plus | **$149**/mo | Same gate, more lead allotment. |
+| OS desk | **$49**/mo | Job book without pings. Claiming requires **Network** or **Run** (§36). |
+| OS Plus | **$149**/mo | More quote-lead allotment. Still not a Network seat. |
 
 **Bonus — never the plan**
 
@@ -1527,10 +1528,10 @@ A $55 mow at 5% is **$2.75** (`dispatchTakeUsd`). Eighty of those is **$220**. T
 ### 35.3 The spend cap (how we stay profitable)
 
 ```
-this month's ads + Twilio + founder cash out  ≤  Managed MRR  +  Launch closed this month
+this month's ads + Twilio + founder cash out  ≤  Run MRR  +  Network MRR  +  Build closed this month
 ```
 
-`monthlySpendCapUsd({ managedCount, launchesClosedThisMonth })`.
+`monthlySpendCapUsd({ managedCount, networkCount, launchesClosedThisMonth })`. Network is the DoorDash seat (§36).
 
 OS MRR and dispatch take are **not** in the cap. January will not have lawn take. A Facebook test that assumes June volume is how directories die.
 
@@ -1568,4 +1569,64 @@ If we want to change a price, change `pricing.ts` and this section in the same c
 - [Kodiak — Charlotte HVAC seasonal guide](https://www.callkodiakhvac.com/learning-center/maintenance/charlotte-hvac-seasonal-tips)
 - [Terminix Triad — NC pest calendar](https://www.terminix-triad.com/about/nc-pest-calendar/)
 - [GreenPal vendor handbook (5% + Stripe)](https://www.yourgreenpal.com/vendor-handbook/getting-started-and-completing-work)
+
+---
+
+## 36. Build and Run — Network is the DoorDash seat
+
+The founder asked for two things at once: **put a price on staying in the network**, and **pivot the company to the first build-and-run agency**, with the client/customer network included. Start with home services. Add medspas, dentists, and vets as booking businesses, not as Saturday-mow trades.
+
+This supersedes the public names “Launch” and “Managed Growth.” The prices do not change except that **Network is now an explicit $99/month SKU**. The 5% take, the spend cap, and the seasonal calendar in §35 still hold.
+
+### 36.1 Official offers
+
+| Offer | Price | What they get | What they do not get |
+|---|---|---|---|
+| **Build** | **$1,200** one-time | Brand, site, booking calendar, OS, live profile. We stand the business up. | Ongoing pings. Build without Network is a brochure that can book on `/b`. |
+| **Network** | **$99**/month | The DoorDash seat. City×trade pings. First claim owns the job. 40 quote leads/month. OS included to claim/quote/pay. | A fee per ping. Shared Angi contacts. Clinical records. |
+| **Run** | **$497**/month | We run the front door (SEO, GBP, reviews, the book). **Network is included.** 200 leads/month. | A lock-in. They can take the OS over any time. |
+
+Free **listing** stays. It cannot receive or claim pings (`hasNetworkSeat` is `network` or `managed` only). OS desk at $49 is software without the board.
+
+Still forbidden: charge per ping, pay-per-lead quality tiers, 15–30% DoorDash restaurant take on a $55 mow.
+
+### 36.2 Why $99, not $0 and not 25%
+
+§30 said the OS becomes the board pass after three claiming crews. That left the DoorDash system unpriced until density — which means we would run Twilio for free listings. The seat is the product. $99 is:
+
+- More than Jobber Core ($29–$49) because Jobber does not ping the city.
+- Less than a single Angi/Thumbtack shared lead ($25–$75) in a slow week, and those leads are shared.
+- Recurring, so January still pays when lawn GMV is $0 (§35).
+- **15 Network seats = $1,485** ≈ the three-Run winter floor.
+
+Run at $497 is the agency. Network at $99 is self-serve stay-in. Do not discount Network to $0 to “get density.” Density that cannot pay $99 will not pay a take-rate later.
+
+### 36.3 Two shapes of “network” — do not flatten them
+
+| Group | How demand moves | What we build | What we do not claim |
+|---|---|---|---|
+| **Home services** (lawn, cleaning, HVAC, pest, …) | DoorDash ping. First crew claims. | City×trade board + `/b` calendar + OS. | That we beat the shop that answers at 2 a.m. |
+| **Local care** (medspa, dentist, vet) | Booking, recall, reviews, local search. | Front door: site, calendar, GBP, review cadence, directory listing. | HIPAA-covered charts. Dentrix, ezyVet, Aesthetic Record, or any EMR/PMS. We are not their clinic. |
+
+Do **not** add `dentist` / `medspa` / `vet` to `TRADES` this round. Empty `/nc/greensboro/dentist` pages are the same lie as empty junk pages (§30.3). They live on `/agency` as who we will Build and Run. Hunt order for home services is still §33.5. Local-care outbound is a **second sales motion** after one home-services Run client is live — or if a practice writes the $1,200 first.
+
+No invented medspa case studies (§22.2). Atlas is still the only named real client.
+
+### 36.4 What this does to profitability
+
+Spend cap now counts Network MRR:
+
+`ads + Twilio ≤ Run MRR + Network MRR + Build closed this month`
+
+The 5% take is still a bonus after 3 crews and 20 paid dispatch jobs. Calendar bookings stay 0%. A dentist Run client in January is as good as a cleaner Run client — better than a lawn Network seat with no mows.
+
+### 36.5 What this round shipped
+
+- `LEAD_TIERS.network` at $99. `hasNetworkSeat` gates pings and claims.
+- Agency copy is Build / Network / Run. Vertical groups in `verticals.ts`.
+- Tests: listing-only published crews are not pinged.
+
+**Sources:**
+- Jobber / Housecall Pro pricing already cited in §30.2
+- Angi / Thumbtack lead ranges already cited in §30.1
 

@@ -1,6 +1,7 @@
 import { getStore, type KeyValueStore } from "@/lib/ai/store";
 import { getOrg } from "@/lib/orgs/org";
 import { getServiceBusinessProfileBySlug, listServiceBusinessProfiles, type ServiceBusinessProfile } from "@/lib/service-business/profile";
+import { hasNetworkSeat, type LeadTierId } from "@/lib/marketplace/pricing";
 import { defaultStorefront, getOrgStorefront, getSeedStorefront, saveSeedStorefront, type Storefront, type StorefrontInput } from "@/lib/service-business/storefront";
 import { cleanText, RECORD_TTL } from "@/lib/service-business/shared";
 import { citySlug, getCity, isNcCitySlug, isTradeSlug, matchCitySlug } from "./cities";
@@ -23,6 +24,8 @@ export type PublicListing = {
   slug: string;
   name: string;
   orgId: string | null;
+  /** Null on founding / brochure pages. Only Network and Run receive pings. */
+  leadTier: LeadTierId | null;
   trades: ServiceBusinessProfile["trades"];
   cities: string[];
   phone: string;
@@ -68,6 +71,7 @@ async function listingFromFounding(seed: FoundingListing, store: KeyValueStore):
     slug: seed.slug,
     name,
     orgId: null,
+    leadTier: null,
     trades: seed.trades,
     cities: seed.cities,
     phone: cleanText(meta.phone, 40) || seed.phone,
@@ -97,6 +101,7 @@ async function listingFromProfile(profile: ServiceBusinessProfile, store: KeyVal
     slug: profile.slug,
     name: org.name,
     orgId: profile.orgId,
+    leadTier: profile.leadTier,
     trades: profile.trades,
     cities,
     phone: profile.phone,
@@ -186,4 +191,15 @@ export async function updateFoundingListing(
 
 export function cityLabel(slug: string): string {
   return getCity(slug)?.name ?? slug;
+}
+
+/** City×trade dispatch: published Network/Run seats only. Listing and OS desk do not count. */
+export function listingCanReceivePings(listing: PublicListing): boolean {
+  return Boolean(
+    listing.orgId &&
+      listing.leadTier &&
+      listing.storefront.published &&
+      listing.storefront.acceptingOffers !== false &&
+      hasNetworkSeat(listing.leadTier),
+  );
 }

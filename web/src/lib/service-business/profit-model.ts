@@ -10,6 +10,7 @@ export const PROFIT_MODEL = {
   launchUsd: AGENCY_PACKAGES.launch.price,
   managedUsd: AGENCY_PACKAGES["managed-growth"].price,
   osUsd: LEAD_TIERS.os.priceMonthly,
+  networkUsd: LEAD_TIERS.network.priceMonthly,
   osPlusUsd: LEAD_TIERS["os-plus"].priceMonthly,
   listingUsd: LEAD_TIERS.listing.priceMonthly,
   /** GreenPal-shaped. $0 in code until the gates below are true. */
@@ -50,13 +51,21 @@ export function osMrrUsd(osCount: number, osPlusCount = 0): number {
   return Math.max(0, osCount) * PROFIT_MODEL.osUsd + Math.max(0, osPlusCount) * PROFIT_MODEL.osPlusUsd;
 }
 
+export function networkMrrUsd(networkCount: number): number {
+  return Math.max(0, networkCount) * PROFIT_MODEL.networkUsd;
+}
+
 /**
  * Cash we may spend on ads + Twilio this month.
- * Never outrun retainers + Launch closed *this month*. OS and take-rate
- * are not in the cap — they are not reliable in January.
+ * Never outrun Run + Network retainers + Build closed *this month*.
+ * Desk OS and take-rate are not in the cap.
  */
-export function monthlySpendCapUsd(input: { managedCount: number; launchesClosedThisMonth: number }): number {
-  return managedMrrUsd(input.managedCount) + launchCashUsd(input.launchesClosedThisMonth);
+export function monthlySpendCapUsd(input: {
+  managedCount: number;
+  launchesClosedThisMonth: number;
+  networkCount?: number;
+}): number {
+  return managedMrrUsd(input.managedCount) + networkMrrUsd(input.networkCount ?? 0) + launchCashUsd(input.launchesClosedThisMonth);
 }
 
 export function winterFloorUsd(managedCount = PROFIT_MODEL.winterFloorManagedCount): number {
@@ -65,8 +74,8 @@ export function winterFloorUsd(managedCount = PROFIT_MODEL.winterFloorManagedCou
 
 export type ProfitLine = "floor" | "growth" | "bonus";
 
-export function lineForRevenue(kind: "launch" | "managed" | "os" | "dispatch-take" | "calendar-booking"): ProfitLine {
-  if (kind === "launch" || kind === "managed") return "floor";
+export function lineForRevenue(kind: "launch" | "managed" | "network" | "os" | "dispatch-take" | "calendar-booking"): ProfitLine {
+  if (kind === "launch" || kind === "managed" || kind === "network") return "floor";
   if (kind === "os") return "growth";
   return "bonus";
 }

@@ -5,9 +5,12 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { siteConfig } from "@/lib/site-config";
+import { AGENCY_PACKAGES, LEAD_TIERS } from "@/lib/marketplace/pricing";
+import { AGENCY_VERTICAL_GROUPS } from "@/lib/service-business/verticals";
 
-const title = "Agency";
-const description = "We stand up a booking page locals will actually use — on Google, on your truck, in a text — and keep the jobs coming."
+const title = "Build and run your business";
+const description =
+  "We build the front door and run the operation. The client and customer network comes with it — home services first, then medspas, dentists, and vets.";
 
 export const metadata: Metadata = {
   title,
@@ -19,25 +22,36 @@ export const metadata: Metadata = {
 
 const packages = [
   {
-    name: "Launch",
-    tagline: "$1,200 one-time",
-    summary: "We build your brand, site, and marketplace profile, and lay the local SEO foundation — done once, built to last.",
+    name: AGENCY_PACKAGES.launch.label,
+    tagline: `$${AGENCY_PACKAGES.launch.price.toLocaleString()} one-time`,
+    summary: "We stand the business up: brand, site, booking, OS, and a live network profile.",
     deliverables: [
-      "Brand & logo (if you need one)",
-      "A real website with weekday booking on the live calendar",
-      "Your marketplace profile, live and search-indexed",
-      "Local SEO & Google Business Profile foundation — schema, service-area pages, listings",
+      "Brand and site with a live booking calendar",
+      "OS job book — customers, jobs, estimates, payments",
+      "Network profile, search-indexed",
+      "Local SEO and Google Business Profile foundation",
     ],
   },
   {
-    name: "Managed Growth",
-    tagline: "$497 / month",
-    summary: "We keep running your local SEO, content, and reviews every month, so your marketplace profile and rankings keep improving without you touching a tool.",
+    name: AGENCY_PACKAGES.network.label,
+    tagline: `$${AGENCY_PACKAGES.network.price} / month`,
+    summary: "The DoorDash seat. Stay in the network, receive city-wide jobs, first claim owns them. Not a fee per ping.",
     deliverables: [
-      "Ongoing local SEO & Google Business Profile management",
-      "Review-generation cadence",
-      "Marketplace profile & listing upkeep",
-      "Monthly report on what it's driving",
+      "Pings for your city and trade (home services)",
+      "Booking / recall demand for local-care clients",
+      `${LEAD_TIERS.network.monthlyLeads} quote leads / month on top of pings`,
+      "OS included so you can claim, quote, and get paid",
+    ],
+  },
+  {
+    name: AGENCY_PACKAGES["managed-growth"].label,
+    tagline: `$${AGENCY_PACKAGES["managed-growth"].price} / month`,
+    summary: "We run it. Network is included. Local SEO, reviews, and the book — you do the work, we keep the front door fed.",
+    deliverables: [
+      "Network seat included — no extra $99",
+      "Ongoing local SEO, GBP, and review cadence",
+      `${LEAD_TIERS.managed.monthlyLeads} leads / month`,
+      "Monthly report. You can take the OS over any time.",
     ],
   },
 ];
@@ -47,11 +61,21 @@ export default function AgencyPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="Agency"
-        title="We put a booking link where your customers already are"
-        description="Google, Facebook, the truck, the invoice. Locals will not download our app. They will tap your link. Launch builds that page. Managed Growth keeps it fed."
+        title="The first build-and-run agency. The network comes with it."
+        description="We do not sell a logo and walk away. We build the business, put you on the client and customer network, and stay to run the front door. Start with home services. Local care — medspa, dentist, vet — is booking and reviews, not a clinical chart."
       />
 
-      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        {AGENCY_VERTICAL_GROUPS.map((group) => (
+          <div key={group.id} className="rounded-2xl border border-border p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">{group.label}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{group.pitch}</p>
+            <p className="mt-3 text-sm text-foreground">{group.examples.join(" · ")}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {packages.map((pkg) => (
           <CardSpotlight key={pkg.name} className="h-full p-6">
             <div className="relative z-20">
@@ -74,22 +98,19 @@ export default function AgencyPage() {
       </div>
 
       <p className="mt-8 text-sm text-muted-foreground">
-        Launch is $1,200. Managed Growth starts at $497/month. Multi-location or unusual trades get a custom quote. Every managed client also gets a{" "}
-        <a href="/os" className="underline">
-          self-serve OS
-        </a>{" "}
-        account included, and can take over running it themselves at any time — nothing locks you out of your own data.
+        Build is ${AGENCY_PACKAGES.launch.price.toLocaleString()}. Network is ${AGENCY_PACKAGES.network.price}/month to stay on the board — we do not charge per ping. Run is $
+        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
       </p>
 
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">
-        <h3 className="text-2xl font-bold">Tell us about your business</h3>
-        <p className="mt-2 text-primary-foreground/80">Start with a free audit, then talk to a real person about Launch or Managed Growth.</p>
+        <h3 className="text-2xl font-bold">Tell us about the business</h3>
+        <p className="mt-2 text-primary-foreground/80">Start with a free audit, then talk about Build, Network, or Run.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-4">
           <LinkButton href={siteConfig.freeAudit.href} variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             {siteConfig.freeAudit.cta}
           </LinkButton>
           <LinkButton
-            href={`mailto:hello@launchabl.io?subject=${encodeURIComponent("Agency — Launch or Managed Growth")}`}
+            href={`mailto:hello@launchabl.io?subject=${encodeURIComponent("Agency — Build, Network, or Run")}`}
             className="bg-background text-foreground hover:bg-background/90"
           >
             Talk to a person

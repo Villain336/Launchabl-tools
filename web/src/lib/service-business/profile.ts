@@ -128,7 +128,7 @@ export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
 /**
  * Which of §26's three legs is actually running this account's operation —
  * `"self-serve"` (the contractor runs their own OS) or `"managed"`
- * (Launchabl's own team runs it for them, the agency/"Managed Growth" leg,
+ * (Launchabl's own team runs it for them, the agency/"Run" leg,
  * §26.4). Deliberately not settable through the ordinary org-scoped update
  * path (`ServiceBusinessProfileInput`/`updateServiceBusinessProfile`) — a
  * contractor can't self-assign white-glove service any more than they can

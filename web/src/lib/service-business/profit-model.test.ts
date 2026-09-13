@@ -12,6 +12,7 @@ describe("official profit model", () => {
   it("keeps agency prices as the floor and dispatch take at 5% only after gates", () => {
     expect(PROFIT_MODEL.launchUsd).toBe(1200);
     expect(PROFIT_MODEL.managedUsd).toBe(497);
+    expect(PROFIT_MODEL.networkUsd).toBe(99);
     expect(PROFIT_MODEL.dispatchTakeRate).toBe(0.05);
     expect(winterFloorUsd()).toBe(1491);
 
@@ -26,8 +27,10 @@ describe("official profit model", () => {
 
   it("caps ads and Twilio at this month's Managed + Launch, and never takes calendar bookings", () => {
     expect(monthlySpendCapUsd({ managedCount: 3, launchesClosedThisMonth: 1 })).toBe(1491 + 1200);
+    expect(monthlySpendCapUsd({ managedCount: 0, networkCount: 15, launchesClosedThisMonth: 0 })).toBe(1485);
     expect(monthlySpendCapUsd({ managedCount: 0, launchesClosedThisMonth: 0 })).toBe(0);
     expect(lineForRevenue("managed")).toBe("floor");
+    expect(lineForRevenue("network")).toBe("floor");
     expect(lineForRevenue("os")).toBe("growth");
     expect(lineForRevenue("dispatch-take")).toBe("bonus");
     expect(lineForRevenue("calendar-booking")).toBe("bonus");

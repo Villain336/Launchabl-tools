@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { DispatchForm } from "@/components/marketplace/dispatch-form";
 import { getCity, NC_CITIES, isTradeSlug } from "@/lib/marketplace/cities";
-import { listDirectoryFiltered } from "@/lib/marketplace/listing";
+import { listDirectoryFiltered, listingCanReceivePings } from "@/lib/marketplace/listing";
 import { TRADE_LABELS, TRADES, tradeMarketplacePitch } from "@/lib/service-business/profile";
 import { tradeSeasonNote } from "@/lib/service-business/seasonality";
 
@@ -33,9 +33,7 @@ export default async function TradeCityPage({ params }: { params: Promise<{ city
   const record = getCity(city);
   if (!record || !isTradeSlug(trade)) notFound();
   const listings = await listDirectoryFiltered({ city: record.slug, trade });
-  const availableCrews = listings.filter(
-    (listing) => listing.orgId && listing.storefront.published && listing.storefront.acceptingOffers !== false,
-  ).length;
+  const availableCrews = listings.filter(listingCanReceivePings).length;
   return (
     <Container className="py-16">
       <SectionHeading
