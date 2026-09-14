@@ -1763,7 +1763,7 @@ Do not:
 - Invent crews so a city page looks busy.
 - Buy ads until this month’s Run + **paid** Network + Builds closed cover the spend.
 
-Next (not this round): a Run queue where we draft the neighborhood reply and they tap send from their phone; a seated operator who brings crew two and three gets a month of Network credited. Both are density without a scrape and without buying ads.
+The Run reply queue shipped in §39. Still next: a seated operator who brings crew two and three gets a month of Network credited.
 
 ### 38.4 What this round shipped
 
@@ -1773,5 +1773,33 @@ Next (not this round): a Run queue where we draft the neighborhood reply and the
 - Profit helpers refuse to treat complimentary seats as spend-cap cash.
 
 **Sources:** LeadHall / Jobber / ServiceTitan citations already in §37. Atlas is the live site, not a third-party stat.
+
+---
+
+## 39. Run reply queue — we draft, they send
+
+§38 said the next punch was a queue where we draft the neighborhood reply and they tap send from their phone. This is that product.
+
+It is **not** a Nextdoor integration. We do not scrape. We do not post as the operator. The ask is **pasted by a human**. The send happens in their own Nextdoor / Facebook / GBP app.
+
+### 39.1 Why this is the Run wedge
+
+Build already hands them a reply kit (scripts). Network is the DoorDash seat. **Run is the sit-promise** — we keep watching the threads and writing the next reply. The queue is how that promise shows up on their phone:
+
+1. Agency (or an org owner/admin on a managed account) pastes the ask and writes the draft.
+2. We append `/b/{slug}` if they forgot.
+3. Telegram/email alert: “Reply ready.”
+4. Operator opens `/os/replies`, hits **Copy reply**, pastes, sends, marks **I sent it**.
+
+Self-serve and Network-only accounts see an honest empty state: this is a Run feature. A contractor cannot self-assign `engagementType: "managed"`.
+
+### 39.2 What this round shipped
+
+- `reply-queue.ts` + `reply-queue-shared.ts` — Run gate, pasted source, `/b` enforcement, copy/sent/skip.
+- `/os/replies` — phone-first queue. `/admin/replies` — platform drafts for Run orgs we are not a member of.
+- Tests refuse a self-serve draft and refuse a scrape-shaped empty ask.
+
+**Do not claim:** we posted the reply, we read Nextdoor via API, or Twilio SMS delivered the ping (alerts are still Telegram/email).
+
 
 

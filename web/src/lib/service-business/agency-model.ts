@@ -56,6 +56,7 @@ export const REPLY_KIT = {
   channels: ["Nextdoor", "Facebook", "Google Business Profile"] as const,
   rule: "We write the replies. We do not scrape Nextdoor or LeadHall.",
   cta: "Every reply ends with the /b booking link.",
+  queueHref: "/os/replies",
 } as const;
 
 export const AGENCY_WONT = [

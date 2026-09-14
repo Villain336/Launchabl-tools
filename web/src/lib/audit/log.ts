@@ -51,7 +51,11 @@ export type AuditAction =
   | "inventory.updated"
   | "automation.updated"
   | "alerts.updated"
-  | "review.created";
+  | "review.created"
+  | "reply.created"
+  | "reply.copied"
+  | "reply.sent"
+  | "reply.skipped";
 
 export type AuditEvent = {
   /** Null/omitted for actions not scoped to an org (e.g. an admin-dashboard view). */
