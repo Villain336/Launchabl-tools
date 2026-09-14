@@ -11,6 +11,7 @@ import type { Lead } from "@/lib/service-business/lead";
 import type { Job } from "@/lib/service-business/job";
 import type { Estimate } from "@/lib/service-business/estimate";
 import type { Customer } from "@/lib/service-business/customer";
+import { FoundingReferralCard } from "./founding-referral-card";
 
 function money(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
@@ -197,6 +198,8 @@ export function OpsWorkspace() {
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <FoundingReferralCard />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

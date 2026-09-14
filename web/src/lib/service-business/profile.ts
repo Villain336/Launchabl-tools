@@ -374,7 +374,6 @@ export async function updateServiceBusinessProfile(
     gbpUrl: input.gbpUrl !== undefined ? cleanUrl(input.gbpUrl) : existing.gbpUrl,
     websiteUrl: input.websiteUrl !== undefined ? cleanUrl(input.websiteUrl) : existing.websiteUrl,
     allowKnowledgeSharing: input.allowKnowledgeSharing !== undefined ? Boolean(input.allowKnowledgeSharing) : existing.allowKnowledgeSharing,
-    leadTier: input.leadTier !== undefined && isLeadTierId(input.leadTier) ? input.leadTier : existing.leadTier,
     updatedAt: new Date().toISOString(),
   };
   const consentChanged = updated.allowKnowledgeSharing !== existing.allowKnowledgeSharing;
@@ -386,6 +385,26 @@ export async function updateServiceBusinessProfile(
       store,
     );
   }
+  return updated;
+}
+
+/**
+ * Billing / platform-ops only (§40). Org members cannot self-assign Network or Run
+ * through the ordinary update path — that was a free seat.
+ */
+export async function setLeadTierFromOps(
+  orgId: string,
+  actorLabel: string,
+  leadTier: LeadTierId,
+  store: KeyValueStore = getStore(),
+): Promise<ServiceBusinessProfile | ProfileError> {
+  if (!isLeadTierId(leadTier)) return { error: "Unknown seat." };
+  const existing = await getServiceBusinessProfile(orgId, store);
+  if (!existing) return { error: "This org hasn't set up a service-business profile yet." };
+  if (existing.leadTier === leadTier) return existing;
+  const updated: ServiceBusinessProfile = { ...existing, leadTier, updatedAt: new Date().toISOString() };
+  await store.set(profileKey(orgId), JSON.stringify(updated), PROFILE_TTL);
+  await logAuditEvent({ orgId, actorUid: actorLabel, action: "svcprofile.tier_changed", target: orgId, detail: { leadTier } }, store);
   return updated;
 }
 

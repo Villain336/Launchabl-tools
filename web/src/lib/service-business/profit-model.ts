@@ -61,12 +61,14 @@ export type NetworkSeatBill = {
   daysSinceBuild?: number;
   /** Run already includes Network — never bill the $99 again. */
   includedWithRun?: boolean;
+  /** Founding-crew referral month — complimentary, not spend-cap cash. */
+  includedWithReferral?: boolean;
 };
 
-/** Paid Network seats only. Complimentary 90-day Build seats and Run seats are $0. */
+/** Paid Network seats only. Complimentary 90-day Build seats, Run seats, and referral months are $0. */
 export function billableNetworkMrrUsd(seats: readonly NetworkSeatBill[]): number {
   return seats.reduce((sum, seat) => {
-    if (seat.includedWithRun) return sum;
+    if (seat.includedWithRun || seat.includedWithReferral) return sum;
     if (seat.daysSinceBuild !== undefined) return sum + networkPriceAfterBuild(seat.daysSinceBuild);
     return sum + PROFIT_MODEL.networkUsd;
   }, 0);

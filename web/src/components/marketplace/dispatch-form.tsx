@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cityTradeBoard } from "@/lib/service-business/agency-model";
 
 type Props = {
   city: string;
@@ -15,6 +16,7 @@ type Props = {
 
 export function DispatchForm({ city, trade, tradeLabel, cityLabel, availableCrews }: Props) {
   const router = useRouter();
+  const board = cityTradeBoard(availableCrews);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -59,9 +61,9 @@ export function DispatchForm({ city, trade, tradeLabel, cityLabel, availableCrew
     <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-border bg-card p-4">
       <p className="text-sm font-medium text-foreground">Get this done — first crew to claim it</p>
       <p className="text-sm text-muted-foreground">
-        {availableCrews > 0
+        {board.open
           ? `We ping ${availableCrews} available ${tradeLabel.toLowerCase()} crew${availableCrews === 1 ? "" : "s"} in ${cityLabel} at once. First one to claim owns the job, sends a quote, and you pay on the next page.`
-          : `No live crew is on the open board in ${cityLabel} yet. You can still send the request — it sits for two hours. Founding listings without a signed-up crew cannot be pinged.`}
+          : `This board is not open yet — ${board.seated} of ${board.needed} claiming crews. You can still send the request; it sits for two hours. Founding listings without a signed-up crew cannot be pinged.`}
       </p>
       <label className="block text-sm">
         <span className="text-muted-foreground">Your name</span>

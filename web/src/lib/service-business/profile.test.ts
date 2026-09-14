@@ -147,6 +147,16 @@ describe("service business profile", () => {
     expect((await getServiceBusinessProfile(org.id, store))?.engagementType).toBe("managed");
   });
 
+  it("does not let an org owner self-assign a Network seat through the ordinary update path (§40)", async () => {
+    const { store, owner, org } = await seedOrg();
+    const created = await createServiceBusinessProfile(org.id, owner.uid, {}, store);
+    if ("error" in created) throw new Error(created.error);
+    expect(created.leadTier).toBe("listing");
+    const attempted = await updateServiceBusinessProfile(org.id, owner.uid, { leadTier: "network" }, store);
+    if ("error" in attempted) throw new Error(attempted.error);
+    expect(attempted.leadTier).toBe("listing");
+  });
+
   it("setEngagementType is a no-op (no audit event) when the value is already what's requested", async () => {
     const { store, owner, org } = await seedOrg();
     const created = await createServiceBusinessProfile(org.id, owner.uid, {}, store);

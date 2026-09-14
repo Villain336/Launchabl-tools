@@ -1763,7 +1763,7 @@ Do not:
 - Invent crews so a city page looks busy.
 - Buy ads until this month’s Run + **paid** Network + Builds closed cover the spend.
 
-The Run reply queue shipped in §39. Still next: a seated operator who brings crew two and three gets a month of Network credited.
+The Run reply queue shipped in §39. Founding-crew credit shipped in §40.
 
 ### 38.4 What this round shipped
 
@@ -1800,6 +1800,32 @@ Self-serve and Network-only accounts see an honest empty state: this is a Run fe
 - Tests refuse a self-serve draft and refuse a scrape-shaped empty ask.
 
 **Do not claim:** we posted the reply, we read Nextdoor via API, or Twilio SMS delivered the ping (alerts are still Telegram/email).
+
+---
+
+## 40. Founding board — three crews, then it's open
+
+§38 said a city×trade board is not open until three claiming crews sit. That was copy. This section is the product.
+
+### 40.1 Official rules
+
+| Rule | Law |
+|---|---|
+| **Open at 3** | `cityTradeBoard(n).open` is true only at 3+ Network/Run seats that can receive pings. Founding listings with `orgId: null` do not count. |
+| **Honest empty** | City×trade pages say `0 of 3`. Homeowners can still leave a request; it sits. We do not invent crews. |
+| **Founding credit** | A seated Network/Run crew that brings crew **two or three** on that same city×trade gets **one month of Network** ($99) credited. After the board is open, no founding credit. |
+| **No free seats** | Org members cannot set `leadTier` to `network` or `managed` on the profile API. Seats come from ops/billing (`setLeadTierFromOps`) or from flipping Run (`setEngagementType`). |
+
+Run is still not a self-serve Stripe button. We only sell Run where we will sit.
+
+### 40.2 What this round shipped
+
+- Founding note on `/nc/[city]/[trade]`. Dispatch copy matches.
+- `recordFoundingReferral` + `/os` dashboard card + `POST /api/service-business/referrals`.
+- Profile update ignores `leadTier`. Tests refuse a self-assigned Network seat.
+
+Stripe Network checkout is still unbuilt — no price IDs on this deployment. Do not pretend someone can buy the $99 seat in one click until those exist.
+
 
 
 
