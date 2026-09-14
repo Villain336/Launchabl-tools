@@ -38,7 +38,7 @@ describe("official profit model", () => {
   });
 
   it("does not count complimentary Build Network or Run-included seats as spend-cap cash (§38)", () => {
-    expect(billableNetworkMrrUsd([{ daysSinceBuild: 10 }, { daysSinceBuild: 90 }, { includedWithRun: true }])).toBe(99);
+    expect(billableNetworkMrrUsd([{ daysSinceBuild: 10 }, { daysSinceBuild: 90 }, { includedWithRun: true }, { includedWithReferral: true }])).toBe(99);
     expect(
       monthlySpendCapUsd({
         managedCount: 1,

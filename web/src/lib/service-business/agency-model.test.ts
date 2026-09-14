@@ -7,9 +7,12 @@ import {
   AGENCY_MODEL,
   AGENCY_WONT,
   BUILD_SEQUENCE,
+  FOUNDING_REFERRAL,
   REPLY_KIT,
   WINTER_HUNT,
   canOpenCityTradeBoard,
+  cityTradeBoard,
+  foundingBoardCopy,
   intakeVerticalIsUnlisted,
   networkPriceAfterBuild,
   networkSeatIncludedWithBuild,
@@ -38,6 +41,10 @@ describe("agency operating model (§38)", () => {
   it("does not open a city×trade board or sell Run on hope", () => {
     expect(canOpenCityTradeBoard(2)).toBe(false);
     expect(canOpenCityTradeBoard(3)).toBe(true);
+    expect(cityTradeBoard(0)).toEqual({ seated: 0, needed: 3, open: false, seatsToOpen: 3 });
+    expect(cityTradeBoard(3).open).toBe(true);
+    expect(foundingBoardCopy("Greensboro", "Appliance repair", cityTradeBoard(0))).toMatch(/not open/i);
+    expect(FOUNDING_REFERRAL.creditUsd).toBe(99);
     expect(willSellRun(false)).toBe(false);
     expect(willSellRun(true)).toBe(true);
     expect(AGENCY_MODEL.proof.name).toBe("Atlas Lot Care");

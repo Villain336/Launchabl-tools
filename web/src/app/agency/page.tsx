@@ -97,7 +97,7 @@ export default function AgencyPage() {
       <section className="mt-16">
         <h2 className="font-heading text-2xl font-bold">The sequence</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Audit → 14-day Build → 90 days of Network → then ${AGENCY_MODEL.networkUsd}/month or Run. We do not open a city×trade board until {AGENCY_MODEL.foundingCrewsToOpenBoard} claiming crews sit on it.
+          Audit → 14-day Build → 90 days of Network → then ${AGENCY_MODEL.networkUsd}/month or Run. We do not open a city×trade board until {AGENCY_MODEL.foundingCrewsToOpenBoard} claiming crews sit on it. A seated crew that brings the next one gets a month of Network credited.
         </p>
         <ol className="mt-6 grid gap-4 sm:grid-cols-2">
           {BUILD_SEQUENCE.map((step) => (

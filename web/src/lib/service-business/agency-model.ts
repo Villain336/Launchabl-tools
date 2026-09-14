@@ -134,6 +134,33 @@ export function canOpenCityTradeBoard(claimingCrews: number): boolean {
   return Number.isFinite(claimingCrews) && claimingCrews >= AGENCY_MODEL.foundingCrewsToOpenBoard;
 }
 
+export type CityTradeBoard = {
+  seated: number;
+  needed: number;
+  open: boolean;
+  seatsToOpen: number;
+};
+
+export function cityTradeBoard(claimingCrews: number): CityTradeBoard {
+  const seated = Number.isFinite(claimingCrews) ? Math.max(0, Math.floor(claimingCrews)) : 0;
+  const needed = AGENCY_MODEL.foundingCrewsToOpenBoard;
+  const seatsToOpen = Math.max(0, needed - seated);
+  return { seated, needed, open: seatsToOpen === 0, seatsToOpen };
+}
+
+export function foundingBoardCopy(cityName: string, tradeLabel: string, board: CityTradeBoard): string {
+  if (board.open) {
+    return `${board.seated} claiming ${tradeLabel.toLowerCase()} crews sit in ${cityName}. First claim owns the job.`;
+  }
+  return `${board.seated} of ${board.needed} claiming ${tradeLabel.toLowerCase()} crews sit in ${cityName}. This board is not open. The first three get 90 days of Network with Build. A seated crew that brings the next one gets a month of Network credited.`;
+}
+
+/** One month of Network when a seated crew brings founding crew 2 or 3. */
+export const FOUNDING_REFERRAL = {
+  creditMonths: 1,
+  creditUsd: AGENCY_MODEL.networkUsd,
+} as const;
+
 /** Run is a promise to sit on neighborhood asks. If we will not, we do not sell it. */
 export function willSellRun(weWillSitOnNeighborhoodAsks: boolean): boolean {
   return weWillSitOnNeighborhoodAsks === true;

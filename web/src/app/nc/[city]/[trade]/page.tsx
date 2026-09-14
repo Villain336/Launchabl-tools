@@ -8,6 +8,7 @@ import { getCity, NC_CITIES, isTradeSlug } from "@/lib/marketplace/cities";
 import { listDirectoryFiltered, listingCanReceivePings } from "@/lib/marketplace/listing";
 import { TRADE_LABELS, TRADES, tradeMarketplacePitch } from "@/lib/service-business/profile";
 import { tradeSeasonNote } from "@/lib/service-business/seasonality";
+import { FoundingBoardNote } from "@/components/marketplace/founding-board-note";
 
 /** Seasonal copy is month-scoped; rebuild or ISR at least daily so January does not advertise Saturday cuts. */
 export const revalidate = 86400;
@@ -42,6 +43,7 @@ export default async function TradeCityPage({ params }: { params: Promise<{ city
         description={tradeMarketplacePitch(trade, record.name)}
       />
       <p className="mt-3 max-w-2xl text-sm text-muted-foreground">{tradeSeasonNote(trade)}</p>
+      <FoundingBoardNote cityName={record.name} tradeLabel={TRADE_LABELS[trade]} seated={availableCrews} />
       <div className="mt-10 max-w-xl">
         <DispatchForm
           city={record.slug}
