@@ -40,13 +40,13 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-5xl px-6">
         <div className="flex flex-col items-center gap-5 border-b border-border py-12 text-center">
           <h2 className="font-heading text-2xl font-bold tracking-tight text-balance sm:text-3xl">
-            Get listed in North Carolina
+            Build and run a local business
           </h2>
           <p className="max-w-md text-sm text-pretty text-muted-foreground">
-            A public storefront, leads from the directory, and an OS for the jobs that follow. Agency Launch is still {siteConfig.price} to get set up.
+            We stand it up and stay on the front door. The customer network comes with it. Build is {siteConfig.price} and includes 90 days of Network. Then $99/month to stay on the board.
           </p>
-          <Button render={<Link href="/os" />} nativeButton={false} size="lg">
-            Open the OS
+          <Button render={<Link href="/agency/start" />} nativeButton={false} size="lg">
+            Start the agency
             <ChevronRight data-icon="inline-end" aria-hidden="true" />
           </Button>
         </div>

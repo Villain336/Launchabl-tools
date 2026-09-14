@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  */
 const features: { name: string; summary: string; status: "live" | "beta" | "coming-soon" }[] = [
   { name: "Unified customer profiles", summary: "Every customer, their contact info, job history, and notes in one place — not scattered across texts and spreadsheets.", status: "live" },
-  { name: "Dispatch offers", summary: "A homeowner asks for the trade in your city. Every available crew gets the ping. First claim owns the job, sends the quote, and gets paid on that request.", status: "live" },
+  { name: "Dispatch offers", summary: "A homeowner asks for the trade in your city. Network and Run crews get the ping. First claim owns the job, sends the quote, and gets paid on that request.", status: "live" },
   { name: "Public booking", summary: "Customers pick an open weekday slot on your page. It becomes a job on the calendar, not a quote you have to chase.", status: "live" },
   { name: "Customizable storefront", summary: "Your public listing is a theme you control — colors, services, photos, booking — like Shopify, for a trade.", status: "live" },
   { name: "Marketplace leads", summary: "Quote requests still work for messy jobs. Booked slots always land — we do not hold a Saturday because your allotment ran out.", status: "live" },
@@ -47,7 +47,7 @@ export default function OsPage() {
       <SectionHeading
         eyebrow="The OS"
         title="Jobs hit your phone. The page still books your regulars."
-        description="City-wide work lands in Offers — Telegram or email today, not carrier SMS yet. First claim owns the quote. /b/your-name is still what you text after a call. Built for NC lawn, cleaning, HVAC, junk removal, and the other launch trades."
+        description="City-wide work lands in Offers — Telegram or email today, not carrier SMS yet. Claiming those pings needs Network ($99/month) or Run. /b/your-name is still what you text after a call. Built for NC lawn, cleaning, HVAC, pest, and the other launch trades."
       />
 
       <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

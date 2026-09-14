@@ -8,8 +8,9 @@ import ComparisonBlock from "@/components/blocks/comparison-2";
 import FaqsBlock from "@/components/blocks/faqs-1";
 import { MarketplacePricing } from "@/components/blocks/marketplace-pricing";
 
-const title = `Pricing — Free Audit, Then ${siteConfig.price} Unlimited`;
-const description = `Start with a free 20+ point website audit, no account required. When you're ready, ${siteConfig.price} one time unlocks unlimited marketing and design requests for life. No retainer, no monthly fee.`;
+const title = "Pricing — Build $1,200 · Network $99/mo · Run $497/mo";
+const description =
+  "We build and run local businesses. Build is $1,200 and includes 90 days of Network. Then Network is $99/month. Run is $497/month and includes Network. Tools Pro and credit packs stay for the compute-heavy tools.";
 
 export const metadata: Metadata = {
   title,
@@ -31,9 +32,9 @@ const faqs = [
       "Unlimited requests over the life of your plan, worked one at a time in a visible queue. This keeps every request getting full attention instead of everything happening at once, badly.",
   },
   {
-    question: "Is this really a one-time price?",
+    question: "What does Network cost, and is it a fee per ping?",
     answer:
-      `Yes — you pay ${siteConfig.price} once for lifetime access to the request queue. Hosting has a small pass-through cost at scale, which we'll always disclose up front.`,
+      "Build includes 90 days of Network. After that, Network is $99/month to stay on the DoorDash board — city-wide jobs, first claim owns them. We do not charge per ping or sell shared Angi-style leads. Run at $497/month includes Network. A free listing is a brochure and cannot claim.",
   },
   {
     question: "What if I only need the free tools?",
@@ -47,7 +48,7 @@ const faqs = [
   },
   {
     question: "Is there a guarantee?",
-    answer: siteConfig.guarantee,
+    answer: `${siteConfig.agencyGuarantee} Tools on the unlimited design plan: ${siteConfig.guarantee}`,
   },
 ];
 
@@ -58,7 +59,7 @@ function pricingJsonLd() {
     {
       "@type": "Service",
       "@id": `${url}#service`,
-      name: `${siteConfig.name} unlimited marketing & design plan`,
+      name: `${siteConfig.name} Build, Network, and Run`,
       description,
       url,
       provider: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
@@ -75,10 +76,28 @@ function pricingJsonLd() {
         {
           "@type": "Offer",
           "@id": `${url}#unlimited-plan`,
-          name: "Unlimited marketing & design plan",
+          name: "Build",
           price: siteConfig.priceNumeric,
           priceCurrency: "USD",
-          description: "One-time payment for unlimited, lifetime marketing and design requests — no retainer.",
+          description: "One-time stand-up: brand, site, booking, OS, live network profile, and 90 days of Network. Live in 14 days or Build is refunded.",
+          url,
+        },
+        {
+          "@type": "Offer",
+          "@id": `${url}#network`,
+          name: "Network",
+          price: "99",
+          priceCurrency: "USD",
+          description: "Monthly DoorDash seat — city-wide pings, first claim owns the job. Not a fee per ping.",
+          url,
+        },
+        {
+          "@type": "Offer",
+          "@id": `${url}#run`,
+          name: "Run",
+          price: "497",
+          priceCurrency: "USD",
+          description: "We run the front door. Network is included.",
           url,
         },
         {
@@ -121,7 +140,7 @@ export default function PricingPage() {
       <FaqsBlock
         items={faqs}
         title="Frequently asked questions"
-        description="Answers about the free audit, the unlimited plan, and how billing works."
+        description="Answers about Build, Network, Run, the free audit, and Tools Pro."
       />
     </>
   );

@@ -781,7 +781,7 @@ Building all eleven OS features and full statewide SEO coverage simultaneously i
 ### 25.7 Founder decisions
 
 1. **Marketplace monetization — decided.** Subscription tiers determine lead *volume*, not lead *quality*: a contractor's plan sets how many leads they receive per period; every lead delivered, at every tier, must be consistently good. No pay-per-lead, no commission-on-job-value. See §25.3's `Lead` entry for the schema implication (a period-scoped allotment counter, not a price field).
-2. **Launch trade categories — decided, then extended in §31.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added when the founder asked to hunt repeat trades. `TRADES` in `src/lib/service-business/profile.ts` is the nine. Agency *sourcing* is the four repeat trades in §31, not painting.
+2. **Launch trade categories — decided, then extended in §31–§34.** Lawn care, HVAC, cleaning, pressure washing/exterior, parking-lot/paving (carried forward from §24), plus plumbing, electrical, and painting. **Junk removal** added in §31. **Roadside assistance** and **towing** added as separate dispatch-native trades (§32). **Pest control** added as the fourth starting-lineup trade (§33). **Courier / cargo van** added in §34 for drivers who cannot live on DoorDash. Agency *sourcing* for the remaining season is cleaning, HVAC, pest, then lawn — not painting, not “households tow weekly,” not food delivery.
 3. **The tool cut list (§25.2) — decided and executed.** Public catalog is the SEO keep-list. Repurposed tools stay reachable for OS/agency. Cut tools are retired from the public catalog, not deleted from the repo.
 4. **The existing consumer-facing funnel and Tools Pro subscription — decided, then superseded by §26.** Originally recorded as "runs as-is, in parallel, untouched" — treated as legacy left alone while the new pivot builds elsewhere. §26 corrects that: the agency isn't legacy to leave alone, it's the third, permanent leg of this same NC service-business mission, and gets actively built out further, not just preserved.
 
@@ -1171,6 +1171,8 @@ Phase the money so it matches reality:
 
 Do not ship (3) as code until (1) and (2) have real numbers. A take-rate switch with no volume is a scarecrow.
 
+**Official numbers, seasonal calendar, and spend cap are in §35.** `lib/service-business/profit-model.ts` is the code that may not drift from that section.
+
 ### 30.5 What “build properly” means (ordered)
 
 Software that is worth writing, in this order, and nothing else until the previous line has a user:
@@ -1232,14 +1234,7 @@ Pressure washing is seasonal (1–2×/year). Plumbing and electrical are mostly 
 
 ### 31.2 Agency list, not eight equal chips
 
-Launch / Managed outbound this quarter, in order:
-
-1. Greensboro lawn
-2. Greensboro cleaning
-3. Greensboro / Raleigh HVAC (pitch the **membership book** + on-shift pings, not “we will be your after-hours answering service”)
-4. Greensboro junk (pitch **property managers**, not only Facebook garage cleanouts)
-
-Three claiming crews are still required **per city×trade** (§30.3). A liquid lawn board does not let us lie on `/nc/greensboro/junk-removal`. Selling Launch to an HVAC shop and a junk hauler *in parallel* is allowed. Pretending four empty boards are a marketplace is not.
+Superseded in order by **§33**. Still true: three claiming crews are required **per city×trade** (§30.3). A liquid lawn board does not let us lie on `/nc/greensboro/junk-removal` or `/nc/greensboro/pest-control`. Selling Launch to an HVAC shop and a pest operator *in parallel* is allowed. Pretending four empty boards are a marketplace is not.
 
 ### 31.3 What this round shipped
 
@@ -1256,4 +1251,527 @@ Three claiming crews are still required **per city×trade** (§30.3). A liquid l
 - [Junk removal industry notes — The Deal Sheet](https://thedealsheet.co/industries/junk-removal)
 - [Commercial junk / apartment turnover costs — Dropcurb](https://dropcurb.com/blog/commercial-junk-removal-cost-calculator)
 - [Growing a junk business / PM accounts](https://kickbackservices.com/grow-your-junk-removal-business)
+
+---
+
+## 32. Ranked repeat-purchase frequency (NC-flavored) + roadside / towing
+
+The founder asked for two things: add **roadside assistance** and **tow truck drivers**, and rank **how often the same buyer comes back** across services — specifically in North Carolina.
+
+These are different questions. Do not flatten them.
+
+- **Household cadence** = visits or purchases per year *among people who already buy that service*. That is what this ranking is.
+- **Market velocity** = how many pings a city produces in a week. Roadside and towing are high here and **low** on household cadence.
+- **NC demand mix** = which trades stay busy because of heat, humidity, pollen, growth, or storms. Busy ≠ weekly-repeat. Roofing after a hurricane is a spike, not a route.
+
+Pest is now in `TRADES` because §33 picked it as the fourth starting-lineup trade (requests + revenue). Pool still stays off the catalog — weekly cadence, thin Greensboro density.
+
+### 32.1 How to read the table
+
+Two published “how often” datasets disagree in useful ways:
+
+- [Thumbtack’s Home Care Price Index](https://blog.thumbtack.com/thumbtack-relaunches-home-care-price-index-to-provide-deeper-insights-into-home-maintenance-trends-807200141331) is **recommended** cadence (what a home *should* buy), used to weight their cost index. House cleaning and lawn mowing are listed as **1×/month**; pest, gutters, windows, and “full-service lawn” as **2×/year**; pressure wash, carpet, chimney, tree, appliance/water-heater/AC maintenance as **1×/year**.
+- [HIRI’s home-care survey](https://www.hiri.org/blog/home-care-and-maintenance-services) is **actual purchases among buyers** (2019): lawn/landscaping **8.9 purchases/year** (~$66 each), pest **3.1**, HVAC **1.4**. That is the closest public “repeat purchase frequency” we have for US homeowners. It is national, not NC.
+
+NC overlays, not substitutes:
+
+- [NC State Extension lawn calendars](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar) — Piedmont tall fescue is mowed often enough that late spring is **every 5–7 days**; warm-season Bermuda/zoysia grow hard through the humid summer and are cut until frost. A weekly pro route Mar–Oct/Nov is **~30–40 cuts**, not Thumbtack’s 12.
+- [Elev8’s 2026 NC home-services notes](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026) — Charlotte/Triangle growth keeps HVAC, remodeling, and electrical busy; heat + humidity support HVAC, pest, and pressure washing; hurricanes and inland flooding spike roofing, tree, water restoration, and generators. Use this for **which boards will have work**, not for visit counts. Greensboro/Triad leads are cheaper ($26–$75 LSA range on that page).
+- Snow removal is effectively **N/A** for most of the state. Do not copy a Northeast route model.
+
+Zipdo-style “2.1 roadside requests per vehicle owner” conflicts with AAA’s published call volume. Treat aggregator blogs as weak; use AAA’s own 2024 numbers.
+
+### 32.2 Ranked by household / buyer cadence (highest first)
+
+| Rank | Service | Cadence among buyers | NC note | In `TRADES`? |
+|---|---|---|---|---|
+| 1 | House / office cleaning | Among recurring customers, monthly is the modal book (~60%), biweekly ~33%, weekly ~7% ([Keepsake booking mix](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)). Industry write-ups also cite ~**2.3 pro visits/month** ([Gitnux](https://gitnux.org/house-cleaning-industry-statistics/)). Thumbtack recommends **1×/month**. | Year-round. Offices and move-outs are extra, not the route. | Yes — hunt |
+| 2 | Pool service | Weekly in season; heat + pollen in the Carolinas often keep that weekly, not “every other week if you’re lucky.” | Strong in Charlotte / Triangle / coastal suburbs. **Not in the catalog this round.** | No |
+| 3 | Lawn mowing / basic landscaping | Weekly or every 5–7 days in growth ([NC State tall fescue calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)). HIRI buyers averaged **8.9 purchases/yr** (many DIY the rest of the year). A professional weekly NC route is **~30–40 cuts** Mar–Nov. | The closest thing we have to a DoorDash habit. Dormant Dec–Feb except leaf/cleanup. | Yes — hunt |
+| 4 | Dog walking / pet sitting | Daily or several times/week for the households that buy it. | Urban cores. Not a Launch trade. | No |
+| 5 | Mobile car wash / detailing (membership) | Weekly–monthly if they buy a plan; otherwise 2–4×/year. | Complements roadside, is not roadside. | No |
+| 6 | Pest control | HIRI **3.1 purchases/yr** among buyers. Routes are quarterly–monthly (4–12). Thumbtack’s index still lists pest as **2×/year** recommended — that is a floor, not an NC route. | Humidity + a long warm season support more pest work than the national average ([Elev8 NC](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). NC quarterly plans run ~**$400–$680/yr** ([NC pest pricing 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)). | Yes — hunt (§33) |
+| 7 | Oil change / light auto service | Every ~5k–7.5k miles → **2–4×/year** per vehicle. | High market volume, shop-based, not our dispatch. | No |
+| 8 | HVAC membership | **2 visits/yr** (spring AC, fall heat), typically $200–$350/yr; HIRI HVAC buyers **1.4 purchases/yr** including repairs (§31). | Heat + humidity make the AC half of the year the money. Hunt the **plan**, not 2 a.m. no-cool. | Yes — hunt |
+| 9 | Gutter clean / window clean / “full-service” lawn (fert + weed, not mow) | Thumbtack **2×/year**. Gutters in leafy / stormy lots 2–4× ([Thumbtack gutter guide](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)). | Fall leaves + tropical remnants argue for the high end in NC. | Partial (lawn) |
+| 10 | Pressure wash / carpet / chimney / tree trim / appliance & water-heater maint / dryer vent | Thumbtack **1×/year**. Carpet often 12–18 months. | Pressure wash is busier here because of pollen and mildew. Tree work spikes after storms. | Pressure wash yes; rest no |
+| 11 | Plumbing / electrical / garage door / appliance repair | As-needed. Plumbers are the most-called home pro in several DIY-vs-pro surveys; electricians less often. Garage-door pro inspect **1×/year**, lube quarterly (often DIY). | Growth metros keep electricians busy (new construction + panels). Still not a weekly household. | Plumbing + electrical listed, not hunted |
+| 12 | Junk removal | Residential **~80% one-time**; a property-manager account is **3–10 jobs/month** (§31). | Hunt PMs, not garage-cleanout Facebook ads. | Yes — listed; PM inbound |
+| 12b | Courier / cargo van | Households almost never. A shop, warehouse, or lab that buys it wants **daily/weekly standing lanes** plus STAT when a job is down ([Dispatch Greensboro](https://www.dispatchit.com/company/locations/greensboro); [Carolina Quick Courier](https://www.carolinaquickcourier.com/)). | Same shape as junk: the *buyer* repeats. Not DoorDash. See §34. | Yes — listed, not hunted |
+| 13 | Septic pump / inspect | Inspect **1–3 years**; pump **3–5 years** ([EPA](https://www.epa.gov/septic/how-care-your-septic-system)). | Rural / county NC, not the Triangle apartment. | No |
+| 14 | Roadside assistance | AAA **>27 million** US calls in 2024, ~**7 million** battery ([AAA Apr 2025](https://newsroom.aaa.com/2025/04/aaa-urges-drivers-to-stay-proactive-on-auto-repair-and-maintenance/); [Tow Times](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)). ~**58 million** US members → **~0.47 calls per member-year**. Clubs cap Classic/Plus at **4 calls/year** — a ceiling, not the mean. | NC Memorial Day weekend alone was **~8,000** AAA calls ([AAA Carolinas](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)). Holiday I-40/I-85/I-77 spikes. Household LTV is terrible unless the “customer” is a fleet, rental lot, or club overflow. | Yes — dispatch-native |
+| 15 | Towing | ~**13 million** of those AAA calls were tows (~**0.22 tows per member-year**). Separate trade: hook-and-haul is not a jump-start. | Same NC highway spikes. Impound / repo / dealer lot is the repeat book. | Yes — dispatch-native |
+| 16 | Locksmith (home / auto) | Once every few years per household; auto lockout is often billed through roadside. | Overlaps roadside; do not invent a third chip. | No |
+| 17 | Moving | Once every few years per household. | College-town August spikes (Chapel Hill, Raleigh, Greensboro). | No |
+| 18 | Water restoration / emergency roof tarp | Almost never — until a storm. Then it is the only board that matters for two weeks. | [Elev8](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026): coastal landfalls + inland flooding. | No |
+| 19 | Painting / deck stain / parking-lot sealcoat / roof replace | Years between jobs (Thumbtack: deck stain every 2–3 years; duct clean 3–5). Sealcoat often 3–5 years. Roof replace is a decade-scale event unless a storm writes it off. | Atlas’s parking-lot trade stays listed because we already work it, not because it repeats. | Painting + parking-lot listed, not hunted |
+| — | Snow / ice | Weekly in season up north. | **N/A** for most of NC. Do not staff a sales week on it. | No |
+
+### 32.3 What we actually added
+
+`roadside-assistance` and `towing` are first-class, **separate** slugs. A jump pack and a wrecker are different trucks, different licenses, different dispatch.
+
+`TRADE_REPEAT` for both is **`dispatch-native`**: first truck claims (same DoorDash loop as lawn), but the city×trade pitch must say households need this rarely. The book worth selling Launch into is fleets, rental lots, and motor-club overflow — same shape as junk + property managers, not lawn + weekly route.
+
+Public nav (`FEATURED_NAV_TRADES`): §33 starting lineup first (lawn, cleaning, HVAC, pest), then junk, then roadside/towing, then the rest, painting last. Do not pretend a household tows like they mow.
+
+No invented roadside or tow founding listings. Liquidity is still per city×trade (§30.3). A liquid Greensboro lawn board does not let us lie on `/nc/greensboro/towing`.
+
+### 32.4 Agency implication
+
+Do **not** insert roadside/towing into the starting lineup. If a wrecker or roadside shop wants Launch, take the $1,200 — the OS and `/b` link still work. Do not spend a sourcing week on them until a fleet or lot is the buyer, or until three claiming trucks exist in one city.
+
+Pest is the fourth starting-lineup trade (§33). Pool stays off the catalog.
+
+**Sources:**
+- [Thumbtack Home Care Price Index — recommended frequencies](https://blog.thumbtack.com/thumbtack-relaunches-home-care-price-index-to-provide-deeper-insights-into-home-maintenance-trends-807200141331)
+- [Thumbtack — how often to clean gutters](https://www.thumbtack.com/guide/content/how-often-to-clean-gutters)
+- [HIRI — home care and maintenance services (8.9 / 3.1 / 1.4 purchases)](https://www.hiri.org/blog/home-care-and-maintenance-services)
+- [NC State Extension — tall fescue lawn calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [Gitnux — house cleaning industry statistics](https://gitnux.org/house-cleaning-industry-statistics/)
+- [Keepsake — how often customers actually book cleaning](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)
+- [Elev8 — North Carolina home services statistics 2026](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)
+- [AAA — 27M roadside calls in 2024](https://newsroom.aaa.com/2025/04/aaa-urges-drivers-to-stay-proactive-on-auto-repair-and-maintenance/)
+- [Tow Times — AAA 2024 call mix (13M tows, 7M battery)](https://towtimes.com/aaa-received-over-27-million-calls-from-stranded-drivers-in-2024/)
+- [AAA Carolinas — NC Memorial Day (~8,000 calls)](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
+- [EPA — septic inspect 1–3 years, pump 3–5](https://www.epa.gov/septic/how-care-your-septic-system)
+- [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)
+
+---
+
+## 33. Starting lineup — most requests *and* most revenue
+
+§32 ranked **how often the same household comes back**. That is not the same as “what we should sell first.” Requests (pings we can actually win) and revenue (Launch + Managed + later GMV) pull in different directions. The starting lineup is the overlap.
+
+Two numbers we do **not** optimize for:
+
+- **Raw market emergencies.** Roadside and towing produce the most stranded-driver calls in the state ([~8,000 AAA calls in NC on one Memorial Day weekend](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)). Those calls already have a phone number: AAA, insurance, the shop on the exit. A new board with zero trucks captures none of them. High request *in the world* is not high request *on Launchabl*.
+- **One fat ticket.** Painting, parking-lot, roof replace, and a 2 a.m. HVAC changeout look like revenue. They do not refill the board next Saturday. Atlas stays listed; it is not the lineup.
+
+### 33.1 The scoreboard (existing catalog + pest)
+
+Approximate **annual $ from one retained household** × **how often they generate a job we could dispatch or book**:
+
+| Slot | Trade | Why it scores | Why it is not #1 alone |
+|---|---|---|---|
+| 1 | **Lawn — Greensboro** | Weekly Mar–Nov = 30–40 paid visits if they stay ([NC State](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)). ~$45–$70/cut (§30) → **~$1,500–$2,500/yr** on a weekly route. Closest consumer habit to DoorDash. Triad leads are cheaper ([Elev8](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)). | Quiet Dec–Feb. Small ticket. Need three claiming crews before the page is real (§30.3). |
+| 2 | **Cleaning — Greensboro** | Highest household cadence we have — monthly is the modal book, weekly/biweekly common ([Keepsake](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)). Year-round, not a growing-season trade. Same dispatch → calendar loop as lawn. | More “I already have a person” than lawn. First request is still a Saturday we have to earn. |
+| 3 | **HVAC — Greensboro / Raleigh** | Lowest visit count (2 tune-ups/yr) and the **highest contractor check**. Memberships $200–$350/yr; members spend **~$3k–$4.5k over 3 years** vs ~$700–$1.1k without a plan (§31). NC heat makes the AC half of the year the money. Shops can actually write a $1,200 Launch check. | Do not sell “we will be your 2 a.m. answering service.” On-shift pings + the plan on `/b/{slug}`. |
+| 4 | **Pest — Greensboro** | HIRI buyers come back **3.1×/yr** ([HIRI](https://www.hiri.org/blog/home-care-and-maintenance-services)); NC humidity supports quarterly–monthly routes. Quarterly plans here run ~**$400–$680/yr** ([NC 2026 pricing](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)). Recurring like HVAC, more visits than HVAC, cheaper than inventing a roadside network. | Termite bonds are a different sale. Hunt general-pest routes, not one wasp nest. |
+
+That is the starting lineup. Four trades, **Greensboro first** (Raleigh only as the HVAC twin). Not eleven chips.
+
+### 33.2 On the roster, not in the starting five
+
+| Trade | Role |
+|---|---|
+| **Junk** | Revenue *if* the buyer is a property manager (3–10 jobs/month). Not a consumer-request engine. Sell it when a PM walk-in or a hauler already on Launch wants the OS. Do not spend the first sourcing month on Facebook garage cleanouts. |
+| **Courier / cargo van** | Same shape as junk, on wheels. The buyer is a shop or warehouse, not a household. Listed. Not in the remaining-season hunt. See §34. |
+| **Roadside / towing** | Listed. Dispatch-native. Take Launch if a fleet, lot, or three trucks walk in. Do not hunt. AAA already owns household requests. |
+| **Pressure wash** | Seasonal NC pollen/mildew add-on for a lawn or exterior crew already on the board. Not a fourth Launch target. |
+| **Plumbing / electrical** | Pages exist. Emergency, not a route. |
+| **Pool** | Would rank #2 on cadence. Thin in Greensboro vs Charlotte / Triangle suburbs. **Stay off the catalog** until the four above have claiming crews. |
+| **Painting / parking-lot** | Listed. Not hunted. |
+
+### 33.3 What “start” means — two clocks
+
+§30.3 still governs density. The annual scoreboard in §33.1 is not the hunt order for late 2026. See **§33.5**.
+
+Cash this quarter is still Launch ($1,200) + Managed ($497/mo). The lineup is chosen so those clients (a) get repeat jobs and (b) seed boards people will ping again. A wrecker Launch is $1,200 once. A cleaning + HVAC + pest book is the OS they do not churn from in January.
+
+### 33.4 What this round shipped
+
+- `pest-control` in `TRADES` / sitemap / CRM. Pitch is the quarterly plan, same shape as HVAC membership.
+- `REPEAT_TRADES` / `FEATURED_NAV_TRADES` follow the **remaining-season** order in §33.5: cleaning, HVAC, pest, lawn. Junk is no longer a hunt-list equal.
+- No invented pest founding listing.
+
+### 33.5 Remaining season — it is mid-September
+
+The founder is right: we do not have a summer left. Today is mid-September 2026. Greensboro Airport’s average **first fall freeze is October 31**; High Point is November 1 ([NC State Extension freeze dates](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)). Piedmont grass keeps growing until nightly lows sit under ~50°F — most years **late October / early November** ([Piedmont Triad fall lawn checklist](https://lawnlove.com/blog/fall-lawn-care-checklist-piedmont-triad/)). That is **six to eight weekly mows**, then leaf, then a dead board until March.
+
+Do not prove the marketplace on Saturday mows through February. Do not wait until March either.
+
+Two different “starts”:
+
+| Clock | What we do | What we do not do |
+|---|---|---|
+| **Marketplace requests (next 90 days)** | Prove density on **cleaning** (year-round) and **HVAC fall heat tune-ups / memberships** (this is their Q4). Pest rides the same months — rodents move inside, last outdoor quarter. | Treat lawn dispatch as the live product after Halloween. Flip to roadside because Thanksgiving travel exists (AAA still owns those calls). |
+| **Agency sales (this month)** | Sell Launch to lawn operators **now**. They have time, they are selling aeration / fescue overseed / leaf, and they need a `/b` link before March. Same week: cleaning + one HVAC shop. | Sit on lawn outbound until spring. A crew that buys in October and has no ping until April still churns if we promised Saturday volume. |
+
+**Hunt / public-nav order until March:** cleaning → HVAC → pest → lawn. Annual scoreboard in §33.1 does not change — lawn is still the best *year* habit. It is the worst *winter* proof.
+
+Concrete next 90 days, Greensboro:
+
+1. **Cleaning to three claiming orgs** and a paid Checkout job. That board still has work in January. Until that is true, cleaning *is* the product we can show.
+2. **HVAC Launch this month** — pitch the **fall heat tune-up + membership**, not no-cool. One GSO or Raleigh shop. On-shift pings only.
+3. **Pest Launch** in parallel if the operator writes the check. Quarterly plans do not freeze on Oct 31.
+4. **Lawn Launch** is a spring lock-in sale: last cuts, leaf, overseed, calendar for March. Do not staff a lawn-only Facebook test after the last mow. Do not claim `/nc/greensboro/lawn-care` is liquid because three crews exist and nobody is booking.
+
+Pool closing is a two-week spike, then dead until April — still not a catalog add. Pressure wash is a leaf-and-pollen add-on, not a fourth target.
+
+**Sources:**
+- [NC State Extension — tall fescue lawn calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [NC State Extension — average first/last freeze dates (KGSO Oct 31)](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)
+- [Lawn Love — Piedmont Triad fall lawn checklist](https://lawnlove.com/blog/fall-lawn-care-checklist-piedmont-triad/)
+- [HIRI — home care purchase frequency](https://www.hiri.org/blog/home-care-and-maintenance-services)
+- [Keepsake — cleaning booking mix](https://keepsakepco.com/blog/how-often-should-you-get-your-house-professionally-cleaned/)
+- [NC pest control cost 2026](https://pestcontrolpricing.com/north-carolina-pest-control-cost/)
+- [Elev8 — NC home services 2026](https://www.elev8operations.com/guides/north-carolina-home-services-statistics-2026)
+- [AAA Carolinas — NC Memorial Day calls](https://newsroom.acg.aaa.com/aaa-over-13-million-north-carolinians-to-travel-for-memorial-day-weekend/)
+
+---
+
+## 34. Courier and cargo-van drivers who cannot live on DoorDash
+
+The founder asked about van drivers and couriers who **cannot** do DoorDash or consumer deliveries. That is a real supply pool. It is not a new consumer habit, and it is not the remaining-season starting lineup.
+
+### 34.1 Why they are locked out of food apps (even when the app says “vans OK”)
+
+DoorDash’s public vehicle rules are loose — any car, no model year ([Dasher requirements](https://dasher.doordash.com/en-us/requirements)). Amazon Flex lists vans as eligible ([Flex requirements](https://flex.amazon.com/get-started/requirements/)). That is not the constraint.
+
+The constraint is the **vehicle and the insurance**, not the signup form:
+
+- A Transit / Sprinter / box van is sized and fueled for a **$75–$200 B2B run**, not a $6 burrito. Parking a cargo van at a drive-through for a $4 tip is how those drivers go broke.
+- North Carolina cargo vans used for hire need a **commercial auto** policy; a personal policy does not cover for-hire freight ([NC cargo-van insurance](https://pegramonline.com/cargo-van-insurance-north-carolina/); [Insurance.com NC commercial auto](https://www.insurance.com/small-business/commercial-auto-insurance-in-north-carolina/)). Gig-app contingent liability is not cargo coverage.
+- What they actually haul — HVAC compressors, auto parts, industrial pieces, legal pouches — is not a DoorDash SKU. Greensboro already has same-day **parts / hotshot** boards ([Dispatch Piedmont Triad](https://www.dispatchit.com/company/locations/greensboro); [Carolina Quick Courier](https://www.carolinaquickcourier.com/); [Reliable Couriers Greensboro](https://www.reliablecouriers.com/service-area/north-carolina/greensboro)). Hoffman and AIR Carolinas sit in this city with warehouses a tech cannot always leave a job to visit ([Hoffman parts](https://www.hoffman-hoffman.com/parts-and-warehouse/); [AIR Carolinas Greensboro](https://www.air-carolinas.com/parts)).
+
+We do **not** claim STAT medical / chain-of-custody / pharma. That is a licensed courier world (temperature, USP, $100k+ cargo). Our pitch is shops and parts, not chemo.
+
+### 34.2 Repeat shape — same as junk, not lawn
+
+Households do not courier weekly. A body shop, HVAC contractor, or warehouse that buys a van **does** — daily or weekly standing lanes, plus a STAT ping when a job is down. Same-day is the premium layer in healthcare last-mile; next-day is still the volume ([US healthcare last-mile](https://www.mordorintelligence.com/industry-reports/united-states-healthcare-parcel-last-mile-delivery-market)). For us the analog is: first van claims the run, then the shop puts that driver on the book.
+
+`TRADE_REPEAT` is **`dispatch-native`**. The city pitch must say the book is shops and parts counters, not “we are DoorDash without food.”
+
+### 34.3 Where it sits on the roster
+
+- **Listed.** `courier` is a first-class slug, separate from junk, roadside, and towing. A haul-away is not a parts run. A wrecker is not a cargo van.
+- **Not hunted this quarter.** Remaining-season proof is still cleaning → HVAC → pest (§33.5). Courier does not freeze on Oct 31, which is why we list it — winter supply exists. It does not get a sourcing week until a parts house, HVAC shop, or three vans walk in.
+- **Take Launch if they write the $1,200.** The OS and `/b` link are useful to a one-van operator who already has three shops on speed-dial. Do not promise we will fill a cold courier board from homepage chips.
+- **No invented courier founding listing.** Liquidity is per city×trade. A liquid cleaning board does not make `/nc/greensboro/courier` real.
+
+This is how we absorb drivers the food apps cannot pay, without becoming a food app.
+
+**Sources:**
+- [DoorDash Dasher vehicle requirements](https://dasher.doordash.com/en-us/requirements)
+- [Amazon Flex delivery partner requirements](https://flex.amazon.com/get-started/requirements/)
+- [Pegram — cargo van insurance in North Carolina](https://pegramonline.com/cargo-van-insurance-north-carolina/)
+- [Insurance.com — NC commercial auto](https://www.insurance.com/small-business/commercial-auto-insurance-in-north-carolina/)
+- [Dispatch — Greensboro / Piedmont Triad courier](https://www.dispatchit.com/company/locations/greensboro)
+- [Carolina Quick Courier](https://www.carolinaquickcourier.com/)
+- [Reliable Couriers — Greensboro](https://www.reliablecouriers.com/service-area/north-carolina/greensboro)
+- [Hoffman Parts & Warehouse — Greensboro](https://www.hoffman-hoffman.com/parts-and-warehouse/)
+- [AIR Carolinas parts](https://www.air-carolinas.com/parts)
+- [Mordor — US healthcare last-mile delivery](https://www.mordorintelligence.com/industry-reports/united-states-healthcare-parcel-last-mile-delivery-market)
+
+---
+
+## 35. Official profit model — seasonal requests, seasonal cash, one spend cap
+
+§30 named the legs. §33.5 said lawn dies after Halloween. This section is the **official** model so we do not staff January as if June mows still pay Twilio.
+
+Two books, every month:
+
+| Book | What moves | What we keep |
+|---|---|---|
+| **Requests** (homeowner / shop pings) | Follows Piedmont season. Lawn ~100 in June, ~8 in January. Cleaning stays ~90. HVAC has two membership windows (Mar–May AC, Sep–Nov heat). Pest shifts from outdoor to rodents; it does not freeze. | Almost nothing until density gates. Then **5% of paid dispatch only**. |
+| **Revenue we can live on** | Inverse of how busy the *crew* is. Launch closes when operators have time (Oct–Feb). Managed is flat. OS sticks if the shop has a year-round book. | **Launch $1,200 + Managed $497/mo** is the floor. Forever, including July. |
+
+Do not add those two columns together and call it “marketplace profit.” A dead lawn board in January is not a failed company if three Managed retainers are paying.
+
+### 35.1 Piedmont request calendar (index 100 = that trade’s own peak)
+
+Encoded in `lib/service-business/seasonality.ts`. City×trade pages show the current-month note so we do not advertise Saturday cuts in January.
+
+| Trade | Winter (Dec–Feb) | Shoulder (Mar–Apr, Oct–Nov) | Peak (May–Sep) | What that does to *our* cash |
+|---|---|---|---|---|
+| Lawn | Dormant. Leaf leftover only. GSO first freeze **Oct 31** (§33.5). | First cuts / last cuts + overseed + leaf. | Weekly route. Closest DoorDash habit. | Dispatch GMV exists ~Mar–Nov. **$0 take assumed Dec–Feb.** Sell Launch in the quiet. |
+| Cleaning | Still the modal monthly book. | Spring-clean bump. | Steady. | The winter *request* proof. Year-round OS. |
+| HVAC | Heat repair, not tune-up volume. | **The money:** spring AC plan, fall heat plan ([NC HVAC timing](https://www.airtechnc.com/blog/hvac-maintenance-guide-2026); [Charlotte seasonal guide](https://www.callkodiakhvac.com/learning-center/maintenance/charlotte-hvac-seasonal-tips)). | AC no-cool overflow. Do not staff 2 a.m. as the product. | Fat Launch checks. Two membership campaigns per year. |
+| Pest | Indoor / rodents ([Terminix Triad calendar](https://www.terminix-triad.com/about/nc-pest-calendar/)). Quarterly plans still bill. | Outdoor ramps up. | Mosquito / general pest. | Retainer-shaped. Does not need summer. |
+| Junk | Slow households. | Spring cleanouts. | August college turnovers. | Cash if a PM is on the book. Not a winter consumer engine. |
+| Courier | Shops still move parts. | Flat. | Flat + holiday freight. | Winter *supply* exists. Hunt a shop, not a homepage. |
+| Roadside / tow | Batteries + holiday travel. | Quieter. | Memorial / July 4 / Thanksgiving / Christmas spikes. | World volume ≠ our volume. AAA owns households. |
+| Pressure wash / painting / parking-lot | Off. | Pollen / sealcoat windows. | Exterior season. | Do not put take-rate or ad spend on these in January. |
+
+Cleaning + HVAC + pest are the **year-round request mix**. Lawn is a **seasonal GMV spike**. Courier is a **year-round B2B side door**. Everything else is listed.
+
+### 35.2 Official cash stack (do not reorder)
+
+Code: `lib/service-business/profit-model.ts`. Prices come from `LEAD_TIERS` / `AGENCY_PACKAGES`. If a page and this file disagree, the file is wrong.
+
+**Floor — must cover the month before we talk GMV** (names in §36: Build / Network / Run)
+
+| Line | Price | When it counts |
+|---|---|---|
+| Build (Launch) | **$1,200** one-time | Closed this month. Best sold Oct–Feb when crews have time. |
+| Network | **$99**/month | DoorDash seat. Recurring. 15 seats ≈ three Run retainers. |
+| Run (Managed Growth) | **$497**/month | Every month they stay. **Includes Network.** Human SEO/reviews. **The winter floor.** |
+
+**Growth — desk only, not the board**
+
+| Line | Price | Gate |
+|---|---|---|
+| OS desk | **$49**/mo | Job book without pings. Claiming requires **Network** or **Run** (§36). |
+| OS Plus | **$149**/mo | More quote-lead allotment. Still not a Network seat. |
+
+**Bonus — never the plan**
+
+| Line | Price | Gate |
+|---|---|---|
+| Dispatch take | **5%** of the quote | **3 claiming crews** *and* **20 paid dispatch jobs that month** on that board. Stripe ~2.9% is the processor, not our margin. |
+| Calendar booking on `/b/{slug}` | **0%** | Always. That is how we steal the route. |
+| Ping / shared lead | **$0** | Forbidden (§27, §29). |
+
+A $55 mow at 5% is **$2.75** (`dispatchTakeUsd`). Eighty of those is **$220**. Three Managed is **$1,491**. Ten Managed is **$4,970**. The company is the retainer line. The take is a bonus on first dates.
+
+### 35.3 The spend cap (how we stay profitable)
+
+```
+this month's ads + Twilio + founder cash out  ≤  Run MRR  +  Network MRR  +  Build closed this month
+```
+
+`monthlySpendCapUsd({ managedCount, networkCount, launchesClosedThisMonth })`. Network is the DoorDash seat (§36).
+
+OS MRR and dispatch take are **not** in the cap. January will not have lawn take. A Facebook test that assumes June volume is how directories die.
+
+Worked floors (same numbers as §30.2, now law):
+
+| State | Cash in | Meaning |
+|---|---|---|
+| 0 Managed, 0 Launch | **$0 spend cap** | Do not buy ads. Sell Launch. |
+| 2 Launch, 0 Managed | **$2,400** this month only | One-time. Do not hire as if it repeats. |
+| 3 Managed | **$1,491**/mo | Micro-business. Winter-survivable. |
+| 10 Managed | **$4,970**/mo | A company. Still $0 take-rate required. |
+| 3 Managed + 20 paid $55 mows @ 5% | $1,491 + $55 | Nice. Not a reason to raise ad spend. |
+
+### 35.4 Seasonal operating rules
+
+1. **Never staff burn on lawn GMV after first freeze.** Dec–Feb dispatch take from lawn is modeled as **$0**.
+2. **Never promise a lawn Launch Saturday volume in October.** Sell leaf, overseed, and March. Churn is a profitability event.
+3. **Prove winter density on cleaning** (and HVAC/pest memberships). That is the board we can show in January.
+4. **Sell Launch in the crew’s off-season.** Lawn operators in November have time. HVAC shops in March/September have a reason. Do not only sell when they are drowning.
+5. **Two year-round trades with claiming crews before we depend on any take-rate.** Lawn alone is a seasonal business we do not own yet.
+6. **Do not ship the 5% switch** until a real month has 20 paid dispatch jobs. A take-rate with no volume is a scarecrow (§30.4).
+7. **Tools Pro / credit packs** remain a separate, small line. They do not fund Twilio for Greensboro lawn.
+
+### 35.5 What this round shipped
+
+- `seasonality.ts` — Piedmont request indexes + current-month note on `/nc/[city]/[trade]`.
+- `profit-model.ts` — prices, gates, spend cap, winter floor. Tests refuse take-rate before 3 crews / 20 jobs, and refuse a spend cap on hope.
+
+If we want to change a price, change `pricing.ts` and this section in the same commit.
+
+**Sources:**
+- [NC State Extension — freeze dates (KGSO Oct 31)](https://gardening.ces.ncsu.edu/weather-2-2/average-first-and-last-frost-dates/)
+- [NC State Extension — tall fescue calendar](https://content.ces.ncsu.edu/tall-fescue-lawn-maintenance-calendar)
+- [Air Tech NC — HVAC service timing 2026](https://www.airtechnc.com/blog/hvac-maintenance-guide-2026)
+- [Kodiak — Charlotte HVAC seasonal guide](https://www.callkodiakhvac.com/learning-center/maintenance/charlotte-hvac-seasonal-tips)
+- [Terminix Triad — NC pest calendar](https://www.terminix-triad.com/about/nc-pest-calendar/)
+- [GreenPal vendor handbook (5% + Stripe)](https://www.yourgreenpal.com/vendor-handbook/getting-started-and-completing-work)
+
+---
+
+## 36. Build and Run — Network is the DoorDash seat
+
+The founder asked for two things at once: **put a price on staying in the network**, and **pivot the company to the first build-and-run agency**, with the client/customer network included. Start with home services. Add medspas, dentists, and vets as booking businesses, not as Saturday-mow trades.
+
+This supersedes the public names “Launch” and “Managed Growth.” The prices do not change except that **Network is now an explicit $99/month SKU**. The 5% take, the spend cap, and the seasonal calendar in §35 still hold.
+
+### 36.1 Official offers
+
+| Offer | Price | What they get | What they do not get |
+|---|---|---|---|
+| **Build** | **$1,200** one-time | Brand, site, booking calendar, OS, live profile. We stand the business up. | Ongoing pings. Build without Network is a brochure that can book on `/b`. |
+| **Network** | **$99**/month | The DoorDash seat. City×trade pings. First claim owns the job. 40 quote leads/month. OS included to claim/quote/pay. | A fee per ping. Shared Angi contacts. Clinical records. |
+| **Run** | **$497**/month | We run the front door (SEO, GBP, reviews, the book). **Network is included.** 200 leads/month. | A lock-in. They can take the OS over any time. |
+
+Free **listing** stays. It cannot receive or claim pings (`hasNetworkSeat` is `network` or `managed` only). OS desk at $49 is software without the board.
+
+Still forbidden: charge per ping, pay-per-lead quality tiers, 15–30% DoorDash restaurant take on a $55 mow.
+
+### 36.2 Why $99, not $0 and not 25%
+
+§30 said the OS becomes the board pass after three claiming crews. That left the DoorDash system unpriced until density — which means we would run Twilio for free listings. The seat is the product. $99 is:
+
+- More than Jobber Core ($29–$49) because Jobber does not ping the city.
+- Less than a single Angi/Thumbtack shared lead ($25–$75) in a slow week, and those leads are shared.
+- Recurring, so January still pays when lawn GMV is $0 (§35).
+- **15 Network seats = $1,485** ≈ the three-Run winter floor.
+
+Run at $497 is the agency. Network at $99 is self-serve stay-in. Do not discount Network to $0 to “get density.” Density that cannot pay $99 will not pay a take-rate later.
+
+### 36.3 Two shapes of “network” — do not flatten them
+
+| Group | How demand moves | What we build | What we do not claim |
+|---|---|---|---|
+| **Home services** (lawn, cleaning, HVAC, pest, …) | DoorDash ping. First crew claims. | City×trade board + `/b` calendar + OS. | That we beat the shop that answers at 2 a.m. |
+| **Local care** (medspa, dentist, vet) | Booking, recall, reviews, local search. | Front door: site, calendar, GBP, review cadence, directory listing. | HIPAA-covered charts. Dentrix, ezyVet, Aesthetic Record, or any EMR/PMS. We are not their clinic. |
+
+Do **not** add `dentist` / `medspa` / `vet` to `TRADES` this round. Empty `/nc/greensboro/dentist` pages are the same lie as empty junk pages (§30.3). They live on `/agency` as who we will Build and Run. Hunt order for home services is still §33.5. Local-care outbound is a **second sales motion** after one home-services Run client is live — or if a practice writes the $1,200 first.
+
+No invented medspa case studies (§22.2). Atlas is still the only named real client.
+
+### 36.4 What this does to profitability
+
+Spend cap now counts Network MRR:
+
+`ads + Twilio ≤ Run MRR + Network MRR + Build closed this month`
+
+The 5% take is still a bonus after 3 crews and 20 paid dispatch jobs. Calendar bookings stay 0%. A dentist Run client in January is as good as a cleaner Run client — better than a lawn Network seat with no mows.
+
+### 36.5 What this round shipped
+
+- `LEAD_TIERS.network` at $99. `hasNetworkSeat` gates pings and claims.
+- Agency copy is Build / Network / Run. Vertical groups in `verticals.ts`.
+- Tests: listing-only published crews are not pinged.
+
+**Sources:**
+- Jobber / Housecall Pro pricing already cited in §30.2
+- Angi / Thumbtack lead ranges already cited in §30.1
+
+---
+
+## 37. Hunt where people ask — and no platform already owns the ask
+
+The founder asked to focus on services people request a lot that **still do not have a software or platform established**. That is the Build-and-Run wedge. It does not rewind §33.5 (winter proof is still cleaning → HVAC → pest) or §36 (Build / Network / Run). It changes **who we sell the agency to** once the checkbook is open.
+
+Do not read this as “no SaaS product exists.” In 2026 almost every trade has a landing page on [Jobber](https://www.getjobber.com/academy/housecall-pro-competitors/), a QuoteIQ SEO post, or a $29/mo CRM. That is not a platform. A platform is what the **customer already opens** (DoorDash, Rover, Handy, Wrench) or what the **category already lives in** (ServiceTitan for HVAC, Workiz for locksmiths, ServiceCore for dumpsters, Dentrix for dentists). If they still post “anyone know a guy?” on Nextdoor, the platform is not established.
+
+### 37.1 The test (all five, or we do not call it white space)
+
+1. **People ask often.** Household cadence (§32) or live Nextdoor/Facebook volume, not a founder hunch.
+2. **No consumer app they already have.** Not DoorDash, Rover, Handy, Wrench/YourMechanic, AAA.
+3. **No category-default OS.** Not ServiceTitan / Jobber / Housecall Pro as the shop’s actual system of record. Not Workiz for locksmith/garage/tow. Not ServiceCore for dumpsters/porta/septic. Not Dentrix / ezyVet / Booksy / Vagaro / Mindbody / Brightwheel.
+4. **Work still arrives from Google, GBP, Nextdoor, Facebook.** That is the front door we Build and Run.
+5. **We can stand them up without becoming their regulator.** No NFPA-certificate product. No EMR. No daycare compliance.
+
+### 37.2 What people are actually asking for (August 2026)
+
+[LeadHall](https://leadhall.com/blog/service-demand-report-2026-08-13) tracked **761,353** neighborhood requests in the 30 days to 13 Aug 2026 (mostly Nextdoor). **North Carolina was 6th** among states (**28,387**). **Charlotte was 4th** among cities (**5,996**).
+
+| Rank | What they asked | Requests | Platform already established? | Our move |
+|---|---|---|---|---|
+| 1 | Landscaping | 29,013 | Yes — Jobber, GreenPal, LawnStarter | Keep the winter/spring lawn plan (§33.5). Do not pretend we invented lawn software. |
+| 2 | Mover | 13,801 | Partial — Dolly, Bellhop, U-Haul in many metros | Take a Build check if a mover walks in. Do not hunt a moving board. |
+| 3 | Cleaning | 12,096 | Yes — Jobber, Handy | Still the winter *marketplace* proof. Agency is not “first cleaner OS.” |
+| 4 | Auto mechanic | 9,713 | Partial — shops + [Wrench/YourMechanic](https://wrench.com/faq/) (they claim 2,000+ cities, including NC) | Do not launch `/nc/greensboro/mobile-mechanic`. Independents can still buy Build. |
+| 5 | Daycare | 8,379 | Yes — Brightwheel and the state | Out. Kids + licensing. |
+| 6 | **Appliance repair** | **7,068** | **No.** Angi/HomeServe sell leads. There is no DoorDash and no ServiceTitan-default. | **Agency hunt #1 in this section.** Year-round. More Nextdoor asks than HVAC. |
+| 7 | HVAC | 5,898 | Yes — ServiceTitan, Housecall Pro, Jobber ([2026 trade comparisons](https://www.constructionperks.com/blog/jobber-vs-housecall-pro-vs-servicetitan-2026)) | Keep for winter memberships. Not white space. |
+| 8 | Junk removal | 5,786 | Partial — Workiz treats junk as an on-demand default ([Workiz vs Service Fusion](https://fieldservicesoftware.io/comparisons/service-fusion-vs-workiz/)) | Listed. PM inbound. Not a white-space story. |
+| 9 | Electrical | 5,451 | Yes — same FSM trio as HVAC | Listed, not hunted. |
+| 11 | Photographer | 4,208 | Partial — HoneyBook | Booking Build if they write $1,200. No city page. |
+
+Appliance repair out-asks HVAC on the neighborhood board and has no established platform. That is the point.
+
+### 37.3 Agency hunt list (not `TRADES`)
+
+Ranked by (frequent ask) × (no platform) × (we can Build / book / later ping):
+
+| Priority | Vertical | Why it passes | Shape | Do not claim |
+|---|---|---|---|---|
+| 1 | **Appliance repair** | LeadHall #6. Fridge/washer/dryer die year-round. Operators live on Nextdoor + a van. | Booking + later dispatch | That we are the next ServiceTitan. |
+| 2 | **Mobile detailing / wash memberships** | §32 rank 5 (weekly–monthly if they buy a plan). Software is fragmented (QuoteIQ, DetailDeck, Urable — vendor roundups, not a consumer app). No NC DoorDash for a wash. | Dispatch-native once seated | That no detailing CRM exists. |
+| 3 | **Exterior cluster** (pressure wash we already list, plus gutter / window / dryer vent) | Thumbtack 1–2×/year; NC pollen and leaves push the high end (§32). Jobber will *host* a gutter calendar. Homeowners still ask the neighborhood. | Add-on to a lawn/exterior Build | Empty `/nc/greensboro/gutter` pages. |
+| 4 | **Commercial kitchen hood / grease trap** | Fire code is a recurring B2B ask (monthly–annual by cooking type). HoodOps/MyHoodClean are new specialist tools, not a restaurant’s default app. | Booking / route | NFPA 96 certificates, fire-marshal software, FOG manifests. |
+| 5 | **Small-engine / outdoor power** | Every lawn household has a mower. Spring flood of “who can fix this?” RepairDesk/RepairShopr are counter POS, not a consumer board. | Booking, spring lock-in | That we beat the dealer shop. |
+| 6 | **Standby generator service** | NC storms. Membership shape like HVAC. GenCore/GenaForce exist for dealers; most independents are still on a clipboard. | Membership booking | That we are Generac’s dealer OS. |
+
+**Local care** (medspa, dentist, vet) stays §36.3 — booking only. Booksy/Vagaro/Mindbody *are* established for salons; Dentrix/ezyVet *are* established for charts. We sell the agency front door, not a clinic.
+
+### 37.4 Forbidden to call “no platform”
+
+| Category | Who already owns it | Why we do not pitch “first OS” |
+|---|---|---|
+| HVAC / plumbing / electrical | ServiceTitan, Housecall Pro, Jobber | The 2026 comparison pages are written for those three names. |
+| Lawn / cleaning / pest / pressure wash | Jobber, GreenPal, FieldRoutes, Handy | We still sell Network + Run. We do not say they have no software. |
+| Dumpster / porta / septic | [ServiceCore](https://servicecore.com/features/) | Purpose-built. Quote-per-truck. |
+| Locksmith / garage door / tow / on-demand junk | [Workiz](https://www.workiz.com/industries/) (they claim 120k+ pros) | That *is* the established on-demand desk. |
+| Mobile mechanic marketplace | Wrench / YourMechanic | They already take the job in many cities. |
+| Beauty / wellness | Booksy, Vagaro, Mindbody | |
+| Clinics | Dentrix, ezyVet, Aesthetic Record | |
+| Pets | Rover, Wag | |
+| Daycare | Brightwheel + DHHS | |
+
+### 37.5 What this does to the next 90 days
+
+- **Marketplace density** is still cleaning → HVAC → pest → lawn (§33.5). A liquid Greensboro cleaning board is how we survive January.
+- **Agency outbound** adds appliance, detailing, and hood/grease-trap operators **now**. They have year-round or restaurant-night work. They do not need Saturday mows to pay $1,200 / $99 / $497.
+- The founder asked to **put the first three on the public list.** `appliance-repair`, `mobile-detailing`, and `gutter-cleaning` (gutters + windows + dryer vents) are in `TRADES` and public nav. Pressure wash was already listed. Empty boards stay honest — no invented crews (§22.2).
+- Still **not** in `TRADES`: `window-cleaning` as its own slug (bundled under gutter-cleaning), `kitchen-hood`, `small-engine`, `generator`, dentist / medspa / vet.
+
+### 37.6 What this round shipped
+
+- Third agency vertical group: **No-platform demand**.
+- First three no-platform asks are public trades. Hoods and small engines stay agency-only.
+
+**Sources:**
+- [LeadHall — service demand 13 Aug 2026](https://leadhall.com/blog/service-demand-report-2026-08-13)
+- [Jobber — Housecall Pro competitors / industry list](https://www.getjobber.com/academy/housecall-pro-competitors/)
+- [Construction Perks — Jobber vs Housecall Pro vs ServiceTitan 2026](https://www.constructionperks.com/blog/jobber-vs-housecall-pro-vs-servicetitan-2026)
+- [Workiz industries](https://www.workiz.com/industries/)
+- [Service Fusion vs Workiz 2026](https://fieldservicesoftware.io/comparisons/service-fusion-vs-workiz/)
+- [ServiceCore — porta / septic / dumpster](https://servicecore.com/features/)
+- [Wrench FAQ — YourMechanic + 2,000 cities](https://wrench.com/faq/)
+- Thumbtack / HIRI frequencies already cited in §32
+
+---
+
+## 38. The agency is the company — how we actually operate
+
+§36 priced the seat. §37 named who we hunt. This section is the **operating model** so `/agency` is a firm, not three pricing cards and a mailto.
+
+The founder asked to work the planned model **and** to stop shipping incremental catalog moves as if they were the idea. The idea is: **Nextdoor is the demand engine. The `/b` link is the product. Build/Network/Run is how we get paid. The marketplace is the perk that comes with the agency — not a second Angi.**
+
+This does not rewind §33.5 (cleaning still has to prove January), §35 (spend cap, no per-ping, 5% gated), or §36 (prices). It changes **what Build includes**, **when a board is “open,”** and **when we are allowed to sell Run**.
+
+### 38.1 Official operating rules
+
+| Rule | Law |
+|---|---|
+| **14-day Build** | Live `/b` calendar, OS job book, and Network profile in **14 days**, or **Build is refunded**. Not “we’ll try.” |
+| **90 days of Network with Build** | Complimentary seat through day 89. Day 90+ is **$99/month** or they leave. Solves empty-board density **without** making Network free forever (§36.2 still forbids $0 forever). |
+| **Founding density** | A city×trade board is not open until **3 claiming crews** sit on it (`canOpenCityTradeBoard`). Empty stays honest. |
+| **Run is a sit-promise** | We sell Run only where we will actually reply to that city×trade’s “anyone know a guy?” posts (`willSellRun`). One city, one trade per Run client until that loop works. |
+| **Reply kit on day 1–2** | Nextdoor, Facebook, GBP scripts that **end on `/b`**. We write replies. **We do not scrape Nextdoor or LeadHall.** |
+| **`/b` is distribution** | After every call, missed call, invoice, and neighborhood reply. More valuable than another OS feature. |
+| **Winter hunt** | `cleaning → appliance-repair → hvac → pest-control → lawn-care`. Appliance sits with cleaning so January still has a board. Lawn is still the spring lock-in. |
+| **Atlas is the proof** | [atlaslotcare.com](https://atlaslotcare.com) is the only named real client (§22.2). No invented shops. |
+| **Spend cap unchanged** | Complimentary 90-day seats and Run-included seats are **$0 cash** (`billableNetworkMrrUsd`). Do not inflate the ad/Twilio cap with seats we are not collecting. |
+
+### 38.2 Why 90 days, not free forever and not $99 on day 1
+
+A Build with no seat is a brochure (§36.1). A seat at $0 forever is how we run Twilio for people who will never pay a take-rate. Ninety days is long enough to seat three Greensboro appliance or cleaning crews on one board. Day 91 they pay $99 or they are a listing. Density that cannot pay $99 will not pay 5% later.
+
+Run at $497 already includes Network. Do not double-bill.
+
+### 38.3 What “insanely better” means here (and what it does not)
+
+Do:
+
+- Sit on the threads the category already uses. Convert them with a booking link.
+- Hand the operator a reply kit before the brand is pretty.
+- Open one city×trade at a time.
+- Film Atlas. One honest URL beats a logo wall.
+
+Do not:
+
+- Promise a Nextdoor/LeadHall scrape or a “neighborhood data product.”
+- Promise Twilio SMS until it is built (alerts today are Telegram/email).
+- Promise HIPAA/EMR, NFPA certificates, or clinic charts.
+- Invent crews so a city page looks busy.
+- Buy ads until this month’s Run + **paid** Network + Builds closed cover the spend.
+
+Next (not this round): a Run queue where we draft the neighborhood reply and they tap send from their phone; a seated operator who brings crew two and three gets a month of Network credited. Both are density without a scrape and without buying ads.
+
+### 38.4 What this round shipped
+
+- `agency-model.ts` — 14-day SLA, 90-day included Network, founding-crew gate, Run sit-promise, reply kit, intake parser.
+- `/agency` rebuilt as the operating page. `/agency/start` is a form a person reads (`POST /api/agency/intake`).
+- `REPEAT_TRADES` / public nav put appliance next to cleaning.
+- Profit helpers refuse to treat complimentary seats as spend-cap cash.
+
+**Sources:** LeadHall / Jobber / ServiceTitan citations already in §37. Atlas is the live site, not a third-party stat.
+
 

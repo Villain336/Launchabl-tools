@@ -5,7 +5,8 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { LinkButton } from "@/components/ui/agency-button";
 
 const title = "How this works";
-const description = "Ask for the job and we ping every available crew — first claim quotes and gets paid here. Or book a specific crew's Saturday. Not a shared Angi lead.";
+const description =
+  "We build and run local businesses. Home services get DoorDash-style pings — first claim quotes and gets paid. Medspas, dentists, and vets get booking and reviews. Not a shared Angi lead.";
 
 export const metadata: Metadata = {
   title,
@@ -49,9 +50,9 @@ export default function HowItWorksPage() {
           </p>
         </article>
         <article className="rounded-3xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold">Three legs, one NC market</h2>
+          <h2 className="text-lg font-semibold">Build and run — Network is a seat, not a ping fee</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Jobber and Housecall Pro do not run a consumer directory. Angi does not run the contractor&rsquo;s job book. A generic CRM has neither. The agency exists to put real NC contractors on the directory this week, not after a marketplace fairy tale.
+            We build the business ($1,200, live in 14 days or refunded) with 90 days of Network included. Then the DoorDash seat is $99/month — or included in Run at $497/month, which we only sell where we will sit on the neighborhood asks. Free listings cannot claim. Appliance repair, mobile detailing, and gutters/windows are on the directory. Empty boards stay empty — we do not invent crews. Kitchen hoods stay agency-first. Medspas, dentists, and vets get booking and reviews. We do not replace their clinical software.
           </p>
         </article>
       </div>
@@ -84,6 +85,9 @@ export default function HowItWorksPage() {
         <LinkButton href="/nc">Browse NC</LinkButton>
         <LinkButton href="/os" variant="secondary">
           The OS
+        </LinkButton>
+        <LinkButton href="/agency/start" variant="secondary">
+          Start the agency
         </LinkButton>
       </div>
     </Container>

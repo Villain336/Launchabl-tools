@@ -17,14 +17,19 @@ const silentAlerts = {
   telegram: async () => true,
 };
 
-async function seedCrew(store: ReturnType<typeof createMemoryStore>, email: string, name: string) {
+async function seedCrew(
+  store: ReturnType<typeof createMemoryStore>,
+  email: string,
+  name: string,
+  leadTier: "listing" | "os" | "network" | "managed" = "network",
+) {
   const { user } = await upsertUser(email, name, store);
   const org = await createOrg(user.uid, name, store);
   if ("error" in org) throw new Error(org.error);
   const profile = await createServiceBusinessProfile(
     org.id,
     user.uid,
-    { trades: ["plumbing"], serviceArea: ["Raleigh"], leadTier: "listing" },
+    { trades: ["plumbing"], serviceArea: ["Raleigh"], leadTier },
     store,
   );
   if ("error" in profile) throw new Error(profile.error);
@@ -149,5 +154,35 @@ describe("dispatch offers (§29)", () => {
     if ("error" in offer) throw new Error(offer.error);
     expect(offer.pingedOrgIds).toHaveLength(1);
     expect(offer.pingedOrgIds[0]).not.toBe(a.org.id);
+  });
+
+  it("does not ping a published crew that only has a free listing — Network is the DoorDash seat (§36)", async () => {
+    const store = createMemoryStore();
+    await seedCrew(store, "free@example.com", "Brochure Plumbing", "listing");
+
+    const offer = await openRaleighPlumbing(store);
+    if ("error" in offer) throw new Error(offer.error);
+    expect(offer.pingedOrgIds).toEqual([]);
+  });
+
+  it("does not ping an OS-desk crew — software without the board", async () => {
+    const store = createMemoryStore();
+    await seedCrew(store, "desk@example.com", "Desk Plumbing", "os");
+
+    const offer = await openRaleighPlumbing(store);
+    if ("error" in offer) throw new Error(offer.error);
+    expect(offer.pingedOrgIds).toEqual([]);
+  });
+
+  it("rejects a claim from a listing-only crew even if they know the offer id", async () => {
+    const store = createMemoryStore();
+    const seated = await seedCrew(store, "a@example.com", "Piedmont Plumbing");
+    const brochure = await seedCrew(store, "free@example.com", "Brochure Plumbing", "listing");
+    const offer = await openRaleighPlumbing(store);
+    if ("error" in offer) throw new Error(offer.error);
+    expect(offer.pingedOrgIds).toEqual([seated.org.id]);
+
+    const claimed = await claimServiceOffer(brochure.org.id, brochure.owner.uid, offer.id, store);
+    expect(claimed).toEqual({ error: "Network membership is required to claim jobs." });
   });
 });

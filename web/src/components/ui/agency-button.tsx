@@ -42,6 +42,7 @@ export function LinkButton({
   className,
   children,
   target,
+  rel,
 }: {
   href: string;
   variant?: Variant;
@@ -49,13 +50,14 @@ export function LinkButton({
   className?: string;
   children: ReactNode;
   target?: string;
+  rel?: string;
 }) {
   return (
     <ShadcnButton
       variant={variantMap[variant]}
       size={sizeMap[size]}
       className={className}
-      render={<Link href={href} target={target} />}
+      render={<Link href={href} target={target} rel={rel} />}
       nativeButton={false}
     >
       {children}

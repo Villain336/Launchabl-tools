@@ -27,6 +27,7 @@ function asListing(slug: string, state: EditorState, cities: string[], trades: P
     slug,
     name,
     orgId: null,
+    leadTier: null,
     trades,
     cities,
     phone,

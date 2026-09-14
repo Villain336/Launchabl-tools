@@ -16,15 +16,26 @@ import { logAuditEvent } from "@/lib/audit/log";
 import { isLeadTierId, type LeadTierId } from "@/lib/marketplace/pricing";
 
 /**
- * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31) —
- * the original five (§24) plus plumbing, electrical, painting, and
- * junk-removal (added when the founder asked to target repeat trades).
+ * Launch trade taxonomy for the NC marketplace + OS (§25.7, §31–§34) —
+ * the original five (§24) plus plumbing, electrical, painting, junk-removal
+ * (§31), roadside + towing (§32), pest-control (§33), courier / cargo-van
+ * (§34), and the first three no-platform asks (§37): appliance repair,
+ * mobile detailing, and gutters/windows/dryer vents. Keep roadside, towing,
+ * and courier separate: a jump pack is not a wrecker, and a cargo van is
+ * not a burrito bag.
  */
 export const TRADES = [
   "lawn-care",
   "hvac",
   "cleaning",
+  "pest-control",
+  "appliance-repair",
+  "mobile-detailing",
+  "gutter-cleaning",
   "junk-removal",
+  "courier",
+  "roadside-assistance",
+  "towing",
   "pressure-washing",
   "parking-lot",
   "plumbing",
@@ -37,7 +48,14 @@ export const TRADE_LABELS: Record<Trade, string> = {
   "lawn-care": "Lawn care & landscaping",
   hvac: "HVAC",
   cleaning: "Cleaning",
+  "pest-control": "Pest control",
+  "appliance-repair": "Appliance repair",
+  "mobile-detailing": "Mobile detailing & wash",
+  "gutter-cleaning": "Gutters, windows & dryer vents",
   "junk-removal": "Junk removal & haul-away",
+  courier: "Courier & cargo van",
+  "roadside-assistance": "Roadside assistance",
+  towing: "Towing",
   "pressure-washing": "Pressure washing & exterior",
   "parking-lot": "Parking lot & exterior paving",
   plumbing: "Plumbing",
@@ -45,28 +63,62 @@ export const TRADE_LABELS: Record<Trade, string> = {
   painting: "Painting",
 };
 
+export type TradeRepeatShape = "weekly" | "membership" | "on-demand-repeat" | "seasonal" | "project" | "dispatch-native";
+
 /**
- * How often the same customer comes back. Agency sourcing and public
- * nav lead with these; parking-lot and painting stay listed, not hunted (§31).
+ * How often the same *household* comes back — not market ping volume.
+ * Agency sourcing hunts REPEAT_TRADES (§33 starting lineup). Roadside, towing,
+ * and courier are dispatch-native: high market velocity, low household LTV
+ * unless the buyer is a shop, lot, or standing route (§32, §34).
+ * Parking-lot and painting stay listed, not hunted.
  */
 export const TRADE_REPEAT = {
   "lawn-care": "weekly",
   cleaning: "weekly",
   hvac: "membership",
+  "pest-control": "membership",
+  "appliance-repair": "on-demand-repeat",
+  "mobile-detailing": "weekly",
+  "gutter-cleaning": "seasonal",
   "junk-removal": "on-demand-repeat",
+  courier: "dispatch-native",
+  "roadside-assistance": "dispatch-native",
+  towing: "dispatch-native",
   "pressure-washing": "seasonal",
   plumbing: "on-demand-repeat",
   electrical: "on-demand-repeat",
   "parking-lot": "project",
   painting: "project",
-} as const satisfies Record<Trade, "weekly" | "membership" | "on-demand-repeat" | "seasonal" | "project">;
+} as const satisfies Record<Trade, TradeRepeatShape>;
 
-export const REPEAT_TRADES = ["lawn-care", "cleaning", "hvac", "junk-removal"] as const;
+/**
+ * Hunt / public-nav order for the remaining season (§33.5, §38).
+ * Annual scoreboard is still lawn → cleaning → HVAC → pest (§33.1).
+ * Mid-September through March, cleaning and appliance have to carry
+ * requests; a lawn-first board starves after first freeze (GSO ~Oct 31).
+ */
+export const REPEAT_TRADES = ["cleaning", "appliance-repair", "hvac", "pest-control", "lawn-care"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
+/** Public chips: winter hunt (cleaning + appliance), then HVAC/pest/lawn, then the rest of no-platform + trucks. */
+export const FEATURED_NAV_TRADES = [
+  "cleaning",
+  "appliance-repair",
+  "hvac",
+  "pest-control",
+  "lawn-care",
+  "mobile-detailing",
+  "gutter-cleaning",
+  "junk-removal",
+  "courier",
+  "roadside-assistance",
+  "towing",
+] as const;
+
 export function tradesForPublicNav(): Trade[] {
-  const lead = new Set<string>(REPEAT_TRADES);
-  return [...REPEAT_TRADES, ...TRADES.filter((trade) => !lead.has(trade))];
+  const lead = new Set<string>(FEATURED_NAV_TRADES);
+  const rest = TRADES.filter((trade) => !lead.has(trade) && trade !== "painting");
+  return [...FEATURED_NAV_TRADES, ...rest, "painting"];
 }
 
 export const isTrade = (value: unknown): value is Trade => typeof value === "string" && (TRADES as readonly string[]).includes(value);
@@ -74,22 +126,41 @@ export const isTrade = (value: unknown): value is Trade => typeof value === "str
 export function tradeMarketplacePitch(trade: Trade, cityName: string): string {
   switch (TRADE_REPEAT[trade]) {
     case "weekly":
+      if (trade === "mobile-detailing") {
+        return `Need the car washed at the house? We ping available vans in ${cityName}. First claim owns the slot. The money is the monthly wash plan — book the next one on their page.`;
+      }
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. The money for that crew is the weekly route — book them next time on their page.`;
     case "membership":
-      return `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
+      return trade === "pest-control"
+        ? `Need it done now? We ping available crews in ${cityName}; first claim owns the job. Pest shops live on the quarterly plan, not one wasp nest — book the route on their calendar.`
+        : `Need it done now? We ping available crews in ${cityName}; first claim owns the job. HVAC shops live on the maintenance plan, not the one emergency — if you already have a name, book the tune-up on their calendar.`;
     case "on-demand-repeat":
+      if (trade === "appliance-repair") {
+        return `Washer dead, fridge warm — we ping every available tech in ${cityName}. First claim owns the job. There is no DoorDash for this. Book the one who showed up the next time something else dies.`;
+      }
       return `Ping every available crew in ${cityName}. First claim owns the haul. If you run properties, put the crew you liked on the book so the next turnover is not another blast.`;
     case "seasonal":
+      if (trade === "gutter-cleaning") {
+        return `Gutters, windows, dryer vents — we ping available crews in ${cityName}. First claim owns the job. Leaf season is the rush; book the spring pass on their calendar.`;
+      }
       return `Tell us the job. We ping every available crew in ${cityName}. First claim quotes and gets paid here. Or pick a specific crew and book their calendar.`;
     case "project":
       return `Tell us the job. We ping every available crew in ${cityName}. First one to claim it quotes and gets paid here. Or pick a specific crew below and book their calendar.`;
+    case "dispatch-native":
+      if (trade === "towing") {
+        return `Need a hook? We ping every available wrecker in ${cityName}. First claim owns the haul. Households tow rarely — fleets, lots, and motor-club overflow keep the trucks moving.`;
+      }
+      if (trade === "courier") {
+        return `Need a cargo van, not a food bag? We ping every available courier in ${cityName}. First claim owns the run. Households don't courier weekly — shops, parts counters, and standing routes keep the book full.`;
+      }
+      return `Flat, dead battery, lockout — we ping every available truck in ${cityName}. First claim owns the job. A household needs this rarely; the book is fleets, lots, and clubs.`;
   }
 }
 
 /**
  * Which of §26's three legs is actually running this account's operation —
  * `"self-serve"` (the contractor runs their own OS) or `"managed"`
- * (Launchabl's own team runs it for them, the agency/"Managed Growth" leg,
+ * (Launchabl's own team runs it for them, the agency/"Run" leg,
  * §26.4). Deliberately not settable through the ordinary org-scoped update
  * path (`ServiceBusinessProfileInput`/`updateServiceBusinessProfile`) — a
  * contractor can't self-assign white-glove service any more than they can

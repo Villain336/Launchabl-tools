@@ -12,7 +12,8 @@ import { createCustomer } from "./customer";
 import { createEstimate, getEstimate, type Estimate } from "./estimate";
 import { createJob } from "./job";
 import { isLeadUrgency, submitLead, type LeadUrgency } from "./lead";
-import { isTrade, type Trade } from "./profile";
+import { hasNetworkSeat } from "@/lib/marketplace/pricing";
+import { getServiceBusinessProfile, isTrade, type Trade } from "./profile";
 import { cleanText, newId, RECORD_TTL, requireOrgRole, type DomainError } from "./shared";
 
 export const OFFER_STATUSES = ["open", "claimed", "quoted", "paid", "expired", "canceled"] as const;
@@ -117,6 +118,8 @@ export async function listAvailableCrews(city: string, trade: Trade, store: KeyV
   for (const listing of listings) {
     if (!listing.orgId || !listing.storefront.published) continue;
     if (listing.storefront.acceptingOffers === false) continue;
+    const profile = await getServiceBusinessProfile(listing.orgId, store);
+    if (!profile || !hasNetworkSeat(profile.leadTier)) continue;
     crews.push({ orgId: listing.orgId, slug: listing.slug, name: listing.name });
   }
   return crews;
@@ -207,6 +210,8 @@ export async function claimServiceOffer(
   if (!offer) return { error: "That job is gone." };
   if (offer.status === "expired") return { error: "That request expired." };
   if (offer.status !== "open") return { error: "Someone already took that job." };
+  const profile = await getServiceBusinessProfile(orgId, store);
+  if (!profile || !hasNetworkSeat(profile.leadTier)) return { error: "Network membership is required to claim jobs." };
   if (!offer.pingedOrgIds.includes(orgId)) return { error: "This job was not sent to your crew." };
   const locked = await store.setNx(claimLock(offer.id), orgId, RECORD_TTL);
   if (!locked) return { error: "Someone already took that job." };
