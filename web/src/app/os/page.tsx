@@ -39,6 +39,7 @@ const features: { name: string; summary: string; status: "live" | "beta" | "comi
   { name: "Warranty & maintenance tracking", summary: "Know exactly what's still under warranty and when a maintenance visit is due.", status: "live" },
   { name: "Inventory management", summary: "What's on hand, what's low, what a job actually used.", status: "live" },
   { name: "Telegram/iMessage alerts", summary: "Telegram and email from the truck. iMessage is not a public API — use those two until a Messages provider exists.", status: "live" },
+  { name: "Run reply queue", summary: "We draft the Nextdoor, Facebook, or GBP reply. You copy it and send it from your phone. We do not scrape and we do not post as you.", status: "live" },
 ];
 
 export default function OsPage() {
@@ -78,6 +79,9 @@ export default function OsPage() {
           </LinkButton>
           <LinkButton href="/os/offers" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Open offers
+          </LinkButton>
+          <LinkButton href="/os/replies" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            Reply queue
           </LinkButton>
           <LinkButton href="/os/storefront" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
             Customize your page

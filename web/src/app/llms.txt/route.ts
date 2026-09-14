@@ -25,6 +25,7 @@ export function GET() {
     "## OS and agency",
     "",
     `- [The OS](${url("/os")}): Self-serve operations for contractors.`,
+    `- [Reply queue](${url("/os/replies")}): Run drafts neighborhood replies. The operator copies and sends. We do not scrape.`,
     `- [Offers](${url("/os/offers")}): Claim city-wide jobs pinged to the crew.`,
     `- [Storefront editor](${url("/os/storefront")}): Customize the public listing.`,
     `- [Agency](${url("/agency")}): Build $1,200 (90 days of Network) · then $99/month · Run $497/month.`,

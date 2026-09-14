@@ -42,6 +42,7 @@ describe("agency operating model (§38)", () => {
     expect(willSellRun(true)).toBe(true);
     expect(AGENCY_MODEL.proof.name).toBe("Atlas Lot Care");
     expect(REPLY_KIT.rule).toMatch(/do not scrape/i);
+    expect(REPLY_KIT.queueHref).toBe("/os/replies");
     expect(AGENCY_WONT.some((line) => /scrape/i.test(line))).toBe(true);
     expect(BUILD_SEQUENCE).toHaveLength(4);
     expect(WINTER_HUNT[0]).toBe("cleaning");

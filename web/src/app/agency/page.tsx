@@ -58,6 +58,7 @@ const packages = [
     summary: "We sit on that city×trade’s neighborhood asks. Network is included. You do the work. We keep the front door fed.",
     deliverables: [
       "Network seat included — no extra $99",
+      "Reply queue: we draft, they send from their phone",
       "We only sell this where we will actually reply",
       "GBP, reviews, and the book — not a clinic chart",
       "Monthly report. You can take the OS over any time.",
@@ -112,7 +113,7 @@ export default function AgencyPage() {
       <section className="mt-16 rounded-3xl border border-border bg-card p-6 sm:p-8">
         <h2 className="font-heading text-2xl font-bold">The reply kit is the first product</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          {REPLY_KIT.rule} {REPLY_KIT.cta} Nextdoor is the demand engine. Our marketplace is the Network perk that comes with the agency — not a second Angi they have to join.
+          {REPLY_KIT.rule} {REPLY_KIT.cta} On Run, those drafts land in a phone queue — they copy and send. We do not post as them. Nextdoor is the demand engine. Our marketplace is the Network perk that comes with the agency — not a second Angi they have to join.
         </p>
         <ul className="mt-4 flex flex-wrap gap-2">
           {REPLY_KIT.channels.map((channel) => (
@@ -121,6 +122,11 @@ export default function AgencyPage() {
             </li>
           ))}
         </ul>
+        <div className="mt-5">
+          <LinkButton href={REPLY_KIT.queueHref} variant="secondary">
+            Open the reply queue
+          </LinkButton>
+        </div>
       </section>
 
       <section className="mt-16">
