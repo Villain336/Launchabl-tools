@@ -1716,3 +1716,62 @@ Ranked by (frequent ask) × (no platform) × (we can Build / book / later ping):
 - [Wrench FAQ — YourMechanic + 2,000 cities](https://wrench.com/faq/)
 - Thumbtack / HIRI frequencies already cited in §32
 
+---
+
+## 38. The agency is the company — how we actually operate
+
+§36 priced the seat. §37 named who we hunt. This section is the **operating model** so `/agency` is a firm, not three pricing cards and a mailto.
+
+The founder asked to work the planned model **and** to stop shipping incremental catalog moves as if they were the idea. The idea is: **Nextdoor is the demand engine. The `/b` link is the product. Build/Network/Run is how we get paid. The marketplace is the perk that comes with the agency — not a second Angi.**
+
+This does not rewind §33.5 (cleaning still has to prove January), §35 (spend cap, no per-ping, 5% gated), or §36 (prices). It changes **what Build includes**, **when a board is “open,”** and **when we are allowed to sell Run**.
+
+### 38.1 Official operating rules
+
+| Rule | Law |
+|---|---|
+| **14-day Build** | Live `/b` calendar, OS job book, and Network profile in **14 days**, or **Build is refunded**. Not “we’ll try.” |
+| **90 days of Network with Build** | Complimentary seat through day 89. Day 90+ is **$99/month** or they leave. Solves empty-board density **without** making Network free forever (§36.2 still forbids $0 forever). |
+| **Founding density** | A city×trade board is not open until **3 claiming crews** sit on it (`canOpenCityTradeBoard`). Empty stays honest. |
+| **Run is a sit-promise** | We sell Run only where we will actually reply to that city×trade’s “anyone know a guy?” posts (`willSellRun`). One city, one trade per Run client until that loop works. |
+| **Reply kit on day 1–2** | Nextdoor, Facebook, GBP scripts that **end on `/b`**. We write replies. **We do not scrape Nextdoor or LeadHall.** |
+| **`/b` is distribution** | After every call, missed call, invoice, and neighborhood reply. More valuable than another OS feature. |
+| **Winter hunt** | `cleaning → appliance-repair → hvac → pest-control → lawn-care`. Appliance sits with cleaning so January still has a board. Lawn is still the spring lock-in. |
+| **Atlas is the proof** | [atlaslotcare.com](https://atlaslotcare.com) is the only named real client (§22.2). No invented shops. |
+| **Spend cap unchanged** | Complimentary 90-day seats and Run-included seats are **$0 cash** (`billableNetworkMrrUsd`). Do not inflate the ad/Twilio cap with seats we are not collecting. |
+
+### 38.2 Why 90 days, not free forever and not $99 on day 1
+
+A Build with no seat is a brochure (§36.1). A seat at $0 forever is how we run Twilio for people who will never pay a take-rate. Ninety days is long enough to seat three Greensboro appliance or cleaning crews on one board. Day 91 they pay $99 or they are a listing. Density that cannot pay $99 will not pay 5% later.
+
+Run at $497 already includes Network. Do not double-bill.
+
+### 38.3 What “insanely better” means here (and what it does not)
+
+Do:
+
+- Sit on the threads the category already uses. Convert them with a booking link.
+- Hand the operator a reply kit before the brand is pretty.
+- Open one city×trade at a time.
+- Film Atlas. One honest URL beats a logo wall.
+
+Do not:
+
+- Promise a Nextdoor/LeadHall scrape or a “neighborhood data product.”
+- Promise Twilio SMS until it is built (alerts today are Telegram/email).
+- Promise HIPAA/EMR, NFPA certificates, or clinic charts.
+- Invent crews so a city page looks busy.
+- Buy ads until this month’s Run + **paid** Network + Builds closed cover the spend.
+
+Next (not this round): a Run queue where we draft the neighborhood reply and they tap send from their phone; a seated operator who brings crew two and three gets a month of Network credited. Both are density without a scrape and without buying ads.
+
+### 38.4 What this round shipped
+
+- `agency-model.ts` — 14-day SLA, 90-day included Network, founding-crew gate, Run sit-promise, reply kit, intake parser.
+- `/agency` rebuilt as the operating page. `/agency/start` is a form a person reads (`POST /api/agency/intake`).
+- `REPEAT_TRADES` / public nav put appliance next to cleaning.
+- Profit helpers refuse to treat complimentary seats as spend-cap cash.
+
+**Sources:** LeadHall / Jobber / ServiceTitan citations already in §37. Atlas is the live site, not a third-party stat.
+
+

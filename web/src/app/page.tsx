@@ -20,7 +20,7 @@ export default async function Home() {
             We build and run your business. The client network comes with it.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            Home services first. Then trades people still request on Nextdoor that have no established platform — appliance repair, mobile detailing, kitchen hoods. Then medspas, dentists, and vets. Build is {siteConfig.price}. Network is $99/month. Run is $497/month and includes Network.
+            Home services first. Then trades people still request on Nextdoor that have no established platform — appliance repair, mobile detailing, kitchen hoods. Then medspas, dentists, and vets. Build is {siteConfig.price} and includes 90 days of Network. Then Network is $99/month. Run is $497/month and includes Network.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton href="/nc/greensboro" size="lg">
@@ -31,6 +31,9 @@ export default async function Home() {
             </LinkButton>
             <LinkButton href="/agency" variant="secondary" size="lg">
               Agency
+            </LinkButton>
+            <LinkButton href="/agency/start" variant="secondary" size="lg">
+              Start Build
             </LinkButton>
             <LinkButton href="/how-it-works" variant="secondary" size="lg">
               How it works
@@ -84,14 +87,14 @@ export default async function Home() {
         <Container className="flex flex-col items-center text-center">
           <h2 className="font-heading text-3xl font-bold">Contractors: the ping and the booking link</h2>
           <p className="mt-3 max-w-2xl text-primary-foreground/80">
-            City-wide jobs hit Telegram or email — first claim owns the quote. Your /b link is still what you text after a call. Network is $99/month to stay on that board. We build the business for {siteConfig.price}, and Run is $497/month if you want us to keep the front door fed.
+            City-wide jobs hit Telegram or email — first claim owns the quote. Your /b link is what you text after a call and what we put at the end of every neighborhood reply. Build is {siteConfig.price} and includes 90 days of Network. Then $99/month to stay on the board, or $497/month if we sit on the asks.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <LinkButton href="/os" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
               Open the OS
             </LinkButton>
-            <LinkButton href="/agency" className="bg-background text-foreground hover:bg-background/90">
-              Talk to the agency
+            <LinkButton href="/agency/start" className="bg-background text-foreground hover:bg-background/90">
+              Start the agency
             </LinkButton>
             <LinkButton href="/tools" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
               Free SEO tools

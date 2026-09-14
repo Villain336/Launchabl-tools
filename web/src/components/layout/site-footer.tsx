@@ -43,10 +43,10 @@ export function SiteFooter() {
             Build and run a local business
           </h2>
           <p className="max-w-md text-sm text-pretty text-muted-foreground">
-            We stand it up and stay on the front door. The customer network comes with it. Build is {siteConfig.price}. Network is $99/month to stay on the board.
+            We stand it up and stay on the front door. The customer network comes with it. Build is {siteConfig.price} and includes 90 days of Network. Then $99/month to stay on the board.
           </p>
-          <Button render={<Link href="/agency" />} nativeButton={false} size="lg">
-            Talk to the agency
+          <Button render={<Link href="/agency/start" />} nativeButton={false} size="lg">
+            Start the agency
             <ChevronRight data-icon="inline-end" aria-hidden="true" />
           </Button>
         </div>

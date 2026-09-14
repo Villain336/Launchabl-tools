@@ -92,21 +92,21 @@ export const TRADE_REPEAT = {
 } as const satisfies Record<Trade, TradeRepeatShape>;
 
 /**
- * Hunt / public-nav order for the remaining season (§33.5).
+ * Hunt / public-nav order for the remaining season (§33.5, §38).
  * Annual scoreboard is still lawn → cleaning → HVAC → pest (§33.1).
- * Mid-September through March, cleaning and fall HVAC have to carry
+ * Mid-September through March, cleaning and appliance have to carry
  * requests; a lawn-first board starves after first freeze (GSO ~Oct 31).
  */
-export const REPEAT_TRADES = ["cleaning", "hvac", "pest-control", "lawn-care"] as const;
+export const REPEAT_TRADES = ["cleaning", "appliance-repair", "hvac", "pest-control", "lawn-care"] as const;
 export type RepeatTrade = (typeof REPEAT_TRADES)[number];
 
-/** Public chips: remaining-season lineup, then the first three no-platform asks (§37), then junk and trucks. */
+/** Public chips: winter hunt (cleaning + appliance), then HVAC/pest/lawn, then the rest of no-platform + trucks. */
 export const FEATURED_NAV_TRADES = [
   "cleaning",
+  "appliance-repair",
   "hvac",
   "pest-control",
   "lawn-care",
-  "appliance-repair",
   "mobile-detailing",
   "gutter-cleaning",
   "junk-removal",

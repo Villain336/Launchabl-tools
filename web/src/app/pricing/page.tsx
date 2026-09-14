@@ -10,7 +10,7 @@ import { MarketplacePricing } from "@/components/blocks/marketplace-pricing";
 
 const title = "Pricing — Build $1,200 · Network $99/mo · Run $497/mo";
 const description =
-  "We build and run local businesses. Build is $1,200. Network, the DoorDash seat, is $99/month. Run is $497/month and includes Network. Tools Pro and credit packs stay for the compute-heavy tools.";
+  "We build and run local businesses. Build is $1,200 and includes 90 days of Network. Then Network is $99/month. Run is $497/month and includes Network. Tools Pro and credit packs stay for the compute-heavy tools.";
 
 export const metadata: Metadata = {
   title,
@@ -34,7 +34,7 @@ const faqs = [
   {
     question: "What does Network cost, and is it a fee per ping?",
     answer:
-      "Network is $99/month to stay on the DoorDash board — city-wide jobs, first claim owns them. We do not charge per ping or sell shared Angi-style leads. Run at $497/month includes Network. A free listing is a brochure and cannot claim.",
+      "Build includes 90 days of Network. After that, Network is $99/month to stay on the DoorDash board — city-wide jobs, first claim owns them. We do not charge per ping or sell shared Angi-style leads. Run at $497/month includes Network. A free listing is a brochure and cannot claim.",
   },
   {
     question: "What if I only need the free tools?",
@@ -48,7 +48,7 @@ const faqs = [
   },
   {
     question: "Is there a guarantee?",
-    answer: siteConfig.guarantee,
+    answer: `${siteConfig.agencyGuarantee} Tools on the unlimited design plan: ${siteConfig.guarantee}`,
   },
 ];
 
@@ -79,7 +79,7 @@ function pricingJsonLd() {
           name: "Build",
           price: siteConfig.priceNumeric,
           priceCurrency: "USD",
-          description: "One-time stand-up: brand, site, booking, OS, and a live network profile.",
+          description: "One-time stand-up: brand, site, booking, OS, live network profile, and 90 days of Network. Live in 14 days or Build is refunded.",
           url,
         },
         {

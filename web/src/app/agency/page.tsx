@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -7,10 +8,18 @@ import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { siteConfig } from "@/lib/site-config";
 import { AGENCY_PACKAGES, LEAD_TIERS } from "@/lib/marketplace/pricing";
 import { AGENCY_VERTICAL_GROUPS } from "@/lib/service-business/verticals";
+import {
+  AGENCY_MODEL,
+  AGENCY_VS,
+  AGENCY_WONT,
+  BUILD_SEQUENCE,
+  REPLY_KIT,
+  WINTER_HUNT,
+} from "@/lib/service-business/agency-model";
 
 const title = "Build and run your business";
 const description =
-  "We build the front door and run the operation. The client network comes with it. Home services, then trades people still request on Nextdoor that have no established platform — appliance repair, detailing, hoods — then medspas, dentists, and vets.";
+  "We sit on “anyone know a guy?” and turn it into a booking link. Build is $1,200 with 90 days of Network. Then $99/month to stay on the board — or $497/month if we run the front door.";
 
 export const metadata: Metadata = {
   title,
@@ -24,20 +33,20 @@ const packages = [
   {
     name: AGENCY_PACKAGES.launch.label,
     tagline: `$${AGENCY_PACKAGES.launch.price.toLocaleString()} one-time`,
-    summary: "We stand the business up: brand, site, booking, OS, and a live network profile.",
+    summary: "We stand the business up in 14 days: brand, site, booking, OS, live Network profile, and a reply kit they can use on day 2.",
     deliverables: [
-      "Brand and site with a live booking calendar",
-      "OS job book — customers, jobs, estimates, payments",
-      "Network profile, search-indexed",
-      "Local SEO and Google Business Profile foundation",
+      "Live /b booking page + OS job book",
+      `${AGENCY_MODEL.buildIncludesNetworkDays} days of Network included — then $${AGENCY_MODEL.networkUsd}/month`,
+      "Nextdoor, Facebook, and GBP reply scripts that end on /b",
+      AGENCY_MODEL.guarantee,
     ],
   },
   {
     name: AGENCY_PACKAGES.network.label,
-    tagline: `$${AGENCY_PACKAGES.network.price} / month`,
+    tagline: `$${AGENCY_PACKAGES.network.price} / month after day 90`,
     summary: "The DoorDash seat. Stay in the network, receive city-wide jobs, first claim owns them. Not a fee per ping.",
     deliverables: [
-      "Pings for your city and trade (home services)",
+      "Pings for your city and trade once three crews sit",
       "Booking / recall demand for local-care clients",
       `${LEAD_TIERS.network.monthlyLeads} quote leads / month on top of pings`,
       "OS included so you can claim, quote, and get paid",
@@ -46,11 +55,11 @@ const packages = [
   {
     name: AGENCY_PACKAGES["managed-growth"].label,
     tagline: `$${AGENCY_PACKAGES["managed-growth"].price} / month`,
-    summary: "We run it. Network is included. Local SEO, reviews, and the book — you do the work, we keep the front door fed.",
+    summary: "We sit on that city×trade’s neighborhood asks. Network is included. You do the work. We keep the front door fed.",
     deliverables: [
       "Network seat included — no extra $99",
-      "Ongoing local SEO, GBP, and review cadence",
-      `${LEAD_TIERS.managed.monthlyLeads} leads / month`,
+      "We only sell this where we will actually reply",
+      "GBP, reviews, and the book — not a clinic chart",
       "Monthly report. You can take the OS over any time.",
     ],
   },
@@ -61,21 +70,76 @@ export default function AgencyPage() {
     <Container className="py-16 sm:py-24">
       <SectionHeading
         eyebrow="Agency"
-        title="The first build-and-run agency. The network comes with it."
-        description="We do not sell a logo and walk away. We build the business, put you on the client and customer network, and stay to run the front door. We hunt where people already ask and no app owns the ask — appliance repair, mobile detailing, hoods — not another Jobber clone. Local care is booking and reviews, not a clinical chart."
+        title="We sit on “anyone know a guy?” and turn it into a booking link."
+        description="Not another Jobber clone. Not a logo and a walk-away. The neighborhood already has the demand. We build the front door, put you on the client network, and stay if you want the asks answered. One city, one trade, until that board is real."
       />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {AGENCY_VERTICAL_GROUPS.map((group) => (
-          <div key={group.id} className="rounded-2xl border border-border p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">{group.label}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{group.pitch}</p>
-            <p className="mt-3 text-sm text-foreground">{group.examples.join(" · ")}</p>
-          </div>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <LinkButton href="/agency/start" size="lg">
+          Start with Build
+        </LinkButton>
+        <LinkButton href={siteConfig.freeAudit.href} variant="secondary" size="lg">
+          {siteConfig.freeAudit.cta}
+        </LinkButton>
+      </div>
+      <p className="mt-4 max-w-2xl text-sm text-muted-foreground">{AGENCY_MODEL.guarantee}</p>
+
+      <div className="mt-16 grid gap-4 lg:grid-cols-3">
+        {AGENCY_VS.map((item) => (
+          <article key={item.name} className="rounded-2xl border border-border p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Vs {item.name}</p>
+            <p className="mt-2 text-sm leading-6 text-foreground">{item.ours}</p>
+          </article>
         ))}
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <section className="mt-16">
+        <h2 className="font-heading text-2xl font-bold">The sequence</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Audit → 14-day Build → 90 days of Network → then ${AGENCY_MODEL.networkUsd}/month or Run. We do not open a city×trade board until {AGENCY_MODEL.foundingCrewsToOpenBoard} claiming crews sit on it.
+        </p>
+        <ol className="mt-6 grid gap-4 sm:grid-cols-2">
+          {BUILD_SEQUENCE.map((step) => (
+            <li key={step.day} className="rounded-2xl border border-border p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">Days {step.day}</p>
+              <h3 className="mt-1 text-lg font-semibold">{step.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{step.detail}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-16 rounded-3xl border border-border bg-card p-6 sm:p-8">
+        <h2 className="font-heading text-2xl font-bold">The reply kit is the first product</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+          {REPLY_KIT.rule} {REPLY_KIT.cta} Nextdoor is the demand engine. Our marketplace is the Network perk that comes with the agency — not a second Angi they have to join.
+        </p>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {REPLY_KIT.channels.map((channel) => (
+            <li key={channel} className="rounded-full border border-border px-3 py-1.5 text-sm">
+              {channel}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-16">
+        <h2 className="font-heading text-2xl font-bold">Who we Build for</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Winter hunt is {WINTER_HUNT.map((slug) => slug.replaceAll("-", " ")).join(" → ")}. Appliance sits next to cleaning so January still has work. Hoods and clinics stay agency-first — no empty city pages.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {AGENCY_VERTICAL_GROUPS.map((group) => (
+            <div key={group.id} className="rounded-2xl border border-border p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">{group.label}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{group.pitch}</p>
+              <p className="mt-3 text-sm text-foreground">{group.examples.join(" · ")}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="mt-16 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {packages.map((pkg) => (
           <CardSpotlight key={pkg.name} className="h-full p-6">
             <div className="relative z-20">
@@ -97,25 +161,52 @@ export default function AgencyPage() {
         ))}
       </div>
 
-      <p className="mt-8 text-sm text-muted-foreground">
-        Build is ${AGENCY_PACKAGES.launch.price.toLocaleString()}. Network is ${AGENCY_PACKAGES.network.price}/month to stay on the board — we do not charge per ping. Run is $
-        {AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. Appliance, detailing, and gutters are on the directory — empty boards stay empty until a real crew sits. Kitchen hoods stay agency-first. We do not replace Dentrix, ezyVet, or a medspa EMR. Multi-location or unusual work gets a custom quote.
+      <section className="mt-16">
+        <h2 className="font-heading text-2xl font-bold">What we will not do</h2>
+        <ul className="mt-4 max-w-2xl space-y-2 text-sm leading-6 text-muted-foreground">
+          {AGENCY_WONT.map((line) => (
+            <li key={line}>— {line}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-16 rounded-2xl border border-border p-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Named proof</p>
+        <h2 className="mt-1 font-heading text-2xl font-bold">{AGENCY_MODEL.proof.name}</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{AGENCY_MODEL.proof.note}</p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <LinkButton href={AGENCY_MODEL.proof.url} target="_blank" rel="noreferrer">
+            atlaslotcare.com
+          </LinkButton>
+          <LinkButton href={AGENCY_MODEL.proof.href} variant="secondary">
+            The case study
+          </LinkButton>
+        </div>
+      </section>
+
+      <p className="mt-10 text-sm text-muted-foreground">
+        Build is ${AGENCY_PACKAGES.launch.price.toLocaleString()} and includes {AGENCY_MODEL.buildIncludesNetworkDays} days of Network. Then Network is $
+        {AGENCY_PACKAGES.network.price}/month — we do not charge per ping. Run is ${AGENCY_PACKAGES["managed-growth"].price}/month and includes Network. Free listings cannot claim jobs. Ads and Twilio never outrun this month&apos;s retainers plus Builds closed. The 5% dispatch take stays off until three crews and twenty paid jobs exist on that board.
       </p>
 
       <div className="mt-16 rounded-3xl bg-primary p-10 text-center text-primary-foreground">
-        <h3 className="text-2xl font-bold">Tell us about the business</h3>
-        <p className="mt-2 text-primary-foreground/80">Start with a free audit, then talk about Build, Network, or Run.</p>
+        <h3 className="text-2xl font-bold">Tell us the city and the trade</h3>
+        <p className="mt-2 text-primary-foreground/80">A form a person reads. If we cannot sit on those asks, we will say so.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-4">
-          <LinkButton href={siteConfig.freeAudit.href} variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+          <LinkButton href="/agency/start" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            Start the agency
+          </LinkButton>
+          <LinkButton href={siteConfig.freeAudit.href} className="bg-background text-foreground hover:bg-background/90">
             {siteConfig.freeAudit.cta}
           </LinkButton>
-          <LinkButton
-            href={`mailto:hello@launchabl.io?subject=${encodeURIComponent("Agency — Build, Network, or Run")}`}
-            className="bg-background text-foreground hover:bg-background/90"
-          >
-            Talk to a person
-          </LinkButton>
         </div>
+        <p className="mt-4 text-xs text-primary-foreground/70">
+          Or{" "}
+          <Link href="mailto:hello@launchabl.io?subject=Agency%20%E2%80%94%20Build%2C%20Network%2C%20or%20Run" className="underline">
+            email hello@launchabl.io
+          </Link>
+          .
+        </p>
       </div>
     </Container>
   );

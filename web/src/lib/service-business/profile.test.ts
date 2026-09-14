@@ -12,7 +12,7 @@ async function seedOrg(name = "Carolina Lawn Co", store = createMemoryStore()) {
 }
 
 describe("service business profile", () => {
-  it("leads public nav with the remaining-season lineup (cleaning, HVAC, pest, lawn), then junk and trucks (§33.5)", () => {
+  it("leads public nav with the winter hunt (cleaning, appliance, HVAC, pest, lawn), then junk and trucks (§33.5, §38)", () => {
     expect(TRADES).toContain("pest-control");
     expect(TRADES).toContain("appliance-repair");
     expect(TRADES).toContain("mobile-detailing");
@@ -25,10 +25,10 @@ describe("service business profile", () => {
     expect(tradesForPublicNav()[0]).toBe("cleaning");
     expect(tradesForPublicNav().slice(0, 11)).toEqual([
       "cleaning",
+      "appliance-repair",
       "hvac",
       "pest-control",
       "lawn-care",
-      "appliance-repair",
       "mobile-detailing",
       "gutter-cleaning",
       "junk-removal",

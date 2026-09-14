@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PROFIT_MODEL,
+  billableNetworkMrrUsd,
   canChargeDispatchTake,
   dispatchTakeUsd,
   lineForRevenue,
@@ -34,5 +35,16 @@ describe("official profit model", () => {
     expect(lineForRevenue("os")).toBe("growth");
     expect(lineForRevenue("dispatch-take")).toBe("bonus");
     expect(lineForRevenue("calendar-booking")).toBe("bonus");
+  });
+
+  it("does not count complimentary Build Network or Run-included seats as spend-cap cash (§38)", () => {
+    expect(billableNetworkMrrUsd([{ daysSinceBuild: 10 }, { daysSinceBuild: 90 }, { includedWithRun: true }])).toBe(99);
+    expect(
+      monthlySpendCapUsd({
+        managedCount: 1,
+        launchesClosedThisMonth: 1,
+        networkSeats: [{ daysSinceBuild: 20 }, { daysSinceBuild: 100 }],
+      }),
+    ).toBe(497 + 1200 + 99);
   });
 });

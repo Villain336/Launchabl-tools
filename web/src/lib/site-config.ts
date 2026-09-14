@@ -3,11 +3,11 @@ export const siteConfig = {
   url: "https://launchabl.io",
   tagline: "Build and run your business. The client network comes with it.",
   description:
-    "Launchabl builds and runs local businesses. Home services first, then trades people still request that have no established platform — appliance repair, detailing, hoods — then medspas, dentists, and vets. Build is $1,200. Network is $99/month. Run is $497/month and includes Network.",
+    "Launchabl builds and runs local businesses. Home services first, then trades people still request that have no established platform — appliance repair, detailing, hoods — then medspas, dentists, and vets. Build is $1,200 and includes 90 days of Network. Then Network is $99/month. Run is $497/month and includes Network.",
   price: "$1,200",
   /** Numeric form for structured data (schema.org Offer.price expects a bare number string). */
   priceNumeric: "1200",
-  priceNote: "Build $1,200 one-time · Network $99/mo · Run $497/mo",
+  priceNote: "Build $1,200 one-time (90 days of Network) · then $99/mo · Run $497/mo",
   /** The lead-in offer ahead of the paid plan — a real audit from the tool already built, not a lead-gen gimmick. */
   freeAudit: {
     name: "Free Website Audit",
@@ -19,6 +19,7 @@ export const siteConfig = {
     cta: "Get your free audit",
   },
   guarantee: "30-day money-back guarantee if your first three requests don't land after revisions.",
+  agencyGuarantee: "Live booking page, OS job book, and Network profile in 14 days, or Build is refunded.",
 };
 
 export type NavLink = {

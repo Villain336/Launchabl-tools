@@ -5,6 +5,7 @@
  * in `seasonality.ts` so winter GMV cannot be stuffed into this floor.
  */
 import { AGENCY_PACKAGES, LEAD_TIERS } from "@/lib/marketplace/pricing";
+import { networkPriceAfterBuild } from "./agency-model";
 
 export const PROFIT_MODEL = {
   launchUsd: AGENCY_PACKAGES.launch.price,
@@ -55,6 +56,22 @@ export function networkMrrUsd(networkCount: number): number {
   return Math.max(0, networkCount) * PROFIT_MODEL.networkUsd;
 }
 
+export type NetworkSeatBill = {
+  /** Days since that org's Build closed. Omit if they bought Network without Build. */
+  daysSinceBuild?: number;
+  /** Run already includes Network — never bill the $99 again. */
+  includedWithRun?: boolean;
+};
+
+/** Paid Network seats only. Complimentary 90-day Build seats and Run seats are $0. */
+export function billableNetworkMrrUsd(seats: readonly NetworkSeatBill[]): number {
+  return seats.reduce((sum, seat) => {
+    if (seat.includedWithRun) return sum;
+    if (seat.daysSinceBuild !== undefined) return sum + networkPriceAfterBuild(seat.daysSinceBuild);
+    return sum + PROFIT_MODEL.networkUsd;
+  }, 0);
+}
+
 /**
  * Cash we may spend on ads + Twilio this month.
  * Never outrun Run + Network retainers + Build closed *this month*.
@@ -64,8 +81,12 @@ export function monthlySpendCapUsd(input: {
   managedCount: number;
   launchesClosedThisMonth: number;
   networkCount?: number;
+  /** Prefer this when seats are mixed (Build-included vs paid). */
+  networkSeats?: readonly NetworkSeatBill[];
 }): number {
-  return managedMrrUsd(input.managedCount) + networkMrrUsd(input.networkCount ?? 0) + launchCashUsd(input.launchesClosedThisMonth);
+  const networkCash =
+    input.networkSeats !== undefined ? billableNetworkMrrUsd(input.networkSeats) : networkMrrUsd(input.networkCount ?? 0);
+  return managedMrrUsd(input.managedCount) + networkCash + launchCashUsd(input.launchesClosedThisMonth);
 }
 
 export function winterFloorUsd(managedCount = PROFIT_MODEL.winterFloorManagedCount): number {
